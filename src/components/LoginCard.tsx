@@ -357,16 +357,42 @@ export function LoginCard() {
             Kết nối với chúng tôi
           </p>
           <div className="flex items-center justify-center gap-4">
-            <a href="#" className="text-gray-400 dark:text-zinc-500 hover:text-orange-500 transition-colors" aria-label="Cộng đồng">
+            <a
+              href="https://www.facebook.com/groups/1277321027865135"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 dark:text-zinc-500 hover:text-orange-500 transition-colors"
+              aria-label="Cộng đồng Facebook"
+              title="Nhóm Facebook V-Affiliate"
+            >
               <UsersIcon className="w-5 h-5" />
             </a>
-            <a href="#" className="text-gray-400 dark:text-zinc-500 hover:text-orange-500 transition-colors" aria-label="Podcast">
+            <a
+              href="https://zalo.me/g/kw4grzxrzqzgrbwyys6f"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 dark:text-zinc-500 hover:text-orange-500 transition-colors"
+              aria-label="Nhóm Zalo"
+              title="Nhóm Zalo V-Affiliate"
+            >
               <MicIcon className="w-5 h-5" />
             </a>
-            <a href="#" className="text-gray-400 dark:text-zinc-500 hover:text-orange-500 transition-colors" aria-label="Email">
+            <a
+              href="mailto:nguyenvandon1304@gmail.com"
+              className="text-gray-400 dark:text-zinc-500 hover:text-orange-500 transition-colors"
+              aria-label="Email liên hệ"
+              title="Email: nguyenvandon1304@gmail.com"
+            >
               <MailIcon className="w-5 h-5" />
             </a>
-            <a href="#" className="text-gray-400 dark:text-zinc-500 hover:text-orange-500 transition-colors" aria-label="Thông tin">
+            <a
+              href="https://www.facebook.com/profile.php?id=61590342930888"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 dark:text-zinc-500 hover:text-orange-500 transition-colors"
+              aria-label="Fanpage chính thức"
+              title="Fanpage Facebook V-Affiliate"
+            >
               <CircleInfoIcon className="w-5 h-5" />
             </a>
           </div>
