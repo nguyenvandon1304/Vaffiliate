@@ -25,7 +25,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const user = await getUserByToken(token, { ip, userAgent });
   if (!user) redirect("/");
-  if (user.role === "admin") redirect("/admin");
 
   return <DashboardShell>{children}</DashboardShell>;
 }
