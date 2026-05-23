@@ -135,6 +135,26 @@ export async function POST(request: NextRequest) {
       detail: emailSent ? "verification email sent" : emailError ?? null,
     });
 
+    // Anti-fraud — fire-and-forget. Audit log đã insert ở trên nên check
+    // count được. Telegram alert nếu high severity.
+    void (async () => {
+      try {
+        const { checkSameIpRegister, checkSelfReferral } = await import("@/lib/fraud");
+        await checkSameIpRegister(ip ?? null, result.user!.id);
+        if (typeof ref === "string" && ref.trim()) {
+          // Lấy referrer ID từ username
+          const { getDb } = await import("@/lib/db");
+          const db = await getDb();
+          const refUser = await db.get("SELECT id FROM users WHERE username = ?", [ref.trim()]);
+          if (refUser) {
+            await checkSelfReferral(Number(refUser.id), result.user!.id);
+          }
+        }
+      } catch (e) {
+        console.warn("[register] fraud check failed:", e);
+      }
+    })();
+
     return NextResponse.json({
       success: true,
       message: emailSent

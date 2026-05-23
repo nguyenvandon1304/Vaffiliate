@@ -56,5 +56,15 @@ export async function POST(request: NextRequest) {
     }
   })();
 
+  // Anti-fraud — check rapid withdraw pattern.
+  void (async () => {
+    try {
+      const { checkRapidWithdraw } = await import("@/lib/fraud");
+      await checkRapidWithdraw(auth.user.id);
+    } catch (e) {
+      console.warn("[withdraw] fraud check failed:", e);
+    }
+  })();
+
   return NextResponse.json({ success: true, message: "Yêu cầu rút tiền đã được gửi" });
 }

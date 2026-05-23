@@ -358,6 +358,23 @@ async function initSchema(database: DbAdapter): Promise<void> {
     )
   `);
 
+  // Anti-fraud — flag hành vi bất thường để admin review.
+  // type: same_ip_register | self_referral | rapid_withdraw | suspicious_login
+  // severity: low | medium | high
+  await database.exec(`
+    CREATE TABLE IF NOT EXISTS fraud_flags (
+      id BIGSERIAL PRIMARY KEY,
+      user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+      type TEXT NOT NULL,
+      severity TEXT NOT NULL DEFAULT 'medium',
+      detail TEXT,
+      resolved INTEGER DEFAULT 0,
+      resolved_at TIMESTAMPTZ,
+      resolved_by BIGINT REFERENCES users(id) ON DELETE SET NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
+
   // Indexes — all idempotent
   await database.exec("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
@@ -384,6 +401,8 @@ async function initSchema(database: DbAdapter): Promise<void> {
   await database.exec("CREATE INDEX IF NOT EXISTS idx_referrals_referrer ON referrals(referrer_user_id)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_achievements_user ON user_achievements(user_id)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_spin_user_time ON spin_history(user_id, spun_at DESC)");
+  await database.exec("CREATE INDEX IF NOT EXISTS idx_fraud_unresolved ON fraud_flags(resolved, severity, created_at DESC)");
+  await database.exec("CREATE INDEX IF NOT EXISTS idx_fraud_user ON fraud_flags(user_id)");
 
   // Seed default admin
   const adminExists = await database.get("SELECT id FROM users WHERE username = 'admin'", []);
