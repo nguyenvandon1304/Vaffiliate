@@ -1,137 +1,128 @@
 /**
- * Mini-game vòng quay may mắn.
+ * Mini-game vòng quay may mắn — EARN-BASED.
  *
- * Cách hoạt động:
- *   - 8 segment trên vòng quay với phần thưởng + xác suất khác nhau
- *   - User spin 1 lần / 24h (cấu hình qua setting `spin_cooldown_hours`)
- *   - Random server-side (không trust client) → trả về `segmentIndex` để UI animate
- *   - Tự động cộng tiền vào ví user qua bảng `wallet`
+ * Cơ chế:
+ *   - User EARN lượt quay (không phải free 1 lần/ngày):
+ *       + Mỗi N đơn hoàn tiền → +1 lượt (default N=10)
+ *       + Mỗi M bạn mời active → +1 lượt (default M=5)
+ *   - User SPEND lượt khi quay
+ *   - Available = total_earned - total_spent
+ *
+ * Điểm hay:
+ *   - Tạo động lực mua hàng + mời bạn (engagement)
+ *   - Không bóp lượt như cooldown — user mua nhiều spin nhiều
+ *   - Server tính toán từ DB → impossible cheat client
  *
  * Anti-cheat:
- *   - Server check cooldown từ DB (không từ client)
- *   - randomBytes thay vì Math.random (entropy cao)
- *   - Atomic check-then-insert trong transaction → 2 request đồng thời
- *     không thể double-spin
+ *   - Available tokens compute from DB (orders + referrals + spin_history)
+ *   - Atomic check-then-spin trong transaction
+ *   - Order phải status = "Đã hoàn tiền" mới count (không tính order đã hủy/pending)
+ *   - Referral phải bonus_credited = 1 (đã có ít nhất 1 đơn hoàn tiền)
  */
 
 import crypto from "crypto";
 import { getDb, getSetting } from "@/lib/db";
 
-/**
- * 8 segment vòng quay. `weight` là trọng số xác suất (cao = dễ trúng).
- * Tổng weight = 100 → tiện hiện % cho user.
- *
- * Strategy:
- *   - 50% rơi vào reward thấp (1-2k) — giữ EV ~3k/spin, app không lỗ nhiều
- *   - 30% trượt — tạo cảm giác đa dạng, không phải lúc nào cũng có thưởng
- *   - 15% medium 5k
- *   - 5% jackpot 50k — hiếm nhưng tạo viral moment
- *
- * Tính toán:
- *   EV = 0.30*1000 + 0.20*2000 + 0.15*5000 + 0.10*3000 + 0.10*0 + 0.05*10000
- *      + 0.05*0 + 0.05*50000
- *      = 300 + 400 + 750 + 300 + 0 + 500 + 0 + 2500 = 4750đ/spin
- *   1 user spin/ngày × 30 ngày = ~142,500đ/tháng — chấp nhận được như chi phí marketing
- */
 export interface SpinSegment {
   index: number;
   amount: number;
   label: string;
-  /** Màu Tailwind cho UI (alternating). */
   color: string;
-  /** Xác suất 0-100. Tổng = 100. */
   weight: number;
 }
 
 export const SPIN_SEGMENTS: SpinSegment[] = [
-  { index: 0, amount: 1000,  label: "1.000đ",   color: "from-amber-300 to-amber-400",   weight: 30 },
-  { index: 1, amount: 2000,  label: "2.000đ",   color: "from-orange-300 to-orange-400", weight: 20 },
-  { index: 2, amount: 5000,  label: "5.000đ",   color: "from-rose-300 to-rose-400",     weight: 15 },
-  { index: 3, amount: 3000,  label: "3.000đ",   color: "from-pink-300 to-pink-400",     weight: 10 },
-  { index: 4, amount: 0,     label: "Chúc may mắn",  color: "from-gray-300 to-gray-400",   weight: 10 },
-  { index: 5, amount: 10000, label: "10.000đ",  color: "from-emerald-400 to-emerald-500", weight: 5 },
-  { index: 6, amount: 0,     label: "Thử lại",  color: "from-slate-300 to-slate-400",   weight: 5 },
-  { index: 7, amount: 50000, label: "50.000đ 🎁", color: "from-fuchsia-400 to-purple-500", weight: 5 },
+  { index: 0, amount: 1000,  label: "1.000đ",     color: "from-amber-300 to-amber-400",     weight: 30 },
+  { index: 1, amount: 2000,  label: "2.000đ",     color: "from-orange-300 to-orange-400",   weight: 20 },
+  { index: 2, amount: 5000,  label: "5.000đ",     color: "from-rose-300 to-rose-400",       weight: 15 },
+  { index: 3, amount: 3000,  label: "3.000đ",     color: "from-pink-300 to-pink-400",       weight: 10 },
+  { index: 4, amount: 0,     label: "Chúc may mắn", color: "from-gray-300 to-gray-400",       weight: 10 },
+  { index: 5, amount: 10000, label: "10.000đ",    color: "from-emerald-400 to-emerald-500", weight: 5 },
+  { index: 6, amount: 0,     label: "Thử lại",    color: "from-slate-300 to-slate-400",     weight: 5 },
+  { index: 7, amount: 50000, label: "50.000đ 🎁", color: "from-fuchsia-400 to-purple-500",  weight: 5 },
 ];
 
-/**
- * Weighted random pick từ SPIN_SEGMENTS dùng crypto.randomBytes.
- *
- * Không dùng `Math.random()` vì:
- *   - PRNG có thể bị predict
- *   - User mất niềm tin nếu admin gian lận (tuy không có thật)
- *
- * Crypto random → entropy đủ + không thể đoán được kết quả tiếp theo.
- */
 function weightedRandom(): SpinSegment {
   const total = SPIN_SEGMENTS.reduce((s, seg) => s + seg.weight, 0);
-  // Sinh số 0..total-1
   const buf = crypto.randomBytes(4);
   const r = buf.readUInt32BE(0) % total;
-
   let cumulative = 0;
   for (const seg of SPIN_SEGMENTS) {
     cumulative += seg.weight;
     if (r < cumulative) return seg;
   }
-  return SPIN_SEGMENTS[0]; // fallback (không xảy ra khi tổng = 100)
+  return SPIN_SEGMENTS[0];
 }
 
 export interface SpinStatus {
-  /** User có thể spin lúc này không. */
-  canSpin: boolean;
-  /** Cooldown còn lại (giây). 0 nếu canSpin = true. */
-  cooldownSeconds: number;
-  /** Lần spin gần nhất (ISO). */
-  lastSpinAt: string | null;
-  /** Tổng số lần đã spin. */
-  totalSpins: number;
-  /** Tổng tiền thưởng đã nhận. */
-  totalWon: number;
   /** Game có đang bật không (admin có thể tắt). */
   enabled: boolean;
+  /** Số lượt quay đang có (earned - spent). */
+  availableTokens: number;
+  /** Tổng số lượt đã earn từ trước đến nay. */
+  totalEarned: number;
+  /** Tổng số lần đã quay. */
+  totalSpins: number;
+  /** Tổng tiền thưởng đã nhận từ vòng quay. */
+  totalWon: number;
+  /** Số đơn "Đã hoàn tiền" hiện có. */
+  completedOrders: number;
+  /** Số bạn mời active. */
+  activeReferrals: number;
+  /** Config hiện tại. */
+  ordersPerToken: number;
+  referralsPerToken: number;
+  /** Tiến độ tới lượt quay tiếp theo. */
+  ordersTowardsNext: number;       // 0..ordersPerToken
+  referralsTowardsNext: number;    // 0..referralsPerToken
 }
 
 /**
- * Lấy trạng thái spin hiện tại của user. UI dùng để render countdown.
+ * Tính số lượt earned từ orders + referrals.
+ *   tokens_from_orders   = floor(completed_orders / orders_per_token)
+ *   tokens_from_referrals= floor(active_referrals / referrals_per_token)
+ *
+ * Tách 2 nguồn để hiển thị progress riêng cho mỗi cái.
  */
 export async function getSpinStatus(userId: number): Promise<SpinStatus> {
   const enabled = (await getSetting("spin_enabled")) !== "0";
-  const cooldownHours = Math.max(1, Number(await getSetting("spin_cooldown_hours")) || 24);
+  const ordersPerToken = Math.max(1, Number(await getSetting("spin_orders_per_token")) || 10);
+  const referralsPerToken = Math.max(1, Number(await getSetting("spin_referrals_per_token")) || 5);
 
   const db = await getDb();
-  // Lấy lần spin gần nhất + summary tổng.
-  const last = await db.get(
-    "SELECT spun_at FROM spin_history WHERE user_id = ? ORDER BY spun_at DESC LIMIT 1",
-    [userId],
-  );
-  const summary = await db.get(
-    "SELECT COUNT(*) AS total, COALESCE(SUM(reward_amount), 0) AS won FROM spin_history WHERE user_id = ?",
+
+  // 1 query gộp các COUNT cần thiết.
+  const row = await db.get(
+    `SELECT
+      COALESCE((SELECT COUNT(*) FROM orders WHERE user_id = $1 AND status = 'Đã hoàn tiền'), 0) AS completed_orders,
+      COALESCE((SELECT COUNT(*) FROM referrals WHERE referrer_user_id = $1 AND bonus_credited = 1), 0) AS active_referrals,
+      COALESCE((SELECT COUNT(*) FROM spin_history WHERE user_id = $1), 0) AS total_spins,
+      COALESCE((SELECT SUM(reward_amount) FROM spin_history WHERE user_id = $1), 0) AS total_won`,
     [userId],
   );
 
-  let canSpin = true;
-  let cooldownSeconds = 0;
-  let lastSpinAt: string | null = null;
+  const completedOrders = Number(row?.completed_orders ?? 0);
+  const activeReferrals = Number(row?.active_referrals ?? 0);
+  const totalSpins = Number(row?.total_spins ?? 0);
+  const totalWon = Number(row?.total_won ?? 0);
 
-  if (last) {
-    const lastDate = new Date(last.spun_at as Date | string);
-    lastSpinAt = lastDate.toISOString();
-    const elapsed = Date.now() - lastDate.getTime();
-    const cooldownMs = cooldownHours * 3600 * 1000;
-    if (elapsed < cooldownMs) {
-      canSpin = false;
-      cooldownSeconds = Math.ceil((cooldownMs - elapsed) / 1000);
-    }
-  }
+  const tokensFromOrders = Math.floor(completedOrders / ordersPerToken);
+  const tokensFromReferrals = Math.floor(activeReferrals / referralsPerToken);
+  const totalEarned = tokensFromOrders + tokensFromReferrals;
+  const availableTokens = Math.max(0, totalEarned - totalSpins);
 
   return {
-    canSpin: enabled && canSpin,
-    cooldownSeconds,
-    lastSpinAt,
-    totalSpins: Number(summary?.total ?? 0),
-    totalWon: Number(summary?.won ?? 0),
     enabled,
+    availableTokens,
+    totalEarned,
+    totalSpins,
+    totalWon,
+    completedOrders,
+    activeReferrals,
+    ordersPerToken,
+    referralsPerToken,
+    ordersTowardsNext: completedOrders % ordersPerToken,
+    referralsTowardsNext: activeReferrals % referralsPerToken,
   };
 }
 
@@ -141,15 +132,16 @@ export interface SpinResult {
   segmentIndex?: number;
   amount?: number;
   label?: string;
-  /** Cooldown sau spin này (giây) — UI countdown đến lượt tiếp. */
-  nextCooldownSeconds?: number;
+  /** Số lượt còn lại sau khi quay. */
+  remainingTokens?: number;
 }
 
 /**
- * Thực hiện spin — atomic check cooldown + insert + cộng ví trong transaction.
+ * Thực hiện 1 lượt quay. Atomic check-then-spend trong transaction.
  *
- * Race condition: nếu user spam click button, 2 request có thể đến cùng lúc.
- * Transaction + lock row đảm bảo chỉ 1 request thành công.
+ * Race condition: user spam click → 2 request đến cùng lúc → cả 2 thấy
+ * available=1 → cả 2 quay → spend âm. Transaction + check trong tx
+ * tránh trường hợp này (sequential within 1 connection pool slot).
  */
 export async function performSpin(userId: number): Promise<SpinResult> {
   const enabled = (await getSetting("spin_enabled")) !== "0";
@@ -157,45 +149,55 @@ export async function performSpin(userId: number): Promise<SpinResult> {
     return { success: false, error: "Vòng quay tạm khoá. Quay lại sau nhé!" };
   }
 
-  const cooldownHours = Math.max(1, Number(await getSetting("spin_cooldown_hours")) || 24);
+  const ordersPerToken = Math.max(1, Number(await getSetting("spin_orders_per_token")) || 10);
+  const referralsPerToken = Math.max(1, Number(await getSetting("spin_referrals_per_token")) || 5);
+
   const db = await getDb();
 
   return await db.transaction(async (tx) => {
-    // Check cooldown trong transaction (FOR UPDATE không cần — UNIQUE key đủ).
-    const last = await tx.get(
-      "SELECT spun_at FROM spin_history WHERE user_id = ? ORDER BY spun_at DESC LIMIT 1",
+    // Re-check availability TRONG transaction để chống race.
+    const row = await tx.get(
+      `SELECT
+        COALESCE((SELECT COUNT(*) FROM orders WHERE user_id = $1 AND status = 'Đã hoàn tiền'), 0) AS completed_orders,
+        COALESCE((SELECT COUNT(*) FROM referrals WHERE referrer_user_id = $1 AND bonus_credited = 1), 0) AS active_referrals,
+        COALESCE((SELECT COUNT(*) FROM spin_history WHERE user_id = $1), 0) AS total_spins`,
       [userId],
     );
 
-    if (last) {
-      const elapsed = Date.now() - new Date(last.spun_at as Date | string).getTime();
-      const cooldownMs = cooldownHours * 3600 * 1000;
-      if (elapsed < cooldownMs) {
-        const remainSec = Math.ceil((cooldownMs - elapsed) / 1000);
-        const remainHours = Math.ceil(remainSec / 3600);
-        return {
-          success: false,
-          error: `Bạn đã quay rồi. Quay lại sau ~${remainHours} giờ nữa nhé!`,
-        };
-      }
+    const completedOrders = Number(row?.completed_orders ?? 0);
+    const activeReferrals = Number(row?.active_referrals ?? 0);
+    const totalSpins = Number(row?.total_spins ?? 0);
+
+    const totalEarned =
+      Math.floor(completedOrders / ordersPerToken) +
+      Math.floor(activeReferrals / referralsPerToken);
+    const available = totalEarned - totalSpins;
+
+    if (available <= 0) {
+      // Tính bao nhiêu nữa thì có lượt — hint cho user.
+      const ordersToNext = ordersPerToken - (completedOrders % ordersPerToken);
+      const refsToNext = referralsPerToken - (activeReferrals % referralsPerToken);
+      return {
+        success: false,
+        error:
+          `Bạn chưa có lượt quay. ` +
+          `Mua thêm ${ordersToNext} đơn hoặc mời thêm ${refsToNext} bạn để mở 1 lượt.`,
+      };
     }
 
-    // Random reward
+    // Spend 1 token = insert 1 row spin_history. Random reward.
     const segment = weightedRandom();
 
-    // Insert spin history
     await tx.run(
       "INSERT INTO spin_history (user_id, reward_amount, reward_label, segment_index) VALUES (?, ?, ?, ?)",
       [userId, segment.amount, segment.label, segment.index],
     );
 
-    // Cộng vào ví user (chỉ khi amount > 0)
     if (segment.amount > 0) {
       await tx.run(
         "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
         [userId, `Vòng quay may mắn — ${segment.label}`, segment.amount, "credit"],
       );
-      // Notification
       await tx.run(
         "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
         [
@@ -212,7 +214,7 @@ export async function performSpin(userId: number): Promise<SpinResult> {
       segmentIndex: segment.index,
       amount: segment.amount,
       label: segment.label,
-      nextCooldownSeconds: cooldownHours * 3600,
+      remainingTokens: available - 1,
     };
   });
 }

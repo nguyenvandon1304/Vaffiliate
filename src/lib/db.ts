@@ -2568,9 +2568,11 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   cashback_base_percent: "50",
   referral_milestone_count: "50",
   referral_milestone_bonus_percent: "5",
-  // Mini-game vòng quay may mắn — admin bật/tắt + chỉnh cooldown.
+  // Mini-game vòng quay may mắn — earn-based, không phải cooldown.
+  // User mua đủ N đơn hoàn tiền → +1 lượt. Mời đủ M bạn active → +1 lượt.
   spin_enabled: "1",
-  spin_cooldown_hours: "24",
+  spin_orders_per_token: "10",       // 10 đơn hoàn tiền = 1 lượt quay
+  spin_referrals_per_token: "5",     // 5 bạn mời active = 1 lượt quay
 };
 
 export async function getSetting(key: string): Promise<string> {

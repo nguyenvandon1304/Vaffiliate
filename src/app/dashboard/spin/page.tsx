@@ -14,26 +14,21 @@ interface Segment {
 }
 
 interface Status {
-  canSpin: boolean;
-  cooldownSeconds: number;
-  lastSpinAt: string | null;
+  enabled: boolean;
+  availableTokens: number;
+  totalEarned: number;
   totalSpins: number;
   totalWon: number;
-  enabled: boolean;
+  completedOrders: number;
+  activeReferrals: number;
+  ordersPerToken: number;
+  referralsPerToken: number;
+  ordersTowardsNext: number;
+  referralsTowardsNext: number;
 }
 
 function formatVND(n: number) {
   return (n || 0).toLocaleString("vi-VN") + "đ";
-}
-
-function formatCountdown(sec: number): string {
-  if (sec <= 0) return "Sẵn sàng quay!";
-  const h = Math.floor(sec / 3600);
-  const m = Math.floor((sec % 3600) / 60);
-  const s = sec % 60;
-  if (h > 0) return `${h}h ${m}m ${s}s`;
-  if (m > 0) return `${m}m ${s}s`;
-  return `${s}s`;
 }
 
 export default function SpinPage() {
@@ -44,11 +39,9 @@ export default function SpinPage() {
   const [loading, setLoading] = useState(true);
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
-  const [remaining, setRemaining] = useState(0);
   const [resultLabel, setResultLabel] = useState<string | null>(null);
   const wheelRef = useRef<HTMLDivElement | null>(null);
 
-  // Initial load
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -62,7 +55,6 @@ export default function SpinPage() {
         }
         setSegments(data.segments);
         setStatus(data.status);
-        setRemaining(data.status.cooldownSeconds);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -70,17 +62,14 @@ export default function SpinPage() {
     return () => { cancelled = true; };
   }, [router]);
 
-  // Countdown ticker — giảm 1s mỗi giây cho đến 0.
-  useEffect(() => {
-    if (remaining <= 0) return;
-    const id = setInterval(() => {
-      setRemaining((r) => Math.max(0, r - 1));
-    }, 1000);
-    return () => clearInterval(id);
-  }, [remaining]);
+  const refetchStatus = async () => {
+    const r = await fetch("/api/spin");
+    const d = await r.json();
+    if (d.success) setStatus(d.status);
+  };
 
   const handleSpin = async () => {
-    if (spinning || !status?.canSpin) return;
+    if (spinning || !status?.availableTokens) return;
     setSpinning(true);
     setResultLabel(null);
 
@@ -94,35 +83,21 @@ export default function SpinPage() {
         return;
       }
 
-      // Animate vòng quay đến đúng segment server đã chọn.
-      // Mỗi segment chiếm 360/8 = 45deg. Index 0 đặt ở góc 12h (top).
-      // Spin 5 vòng full + dừng ở góc target để có cảm giác quay đẹp.
       const segDeg = 360 / segments.length;
       const target = data.segmentIndex * segDeg;
-      // wheel quay theo chiều kim đồng hồ → kim chỉ ngược lại.
-      // Tính rotation mới = current + 5 vòng + (- target) — luôn lớn hơn current.
       const fullSpins = 5;
       const newRotation = rotation + fullSpins * 360 + (360 - target);
       setRotation(newRotation);
 
-      // Đợi animation 4s xong mới hiện kết quả.
       setTimeout(() => {
         setResultLabel(data.label);
         if (data.amount > 0) {
           toast.success(`🎉 Trúng ${formatVND(data.amount)}!`);
         } else {
-          toast.info(`${data.label}. Hẹn bạn ngày mai!`);
+          toast.info(`${data.label}. Lượt sau may mắn hơn nhé!`);
         }
         setSpinning(false);
-        // Reload status để cập nhật cooldown
-        fetch("/api/spin")
-          .then((r) => r.json())
-          .then((d) => {
-            if (d.success) {
-              setStatus(d.status);
-              setRemaining(d.status.cooldownSeconds);
-            }
-          });
+        void refetchStatus();
       }, 4000);
     } catch {
       toast.error("Lỗi kết nối. Vui lòng thử lại.");
@@ -163,38 +138,60 @@ export default function SpinPage() {
       <SpinHeader router={router} />
 
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 pb-24 md:pb-6 space-y-6">
-        {/* Header */}
         <div className="text-center">
           <h1 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-orange-500 via-pink-500 to-fuchsia-500 bg-clip-text text-transparent">
             Vòng Quay May Mắn
           </h1>
           <p className="text-sm text-gray-500 dark:text-zinc-400 mt-2">
-            Mỗi ngày 1 lượt quay — bonus cộng thẳng vào ví
+            Mua đơn + mời bạn để nhận lượt quay
           </p>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-4 text-center shadow-sm">
-            <div className="text-xs text-gray-500 dark:text-zinc-500 mb-1">Đã quay</div>
-            <div className="text-2xl font-bold text-orange-500">{status?.totalSpins ?? 0}</div>
-            <div className="text-xs text-gray-400 dark:text-zinc-600">lần</div>
+        {/* Token counter — nổi bật giữa */}
+        <div className="bg-gradient-to-r from-orange-500 via-pink-500 to-fuchsia-500 rounded-3xl p-5 shadow-xl shadow-orange-500/30 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-xs uppercase tracking-wider opacity-80 mb-1">Lượt quay đang có</div>
+              <div className="text-5xl font-extrabold leading-none">
+                {status.availableTokens}
+              </div>
+            </div>
+            <div className="text-right text-xs space-y-0.5 opacity-90">
+              <div>Đã earn: {status.totalEarned}</div>
+              <div>Đã quay: {status.totalSpins}</div>
+              <div>Tổng nhận: {formatVND(status.totalWon)}</div>
+            </div>
           </div>
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-4 text-center shadow-sm">
-            <div className="text-xs text-gray-500 dark:text-zinc-500 mb-1">Tổng nhận</div>
-            <div className="text-2xl font-bold text-emerald-500">{formatVND(status?.totalWon ?? 0)}</div>
-            <div className="text-xs text-gray-400 dark:text-zinc-600">cộng vào ví</div>
-          </div>
+        </div>
+
+        {/* Progress bars — hiển thị tiến độ tới lượt quay tiếp theo */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <ProgressCard
+            icon="🛒"
+            label="Đơn hoàn tiền"
+            current={status.ordersTowardsNext}
+            target={status.ordersPerToken}
+            description={`${status.ordersPerToken} đơn = 1 lượt quay`}
+            totalCount={status.completedOrders}
+            color="from-orange-400 to-orange-500"
+          />
+          <ProgressCard
+            icon="🤝"
+            label="Bạn mời active"
+            current={status.referralsTowardsNext}
+            target={status.referralsPerToken}
+            description={`${status.referralsPerToken} bạn = 1 lượt quay`}
+            totalCount={status.activeReferrals}
+            color="from-pink-400 to-fuchsia-500"
+          />
         </div>
 
         {/* Wheel */}
         <div className="relative flex justify-center pt-4 pb-2">
-          {/* Pointer (mũi tên trỏ xuống) */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20">
             <div className="w-0 h-0 border-l-[16px] border-l-transparent border-r-[16px] border-r-transparent border-t-[28px] border-t-red-500 drop-shadow-lg" />
           </div>
 
-          {/* Wheel */}
           <div className="relative w-72 h-72 sm:w-80 sm:h-80">
             <div
               ref={wheelRef}
@@ -220,7 +217,7 @@ export default function SpinPage() {
                 </defs>
                 {segments.map((seg) => {
                   const segDeg = 360 / segments.length;
-                  const startAngle = seg.index * segDeg - 90 - segDeg / 2; // center 12h
+                  const startAngle = seg.index * segDeg - 90 - segDeg / 2;
                   const endAngle = startAngle + segDeg;
                   const path = describeSlice(100, 100, 95, startAngle, endAngle);
                   const labelAngle = startAngle + segDeg / 2;
@@ -252,18 +249,37 @@ export default function SpinPage() {
 
         {/* Spin button */}
         <div className="text-center space-y-2">
-          {status?.canSpin ? (
+          {status.availableTokens > 0 ? (
             <button
               onClick={handleSpin}
               disabled={spinning}
               className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 via-pink-500 to-fuchsia-500 hover:from-orange-600 hover:via-pink-600 hover:to-fuchsia-600 text-white font-bold px-10 py-3.5 rounded-full shadow-lg shadow-orange-500/40 transition-all duration-200 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <span className="text-xl">🎰</span>
-              <span>{spinning ? "Đang quay..." : "QUAY NGAY"}</span>
+              <span>{spinning ? "Đang quay..." : `QUAY NGAY (còn ${status.availableTokens} lượt)`}</span>
             </button>
           ) : (
-            <div className="inline-block bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 px-6 py-3 rounded-full text-sm font-semibold">
-              ⏱ Quay tiếp sau: <span className="font-mono text-orange-500">{formatCountdown(remaining)}</span>
+            <div className="space-y-2">
+              <div className="inline-block bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 px-6 py-3 rounded-full text-sm font-semibold">
+                ⏳ Hết lượt quay
+              </div>
+              <p className="text-xs text-gray-500 dark:text-zinc-500">
+                Mua thêm <strong className="text-orange-600">{status.ordersPerToken - status.ordersTowardsNext} đơn</strong> hoặc mời thêm <strong className="text-pink-600">{status.referralsPerToken - status.referralsTowardsNext} bạn</strong> để nhận lượt mới
+              </p>
+              <div className="flex gap-2 justify-center pt-2">
+                <button
+                  onClick={() => router.push("/dashboard/cashback")}
+                  className="text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  Mua hàng
+                </button>
+                <button
+                  onClick={() => router.push("/dashboard/referral")}
+                  className="text-xs font-semibold bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  Mời bạn
+                </button>
+              </div>
             </div>
           )}
           {resultLabel && !spinning && (
@@ -276,28 +292,82 @@ export default function SpinPage() {
         {/* Rules */}
         <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-5 shadow-sm">
           <h3 className="text-sm font-bold text-gray-800 dark:text-zinc-100 mb-3 flex items-center gap-2">
-            <span>📜</span> Luật chơi
+            <span>📜</span> Cách nhận lượt quay
           </h3>
           <ul className="space-y-2 text-sm text-gray-600 dark:text-zinc-400">
             <li className="flex items-start gap-2">
-              <span className="text-orange-500 mt-0.5">•</span>
-              <span>Mỗi tài khoản được quay <strong>1 lần / 24 giờ</strong></span>
+              <span className="text-orange-500 mt-0.5">🛒</span>
+              <span>
+                Mỗi <strong className="text-orange-600">{status.ordersPerToken} đơn hoàn tiền</strong> = <strong>1 lượt quay</strong>
+                <br />
+                <span className="text-xs text-gray-400">Chỉ tính đơn có status &quot;Đã hoàn tiền&quot;</span>
+              </span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-orange-500 mt-0.5">•</span>
+              <span className="text-pink-500 mt-0.5">🤝</span>
+              <span>
+                Mỗi <strong className="text-pink-600">{status.referralsPerToken} bạn mời active</strong> = <strong>1 lượt quay</strong>
+                <br />
+                <span className="text-xs text-gray-400">Bạn được mời phải có ít nhất 1 đơn hoàn tiền</span>
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-emerald-500 mt-0.5">💰</span>
               <span>Tiền thưởng cộng <strong>thẳng vào ví</strong>, có thể rút như cashback</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-orange-500 mt-0.5">•</span>
-              <span>Phần thưởng <strong>random</strong> server-side, công bằng cho mọi user</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-orange-500 mt-0.5">•</span>
+              <span className="text-fuchsia-500 mt-0.5">🎁</span>
               <span>Có cơ hội trúng <strong>50.000đ jackpot</strong> với xác suất 5%</span>
             </li>
           </ul>
         </div>
       </main>
+    </div>
+  );
+}
+
+function ProgressCard({
+  icon,
+  label,
+  current,
+  target,
+  description,
+  totalCount,
+  color,
+}: {
+  icon: string;
+  label: string;
+  current: number;
+  target: number;
+  description: string;
+  totalCount: number;
+  color: string;
+}) {
+  const percent = Math.min(100, (current / target) * 100);
+  return (
+    <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-4 shadow-sm">
+      <div className="flex items-start justify-between mb-2">
+        <div>
+          <div className="text-xs text-gray-500 dark:text-zinc-500 flex items-center gap-1.5">
+            <span className="text-base">{icon}</span>
+            <span>{label}</span>
+          </div>
+          <div className="text-2xl font-bold text-gray-800 dark:text-zinc-100 mt-0.5">
+            {current}<span className="text-base text-gray-400 dark:text-zinc-600">/{target}</span>
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-zinc-500">Tổng</div>
+          <div className="text-lg font-bold text-gray-700 dark:text-zinc-200">{totalCount}</div>
+        </div>
+      </div>
+      <div className="h-2 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden mb-1">
+        <div
+          className={`h-full bg-gradient-to-r ${color} transition-all duration-500`}
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+      <p className="text-[10px] text-gray-400 dark:text-zinc-500">{description}</p>
     </div>
   );
 }
@@ -324,9 +394,6 @@ function SpinHeader({ router }: { router: ReturnType<typeof useRouter> }) {
   );
 }
 
-/* ─────────────── SVG helpers ─────────────── */
-
-/** Pie slice path. */
 function describeSlice(cx: number, cy: number, r: number, startDeg: number, endDeg: number): string {
   const start = polarToCartesian(cx, cy, r, endDeg);
   const end = polarToCartesian(cx, cy, r, startDeg);
@@ -347,7 +414,6 @@ function polarToCartesian(cx: number, cy: number, r: number, deg: number): { x: 
   };
 }
 
-/** Convert tailwind color name + shade → hex (subset cần dùng). */
 function colorTwToHex(name: string | undefined, shade: string | undefined): string {
   if (!name || !shade) return "#fb923c";
   const map: Record<string, Record<string, string>> = {
