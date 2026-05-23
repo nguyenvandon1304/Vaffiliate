@@ -1,0 +1,22 @@
+# Render.com config — Web Service chạy Next.js trên Node 24.
+# Khi connect repo, Render sẽ tự đọc file này và config tương ứng.
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: vaffiliate-app
+    runtime: node
+    region: singapore
+    plan: free
+    branch: main
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/auth/me
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NODE_ENV
+        value: production
+      # Các secret khác (DATABASE_URL, APP_ENCRYPTION_KEY, ...) set thủ công
+      # qua Render Dashboard hoặc dùng `sync: false` để tránh commit.
