@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useNotifications } from "@/hooks/useNotifications";
 
 /**
  * Bottom navigation cho mobile (≤ md). Cố định fixed dưới màn hình.
@@ -77,23 +78,8 @@ export function MobileBottomNav() {
   const params = useSearchParams();
   const tab = params.get("tab");
   const [showMore, setShowMore] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  // Fetch unread count để hiện badge trên nút "Thêm".
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const r = await fetch("/api/notifications");
-        const d = await r.json();
-        if (!cancelled && d.success) setUnreadCount(d.unreadCount || 0);
-      } catch { /* ignore */ }
-    };
-    void load();
-    // Re-fetch mỗi 60s để bắt thông báo mới (đủ tần suất, không spam server).
-    const id = setInterval(load, 60_000);
-    return () => { cancelled = true; clearInterval(id); };
-  }, []);
+  // Dùng hook chung — share SSE connection với NotificationBell ở header desktop.
+  const { unreadCount } = useNotifications();
 
   // Đóng sheet khi route đổi (tránh kẹt sheet sau khi chuyển trang).
   useEffect(() => {

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CaffiliateLogo } from "@/components/icons";
 import { ThemeToggleButton } from "@/components/ThemeToggle";
+import { NotificationBell } from "@/components/NotificationBell";
 import {
   ClockIcon3D,
   GridIcon3D,
@@ -135,63 +136,7 @@ function DashboardContent() {
   const [linkHistory, setLinkHistory] = useState<{id:number;product_name:string;product_price:number;commission:number;commission_rate:string;cashback:number;affiliate_link:string;created_at:string}[]>([]);
   const [linkCopiedId, setLinkCopiedId] = useState<number|null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [showNotif, setShowNotif] = useState(false);
-  const [notifications, setNotifications] = useState<{id:number;title:string;message:string;type:string;is_read:number;created_at:string}[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const notifRef = useRef<HTMLDivElement>(null);
-
-  const fetchNotifications = async () => {
-    try {
-      const res = await fetch("/api/notifications");
-      const data = await res.json();
-      if (data.success) {
-        setNotifications(data.notifications);
-        setUnreadCount(data.unreadCount);
-      }
-    } catch { /* ignore */ }
-  };
-
-  const markAllRead = async () => {
-    await fetch("/api/notifications", { method: "PATCH" });
-    setUnreadCount(0);
-    setNotifications(prev => prev.map(n => ({ ...n, is_read: 1 })));
-  };
-
-  const deleteOneNotification = async (id: number) => {
-    const target = notifications.find((n) => n.id === id);
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-    if (target && !target.is_read) {
-      setUnreadCount((c) => Math.max(0, c - 1));
-    }
-    try {
-      const res = await fetch("/api/notifications", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
-      if (!res.ok) {
-        // Rollback nếu server lỗi
-        await fetchNotifications();
-      }
-    } catch {
-      await fetchNotifications();
-    }
-  };
-
-  // Setstate đặt sau await trong async IIFE → tránh "set sync trong effect body".
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch async, setState sau await
-    void fetchNotifications();
-  }, []);
-
-  useEffect(() => {
-    function handleClickNotif(e: MouseEvent) {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setShowNotif(false);
-    }
-    document.addEventListener("mousedown", handleClickNotif);
-    return () => document.removeEventListener("mousedown", handleClickNotif);
-  }, []);
 
   const fetchLinkHistory = async () => {
     try {
@@ -402,77 +347,8 @@ function DashboardContent() {
           <div className="flex items-center gap-3">
             {/* Theme toggle — đặt cạnh chuông cho gọn */}
             <ThemeToggleButton />
-            {/* Notification Bell */}
-            <div className="relative" ref={notifRef}>
-              <button
-                onClick={() => { setShowNotif(!showNotif); if (!showNotif && unreadCount > 0) markAllRead(); }}
-                className="relative w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
-              >
-                <svg viewBox="0 0 24 24" className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
-                {unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                    {unreadCount > 9 ? "9+" : unreadCount}
-                  </span>
-                )}
-              </button>
-              {showNotif && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 z-50 animate-in fade-in slide-in-from-top-1 max-h-96 overflow-hidden">
-                  <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-gray-800">Thông báo</h3>
-                    {notifications.length > 0 && (
-                      <button onClick={markAllRead} className="text-[10px] text-orange-500 hover:text-orange-600 font-medium">Đánh dấu đã đọc</button>
-                    )}
-                  </div>
-                  <div className="overflow-y-auto max-h-72">
-                    {notifications.length === 0 ? (
-                      <div className="px-4 py-8 text-center">
-                        <p className="text-gray-400 text-xs">Chưa có thông báo nào</p>
-                      </div>
-                    ) : (
-                      <div className="divide-y divide-gray-50">
-                        {notifications.map((n) => (
-                          <div key={n.id} className={`px-4 py-3 hover:bg-gray-50 transition-colors ${n.is_read ? "" : "bg-orange-50/40"}`}>
-                            <div className="flex items-start gap-2.5">
-                              <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                                n.type === "welcome" ? "bg-green-100 text-green-600" :
-                                n.type === "link" ? "bg-blue-100 text-blue-600" :
-                                n.type === "withdraw" ? "bg-purple-100 text-purple-600" :
-                                n.type === "cashback" ? "bg-orange-100 text-orange-600" :
-                                "bg-gray-100 text-gray-500"
-                              }`}>
-                                {n.type === "welcome" && <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>}
-                                {n.type === "link" && <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>}
-                                {n.type === "withdraw" && <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>}
-                                {n.type === "cashback" && <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" /><path d="M12 18V6" /></svg>}
-                                {n.type === "info" && <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-semibold text-gray-800">{n.title}</p>
-                                <p className="text-[11px] text-gray-400 mt-0.5 line-clamp-2">{n.message}</p>
-                                <p className="text-[9px] text-gray-300 mt-1">{formatDate(n.created_at)}</p>
-                              </div>
-                              {!n.is_read && <span className="w-2 h-2 bg-orange-500 rounded-full shrink-0 mt-1.5" />}
-                              <button
-                                type="button"
-                                onClick={(e) => { e.stopPropagation(); void deleteOneNotification(n.id); }}
-                                className="shrink-0 text-gray-300 hover:text-red-500 transition-colors p-0.5 -mt-0.5 -mr-0.5"
-                                aria-label="Xoá thông báo"
-                                title="Xoá"
-                              >
-                                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <path d="M18 6 6 18" />
-                                  <path d="m6 6 12 12" />
-                                </svg>
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* Notification Bell — realtime SSE qua hook chung */}
+            <NotificationBell />
 
             {/* User dropdown */}
             <div className="relative" ref={dropdownRef}>
