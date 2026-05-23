@@ -16,21 +16,20 @@ export function InstallPrompt() {
         </div>
         <div className="flex-1 min-w-0">
           <h4 className="text-sm font-bold text-gray-900 dark:text-zinc-100 mb-0.5">
-            Cài đặt ứng dụng
+            Ứng dụng di động
           </h4>
           <p className="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">
-            Cài đặt ứng dụng để trải nghiệm tiện lợi hơn
+            Sắp ra mắt — đăng ký nhận thông báo qua Fanpage
           </p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <a
-            href="https://play.google.com/store/apps/details?id=vn.caffiliate.customer"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors duration-200"
+          <span
+            aria-disabled="true"
+            title="Sắp ra mắt"
+            className="bg-orange-200 dark:bg-orange-500/20 text-orange-600 dark:text-orange-300 text-xs font-semibold px-4 py-2 rounded-lg cursor-not-allowed select-none"
           >
-            Tải app
-          </a>
+            Coming soon
+          </span>
           <button
             onClick={() => setDismissed(true)}
             className="text-gray-300 hover:text-gray-500 dark:text-zinc-600 dark:hover:text-zinc-300 transition-colors p-1"
