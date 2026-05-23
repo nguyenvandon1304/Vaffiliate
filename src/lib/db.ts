@@ -335,6 +335,17 @@ async function initSchema(database: DbAdapter): Promise<void> {
     )
   `);
 
+  // Bảng achievements — track huy hiệu user đã đạt được. Mỗi user 1 record / badge.
+  await database.exec(`
+    CREATE TABLE IF NOT EXISTS user_achievements (
+      id BIGSERIAL PRIMARY KEY,
+      user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      badge_code TEXT NOT NULL,
+      earned_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(user_id, badge_code)
+    )
+  `);
+
   // Indexes — all idempotent
   await database.exec("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
@@ -359,6 +370,7 @@ async function initSchema(database: DbAdapter): Promise<void> {
   await database.exec("CREATE INDEX IF NOT EXISTS idx_backup_codes_user ON totp_backup_codes(user_id)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_known_devices_user ON known_devices(user_id)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_referrals_referrer ON referrals(referrer_user_id)");
+  await database.exec("CREATE INDEX IF NOT EXISTS idx_achievements_user ON user_achievements(user_id)");
 
   // Seed default admin
   const adminExists = await database.get("SELECT id FROM users WHERE username = 'admin'", []);

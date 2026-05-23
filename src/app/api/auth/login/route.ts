@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { loginUser, logAudit } from "@/lib/db";
 import { sendNewDeviceAlertEmail } from "@/lib/email";
 import { notifyAdminLoginNewDevice } from "@/lib/telegram";
+import { grantBadge } from "@/lib/achievements";
 import { getRateLimitKey, rateLimit } from "@/lib/rate-limit";
 import { CAPTCHA_THRESHOLD, computeFingerprint } from "@/lib/security";
 import { getClientIp, verifyTurnstile } from "@/lib/turnstile";
@@ -141,6 +142,11 @@ export async function POST(request: NextRequest) {
       ip: ip ?? null,
       userAgent: userAgent ?? null,
     });
+  }
+
+  // Grant badge "first_login" — idempotent. Chỉ earn lần đầu, các lần login sau no-op.
+  if (result.user) {
+    void grantBadge(result.user.id, "first_login");
   }
 
   return response;

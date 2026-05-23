@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserByToken, getDb, createNotification } from "@/lib/db";
+import { grantBadge } from "@/lib/achievements";
 
 const GOAFFILIATE_CHECK_COMMISSION_URL = "https://goaffiliate.online/api/check-commission";
 const BROWSER_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
@@ -185,6 +186,8 @@ export async function POST(request: NextRequest) {
           [user.id, ids.shopId, ids.itemId, product.name, product.price, product.commission, product.commissionRate, product.cashback, affiliateLink]
         );
         await createNotification(user.id, "Tạo link thành công", `Link hoàn tiền cho "${product.name}" đã được tạo. Cashback dự kiến: ${product.cashback.toLocaleString("vi-VN")}đ`, "link");
+        // Grant badge "first_link" — idempotent, chỉ earn lần đầu.
+        void grantBadge(user.id, "first_link");
       } catch (e) {
         console.error("[Affiliate] Failed to save link:", e);
       }

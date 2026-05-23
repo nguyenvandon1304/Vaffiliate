@@ -33,6 +33,16 @@ interface RateInfo {
 
 interface User { id: number; username: string; display_name: string | null; }
 
+interface Badge {
+  code: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  earned: boolean;
+  earned_at: string | null;
+}
+
 function formatVND(n: number) { return (n || 0).toLocaleString("vi-VN") + "đ"; }
 function formatDate(s: string) {
   if (!s) return "—";
@@ -46,6 +56,7 @@ export default function ReferralPage() {
   const [user, setUser] = useState<User | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [rate, setRate] = useState<RateInfo | null>(null);
+  const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
   const [showQr, setShowQr] = useState(false);
 
@@ -53,10 +64,13 @@ export default function ReferralPage() {
     Promise.all([
       fetch("/api/auth/me").then(r => r.json()),
       fetch("/api/referrals").then(r => r.json()),
-    ]).then(([me, ref]) => {
+      // sync=1 → backend tự catch up badge cũ rồi mới trả về danh sách.
+      fetch("/api/achievements?sync=1").then(r => r.json()),
+    ]).then(([me, ref, ach]) => {
       if (!me.success) { router.push("/"); return; }
       setUser(me.user);
       if (ref.success) { setStats(ref.stats); setRate(ref.rate); }
+      if (ach.success) setBadges(ach.badges);
       setLoading(false);
     });
   }, [router]);
@@ -304,6 +318,43 @@ export default function ReferralPage() {
                 <span className="font-bold text-orange-600 dark:text-orange-400">{formatVND(stats.totalBonus)}</span>
               </div>
             )}
+          </div>
+        </section>
+
+        {/* Thành tích / Achievements */}
+        <section>
+          <h2 className="flex items-center gap-2 text-base font-bold text-gray-800 dark:text-zinc-100 mb-3 px-1">
+            <span className="text-xl">🏅</span>
+            <span>Thành Tích</span>
+            <span className="ml-auto text-xs font-medium text-gray-500 dark:text-zinc-400">
+              {badges.filter((b) => b.earned).length} / {badges.length}
+            </span>
+          </h2>
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm p-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {badges.map((b) => (
+                <div
+                  key={b.code}
+                  title={b.earned ? `${b.name} — ${b.description}` : `🔒 ${b.name}: ${b.description}`}
+                  className={`relative aspect-square rounded-xl flex flex-col items-center justify-center p-2 transition-all ${
+                    b.earned
+                      ? "bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-500/15 dark:to-orange-500/10 border-2 border-amber-200 dark:border-amber-500/30 shadow-sm hover:shadow-md hover:scale-105 cursor-help"
+                      : "bg-gray-50 dark:bg-zinc-800/40 border border-dashed border-gray-200 dark:border-zinc-700 grayscale opacity-50 cursor-not-allowed"
+                  }`}
+                >
+                  <div className="text-3xl mb-1">{b.earned ? b.icon : "🔒"}</div>
+                  <div className="text-[10px] font-bold text-center text-gray-700 dark:text-zinc-200 leading-tight">
+                    {b.name}
+                  </div>
+                  {b.earned && b.earned_at && (
+                    <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                  )}
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 dark:text-zinc-500 mt-4 text-center">
+              💡 Hoàn thành các thử thách để mở khoá huy hiệu mới
+            </p>
           </div>
         </section>
       </main>

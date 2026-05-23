@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   getAllWithdrawalsPaged,
+  getDb,
   logAudit,
   updateWithdrawalStatus,
   type WithdrawalListFilter,
 } from "@/lib/db";
+import { grantBadge } from "@/lib/achievements";
 import { requireAdmin } from "@/lib/auth";
 import { getClientIp } from "@/lib/turnstile";
 
@@ -57,6 +59,20 @@ export async function PATCH(request: NextRequest) {
     userAgent: request.headers.get("user-agent"),
     detail: note ? `note=${note}` : null,
   });
+
+  // Grant badge "first_withdraw" cho user khi withdrawal được approve.
+  if (status === "approved") {
+    try {
+      const db = await getDb();
+      const wd = await db.get(
+        "SELECT user_id FROM withdrawals WHERE id = ?",
+        [id],
+      );
+      if (wd) void grantBadge(Number(wd.user_id), "first_withdraw");
+    } catch (e) {
+      console.warn("[withdraw] grant badge failed:", e);
+    }
+  }
 
   return NextResponse.json(result);
 }
