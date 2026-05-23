@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createNotification, createWithdrawRequest, getSetting } from "@/lib/db";
+import { createNotification, createWithdrawRequest, getSetting, getDb } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
+import { notifyWithdrawRequest } from "@/lib/telegram";
 
 export async function POST(request: NextRequest) {
   const auth = await requireUser(request);
@@ -33,6 +34,27 @@ export async function POST(request: NextRequest) {
   }
 
   await createNotification(auth.user.id, "Yêu cầu rút tiền", `Bạn đã gửi yêu cầu rút ${amount.toLocaleString("vi-VN")}đ. Đang xử lý...`, "withdraw");
+
+  // Telegram alert cho admin — fire-and-forget. Lookup bank info để hiện đầy đủ.
+  void (async () => {
+    try {
+      const db = await getDb();
+      const bank = await db.get(
+        "SELECT bank_name, account_number FROM bank_accounts WHERE id = ?",
+        [bank_account_id],
+      );
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
+      await notifyWithdrawRequest({
+        username: auth.user.username,
+        amount,
+        bankName: (bank?.bank_name as string) || "?",
+        accountNumber: (bank?.account_number as string) || "?",
+        baseUrl,
+      });
+    } catch (e) {
+      console.warn("[withdraw] telegram notify failed:", e);
+    }
+  })();
 
   return NextResponse.json({ success: true, message: "Yêu cầu rút tiền đã được gửi" });
 }

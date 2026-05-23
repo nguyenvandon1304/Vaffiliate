@@ -3,6 +3,7 @@ import { addImportHistory, importOrders, logAudit } from "@/lib/db";
 import type { ImportOrderItem } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { getClientIp } from "@/lib/turnstile";
+import { notifyCustom } from "@/lib/telegram";
 
 export async function POST(request: NextRequest) {
   const auth = await requireAdmin(request);
@@ -31,6 +32,17 @@ export async function POST(request: NextRequest) {
       userAgent: request.headers.get("user-agent"),
       detail: `total=${result.total}, matched=${result.matched}, updated=${result.updated}, dup=${result.duplicated}, unmatched=${result.unmatched}`,
     });
+
+    // Telegram summary cho admin sau khi import — fire-and-forget.
+    void notifyCustom(
+      "Import CSV hoàn tất",
+      `Tổng: ${result.total} đơn\n` +
+      `✅ Match mới: ${result.matched}\n` +
+      `🔄 Cập nhật: ${result.updated}\n` +
+      `⏭️ Trùng: ${result.duplicated}\n` +
+      `❓ Không match: ${result.unmatched}`,
+    );
+
     return NextResponse.json({ success: true, result });
   } catch (err) {
     console.error("[ImportOrders] Error:", err);

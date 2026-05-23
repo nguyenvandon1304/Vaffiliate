@@ -8,6 +8,7 @@ import {
   logAudit,
 } from "@/lib/db";
 import { sendEmailVerification } from "@/lib/email";
+import { notifyNewUser } from "@/lib/telegram";
 import { getClientIp, verifyTurnstile } from "@/lib/turnstile";
 import { getRateLimitKey, rateLimit } from "@/lib/rate-limit";
 import { checkPwnedPassword, passwordStrength } from "@/lib/security";
@@ -102,6 +103,9 @@ export async function POST(request: NextRequest) {
 
   if (result.user) {
     await createNotification(result.user.id, "Chào mừng bạn!", "Chào mừng bạn đến với V-Affiliate! Hãy xác thực email để bắt đầu.", "welcome");
+
+    // Telegram alert cho admin — fire-and-forget. Skip nếu env chưa set.
+    void notifyNewUser({ username: result.user.username, email });
 
     // Gắn quan hệ giới thiệu nếu user đăng ký với ref hợp lệ.
     // Chỉ silent-fail (log lỗi) — không phải dữ liệu critical.

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { loginUser, logAudit } from "@/lib/db";
 import { sendNewDeviceAlertEmail } from "@/lib/email";
+import { notifyAdminLoginNewDevice } from "@/lib/telegram";
 import { getRateLimitKey, rateLimit } from "@/lib/rate-limit";
 import { CAPTCHA_THRESHOLD, computeFingerprint } from "@/lib/security";
 import { getClientIp, verifyTurnstile } from "@/lib/turnstile";
@@ -129,6 +130,16 @@ export async function POST(request: NextRequest) {
       userId: result.user.id,
       ip,
       userAgent,
+    });
+  }
+
+  // Telegram alert cho admin login từ thiết bị lạ — security critical.
+  // Chỉ alert khi role=admin để admin biết tài khoản admin có hoạt động bất thường.
+  if (result.isNewDevice && result.user?.role === "admin") {
+    void notifyAdminLoginNewDevice({
+      username: result.user.username,
+      ip: ip ?? null,
+      userAgent: userAgent ?? null,
     });
   }
 
