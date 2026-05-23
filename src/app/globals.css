@@ -1,0 +1,338 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-caff-orange: #f97316;
+  --color-caff-orange-dark: #ea580c;
+  --color-caff-green: #22c55e;
+  --color-caff-bg-start: #fef3c7;
+  --color-caff-bg-end: #fff7ed;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: #fffbf5;
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary: #f97316;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f5f4;
+  --secondary-foreground: #1a1a1a;
+  --muted: #f5f5f4;
+  --muted-foreground: #737373;
+  --accent: #fff7ed;
+  --accent-foreground: #1a1a1a;
+  --destructive: #ef4444;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #f97316;
+  --chart-1: #f97316;
+  --chart-2: #22c55e;
+  --chart-3: #3b82f6;
+  --chart-4: #a855f7;
+  --chart-5: #ec4899;
+  --radius: 0.75rem;
+  --sidebar: #fafaf9;
+  --sidebar-foreground: #1a1a1a;
+  --sidebar-primary: #f97316;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #fff7ed;
+  --sidebar-accent-foreground: #1a1a1a;
+  --sidebar-border: #e5e5e5;
+  --sidebar-ring: #f97316;
+}
+
+.dark {
+  --background: #0b0b0c;
+  --foreground: #fafafa;
+  --card: #171718;
+  --card-foreground: #fafafa;
+  --popover: #171718;
+  --popover-foreground: #fafafa;
+  --primary: #fb923c;
+  --primary-foreground: #1a1a1a;
+  --secondary: #27272a;
+  --secondary-foreground: #fafafa;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --accent: #2a1810;
+  --accent-foreground: #fafafa;
+  --destructive: #f87171;
+  --border: #2a2a2d;
+  --input: #2a2a2d;
+  --ring: #fb923c;
+  --chart-1: #fb923c;
+  --chart-2: #34d399;
+  --chart-3: #60a5fa;
+  --chart-4: #c084fc;
+  --chart-5: #f472b6;
+  --sidebar: #141416;
+  --sidebar-foreground: #fafafa;
+  --sidebar-primary: #fb923c;
+  --sidebar-primary-foreground: #1a1a1a;
+  --sidebar-accent: #2a1810;
+  --sidebar-accent-foreground: #fafafa;
+  --sidebar-border: #2a2a2d;
+  --sidebar-ring: #fb923c;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+/*
+ * Dark mode overrides toàn cục cho các trang chưa được refactor sang token.
+ * Dùng :where() để giữ specificity = 0, nên bất kỳ class `dark:*` cụ thể
+ * trên element nào sẽ luôn thắng các quy tắc bên dưới.
+ */
+@layer utilities {
+  :where(.dark) {
+    color-scheme: dark;
+  }
+
+  /* Surfaces */
+  :where(.dark) .bg-white { background-color: #18181b; }
+  :where(.dark) .bg-gray-50 { background-color: #0f0f12; }
+  :where(.dark) .bg-gray-100 { background-color: #1f1f23; }
+  :where(.dark) .bg-gray-200 { background-color: #27272a; }
+  :where(.dark) .bg-gray-700 { background-color: #1a1a1d; }
+  :where(.dark) .bg-gray-800 { background-color: #131316; }
+  :where(.dark) .bg-gray-900 { background-color: #09090b; }
+
+  /* Tints (giữ tone, nhưng chìm hơn) */
+  :where(.dark) .bg-orange-50 { background-color: rgb(249 115 22 / 0.10); }
+  :where(.dark) .bg-orange-100 { background-color: rgb(249 115 22 / 0.18); }
+  :where(.dark) .bg-amber-50 { background-color: rgb(245 158 11 / 0.10); }
+  :where(.dark) .bg-amber-100 { background-color: rgb(245 158 11 / 0.18); }
+  :where(.dark) .bg-blue-50 { background-color: rgb(59 130 246 / 0.10); }
+  :where(.dark) .bg-blue-100 { background-color: rgb(59 130 246 / 0.18); }
+  :where(.dark) .bg-green-50 { background-color: rgb(34 197 94 / 0.10); }
+  :where(.dark) .bg-green-100 { background-color: rgb(34 197 94 / 0.18); }
+  :where(.dark) .bg-emerald-50 { background-color: rgb(16 185 129 / 0.10); }
+  :where(.dark) .bg-red-50 { background-color: rgb(239 68 68 / 0.10); }
+  :where(.dark) .bg-red-100 { background-color: rgb(239 68 68 / 0.18); }
+  :where(.dark) .bg-yellow-50 { background-color: rgb(234 179 8 / 0.10); }
+  :where(.dark) .bg-yellow-100 { background-color: rgb(234 179 8 / 0.18); }
+  :where(.dark) .bg-purple-50 { background-color: rgb(168 85 247 / 0.10); }
+  :where(.dark) .bg-purple-100 { background-color: rgb(168 85 247 / 0.18); }
+  :where(.dark) .bg-pink-50 { background-color: rgb(236 72 153 / 0.10); }
+  :where(.dark) .bg-pink-100 { background-color: rgb(236 72 153 / 0.18); }
+  :where(.dark) .bg-teal-50 { background-color: rgb(20 184 166 / 0.10); }
+
+  /* Backgrounds with alpha (orange-50/40 v.v.) */
+  :where(.dark) [class*="bg-orange-50/"] { background-color: rgb(249 115 22 / 0.10); }
+  :where(.dark) [class*="bg-orange-100/"] { background-color: rgb(249 115 22 / 0.18); }
+
+  /* Surfaces có độ mờ — header sticky, overlay nhẹ … */
+  :where(.dark) [class*="bg-white/"] { background-color: rgb(24 24 27 / 0.85); }
+  :where(.dark) [class*="bg-gray-50/"] { background-color: rgb(15 15 18 / 0.85); }
+  :where(.dark) [class*="bg-gray-100/"] { background-color: rgb(31 31 35 / 0.85); }
+  :where(.dark) [class*="bg-gray-200/"] { background-color: rgb(39 39 42 / 0.85); }
+
+  /* Text colors */
+  :where(.dark) .text-gray-900 { color: #fafafa; }
+  :where(.dark) .text-gray-800 { color: #f4f4f5; }
+  :where(.dark) .text-gray-700 { color: #e4e4e7; }
+  :where(.dark) .text-gray-600 { color: #d4d4d8; }
+  :where(.dark) .text-gray-500 { color: #a1a1aa; }
+  :where(.dark) .text-gray-400 { color: #71717a; }
+  :where(.dark) .text-gray-300 { color: #52525b; }
+
+  /* Borders */
+  :where(.dark) .border-gray-100 { border-color: #1f1f23; }
+  :where(.dark) .border-gray-200 { border-color: #27272a; }
+  :where(.dark) .border-gray-300 { border-color: #3f3f46; }
+  :where(.dark) .border-gray-700 { border-color: #27272a; }
+  :where(.dark) .border-gray-800 { border-color: #18181b; }
+  :where(.dark) [class*="border-gray-100/"] { border-color: rgb(31 31 35 / 0.7); }
+  :where(.dark) [class*="border-gray-200/"] { border-color: rgb(39 39 42 / 0.7); }
+  :where(.dark) [class*="border-gray-300/"] { border-color: rgb(63 63 70 / 0.7); }
+  :where(.dark) .divide-gray-50 > :not([hidden]) ~ :not([hidden]) { border-color: #1f1f23; }
+  :where(.dark) .divide-gray-100 > :not([hidden]) ~ :not([hidden]) { border-color: #27272a; }
+
+  /* Borders pastel cho card thông báo / quy trình */
+  :where(.dark) .border-orange-200 { border-color: rgb(249 115 22 / 0.35); }
+  :where(.dark) .border-amber-200 { border-color: rgb(245 158 11 / 0.35); }
+  :where(.dark) .border-blue-200 { border-color: rgb(59 130 246 / 0.35); }
+  :where(.dark) .border-green-200 { border-color: rgb(34 197 94 / 0.35); }
+  :where(.dark) .border-emerald-200 { border-color: rgb(16 185 129 / 0.35); }
+  :where(.dark) .border-red-200 { border-color: rgb(239 68 68 / 0.35); }
+  :where(.dark) .border-yellow-200 { border-color: rgb(234 179 8 / 0.35); }
+  :where(.dark) .border-purple-200 { border-color: rgb(168 85 247 / 0.35); }
+  :where(.dark) .border-pink-200 { border-color: rgb(236 72 153 / 0.35); }
+
+  /* Hover states phổ biến */
+  :where(.dark) .hover\:bg-gray-50:hover { background-color: #1a1a1d; }
+  :where(.dark) .hover\:bg-gray-100:hover { background-color: #1f1f23; }
+  :where(.dark) .hover\:bg-gray-200:hover { background-color: #27272a; }
+  :where(.dark) .hover\:bg-orange-50:hover { background-color: rgb(249 115 22 / 0.15); }
+  :where(.dark) [class*="hover\\:bg-orange-50/"]:hover { background-color: rgb(249 115 22 / 0.12); }
+  :where(.dark) [class*="hover\\:bg-orange-50\\/"]:hover { background-color: rgb(249 115 22 / 0.12); }
+
+  /* Placeholder */
+  :where(.dark) .placeholder\:text-gray-300::placeholder { color: #52525b; }
+  :where(.dark) .placeholder-gray-500::placeholder { color: #71717a; }
+
+  /* Gradient: làm dịu lớp gradient cam-vàng nhạt đặc trưng */
+  :where(.dark) .from-orange-50\/40 { --tw-gradient-from: rgb(249 115 22 / 0.06) var(--tw-gradient-from-position); }
+  :where(.dark) .via-gray-50 { --tw-gradient-via: #0f0f12 var(--tw-gradient-via-position); }
+  :where(.dark) .to-gray-50 { --tw-gradient-to: #0f0f12 var(--tw-gradient-to-position); }
+  :where(.dark) .from-orange-50 { --tw-gradient-from: rgb(249 115 22 / 0.08) var(--tw-gradient-from-position); }
+  :where(.dark) .via-amber-50\/50 { --tw-gradient-via: rgb(245 158 11 / 0.04) var(--tw-gradient-via-position); }
+  :where(.dark) .to-white { --tw-gradient-to: #0b0b0c var(--tw-gradient-to-position); }
+}
+
+
+/* ─── Nav icon 3D animations ───
+ * Mỗi icon có một animation loop ngắn, chỉ chạy khi `data-active`/hover —
+ * idle thì đứng yên để không gây nhiễu. Tôn trọng prefers-reduced-motion.
+ */
+@keyframes nav-icon-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-1.5px); }
+}
+@keyframes nav-icon-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes nav-icon-tilt {
+  0%, 100% { transform: rotate(-6deg); }
+  50%      { transform: rotate(6deg); }
+}
+@keyframes nav-icon-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%      { opacity: 1;    transform: scale(1.08); }
+}
+@keyframes nav-icon-shimmer {
+  0%   { transform: translateX(-12px); opacity: 0; }
+  20%  { opacity: 0.85; }
+  60%  { transform: translateX(12px); opacity: 0.4; }
+  100% { transform: translateX(12px); opacity: 0; }
+}
+@keyframes nav-icon-shake {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  20%      { transform: translateX(-1px) rotate(-3deg); }
+  40%      { transform: translateX(1px)  rotate(3deg); }
+  60%      { transform: translateX(-1px) rotate(-2deg); }
+  80%      { transform: translateX(1px)  rotate(2deg); }
+}
+
+/* Wrapper button áp class này để cả viên "thở" nhẹ khi active */
+.nav-bubble[data-active="true"] {
+  animation: nav-icon-bob 2.4s ease-in-out infinite;
+}
+
+/* Glyph bên trong từng icon — chỉ chạy khi parent active hoặc hover */
+.nav-bubble[data-active="true"] [data-glyph="grid"]    { animation: nav-icon-pulse 1.6s ease-in-out infinite; transform-origin: 8px 8px; }
+.nav-bubble[data-active="true"] [data-glyph="link"]    { animation: nav-icon-tilt  2.0s ease-in-out infinite; transform-origin: 8px 8px; }
+.nav-bubble[data-active="true"] [data-glyph="clock"]   { transform-origin: 8px 8px; }
+.nav-bubble[data-active="true"] [data-glyph="clock-hand"] { animation: nav-icon-spin 4s linear infinite; transform-origin: 8px 8px; }
+.nav-bubble[data-active="true"] [data-glyph="orders"]  { animation: nav-icon-shake 1.6s ease-in-out infinite; transform-origin: 8px 8px; }
+.nav-bubble[data-active="true"] [data-glyph="wallet-shimmer"] { animation: nav-icon-shimmer 2.2s ease-in-out infinite; }
+
+/* Hover idle: chạy 1 lần, ngắn hơn */
+.nav-bubble:hover:not([data-active="true"]) [data-glyph="grid"]    { animation: nav-icon-pulse 1s ease-in-out 1; transform-origin: 8px 8px; }
+.nav-bubble:hover:not([data-active="true"]) [data-glyph="link"]    { animation: nav-icon-tilt  0.6s ease-in-out 1; transform-origin: 8px 8px; }
+.nav-bubble:hover:not([data-active="true"]) [data-glyph="clock-hand"] { animation: nav-icon-spin 1.2s linear 1; transform-origin: 8px 8px; }
+.nav-bubble:hover:not([data-active="true"]) [data-glyph="orders"]  { animation: nav-icon-shake 0.6s ease-in-out 1; transform-origin: 8px 8px; }
+.nav-bubble:hover:not([data-active="true"]) [data-glyph="wallet-shimmer"] { animation: nav-icon-shimmer 1.2s ease-in-out 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-bubble,
+  .nav-bubble * {
+    animation: none !important;
+  }
+}
+
+
+/* ─── 3D Logo ───
+ * Viên V-Affiliate "thở" nhẹ kèm dải shimmer quét sáng. Hover thì bay lên rõ
+ * hơn và shimmer tăng tốc.
+ */
+@keyframes logo-float {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50%      { transform: translateY(-2px) rotate(-2deg); }
+}
+@keyframes logo-shimmer {
+  0%   { transform: translateX(-15px) rotate(20deg); opacity: 0; }
+  10%  { opacity: 0.7; }
+  60%  { transform: translateX(45px) rotate(20deg); opacity: 0.4; }
+  100% { transform: translateX(50px) rotate(20deg); opacity: 0; }
+}
+
+.logo-3d {
+  animation: logo-float 4s ease-in-out infinite;
+  transition: transform 200ms ease;
+  will-change: transform;
+}
+.group\/logo:hover .logo-3d {
+  transform: translateY(-3px) scale(1.05);
+}
+.logo-3d-shimmer {
+  animation: logo-shimmer 3.5s ease-in-out infinite;
+  animation-delay: 1s;
+}
+.group\/logo:hover .logo-3d-shimmer {
+  animation-duration: 1.4s;
+  animation-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-3d,
+  .logo-3d-shimmer {
+    animation: none !important;
+  }
+}
