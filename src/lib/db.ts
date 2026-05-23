@@ -346,6 +346,18 @@ async function initSchema(database: DbAdapter): Promise<void> {
     )
   `);
 
+  // Lịch sử quay vòng — mỗi lần spin tạo 1 row. Dùng để check cooldown 24h.
+  await database.exec(`
+    CREATE TABLE IF NOT EXISTS spin_history (
+      id BIGSERIAL PRIMARY KEY,
+      user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      reward_amount BIGINT NOT NULL DEFAULT 0,
+      reward_label TEXT NOT NULL,
+      segment_index INTEGER NOT NULL,
+      spun_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
+
   // Indexes — all idempotent
   await database.exec("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
@@ -371,6 +383,7 @@ async function initSchema(database: DbAdapter): Promise<void> {
   await database.exec("CREATE INDEX IF NOT EXISTS idx_known_devices_user ON known_devices(user_id)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_referrals_referrer ON referrals(referrer_user_id)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_achievements_user ON user_achievements(user_id)");
+  await database.exec("CREATE INDEX IF NOT EXISTS idx_spin_user_time ON spin_history(user_id, spun_at DESC)");
 
   // Seed default admin
   const adminExists = await database.get("SELECT id FROM users WHERE username = 'admin'", []);
@@ -2555,6 +2568,9 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   cashback_base_percent: "50",
   referral_milestone_count: "50",
   referral_milestone_bonus_percent: "5",
+  // Mini-game vòng quay may mắn — admin bật/tắt + chỉnh cooldown.
+  spin_enabled: "1",
+  spin_cooldown_hours: "24",
 };
 
 export async function getSetting(key: string): Promise<string> {
