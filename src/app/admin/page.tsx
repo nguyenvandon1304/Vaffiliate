@@ -252,6 +252,9 @@ function AdminPageInner() {
           <a href="/admin/audit" className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white">
             <span>📜</span><span>Audit Log</span>
           </a>
+          <a href="/dashboard/security" className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white" title="Đổi mật khẩu / Bật 2FA cho tài khoản admin">
+            <span>🔐</span><span>Bảo mật cá nhân</span>
+          </a>
         </nav>
         <div className="p-3 border-t border-gray-200 dark:border-gray-700 flex items-center gap-2">
           <ThemeToggleButton />
