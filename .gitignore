@@ -48,7 +48,7 @@ next-env.d.ts
 # Local temp files
 temp/
 
-# SQLite database
+# Local DB artifacts (legacy SQLite, no longer used after Supabase migration)
 *.db
 *.db-shm
 *.db-wal

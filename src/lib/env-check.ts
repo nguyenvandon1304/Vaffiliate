@@ -36,7 +36,7 @@ export function warnMissingEnv(): void {
 
   // Encryption key — bắt buộc cho TOTP / sensitive data
   if (!process.env.APP_ENCRYPTION_KEY) {
-    critical.push("APP_ENCRYPTION_KEY chưa cấu hình → TOTP secret được encrypt bằng key derived từ DB_PATH (kém an toàn). Sinh key mới: openssl rand -hex 32");
+    critical.push("APP_ENCRYPTION_KEY chưa cấu hình → TOTP secret được encrypt bằng key fallback yếu. Sinh key mới: openssl rand -hex 32");
   } else {
     const k = process.env.APP_ENCRYPTION_KEY;
     const okHex = /^[0-9a-fA-F]{64}$/.test(k);
@@ -50,6 +50,11 @@ export function warnMissingEnv(): void {
   // Admin seed password
   if (!process.env.ADMIN_SEED_PASSWORD) {
     issues.push("ADMIN_SEED_PASSWORD chưa cấu hình → admin seed dùng 'admin123' (đổi ngay sau khi boot lần đầu).");
+  }
+
+  // DATABASE_URL — bắt buộc cho Supabase Postgres
+  if (!process.env.DATABASE_URL) {
+    critical.push("DATABASE_URL chưa cấu hình → app không kết nối được DB. Lấy URL Pooler tại Supabase → Project Settings → Database → Connection pooling.");
   }
 
   // Allowed origins (cho CSRF check trong middleware)

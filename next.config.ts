@@ -70,10 +70,11 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // Vercel serverless — KHÔNG dùng standalone (chỉ cho Docker/VPS).
+  // output: "standalone",
   allowedDevOrigins: ["127.0.0.1", "localhost"],
-  // node:sqlite cần giữ nguyên ở server runtime (không bundle).
-  serverExternalPackages: ["node:sqlite"],
+  // postgres-js phải giữ ngoài bundle (dùng Node Buffer + net APIs).
+  serverExternalPackages: ["postgres"],
   // React strict mode: phát hiện side-effect bất thường ở dev.
   reactStrictMode: true,
   // Production source maps tắt để giảm size build.

@@ -73,8 +73,8 @@ export async function POST(request: NextRequest) {
     const { decryptSecret, verifyTotpCode } = await import("@/lib/db");
     const { getDb } = await import("@/lib/db");
     const db = await getDb();
-    const row = db.prepare("SELECT totp_secret FROM users WHERE id = ?").get(auth.user.id) as { totp_secret: string } | undefined;
-    const secret = row?.totp_secret ? decryptSecret(row.totp_secret) : null;
+    const row = await db.get("SELECT totp_secret FROM users WHERE id = ?", [auth.user.id]);
+    const secret = row?.totp_secret ? decryptSecret(row.totp_secret as string) : null;
     if (!secret || !verifyTotpCode(secret, code)) {
       return NextResponse.json({ success: false, error: "Mã xác thực không đúng" }, { status: 400 });
     }

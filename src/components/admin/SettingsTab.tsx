@@ -180,10 +180,10 @@ export function SettingsTab() {
             <DbCount label="DB size" value={formatBytes(stats.db_size_bytes)} />
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 font-mono break-all">
-            File: {stats.db_path}
+            Database: {stats.db_path === "supabase" ? "Supabase Postgres" : stats.db_path}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            💡 Backup DB: chạy <code className="text-orange-600 dark:text-orange-400">bash scripts/backup-db.sh</code> trên server.
+            💡 Backup tự động: Supabase Free tier giữ daily backup 7 ngày. Pro tier: Point-in-time recovery.
           </p>
 
           <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">

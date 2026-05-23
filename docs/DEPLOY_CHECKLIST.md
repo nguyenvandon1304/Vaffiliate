@@ -1,40 +1,46 @@
-# Checklist deploy V-Affiliate
+# Checklist deploy V-Affiliate (Vercel + Supabase)
 
 ## 🔐 Bảo mật — BẮT BUỘC trước deploy
 
-### 1. Env vars
-- [ ] `APP_ENCRYPTION_KEY` — sinh bằng `openssl rand -hex 32` (32 byte). **Backup riêng** ở chỗ khác DB. Mất key = mất tất cả TOTP secret.
-- [ ] `ADMIN_SEED_PASSWORD` — mật khẩu admin lần đầu. Mạnh, tối thiểu 16 ký tự ngẫu nhiên. Đăng nhập lần đầu xong **đổi ngay** trong /dashboard/security.
-- [ ] `NEXT_PUBLIC_BASE_URL` — domain HTTPS production thật.
-- [ ] `ALLOWED_ORIGINS` — nếu có nhiều domain (apex + www), liệt kê đầy đủ.
-- [ ] `TURNSTILE_SECRET_KEY` + `NEXT_PUBLIC_TURNSTILE_SITE_KEY` — keys production cho domain thật.
-- [ ] `SMTP_USER` / `SMTP_PASS` — App Password Gmail (KHÔNG dùng password thật).
-- [ ] `DISABLE_RATE_LIMIT` và `DISABLE_TURNSTILE` — **KHÔNG bật**, để trống.
+### 1. Env vars (Vercel Dashboard → Project Settings → Environment Variables)
+- [ ] `DATABASE_URL` — Transaction Pooler URL từ Supabase (port 6543, có `postgres.<ref>` trong username)
+- [ ] `APP_ENCRYPTION_KEY` — sinh `openssl rand -hex 32`. **Backup riêng** ở chỗ khác. Mất key = mất tất cả TOTP secret.
+- [ ] `ADMIN_SEED_PASSWORD` — mật khẩu admin lần đầu (≥16 ký tự ngẫu nhiên). Đăng nhập xong **đổi ngay**.
+- [ ] `NEXT_PUBLIC_BASE_URL` — domain HTTPS production (vd. `https://vaffiliate.vercel.app`)
+- [ ] `ALLOWED_ORIGINS` — nếu có nhiều domain (apex + www), liệt kê đầy đủ
+- [ ] `TURNSTILE_SECRET_KEY` + `NEXT_PUBLIC_TURNSTILE_SITE_KEY` — keys production cho domain thật
+- [ ] `SMTP_USER` / `SMTP_PASS` — App Password Gmail
+- [ ] `GOAFFILIATE_API_KEY` — key thuê GoAffiliate cho lookup sản phẩm Shopee
+- [ ] `SHOPEE_AFFILIATE_ID` — ID Shopee Affiliate của bạn
+- [ ] `DISABLE_RATE_LIMIT` và `DISABLE_TURNSTILE` — **KHÔNG bật**, để trống
 
 ### 2. Tài khoản admin
-- [ ] Đăng nhập lần đầu, đổi password admin sang chuỗi mạnh.
-- [ ] Setup TOTP 2FA cho admin tại `/dashboard/security`.
-- [ ] Vào `/admin?tab=settings` → bật `Bắt buộc 2FA cho admin`.
+- [ ] Đăng nhập lần đầu → `/dashboard/security` → đổi password admin sang chuỗi mạnh
+- [ ] Setup TOTP 2FA cho admin
+- [ ] Vào `/admin?tab=settings` → bật `Bắt buộc 2FA cho admin`
 
 ### 3. Cấu hình hệ thống
-- [ ] Đặt `min_withdraw_amount` phù hợp ở `/admin?tab=settings`.
-- [ ] Test gửi mail: tạo user mới và verify email — link click được không.
-- [ ] Test Turnstile: trên trang login phải hiện widget Cloudflare.
+- [ ] Đặt `min_withdraw_amount` phù hợp ở `/admin?tab=settings`
+- [ ] Test gửi mail: tạo user mới → email verify click được không
+- [ ] Test Turnstile: trang login phải hiện widget Cloudflare
 
 ### 4. Backup
-- [ ] Lên cron auto chạy `bash scripts/backup-db.sh` hằng ngày, lưu off-site.
-- [ ] Test restore: copy `caffiliate.backup.db` → `caffiliate.db` và boot lại — vào được.
+- [x] Supabase Free tier: tự backup hằng ngày, giữ 7 ngày (built-in)
+- [ ] Supabase Pro tier (nếu nâng cấp): bật Point-in-time recovery
 
 ### 5. Cleanup định kỳ
-Lên cron Linux (vd. `crontab -e`):
-```
-# Cleanup hằng đêm 3h sáng
-0 3 * * * curl -X POST -H "Cookie: session_token=<admin_token>" http://localhost:3000/api/admin/cleanup -d '{"vacuum":false}'
+Vercel không có cron miễn phí. Có 3 cách:
+1. **GitHub Actions cron** — file `.github/workflows/cleanup.yml` chạy `curl /api/admin/cleanup`
+2. **Cron-job.org** — service free, set call hằng đêm
+3. **Vercel Pro Cron** — $20/tháng, tích hợp sẵn
 
-# VACUUM hằng tuần (chủ nhật 4h sáng)
-0 4 * * 0 curl -X POST -H "Cookie: session_token=<admin_token>" http://localhost:3000/api/admin/cleanup -d '{"vacuum":true}'
+```bash
+# Manual cleanup (gọi từ admin UI hoặc curl)
+curl -X POST https://your-domain.vercel.app/api/admin/cleanup \
+  -H "Cookie: session_token=<admin_session>" \
+  -H "Content-Type: application/json" \
+  -d '{"vacuum":false}'
 ```
-Hoặc gọi từ admin UI (nút Cleanup trong tab Cấu hình).
 
 ## 🛡️ Bảo mật đã có sẵn (không cần làm gì)
 
@@ -43,7 +49,7 @@ Hoặc gọi từ admin UI (nút Cleanup trong tab Cấu hình).
 - ✅ TOTP secret encrypt AES-256-GCM
 - ✅ Cookie httpOnly + sameSite=lax + secure=true ở prod
 - ✅ Rate limit per-IP (login 10/15min, register 5/h, forgot 5/h)
-- ✅ Lock account theo username sau 10 fail (15 phút) — chống IP-rotation
+- ✅ Lock account theo username sau 10 fail (15 phút)
 - ✅ Withdraw PIN khoá sau 5 fail (15 phút)
 - ✅ Generic error message (chống user enumeration)
 - ✅ Timing-safe compare cho mọi password
@@ -52,53 +58,55 @@ Hoặc gọi từ admin UI (nút Cleanup trong tab Cấu hình).
 - ✅ CSP siết chặt + COOP same-origin + Permissions-Policy
 - ✅ X-Frame-Options SAMEORIGIN + frame-ancestors
 - ✅ HSTS 2 năm + preload (production HTTPS)
-- ✅ X-Content-Type-Options nosniff
 - ✅ Origin check ở proxy cho mọi POST/PUT/PATCH/DELETE
 - ✅ Body size limit 256KB ở proxy + 1MB ở route handler
-- ✅ Audit log mọi action nhạy cảm (login fail, role change, withdraw, broadcast, cleanup, reset password admin…)
-- ✅ Session sliding 7 ngày + hard cap 30 ngày + IP/UA tracking
-- ✅ Force logout khi đổi password / admin force logout
+- ✅ Audit log mọi action nhạy cảm
+- ✅ Session sliding 7 ngày + hard cap 30 ngày
+- ✅ Force logout khi đổi password
 - ✅ Admin không thể tự khoá / hạ cấp / reset password chính mình
 - ✅ Không thể demote admin cuối cùng
+- ✅ RLS enable trên Supabase (deep defense — block accidental anon queries)
 
-## 🚀 Deploy
+## 🚀 Deploy Vercel CLI
 
-### Docker Compose
 ```bash
-# 1. Copy env
-cp .env.example .env.local
-# 2. Sửa các giá trị bắt buộc (xem checklist ở trên)
-nano .env.local
-# 3. Build + run
-docker compose up -d app
-# 4. Theo dõi log
-docker compose logs -f app
+# 1. Cài Vercel CLI
+npm install -g vercel
+
+# 2. Login
+vercel login
+
+# 3. Link project (lần đầu)
+vercel link
+
+# 4. Set env vars (lặp lại cho mỗi key)
+vercel env add DATABASE_URL production
+vercel env add APP_ENCRYPTION_KEY production
+# ... (tất cả env trong checklist mục 1)
+
+# 5. Deploy preview
+vercel
+
+# 6. Deploy production
+vercel --prod
 ```
 
-### Vercel
-- Đẩy code lên repo Git
-- Vào Vercel → Import project → set tất cả env vars
-- ⚠️ Vercel multi-region: rate limit in-memory không share giữa các instance.
-  Khuyến nghị move sang Redis / Upstash nếu trafficr cao
-- ⚠️ Vercel serverless: file-based SQLite không persist giữa cold starts.
-  Khuyến nghị dùng Vercel Postgres / Turso
-
-### Self-host (VPS)
-- Cài Node ≥ 24 (vì dùng `node:sqlite`)
-- `npm ci --omit=dev && npm run build`
-- Chạy bằng `pm2 start npm --name v-affiliate -- start`
-- Đặt nginx reverse proxy với Let's Encrypt SSL
-- Bật firewall, chỉ mở port 80/443
+Hoặc dùng UI:
+1. Push code lên GitHub
+2. Vercel Dashboard → New Project → Import từ GitHub
+3. Set tất cả env vars
+4. Deploy
 
 ## 🚨 Incident response
 
 Nếu nghi ngờ bị xâm nhập:
 1. Vào `/admin?tab=settings` → bật **Maintenance mode**
 2. Chạy `/api/admin/cleanup` → xoá tất cả session
-3. Reset password tất cả admin (qua DB hoặc reset từ user khác)
+3. Reset password tất cả admin
 4. Soát `/admin/audit` xem hành vi bất thường
-5. Backup snapshot hiện tại trước khi điều tra
+5. Backup snapshot Supabase (Dashboard → Backups → Download)
 6. Sau khi fix → đổi `APP_ENCRYPTION_KEY` (yêu cầu user setup lại 2FA)
+7. Reset password DB Supabase → cập nhật `DATABASE_URL` trong Vercel env
 
 ## 📋 Sau khi deploy
 
@@ -111,3 +119,4 @@ Nếu nghi ngờ bị xâm nhập:
 - [ ] Kiểm tra mobile responsive (Lighthouse)
 - [ ] Test 404/500 page
 - [ ] Set Sentry hoặc tương tự để monitor lỗi production
+- [ ] Set Cron cleanup (GitHub Actions / cron-job.org)
