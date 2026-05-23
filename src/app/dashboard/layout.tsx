@@ -7,8 +7,9 @@ import { DashboardShell } from "@/components/DashboardShell";
  * Layout server-side cho `/dashboard/*`.
  *
  *   - Không có session → redirect "/"
- *   - Admin login → redirect "/admin" (admin có panel riêng)
  *   - User thường → render bình thường
+ *   - Admin → cũng được vào (để dùng /dashboard/security đổi password + 2FA).
+ *     Trang `/dashboard` chính đã tự xử lý: redirect admin → /admin từ client side.
  */
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();

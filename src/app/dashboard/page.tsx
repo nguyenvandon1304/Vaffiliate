@@ -262,6 +262,12 @@ function DashboardContent() {
         const data = await res.json();
         if (cancelled) return;
         if (data.success) {
+          // Admin lạc vào /dashboard → bounce về panel admin (giữ lại /dashboard/security
+          // cho admin đổi password + 2FA, xử lý ở các trang con).
+          if (data.user?.role === "admin") {
+            router.replace("/admin");
+            return;
+          }
           setUser(data.user);
           setStats(data.stats);
           setOrders(data.orders);

@@ -34,6 +34,10 @@ export default function SecurityPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState<SessionItem[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Đường về dashboard chính tuỳ role: admin → /admin, user → /dashboard
+  const dashboardPath = isAdmin ? "/admin" : "/dashboard";
 
   // Change password
   const [currentPassword, setCurrentPassword] = useState("");
@@ -63,8 +67,21 @@ export default function SecurityPage() {
     }
   }
 
+  // Lấy role để biết nút quay lại trỏ về đâu (admin → /admin, user → /dashboard).
+  async function loadRole() {
+    try {
+      const res = await fetch("/api/auth/me");
+      const data = await res.json();
+      if (data.success) setIsAdmin(data.user?.role === "admin");
+    } catch {
+      /* ignore — fallback dashboardPath = /dashboard */
+    }
+  }
+
   useEffect(() => {
     void loadSessions();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- async setState sau await
+    void loadRole();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- chỉ chạy khi mount
   }, []);
 
@@ -151,17 +168,17 @@ export default function SecurityPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950">
       <header className="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-30">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <button onClick={() => router.push("/dashboard")} className="cursor-pointer" title="Về trang chủ">
+          <button onClick={() => router.push(dashboardPath)} className="cursor-pointer" title="Về trang chủ">
             <CaffiliateLogo />
           </button>
           <div className="flex items-center gap-2">
             <ThemeToggleButton />
             <button
-              onClick={() => router.push("/dashboard")}
+              onClick={() => router.push(dashboardPath)}
               className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-orange-500 dark:text-zinc-400 font-medium transition-colors"
             >
               <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
-              Dashboard
+              {isAdmin ? "Admin" : "Dashboard"}
             </button>
           </div>
         </div>
