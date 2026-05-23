@@ -378,10 +378,12 @@ export function LoginCard() {
               <MicIcon className="w-5 h-5" />
             </a>
             <a
-              href="mailto:nguyenvandon1304@gmail.com"
+              href="https://mail.google.com/mail/?view=cm&fs=1&to=nguyenvandon1304@gmail.com&su=H%E1%BB%97%20tr%E1%BB%A3%20V-Affiliate"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-gray-400 dark:text-zinc-500 hover:text-orange-500 transition-colors"
               aria-label="Email liên hệ"
-              title="Email: nguyenvandon1304@gmail.com"
+              title="Gửi email cho nguyenvandon1304@gmail.com"
             >
               <MailIcon className="w-5 h-5" />
             </a>
