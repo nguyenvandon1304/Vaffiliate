@@ -98,7 +98,7 @@ export function OnboardingTour({ onComplete }: { onComplete?: () => void }) {
       aria-labelledby="onboarding-title"
     >
       <div
-        className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto overflow-x-hidden transition-all duration-300 ${
+        className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto overflow-x-hidden transition-all duration-300 ${
           closing ? "scale-95 opacity-0" : "scale-100 opacity-100"
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -106,31 +106,31 @@ export function OnboardingTour({ onComplete }: { onComplete?: () => void }) {
         {/* Skip button góc trên phải */}
         <button
           onClick={close}
-          className="absolute top-2.5 right-2.5 z-10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xs font-medium bg-white/80 dark:bg-gray-800/80 backdrop-blur px-2 py-1 rounded-full"
+          className="absolute top-2 right-2 z-10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-[11px] font-medium bg-white/80 dark:bg-gray-800/80 backdrop-blur px-2 py-0.5 rounded-full"
           aria-label="Bỏ qua hướng dẫn"
         >
           Bỏ qua ✕
         </button>
 
-        {/* Hero — emoji lớn + gradient bg */}
-        <div className="bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 px-6 py-8 text-center">
-          <div className="text-5xl sm:text-6xl mb-2 animate-bounce-once" key={step}>
+        {/* Hero — emoji + gradient bg, gọn hơn cho mobile */}
+        <div className="bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 px-4 py-5 text-center">
+          <div className="text-4xl sm:text-5xl animate-bounce-once" key={step}>
             {current.emoji}
           </div>
         </div>
 
         {/* Content */}
-        <div className="px-5 sm:px-6 py-4 sm:py-5">
-          <h2 id="onboarding-title" className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 text-center break-words">
+        <div className="px-4 sm:px-5 py-3 sm:py-4">
+          <h2 id="onboarding-title" className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-1.5 text-center break-words">
             {current.title}
           </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed text-center break-words">
+          <p className="text-[13px] sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed text-center break-words">
             {current.description}
           </p>
 
           {current.highlight && (
-            <div className="mt-3 text-center">
-              <span className="inline-block bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 text-xs font-semibold px-3 py-1 rounded-full">
+            <div className="mt-2.5 text-center">
+              <span className="inline-block bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
                 💡 Thử ngay tab &quot;{current.highlight}&quot;
               </span>
             </div>
@@ -138,17 +138,17 @@ export function OnboardingTour({ onComplete }: { onComplete?: () => void }) {
         </div>
 
         {/* Progress dots */}
-        <div className="flex items-center justify-center gap-2 pb-2">
+        <div className="flex items-center justify-center gap-1.5 pb-1">
           {STEPS.map((_, i) => (
             <button
               key={i}
               onClick={() => setStep(i)}
-              className={`h-2 rounded-full transition-all ${
+              className={`h-1.5 rounded-full transition-all ${
                 i === step
-                  ? "w-8 bg-orange-500"
+                  ? "w-6 bg-orange-500"
                   : i < step
-                    ? "w-2 bg-orange-300"
-                    : "w-2 bg-gray-200 dark:bg-gray-700"
+                    ? "w-1.5 bg-orange-300"
+                    : "w-1.5 bg-gray-200 dark:bg-gray-700"
               }`}
               aria-label={`Bước ${i + 1}`}
             />
@@ -156,18 +156,18 @@ export function OnboardingTour({ onComplete }: { onComplete?: () => void }) {
         </div>
 
         {/* Footer buttons */}
-        <div className="px-5 sm:px-6 pb-5 pt-3 flex items-center gap-2 sm:gap-3">
+        <div className="px-4 sm:px-5 pb-4 pt-2 flex items-center gap-2">
           {!isFirst && (
             <button
               onClick={prev}
-              className="flex-1 px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors whitespace-nowrap"
+              className="flex-1 px-2.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors whitespace-nowrap"
             >
               ← Quay lại
             </button>
           )}
           <button
             onClick={next}
-            className={`px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-bold text-white rounded-lg transition-all shadow-sm hover:shadow-md whitespace-nowrap ${
+            className={`px-3 py-2 text-xs sm:text-sm font-bold text-white rounded-lg transition-all shadow-sm hover:shadow-md whitespace-nowrap ${
               isLast
                 ? "flex-1 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600"
                 : isFirst
