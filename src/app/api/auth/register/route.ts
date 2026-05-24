@@ -116,23 +116,33 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Gửi email xác thực — nếu SMTP chưa cấu hình thì bỏ qua, trả flag để user resend.
-    let emailSent = false;
-    let emailError: string | undefined;
-    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      const { token } = await createEmailVerificationToken(result.user.id);
-      const send = await sendEmailVerification(email, result.user.username, token);
-      emailSent = send.success;
-      emailError = send.error;
-    } else {
-      emailError = "SMTP chưa cấu hình. Liên hệ admin để xác thực email.";
+    // Gửi email xác thực — fire-and-forget để response ngay, không chặn UI.
+    // Render Free tier + Gmail SMTP đôi khi mất 20-40s mỗi connection → user
+    // bị stuck ở "Đang xử lý...". Chấp nhận trade-off: không biết email gửi
+    // thành công hay không trong response, nhưng có nút "Gửi lại email" trong
+    // UI để retry, và audit log sẽ ghi lại lỗi nếu fail.
+    const smtpConfigured = !!(process.env.SMTP_USER && process.env.SMTP_PASS);
+    if (smtpConfigured) {
+      void (async () => {
+        try {
+          const { token } = await createEmailVerificationToken(result.user!.id);
+          const send = await sendEmailVerification(email, result.user!.username, token);
+          await logAudit("user.register.email", {
+            userId: result.user!.id,
+            ip,
+            detail: send.success ? "verification email sent" : `failed: ${send.error}`,
+          });
+        } catch (e) {
+          console.error("[register] email send failed:", e);
+        }
+      })();
     }
 
     await logAudit("user.register", {
       userId: result.user.id,
       ip,
       userAgent: request.headers.get("user-agent"),
-      detail: emailSent ? "verification email sent" : emailError ?? null,
+      detail: smtpConfigured ? "registered, email sending async" : "SMTP not configured",
     });
 
     // Anti-fraud — fire-and-forget. Audit log đã insert ở trên nên check
@@ -157,11 +167,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: emailSent
-        ? "Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản."
+      message: smtpConfigured
+        ? "Đăng ký thành công. Email xác thực đang được gửi tới hộp thư của bạn (có thể mất vài phút)."
         : "Đăng ký thành công, nhưng chưa gửi được email xác thực.",
       needEmailVerify: true,
-      emailSent,
+      emailSent: smtpConfigured,
       email,
       user: { ...result.user, has_withdraw_pin: false },
     });
