@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createNotification, createWithdrawRequest, getSetting, getDb } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { requireVerifiedUser } from "@/lib/auth";
 import { notifyWithdrawRequest } from "@/lib/telegram";
 
 export async function POST(request: NextRequest) {
-  const auth = await requireUser(request);
+  // Bắt buộc verify email — bảo vệ flow chuyển tiền ra ngoài.
+  const auth = await requireVerifiedUser(request);
   if (!auth.user) return auth.response;
 
   // Admin có thể tắt rút tiền (vd. khi đối soát hệ thống) hoặc đổi min withdraw.

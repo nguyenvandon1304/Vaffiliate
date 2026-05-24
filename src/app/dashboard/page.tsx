@@ -7,6 +7,7 @@ import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { NotificationBell } from "@/components/NotificationBell";
 import { useConfetti } from "@/components/Confetti";
 import { useOnboarding } from "@/components/OnboardingTour";
+import { EmailVerifyBanner } from "@/components/EmailVerifyBanner";
 import {
   ClockIcon3D,
   GridIcon3D,
@@ -34,6 +35,8 @@ interface UserInfo {
   display_name: string | null;
   phone: string | null;
   has_withdraw_pin: boolean;
+  email_verified: boolean;
+  role?: string;
   created_at: string;
   last_login: string | null;
 }
@@ -448,6 +451,14 @@ function DashboardContent() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 pb-24 md:pb-6">
+        {/* Email verify banner — hiện khi chưa verify, soft gate cho rút tiền/2FA/password */}
+        {user && !user.email_verified && (
+          <EmailVerifyBanner
+            user={{ email_verified: user.email_verified, email: user.email }}
+            onVerified={refreshUser}
+          />
+        )}
+
         {accountView === "profile" && user && (
           <ProfileSection user={user} onProfileUpdated={refreshUser} onBack={() => setAccountView(null)} />
         )}
@@ -850,6 +861,7 @@ function DashboardContent() {
             stats={stats}
             walletHistory={walletHistory}
             bankAccounts={bankAccounts}
+            user={user}
             onFetchBanks={fetchBankAccounts}
             onWithdrawSuccess={refreshDashboard}
           />
@@ -1167,12 +1179,14 @@ function WalletTab({
   stats,
   walletHistory,
   bankAccounts,
+  user,
   onFetchBanks,
   onWithdrawSuccess,
 }: {
   stats: Stats;
   walletHistory: WalletData[];
   bankAccounts: BankAccountData[];
+  user: UserInfo | null;
   onFetchBanks: () => void;
   onWithdrawSuccess: () => void;
 }) {
@@ -1184,7 +1198,13 @@ function WalletTab({
   const [withdrawErr, setWithdrawErr] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const isVerified = !!user?.email_verified;
+
   const openWithdraw = () => {
+    if (!isVerified) {
+      setWithdrawErr("⚠️ Vui lòng xác minh email trước khi rút tiền. Xem banner ở đầu trang.");
+      return;
+    }
     onFetchBanks();
     setShowWithdraw(true);
     setWithdrawMsg("");
@@ -1232,15 +1252,27 @@ function WalletTab({
           <p className="text-3xl font-bold mb-4">{formatVND(stats.walletBalance)}</p>
           <button
             onClick={openWithdraw}
-            className="bg-white/20 hover:bg-white/30 backdrop-blur text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors"
+            disabled={!isVerified}
+            className={`backdrop-blur text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors ${
+              isVerified
+                ? "bg-white/20 hover:bg-white/30"
+                : "bg-white/10 cursor-not-allowed opacity-60"
+            }`}
+            title={isVerified ? "Yêu cầu rút tiền" : "Cần xác minh email để rút tiền"}
           >
-            Rút tiền
+            {isVerified ? "Rút tiền" : "🔒 Rút tiền (cần verify email)"}
           </button>
         </div>
 
         {withdrawMsg && (
           <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 mb-4">
             <p className="text-sm text-green-700 font-medium">{withdrawMsg}</p>
+          </div>
+        )}
+
+        {withdrawErr && !showWithdraw && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-4">
+            <p className="text-sm text-amber-700 font-medium">{withdrawErr}</p>
           </div>
         )}
 

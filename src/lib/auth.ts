@@ -39,3 +39,33 @@ export async function requireAdmin(
   }
   return result;
 }
+
+/**
+ * Như `requireUser` nhưng còn enforce email_verified = true.
+ * Dùng cho các API nhạy cảm: rút tiền, đổi password, bật 2FA, gắn referral bonus.
+ *
+ * Admin role được bypass — admin luôn pass kể cả khi email_verified = false.
+ */
+export async function requireVerifiedUser(
+  request: NextRequest,
+): Promise<{ user: User; token: string } | { user: null; response: NextResponse }> {
+  const result = await requireUser(request);
+  if (result.user === null) return { user: null, response: result.response };
+  // Admin bypass — admin có thể chưa verify email (vd seed admin lần đầu) nhưng vẫn cần dùng được hệ thống
+  if (result.user.role === "admin") return result;
+  if (!result.user.email_verified) {
+    return {
+      user: null,
+      response: NextResponse.json(
+        {
+          success: false,
+          error: "Vui lòng xác minh email trước khi thực hiện thao tác này.",
+          needEmailVerify: true,
+          email: result.user.email,
+        },
+        { status: 403 },
+      ),
+    };
+  }
+  return result;
+}

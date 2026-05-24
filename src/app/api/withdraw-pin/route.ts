@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { setWithdrawPin, verifyWithdrawPin } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { requireVerifiedUser } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
-  const auth = await requireUser(request);
+  const auth = await requireVerifiedUser(request);
   if (!auth.user) return auth.response;
 
   const body = await request.json();

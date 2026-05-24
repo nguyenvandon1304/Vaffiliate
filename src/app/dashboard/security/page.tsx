@@ -6,6 +6,7 @@ import { CaffiliateLogo } from "@/components/icons";
 import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { TwoFactorSection } from "@/components/TwoFactorSection";
 import { LoginHistorySection } from "@/components/LoginHistorySection";
+import { EmailVerifyBanner } from "@/components/EmailVerifyBanner";
 
 interface SessionItem {
   id: number;
@@ -40,6 +41,11 @@ export default function SecurityPage() {
   // Đường về dashboard chính tuỳ role: admin → /admin, user → /dashboard
   const dashboardPath = isAdmin ? "/admin" : "/dashboard";
 
+  // Email verified status — gate change password + 2FA
+  const [emailVerified, setEmailVerified] = useState(true); // optimistic
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const isVerified = isAdmin || emailVerified; // admin always allowed
+
   // Change password
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -73,7 +79,11 @@ export default function SecurityPage() {
     try {
       const res = await fetch("/api/auth/me");
       const data = await res.json();
-      if (data.success) setIsAdmin(data.user?.role === "admin");
+      if (data.success) {
+        setIsAdmin(data.user?.role === "admin");
+        setEmailVerified(!!data.user?.email_verified);
+        setUserEmail(data.user?.email ?? null);
+      }
     } catch {
       /* ignore — fallback dashboardPath = /dashboard */
     }
@@ -191,11 +201,27 @@ export default function SecurityPage() {
           <p className="text-sm text-gray-500 dark:text-zinc-400 mt-1">Đổi mật khẩu, quản lý thiết bị đăng nhập, và xoá tài khoản.</p>
         </div>
 
+        {/* Email verify gate banner */}
+        {!isAdmin && !emailVerified && userEmail && (
+          <EmailVerifyBanner
+            user={{ email_verified: false, email: userEmail }}
+            onVerified={() => setEmailVerified(true)}
+          />
+        )}
+
         {/* Đổi mật khẩu */}
         <section className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm p-6">
-          <h2 className="text-base font-bold text-gray-800 dark:text-zinc-100 mb-1">Đổi mật khẩu</h2>
-          <p className="text-xs text-gray-500 dark:text-zinc-500 mb-4">Sau khi đổi, mọi thiết bị khác sẽ bị đăng xuất.</p>
+          <h2 className="text-base font-bold text-gray-800 dark:text-zinc-100 mb-1 flex items-center gap-2">
+            Đổi mật khẩu
+            {!isVerified && <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-500 text-white px-1.5 py-0.5 rounded">🔒 Cần verify email</span>}
+          </h2>
+          <p className="text-xs text-gray-500 dark:text-zinc-500 mb-4">
+            {isVerified
+              ? "Sau khi đổi, mọi thiết bị khác sẽ bị đăng xuất."
+              : "Bạn cần xác minh email trước khi đổi mật khẩu để bảo vệ tài khoản."}
+          </p>
 
+          <fieldset disabled={!isVerified} className={!isVerified ? "opacity-50 pointer-events-none" : ""}>
           <form onSubmit={handleChangePassword} className="space-y-3 max-w-md">
             <input
               type="password"
@@ -237,10 +263,23 @@ export default function SecurityPage() {
               {pwLoading ? "Đang xử lý..." : "Đổi mật khẩu"}
             </button>
           </form>
+          </fieldset>
         </section>
 
-        {/* Sessions */}
-        <TwoFactorSection />
+        {/* 2FA setup — gate qua email verification */}
+        {!isVerified ? (
+          <section className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm p-6 opacity-60">
+            <h2 className="text-base font-bold text-gray-800 dark:text-zinc-100 mb-1 flex items-center gap-2">
+              Xác thực 2 lớp (2FA)
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-500 text-white px-1.5 py-0.5 rounded">🔒 Cần verify email</span>
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-zinc-500">
+              Bạn cần xác minh email trước khi bật 2FA. Tính năng này tăng độ bảo mật cho tài khoản.
+            </p>
+          </section>
+        ) : (
+          <TwoFactorSection />
+        )}
 
         <section className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">

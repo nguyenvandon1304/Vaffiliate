@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { changeUserPassword, createNotification, logAudit } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { requireVerifiedUser } from "@/lib/auth";
 import { getClientIp } from "@/lib/turnstile";
 import { getRateLimitKey, rateLimitAsync } from "@/lib/rate-limit";
 import { checkPwnedPassword, passwordStrength } from "@/lib/security";
@@ -14,7 +14,7 @@ export async function PUT(request: NextRequest) {
     );
   }
 
-  const auth = await requireUser(request);
+  const auth = await requireVerifiedUser(request);
   if (!auth.user) return auth.response;
 
   const body = await request.json().catch(() => ({}));

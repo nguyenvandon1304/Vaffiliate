@@ -8,7 +8,7 @@ import {
   logAudit,
   startTotpSetup,
 } from "@/lib/db";
-import { requireUser } from "@/lib/auth";
+import { requireUser, requireVerifiedUser } from "@/lib/auth";
 import { getClientIp } from "@/lib/turnstile";
 
 export async function GET(request: NextRequest) {
@@ -30,7 +30,9 @@ export async function GET(request: NextRequest) {
  *   - regenerate-backup-codes: tạo lại 10 backup code mới (huỷ code cũ)
  */
 export async function POST(request: NextRequest) {
-  const auth = await requireUser(request);
+  // Bắt buộc verify email để bật/đổi 2FA — chống attacker chiếm tài khoản
+  // chưa verify rồi lock chủ thật ra ngoài bằng cách bật 2FA của họ.
+  const auth = await requireVerifiedUser(request);
   if (!auth.user) return auth.response;
 
   const body = await request.json().catch(() => ({}));

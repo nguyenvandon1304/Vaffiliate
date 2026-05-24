@@ -765,14 +765,10 @@ export async function loginUser(
     return { success: false, error: "Tài khoản đã bị khoá. Vui lòng liên hệ hỗ trợ." };
   }
 
-  if (Number(row.email_verified) === 0) {
-    return {
-      success: false,
-      needEmailVerify: true,
-      email: row.email as string,
-      error: "Email chưa được xác thực. Hãy kiểm tra hộp thư để xác nhận trước khi đăng nhập.",
-    };
-  }
+  // Email chưa verify: KHÔNG block đăng nhập (Phương án C — Soft Email Gate).
+  // User vẫn login được, dashboard hiện banner cảnh báo. Các API nhạy cảm
+  // (rút tiền, đổi password, 2FA, referral bonus) sẽ check qua requireVerified()
+  // và trả 403.
 
   // 2FA TOTP
   if (Number(row.totp_enabled) === 1) {
