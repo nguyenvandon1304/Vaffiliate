@@ -131,12 +131,28 @@
   }
   html {
     @apply font-sans;
+    /* Chống Safari iOS tự co/giãn font khi xoay ngang */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
   /* Chống content tràn ngang trên mobile — bất kỳ child nào có width >100vw
    * sẽ bị cắt thay vì gây horizontal scroll/auto-zoom của iOS Safari. */
   html, body {
     overflow-x: hidden;
     max-width: 100vw;
+  }
+  /* iOS Safari ZOOM-IN bug: khi tap vào input/textarea/select có font-size
+   * < 16px, Safari tự zoom-in để text dễ đọc nhưng KHÔNG zoom-out lại sau
+   * khi rời input → user phải pinch-zoom-out thủ công.
+   * Fix: ép tất cả form control có font-size ≥ 16px trên mobile.
+   * Visual giữ nguyên qua transform scale chỉ khi cần (đã không dùng).
+   */
+  @media (max-width: 768px) {
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
   }
 }
 
