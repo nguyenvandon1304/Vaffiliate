@@ -342,8 +342,16 @@ export default function ReferralPage() {
           <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm divide-y divide-gray-50 dark:divide-zinc-800">
             <RuleItem
               icon={<GiftIcon className="w-5 h-5 text-orange-500" />}
-              title={`Mời ${rate?.milestone ?? 50} bạn bè active — Nâng tỷ lệ lên ${(rate?.basePercent ?? 50) + (rate?.bonusPercent ?? 5)}%`}
-              desc={`Khi có ${rate?.milestone ?? 50} bạn bè bạn giới thiệu hoàn thành đơn hoàn tiền đầu tiên, tỷ lệ cashback của bạn sẽ tự động cộng thêm ${rate?.bonusPercent ?? 5}% (từ ${rate?.basePercent ?? 50}% lên ${(rate?.basePercent ?? 50) + (rate?.bonusPercent ?? 5)}%) áp dụng cho mọi đơn từ đó về sau.`}
+              title={
+                allTiers.length > 0
+                  ? `Hệ thống ${allTiers.length} cấp bậc — Cashback từ ${allTiers[0]?.cashbackPercent ?? 50}% đến ${allTiers[allTiers.length - 1]?.cashbackPercent ?? 58}%`
+                  : "Hệ thống cấp bậc — Cashback tăng theo tier"
+              }
+              desc={
+                allTiers.length > 0
+                  ? `Mỗi tier có ngưỡng đơn hàng + bạn mời riêng. Đạt 1 trong 2 ngưỡng là tự động lên tier mới, cashback tăng vĩnh viễn cho mọi đơn từ đó. Vd: ${allTiers[1]?.icon ?? "🥈"} ${allTiers[1]?.name ?? "Silver"} = ${allTiers[1]?.minOrders ?? 50} đơn HT hoặc ${allTiers[1]?.minReferrals ?? 25} bạn mời active → ${allTiers[1]?.cashbackPercent ?? 53}%.`
+                  : "Mời bạn bè + mua hàng để lên tier cao hơn, hưởng cashback nhiều hơn."
+              }
             />
             <RuleItem
               icon={<ShieldIcon className="w-5 h-5 text-green-500" />}

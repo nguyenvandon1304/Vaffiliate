@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     default: "V-Affiliate — Hoàn 50% hoa hồng Shopee",
     template: "%s | V-Affiliate",
   },
-  description: "Tạo link Shopee → mua sắm như bình thường → tự động hoàn 50% hoa hồng vào ví. Mời bạn bè để nâng tier lên 55%.",
+  description: "Tạo link Shopee → mua sắm như bình thường → tự động hoàn tiền vào ví. Hệ thống cấp bậc Bronze/Silver/Gold/VIP với cashback 50-58%.",
   keywords: ["v-affiliate", "shopee affiliate", "hoàn tiền", "cashback", "hoa hồng shopee", "mua hàng hoàn tiền"],
   authors: [{ name: "V-Affiliate Team" }],
   applicationName: "V-Affiliate",
