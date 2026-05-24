@@ -13,7 +13,7 @@ const inter = Inter({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://v-affiliate.vn";
+const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://vaffiliate-app.onrender.com";
 
 /**
  * Site-wide metadata. Áp dụng cho mọi trang trừ khi page override.

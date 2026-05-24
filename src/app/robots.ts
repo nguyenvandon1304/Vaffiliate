@@ -7,7 +7,7 @@ import type { MetadataRoute } from "next";
  * Sitemap trỏ về cùng host để Google biết file sitemap ở đâu.
  */
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://v-affiliate.vn";
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://vaffiliate-app.onrender.com";
 
   return {
     rules: [

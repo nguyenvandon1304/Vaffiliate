@@ -192,7 +192,7 @@ export function PWAInstallPrompt() {
               {!onSafari ? (
                 <p className="text-xs text-amber-600 dark:text-amber-400 mt-1.5 leading-relaxed">
                   ⚠️ Trên iPhone, chỉ <strong>Safari</strong> mới cài được app vào màn hình chính.
-                  Hãy mở link <strong>vaffiliate-app.onrender.com</strong> bằng Safari rồi quay lại đây.
+                  Hãy mở app này bằng <strong>Safari</strong> rồi quay lại đây.
                 </p>
               ) : (
                 <div className="text-xs text-gray-600 dark:text-gray-300 mt-1.5 leading-relaxed space-y-2">
