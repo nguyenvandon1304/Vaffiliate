@@ -248,6 +248,7 @@ function AdminPageInner() {
         <div className="flex-1 min-w-0">
           <CaffiliateLogo title="Admin" subtitle={tabs.find((t) => t.key === tab)?.label ?? "Bảng điều khiển"} />
         </div>
+        <ThemeToggleButton />
         {pendingCounts.pendingWithdrawals > 0 && (
           <button
             onClick={() => setTabWithStatus("withdrawals", "pending")}
