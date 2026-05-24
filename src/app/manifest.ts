@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 /**
  * PWA manifest — cho phép user "Add to Home Screen" trên mobile.
- * Icons để trống — bạn nên thêm `public/seo/icon-192.png` và `icon-512.png` sau.
+ * Icons sinh từ public/seo/icon.svg qua scripts/generate-icons.mjs
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -16,17 +16,24 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: "portrait",
     lang: "vi",
     icons: [
-      // Các icon này nên thêm vào public/seo/. Để trống vẫn build OK.
-      // {
-      //   src: "/seo/icon-192.png",
-      //   sizes: "192x192",
-      //   type: "image/png",
-      // },
-      // {
-      //   src: "/seo/icon-512.png",
-      //   sizes: "512x512",
-      //   type: "image/png",
-      // },
+      {
+        src: "/seo/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/seo/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/seo/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
+      },
     ],
   };
 }

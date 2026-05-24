@@ -58,6 +58,16 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
+  icons: {
+    icon: [
+      { url: "/seo/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/seo/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [
+      { url: "/seo/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+  },
 };
 
 export const viewport: Viewport = {
