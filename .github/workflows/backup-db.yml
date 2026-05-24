@@ -37,9 +37,13 @@ jobs:
           curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
           sudo apt-get update
           sudo apt-get install -y postgresql-client-17
+          # Ubuntu 24.04 ship sẵn pg_dump 16 ở /usr/bin → push v17 lên đầu PATH
+          echo "/usr/lib/postgresql/17/bin" >> $GITHUB_PATH
 
       - name: Verify pg_dump version
-        run: pg_dump --version
+        run: |
+          which pg_dump
+          pg_dump --version
 
       - name: Tạo dump
         env:
