@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BarChart } from "@/components/BarChart";
-import { CaffiliateLogo } from "@/components/icons";
+import { BrandLogo } from "@/components/icons";
 import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { useToast } from "@/components/Toast";
 import { UsersTab } from "@/components/admin/UsersTab";
@@ -232,11 +232,17 @@ function AdminPageInner() {
   return (
     <div className="min-h-screen flex bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Mobile top header — chỉ hiện ≤lg */}
-      <header className="lg:hidden fixed top-0 inset-x-0 z-30 h-14 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-3 gap-2">
+      <header
+        className="lg:hidden fixed top-0 inset-x-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-3 gap-2"
+        style={{
+          paddingTop: "env(safe-area-inset-top, 0)",
+          minHeight: "calc(env(safe-area-inset-top, 0) + 3.5rem)",
+        }}
+      >
         <button
           type="button"
           onClick={() => setMobileSidebarOpen(true)}
-          className="p-2 -ml-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="p-2 -ml-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 shrink-0"
           aria-label="Mở menu"
         >
           <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -245,14 +251,14 @@ function AdminPageInner() {
             <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
-        <div className="flex-1 min-w-0">
-          <CaffiliateLogo title="Admin" subtitle={tabs.find((t) => t.key === tab)?.label ?? "Bảng điều khiển"} />
+        <div className="flex-1 min-w-0 py-1.5">
+          <BrandLogo title="Admin" subtitle={tabs.find((t) => t.key === tab)?.label ?? "Bảng điều khiển"} />
         </div>
         <ThemeToggleButton />
         {pendingCounts.pendingWithdrawals > 0 && (
           <button
             onClick={() => setTabWithStatus("withdrawals", "pending")}
-            className="relative p-2 -mr-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="relative p-2 -mr-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 shrink-0"
             aria-label="Yêu cầu rút tiền chờ duyệt"
           >
             <span className="text-xl">💸</span>
@@ -285,7 +291,7 @@ function AdminPageInner() {
             className="cursor-pointer text-left flex-1 min-w-0"
             title="Về tổng quan"
           >
-            <CaffiliateLogo title="Admin V-Affiliate" subtitle="Bảng điều khiển" />
+            <BrandLogo title="Admin V-Affiliate" subtitle="Bảng điều khiển" />
           </button>
           <button
             type="button"

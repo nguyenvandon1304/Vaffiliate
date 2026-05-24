@@ -182,105 +182,26 @@ export function CaffiliateLogo({
   title?: string;
   subtitle?: string;
 }) {
+  // Dùng image PNG đã render từ icon.svg (cùng asset với PWA / favicon /
+  // Home Screen) → branding nhất quán + nhẹ hơn SVG inline phức tạp.
   return (
     <div className={`group/logo ${className ?? ""}`}>
       <div className="flex items-center gap-2.5">
-        {/* Viên 3D V — gradient + highlight + drop shadow + shimmer + float loop */}
-        <span className="logo-3d relative inline-flex h-10 w-10 items-center justify-center rounded-2xl">
-          <svg
-            viewBox="0 0 40 40"
-            width="40"
-            height="40"
-            aria-hidden="true"
-            className="h-full w-full"
-          >
-            <defs>
-              <linearGradient id="caff-logo-grad" x1="50%" y1="0%" x2="50%" y2="100%">
-                <stop offset="0%" stopColor="#fed7aa" />
-                <stop offset="35%" stopColor="#fb923c" />
-                <stop offset="100%" stopColor="#c2410c" />
-              </linearGradient>
-              <radialGradient id="caff-logo-gloss" cx="32%" cy="22%" r="55%">
-                <stop offset="0%" stopColor="rgba(255,255,255,0.95)" />
-                <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-              </radialGradient>
-              <filter id="caff-logo-shadow" x="-30%" y="-20%" width="160%" height="160%">
-                <feGaussianBlur stdDeviation="1.1" />
-                <feOffset dx="0" dy="1" result="off" />
-                <feFlood floodColor="rgba(234, 88, 12, 0.55)" />
-                <feComposite in2="off" operator="in" result="shadow" />
-                <feMerge>
-                  <feMergeNode in="shadow" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-              {/* Mask để dải shimmer chỉ chạy trong viền viên */}
-              <clipPath id="caff-logo-clip">
-                <rect x="3" y="3" width="34" height="34" rx="9" />
-              </clipPath>
-            </defs>
-
-            {/* Bóng đổ phía dưới (tạo cảm giác nổi) */}
-            <ellipse cx="20" cy="37.5" rx="11" ry="1.4" fill="rgba(234, 88, 12, 0.5)" />
-
-            {/* Viên kẹo */}
-            <rect
-              x="3"
-              y="3"
-              width="34"
-              height="34"
-              rx="9"
-              fill="url(#caff-logo-grad)"
-              filter="url(#caff-logo-shadow)"
-            />
-
-            {/* Highlight specular */}
-            <ellipse cx="14" cy="11" rx="9" ry="5" fill="url(#caff-logo-gloss)" />
-
-            {/* Shimmer band — animation translateX qua mặt viên */}
-            <g clipPath="url(#caff-logo-clip)">
-              <rect
-                className="logo-3d-shimmer"
-                x="-12"
-                y="0"
-                width="9"
-                height="40"
-                fill="rgba(255,255,255,0.55)"
-                transform="rotate(20 0 0)"
-              />
-            </g>
-
-            {/* Chữ V — viền sáng bên trên (highlight) + chữ trắng chính + bóng dưới */}
-            <text
-              x="20"
-              y="28"
-              textAnchor="middle"
-              fontFamily="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Inter"
-              fontSize="20"
-              fontWeight="900"
-              fill="rgba(0,0,0,0.18)"
-            >
-              V
-            </text>
-            <text
-              x="20"
-              y="27.4"
-              textAnchor="middle"
-              fontFamily="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Inter"
-              fontSize="20"
-              fontWeight="900"
-              fill="#ffffff"
-            >
-              V
-            </text>
-          </svg>
+        <span className="logo-3d relative inline-flex h-10 w-10 items-center justify-center rounded-2xl shrink-0 overflow-hidden shadow-md">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/seo/icon-192.png"
+            alt="V-Affiliate"
+            width={40}
+            height={40}
+            className="w-full h-full object-cover"
+          />
         </span>
-
-        <div className="flex flex-col leading-tight">
-          <span className="text-lg font-extrabold leading-tight bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 bg-clip-text text-transparent group-hover/logo:from-orange-400 group-hover/logo:to-orange-500 transition-colors">
+        <div className="flex flex-col leading-tight min-w-0">
+          <span className="text-base sm:text-lg font-extrabold leading-tight bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 bg-clip-text text-transparent group-hover/logo:from-orange-400 group-hover/logo:to-orange-500 transition-colors truncate">
             {title}
           </span>
-          <span className="text-[10px] text-gray-400 dark:text-zinc-500 leading-tight">
+          <span className="text-[10px] text-gray-400 dark:text-zinc-500 leading-tight truncate">
             {subtitle}
           </span>
         </div>
@@ -310,5 +231,54 @@ export function MoonIcon({ className }: { className?: string }) {
     <svg className={className} viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
     </svg>
+  );
+}
+
+
+/**
+ * BrandLogo — phiên bản logo dùng image PNG đã render từ icon.svg.
+ * Trùng với icon PWA / favicon / Home Screen → branding nhất quán.
+ *
+ * Khác CaffiliateLogo (SVG inline với gradient + animation): lấy từ
+ * /public/seo/icon-192.png hoặc apple-touch-icon.png cho perf nhẹ + đồng bộ.
+ */
+export function BrandLogo({
+  className,
+  title = "V-Affiliate",
+  subtitle = "Thương mại liên kết",
+  iconSize = 36,
+}: {
+  className?: string;
+  title?: string;
+  subtitle?: string;
+  iconSize?: number;
+}) {
+  return (
+    <div className={`group/logo ${className ?? ""}`}>
+      <div className="flex items-center gap-2.5">
+        <span
+          className="logo-3d relative inline-flex items-center justify-center rounded-2xl shrink-0 overflow-hidden shadow-md"
+          style={{ width: iconSize, height: iconSize }}
+        >
+          {/* Dùng <img> thay vì next/image để tránh layout shift + hỗ trợ PWA standalone tốt */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/seo/icon-192.png"
+            alt="V-Affiliate"
+            width={iconSize}
+            height={iconSize}
+            className="w-full h-full object-cover"
+          />
+        </span>
+        <div className="flex flex-col leading-tight min-w-0">
+          <span className="text-base sm:text-lg font-extrabold leading-tight bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 bg-clip-text text-transparent group-hover/logo:from-orange-400 group-hover/logo:to-orange-500 transition-colors truncate">
+            {title}
+          </span>
+          <span className="text-[10px] text-gray-400 dark:text-zinc-500 leading-tight truncate">
+            {subtitle}
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }
