@@ -31,6 +31,13 @@ export const metadata: Metadata = {
   keywords: ["v-affiliate", "shopee affiliate", "hoàn tiền", "cashback", "hoa hồng shopee", "mua hàng hoàn tiền"],
   authors: [{ name: "V-Affiliate Team" }],
   applicationName: "V-Affiliate",
+  appleWebApp: {
+    capable: true,
+    title: "V-Affiliate",
+    // "default" = status bar trắng chữ đen trên light, đen chữ trắng trên dark.
+    // "black-translucent" = trong suốt, content kéo dài lên dưới notch.
+    statusBarStyle: "default",
+  },
   generator: "Next.js",
   referrer: "strict-origin-when-cross-origin",
   formatDetection: { email: false, address: false, telephone: false },
