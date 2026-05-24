@@ -83,16 +83,22 @@ export function OnboardingTour({ onComplete }: { onComplete?: () => void }) {
 
   return (
     <div
-      className={`fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-200 ${
+      className={`fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 transition-opacity duration-200 ${
         closing ? "opacity-0" : "opacity-100"
       }`}
+      style={{
+        paddingTop: "max(env(safe-area-inset-top), 0.75rem)",
+        paddingBottom: "max(env(safe-area-inset-bottom), 0.75rem)",
+        paddingLeft: "max(env(safe-area-inset-left), 0.75rem)",
+        paddingRight: "max(env(safe-area-inset-right), 0.75rem)",
+      }}
       onClick={close}
       role="dialog"
       aria-modal="true"
       aria-labelledby="onboarding-title"
     >
       <div
-        className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transition-all duration-300 ${
+        className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto overflow-x-hidden transition-all duration-300 ${
           closing ? "scale-95 opacity-0" : "scale-100 opacity-100"
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -100,25 +106,25 @@ export function OnboardingTour({ onComplete }: { onComplete?: () => void }) {
         {/* Skip button góc trên phải */}
         <button
           onClick={close}
-          className="absolute top-3 right-3 z-10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm font-medium"
+          className="absolute top-2.5 right-2.5 z-10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xs font-medium bg-white/80 dark:bg-gray-800/80 backdrop-blur px-2 py-1 rounded-full"
           aria-label="Bỏ qua hướng dẫn"
         >
           Bỏ qua ✕
         </button>
 
         {/* Hero — emoji lớn + gradient bg */}
-        <div className="bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 px-6 py-10 text-center">
-          <div className="text-6xl mb-2 animate-bounce-once" key={step}>
+        <div className="bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 px-6 py-8 text-center">
+          <div className="text-5xl sm:text-6xl mb-2 animate-bounce-once" key={step}>
             {current.emoji}
           </div>
         </div>
 
         {/* Content */}
-        <div className="px-6 py-5">
-          <h2 id="onboarding-title" className="text-xl font-bold text-gray-900 dark:text-white mb-2 text-center">
+        <div className="px-5 sm:px-6 py-4 sm:py-5">
+          <h2 id="onboarding-title" className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 text-center break-words">
             {current.title}
           </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed text-center break-words">
             {current.description}
           </p>
 
@@ -150,18 +156,18 @@ export function OnboardingTour({ onComplete }: { onComplete?: () => void }) {
         </div>
 
         {/* Footer buttons */}
-        <div className="px-6 pb-5 pt-3 flex items-center gap-3">
+        <div className="px-5 sm:px-6 pb-5 pt-3 flex items-center gap-2 sm:gap-3">
           {!isFirst && (
             <button
               onClick={prev}
-              className="flex-1 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+              className="flex-1 px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors whitespace-nowrap"
             >
               ← Quay lại
             </button>
           )}
           <button
             onClick={next}
-            className={`px-4 py-2.5 text-sm font-bold text-white rounded-lg transition-all shadow-sm hover:shadow-md ${
+            className={`px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-bold text-white rounded-lg transition-all shadow-sm hover:shadow-md whitespace-nowrap ${
               isLast
                 ? "flex-1 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600"
                 : isFirst
