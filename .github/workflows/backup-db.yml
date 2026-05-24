@@ -72,13 +72,19 @@ jobs:
 
           # Dump ra file trước (không pipe gzip) để bắt lỗi pg_dump rõ ràng.
           # --no-sync để nhanh hơn (an toàn vì không phải dump local).
+          # --schema=public để chỉ dump app data, bỏ qua Supabase internal
+          # schemas (auth, storage, realtime) — không restore được sang project
+          # Supabase khác vì gắn với platform.
+          # --inserts để dump dạng INSERT statements (dễ đọc + restore từng phần được).
           echo "→ Running pg_dump..."
           pg_dump "$DATABASE_URL" \
+            --schema=public \
             --no-owner \
             --no-privileges \
             --clean \
             --if-exists \
             --quote-all-identifiers \
+            --inserts \
             --format=plain \
             --no-sync \
             --file="$RAW_FILE" \
