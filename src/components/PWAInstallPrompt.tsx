@@ -40,6 +40,24 @@ function isIOS(): boolean {
   return /iPad|iPhone|iPod/.test(window.navigator.userAgent) && !("MSStream" in window);
 }
 
+/**
+ * Detect Safari trên iOS thực sự (không phải Chrome iOS / Firefox iOS).
+ * Chrome iOS UA: "CriOS", Firefox iOS: "FxiOS", Edge iOS: "EdgiOS".
+ * Chỉ Safari thật mới install được PWA.
+ */
+function isIOSSafari(): boolean {
+  if (typeof window === "undefined" || !isIOS()) return false;
+  const ua = window.navigator.userAgent;
+  return !/CriOS|FxiOS|EdgiOS|OPiOS|GSA\//.test(ua);
+}
+
+function isIPad(): boolean {
+  if (typeof window === "undefined") return false;
+  // iPad mới (iPadOS 13+) báo UA giống Mac, check theo touch points
+  const ua = window.navigator.userAgent;
+  return /iPad/.test(ua) || (window.navigator.maxTouchPoints > 1 && /Macintosh/.test(ua));
+}
+
 function wasDismissedRecently(): boolean {
   try {
     const ts = window.localStorage.getItem(DISMISS_KEY);
@@ -157,6 +175,8 @@ export function PWAInstallPrompt() {
 
   // iOS hướng dẫn manual
   if (showIosHelp) {
+    const onIPad = isIPad();
+    const onSafari = isIOSSafari();
     return (
       <div
         className={`fixed bottom-20 left-4 right-4 z-[90] transition-all duration-300 ${
@@ -168,12 +188,34 @@ export function PWAInstallPrompt() {
             <div className="text-3xl shrink-0">📲</div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-gray-900 dark:text-white">Cài V-Affiliate vào màn hình chính</p>
-              <p className="text-xs text-gray-600 dark:text-gray-300 mt-1.5 leading-relaxed">
-                Bấm nút <span className="inline-flex items-center mx-0.5 px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded font-mono text-[11px]">
-                  <svg className="w-3 h-3 mr-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-                  Share
-                </span> ở thanh dưới Safari → chọn <strong>&quot;Add to Home Screen&quot;</strong>.
-              </p>
+
+              {!onSafari ? (
+                <p className="text-xs text-amber-600 dark:text-amber-400 mt-1.5 leading-relaxed">
+                  ⚠️ Trên iPhone, chỉ <strong>Safari</strong> mới cài được app vào màn hình chính.
+                  Hãy mở link <strong>vaffiliate-app.onrender.com</strong> bằng Safari rồi quay lại đây.
+                </p>
+              ) : (
+                <div className="text-xs text-gray-600 dark:text-gray-300 mt-1.5 leading-relaxed space-y-2">
+                  <p className="flex items-start gap-1.5">
+                    <span className="font-bold text-orange-500">①</span>
+                    <span>
+                      Bấm nút <span className="inline-flex items-center mx-0.5 px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/30 rounded font-mono text-[11px] text-blue-600 dark:text-blue-300">
+                        <svg className="w-3 h-3 mr-1" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 8 6h3v9h2V6h3l-4-4zM5 10v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V10h-2v10H7V10H5z"/></svg>
+                        Share
+                      </span>
+                      {onIPad ? " ở thanh trên cùng (góc phải)" : " ở thanh dưới của Safari (icon hình ô vuông + mũi tên hướng lên)"}
+                    </span>
+                  </p>
+                  <p className="flex items-start gap-1.5">
+                    <span className="font-bold text-orange-500">②</span>
+                    <span>Cuộn xuống chọn <strong>&quot;Add to Home Screen&quot;</strong> (Thêm vào màn hình chính)</span>
+                  </p>
+                  <p className="flex items-start gap-1.5">
+                    <span className="font-bold text-orange-500">③</span>
+                    <span>Bấm <strong>&quot;Add&quot;</strong> → icon V-Affiliate xuất hiện trên màn hình chính</span>
+                  </p>
+                </div>
+              )}
             </div>
             <button
               onClick={handleDismiss}
