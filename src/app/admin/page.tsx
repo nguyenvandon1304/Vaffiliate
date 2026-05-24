@@ -273,9 +273,11 @@ function AdminPageInner() {
       )}
 
       {/* Sidebar — desktop static, mobile drawer */}
-      <aside className={`fixed lg:sticky top-0 left-0 h-screen w-64 lg:w-60 z-50 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-transform duration-300 ease-out ${
+      <aside className={`fixed lg:sticky top-0 left-0 h-[100dvh] lg:h-screen w-64 lg:w-60 z-50 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-transform duration-300 ease-out ${
         mobileSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-      }`}>
+      }`}
+      style={{ paddingTop: "env(safe-area-inset-top, 0)" }}
+      >
         <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <button
             type="button"
@@ -297,7 +299,7 @@ function AdminPageInner() {
             </svg>
           </button>
         </div>
-        <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto overscroll-contain">
           {tabs.map(t => {
             const badge = t.key === "withdrawals" ? pendingCounts.pendingWithdrawals : 0;
             return (
@@ -325,7 +327,10 @@ function AdminPageInner() {
             <span>🔐</span><span>Bảo mật cá nhân</span>
           </a>
         </nav>
-        <div className="p-3 border-t border-gray-200 dark:border-gray-700 flex items-center gap-2">
+        <div
+          className="p-3 border-t border-gray-200 dark:border-gray-700 flex items-center gap-2 shrink-0"
+          style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0), 0.75rem)" }}
+        >
           <ThemeToggleButton />
           <button
             type="button"
