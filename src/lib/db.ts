@@ -658,8 +658,12 @@ export async function loginUser(
 }> {
   const database = await getDb();
 
-  // Username so sánh case-insensitive — user có thể nhập "Nguyenvandon",
-  // "NGUYENVANDON" v.v. miễn là khớp với username gốc khi viết thường.
+  // Username so sánh "loose": cho phép nhập đúng nguyên username gốc HOẶC
+  // chỉ viết hoa chữ cái ĐẦU. Ví dụ user gốc "nguyenvandon" thì:
+  //   - "nguyenvandon"  ✅
+  //   - "Nguyenvandon"  ✅ (capitalize chữ đầu)
+  //   - "NGUYENVANDON"  ❌
+  //   - "NguyenVanDon"  ❌
   const row = await database.get(
     `SELECT id, username, email, password_hash, salt, display_name, phone, role,
             email_verified, created_at, last_login, is_active,
@@ -671,6 +675,15 @@ export async function loginUser(
 
   const generic = "Tên đăng nhập hoặc mật khẩu không đúng";
   if (!row) {
+    await verifyPassword(password, "pbkdf2$10000$00$00", null);
+    return { success: false, error: generic };
+  }
+
+  // Validate format username: exact match HOẶC capitalize chữ đầu
+  const storedUsername = String(row.username);
+  const capitalizedFirst = storedUsername.charAt(0).toUpperCase() + storedUsername.slice(1);
+  if (username !== storedUsername && username !== capitalizedFirst) {
+    // Cố tình verify password để giữ timing constant — chống timing attack
     await verifyPassword(password, "pbkdf2$10000$00$00", null);
     return { success: false, error: generic };
   }
