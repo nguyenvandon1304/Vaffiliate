@@ -45,14 +45,30 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
+          set -euo pipefail
           if [ -z "$DATABASE_URL" ]; then
             echo "❌ Thiếu DATABASE_URL secret!"
             exit 1
           fi
           mkdir -p backups
           STAMP=$(date -u +"%Y-%m-%d_%H%M%S")
+          RAW_FILE="backups/vaffiliate_${STAMP}.sql"
           DUMP_FILE="backups/vaffiliate_${STAMP}.sql.gz"
           echo "Backup → $DUMP_FILE"
+
+          # Test connection trước để biết lỗi sớm + log rõ ràng (ẩn password)
+          echo "→ Testing connection..."
+          if ! psql "$DATABASE_URL" -c "SELECT version();" > /tmp/version.log 2>&1; then
+            echo "❌ Không kết nối được database. Log:"
+            cat /tmp/version.log
+            exit 1
+          fi
+          cat /tmp/version.log
+          echo "→ Connection OK"
+
+          # Dump ra file trước (không pipe gzip) để bắt lỗi pg_dump rõ ràng.
+          # --no-sync để nhanh hơn (an toàn vì không phải dump local).
+          echo "→ Running pg_dump..."
           pg_dump "$DATABASE_URL" \
             --no-owner \
             --no-privileges \
@@ -60,7 +76,18 @@ jobs:
             --if-exists \
             --quote-all-identifiers \
             --format=plain \
-            | gzip -9 > "$DUMP_FILE"
+            --no-sync \
+            --file="$RAW_FILE" \
+            --verbose 2> /tmp/pgdump.log || {
+              echo "❌ pg_dump failed. stderr:"
+              cat /tmp/pgdump.log
+              exit 1
+            }
+          # In dòng cuối stderr (verbose log) để thấy đã dump bao nhiêu table
+          tail -20 /tmp/pgdump.log
+
+          # Gzip riêng
+          gzip -9 "$RAW_FILE"
           ls -lh "$DUMP_FILE"
           echo "DUMP_FILE=$DUMP_FILE" >> $GITHUB_ENV
           echo "STAMP=$STAMP" >> $GITHUB_ENV
