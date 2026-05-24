@@ -170,6 +170,52 @@ export async function checkRapidWithdraw(userId: number): Promise<void> {
   }
 }
 
+/**
+ * Detect "salami slicing" / shaving pattern — rút nhiều lần số nhỏ liên tục.
+ * Mỗi withdraw < 100k và ≥ 5 lần trong 24h → flag medium.
+ * Mỗi withdraw < 50k và ≥ 10 lần trong 24h → flag high.
+ *
+ * Pattern này thường xuất hiện khi attacker test threshold approval admin.
+ */
+export async function checkShavingWithdraw(userId: number): Promise<void> {
+  const db = await getDb();
+  const row = await db.get(
+    `SELECT
+       COUNT(*) AS total_count,
+       COUNT(*) FILTER (WHERE amount < 100000) AS small_count,
+       COUNT(*) FILTER (WHERE amount < 50000) AS micro_count
+     FROM withdrawals
+     WHERE user_id = ? AND created_at > NOW() - INTERVAL '24 hours'`,
+    [userId],
+  );
+  const microCount = Number(row?.micro_count ?? 0);
+  const smallCount = Number(row?.small_count ?? 0);
+
+  if (microCount >= 10) {
+    await flagFraud({
+      userId,
+      type: "rapid_withdraw",
+      severity: "high",
+      detail: `Salami slicing: ${microCount} yêu cầu < 50k trong 24h`,
+      notifyAdmin: true,
+    });
+  } else if (smallCount >= 5) {
+    await flagFraud({
+      userId,
+      type: "rapid_withdraw",
+      severity: "medium",
+      detail: `Shaving pattern: ${smallCount} yêu cầu < 100k trong 24h`,
+    });
+  }
+}
+
+/**
+ * Detect đăng ký từ TOR exit node / VPN nổi tiếng (qua country code).
+ * Đơn giản: nếu country của IP đăng ký không phải VN/SG/etc và ≥3 user/24h → flag.
+ *
+ * Hiện chưa cần check chi tiết qua TOR API — tích hợp khi user nhiều hơn.
+ */
+
 /* ─────────────── Admin queries ─────────────── */
 
 export interface FraudFlag {

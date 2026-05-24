@@ -428,6 +428,45 @@ async function initSchema(database: DbAdapter): Promise<void> {
   await database.exec("CREATE INDEX IF NOT EXISTS idx_wishlist_user ON wishlist(user_id, created_at DESC)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_wishlist_check ON wishlist(last_checked_at)");
 
+  // ─── Migrations idempotent: thêm cột country cho known_devices ───
+  // Postgres không có "ADD COLUMN IF NOT EXISTS" trên một số version cũ → dùng try/catch
+  try {
+    await database.exec("ALTER TABLE known_devices ADD COLUMN IF NOT EXISTS country TEXT");
+  } catch (e) {
+    console.warn("[migration] add country column to known_devices:", e);
+  }
+
+  // ─── Login history (Group 5 #19) ───
+  // Lưu mỗi lần login thành công kèm IP + country + UA → user xem map IP đã login.
+  await database.exec(`
+    CREATE TABLE IF NOT EXISTS login_history (
+      id BIGSERIAL PRIMARY KEY,
+      user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      ip TEXT,
+      country TEXT,
+      user_agent TEXT,
+      is_new_device INTEGER DEFAULT 0,
+      is_new_country INTEGER DEFAULT 0,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
+  await database.exec("CREATE INDEX IF NOT EXISTS idx_login_history_user ON login_history(user_id, created_at DESC)");
+
+  // ─── IP blocklist (Group 5 #19) ───
+  // IP bị auto-block sau X lần fail rotation. Auto expire sau time-to-live.
+  await database.exec(`
+    CREATE TABLE IF NOT EXISTS ip_blocklist (
+      id BIGSERIAL PRIMARY KEY,
+      ip TEXT NOT NULL UNIQUE,
+      reason TEXT,
+      blocked_until TIMESTAMPTZ,
+      fail_count INTEGER DEFAULT 0,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
+  await database.exec("CREATE INDEX IF NOT EXISTS idx_ip_blocklist_ip ON ip_blocklist(ip)");
+  await database.exec("CREATE INDEX IF NOT EXISTS idx_ip_blocklist_until ON ip_blocklist(blocked_until)");
+
   // Seed default admin
   const adminExists = await database.get("SELECT id FROM users WHERE username = 'admin'", []);
   if (!adminExists) {

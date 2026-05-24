@@ -56,11 +56,12 @@ export async function POST(request: NextRequest) {
     }
   })();
 
-  // Anti-fraud — check rapid withdraw pattern.
+  // Anti-fraud — check rapid withdraw + shaving pattern.
   void (async () => {
     try {
-      const { checkRapidWithdraw } = await import("@/lib/fraud");
+      const { checkRapidWithdraw, checkShavingWithdraw } = await import("@/lib/fraud");
       await checkRapidWithdraw(auth.user.id);
+      await checkShavingWithdraw(auth.user.id);
     } catch (e) {
       console.warn("[withdraw] fraud check failed:", e);
     }

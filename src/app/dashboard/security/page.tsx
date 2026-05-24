@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { CaffiliateLogo } from "@/components/icons";
 import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { TwoFactorSection } from "@/components/TwoFactorSection";
+import { LoginHistorySection } from "@/components/LoginHistorySection";
 
 interface SessionItem {
   id: number;
@@ -297,6 +298,9 @@ export default function SecurityPage() {
             </ul>
           )}
         </section>
+
+        {/* Lịch sử đăng nhập + IP map (Group 5 #19) */}
+        <LoginHistorySection />
 
         {/* Delete account */}
         <section className="bg-white dark:bg-zinc-900 rounded-2xl border border-red-100 dark:border-red-900/40 shadow-sm p-6">

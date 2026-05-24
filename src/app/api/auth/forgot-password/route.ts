@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { createPasswordResetToken } from "@/lib/db";
 import { sendPasswordResetEmail } from "@/lib/email";
 import { getClientIp, verifyTurnstile } from "@/lib/turnstile";
-import { getRateLimitKey, rateLimit } from "@/lib/rate-limit";
+import { getRateLimitKey, rateLimitAsync } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
-    const limit = rateLimit(getRateLimitKey(request.headers, "forgot"), { max: 5, windowMs: 60 * 60 * 1000 });
+    const limit = await rateLimitAsync(getRateLimitKey(request.headers, "forgot"), { max: 5, windowMs: 60 * 60 * 1000 });
     if (!limit.allowed) {
       return NextResponse.json(
         { success: false, error: `Quá nhiều yêu cầu. Vui lòng đợi ${limit.retryAfterSec}s rồi thử lại.` },

@@ -1,14 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import { loginUser, logAudit } from "@/lib/db";
 import { sendNewDeviceAlertEmail } from "@/lib/email";
-import { notifyAdminLoginNewDevice } from "@/lib/telegram";
+import { notifyAdminLoginNewDevice, notifyCustom } from "@/lib/telegram";
 import { grantBadge } from "@/lib/achievements";
-import { getRateLimitKey, rateLimit } from "@/lib/rate-limit";
+import { getRateLimitKey, rateLimit, rateLimitAsync } from "@/lib/rate-limit";
 import { CAPTCHA_THRESHOLD, computeFingerprint } from "@/lib/security";
 import { getClientIp, verifyTurnstile } from "@/lib/turnstile";
+import {
+  getCountryFromIp,
+  countryFlag,
+  countryNameVi,
+  isIpBlocked,
+  detectAndBlockRotation,
+  recordLoginHistory,
+  hasLoggedFromCountry,
+} from "@/lib/geo";
 
 export async function POST(request: NextRequest) {
-  const limit = rateLimit(getRateLimitKey(request.headers, "login"), { max: 10, windowMs: 15 * 60 * 1000 });
+  // Block IP nằm trong blocklist sớm — không cần đụng DB user
+  const earlyIp = getClientIp(request.headers);
+  if (await isIpBlocked(earlyIp)) {
+    return NextResponse.json(
+      { success: false, error: "IP của bạn đã bị tạm khóa do hoạt động đáng ngờ. Liên hệ admin để mở khóa." },
+      { status: 403 },
+    );
+  }
+
+  const limit = await rateLimitAsync(getRateLimitKey(request.headers, "login"), { max: 10, windowMs: 15 * 60 * 1000 });
   if (!limit.allowed) {
     return NextResponse.json(
       { success: false, error: `Quá nhiều lần thử. Vui lòng đợi ${limit.retryAfterSec}s rồi thử lại.` },
@@ -57,7 +75,14 @@ export async function POST(request: NextRequest) {
       userId: result.user?.id ?? null,
       ip,
       userAgent,
+      target: typeof username === "string" ? username : null,
       detail: typeof username === "string" ? `username=${username}${result.needTotp ? " (totp)" : ""}` : null,
+    });
+    // Detect IP rotation pattern — fire-and-forget, không block response.
+    void detectAndBlockRotation(ip).then((res) => {
+      if (res.blocked && res.reason) {
+        void notifyCustom("🚨 IP rotation auto-block", `IP: ${ip}\n${res.reason}`);
+      }
     });
     return NextResponse.json(
       {
@@ -147,6 +172,43 @@ export async function POST(request: NextRequest) {
   // Grant badge "first_login" — idempotent. Chỉ earn lần đầu, các lần login sau no-op.
   if (result.user) {
     void grantBadge(result.user.id, "first_login");
+  }
+
+  // Geo lookup + login history + new country alert (Group 5 #19) — async, không block.
+  if (result.user) {
+    const userId = result.user.id;
+    const userEmail = result.user.email;
+    const userUsername = result.user.username;
+    const isNewDevice = result.isNewDevice ?? false;
+    void (async () => {
+      try {
+        const country = await getCountryFromIp(ip, request.headers);
+        const isNewCountry = country ? !(await hasLoggedFromCountry(userId, country)) : false;
+        await recordLoginHistory(userId, {
+          ip: ip ?? null,
+          country,
+          userAgent: userAgent ?? null,
+          isNewDevice,
+          isNewCountry,
+        });
+        // Alert nếu login từ country mới (sau khi user đã có ≥1 history)
+        if (isNewCountry && country) {
+          await logAudit("user.login.new_country", {
+            userId,
+            ip,
+            userAgent,
+            target: country,
+            detail: `Country: ${country}`,
+          });
+          void notifyCustom(
+            "🌍 Login từ quốc gia mới",
+            `User: ${userUsername} (${userEmail ?? "no-email"})\nQuốc gia: ${countryFlag(country)} ${countryNameVi(country)}\nIP: ${ip ?? "?"}`,
+          );
+        }
+      } catch (e) {
+        console.error("[login] geo/history failed:", e);
+      }
+    })();
   }
 
   return response;

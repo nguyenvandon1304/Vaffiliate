@@ -6,11 +6,11 @@ import {
 } from "@/lib/db";
 import { sendEmailVerification } from "@/lib/email";
 import { getClientIp } from "@/lib/turnstile";
-import { getRateLimitKey, rateLimit } from "@/lib/rate-limit";
+import { getRateLimitKey, rateLimitAsync } from "@/lib/rate-limit";
 import { isEmail } from "@/lib/validate";
 
 export async function POST(request: NextRequest) {
-  const limit = rateLimit(getRateLimitKey(request.headers, "verify-resend"), { max: 5, windowMs: 60 * 60 * 1000 });
+  const limit = await rateLimitAsync(getRateLimitKey(request.headers, "verify-resend"), { max: 5, windowMs: 60 * 60 * 1000 });
   if (!limit.allowed) {
     return NextResponse.json(
       { success: false, error: `Quá nhiều yêu cầu. Vui lòng đợi ${limit.retryAfterSec}s rồi thử lại.` },
