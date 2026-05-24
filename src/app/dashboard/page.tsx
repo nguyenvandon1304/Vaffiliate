@@ -452,7 +452,7 @@ function DashboardContent() {
           <ProfileSection user={user} onProfileUpdated={refreshUser} onBack={() => setAccountView(null)} />
         )}
         {accountView === "bank" && user && (
-          <BankSection bankAccounts={bankAccounts} onBankUpdated={fetchBankAccounts} onBack={() => setAccountView(null)} />
+          <BankSection user={user} bankAccounts={bankAccounts} onBankUpdated={fetchBankAccounts} onProfileUpdated={refreshUser} onBack={() => setAccountView(null)} />
         )}
 
         {!accountView && (
@@ -949,13 +949,12 @@ function ProfileSection({ user, onProfileUpdated, onBack }: { user: UserInfo; on
         </div>
       </div>
 
-      {/* Mật khẩu rút tiền */}
-      <WithdrawPinSection hasPin={user.has_withdraw_pin} onPinUpdated={onProfileUpdated} />
+      {/* Mật khẩu rút tiền — đã chuyển sang mục Tài khoản ngân hàng */}
     </div>
   );
 }
 
-function BankSection({ bankAccounts, onBankUpdated, onBack }: { bankAccounts: BankAccountData[]; onBankUpdated: () => void; onBack: () => void }) {
+function BankSection({ user, bankAccounts, onBankUpdated, onProfileUpdated, onBack }: { user: UserInfo; bankAccounts: BankAccountData[]; onBankUpdated: () => void; onProfileUpdated: () => void; onBack: () => void }) {
   const [showAddBank, setShowAddBank] = useState(false);
   const [selectedBank, setSelectedBank] = useState("");
   const [accNumber, setAccNumber] = useState("");
@@ -1072,6 +1071,9 @@ function BankSection({ bankAccounts, onBankUpdated, onBack }: { bankAccounts: Ba
           </div>
         )}
       </div>
+
+      {/* Mật khẩu rút tiền — chuyển từ ProfileSection xuống đây để gần ngân hàng + form rút */}
+      <WithdrawPinSection hasPin={user.has_withdraw_pin} onPinUpdated={onProfileUpdated} />
     </div>
   );
 }
