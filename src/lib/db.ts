@@ -605,24 +605,36 @@ export async function registerUser(
     return { success: false, error: "Tên đăng nhập chỉ chứa chữ, số, gạch dưới (3–20 ký tự)" };
   }
 
+  // Chuẩn hóa username về lowercase khi lưu — login sẽ so sánh case-insensitive
+  // Email cũng lowercase để khớp các flow gửi/xác minh email.
+  const normalizedUsername = username.toLowerCase();
+  const normalizedEmail = email.trim().toLowerCase();
+
   const database = await getDb();
 
-  const existingUser = await database.get("SELECT id FROM users WHERE username = ?", [username]);
+  // Check trùng username case-insensitive
+  const existingUser = await database.get(
+    "SELECT id FROM users WHERE LOWER(username) = LOWER(?)",
+    [normalizedUsername],
+  );
   if (existingUser) return { success: false, error: "Tên đăng nhập đã tồn tại" };
 
-  const existingEmail = await database.get("SELECT id FROM users WHERE email = ?", [email]);
+  const existingEmail = await database.get(
+    "SELECT id FROM users WHERE LOWER(email) = LOWER(?)",
+    [normalizedEmail],
+  );
   if (existingEmail) return { success: false, error: "Email đã được sử dụng" };
 
   const passwordHash = await hashPasswordEncoded(password);
 
   await database.run(
     "INSERT INTO users (username, email, password_hash, salt, display_name, email_verified) VALUES (?, ?, ?, ?, ?, 0)",
-    [username, email, passwordHash, "", username],
+    [normalizedUsername, normalizedEmail, passwordHash, "", username],
   );
 
   const row = await database.get(
     "SELECT id, username, email, display_name, phone, withdraw_pin_hash, role, email_verified, created_at, last_login, is_active FROM users WHERE username = ?",
-    [username],
+    [normalizedUsername],
   );
   saveDb();
 
@@ -646,12 +658,14 @@ export async function loginUser(
 }> {
   const database = await getDb();
 
+  // Username so sánh case-insensitive — user có thể nhập "Nguyenvandon",
+  // "NGUYENVANDON" v.v. miễn là khớp với username gốc khi viết thường.
   const row = await database.get(
     `SELECT id, username, email, password_hash, salt, display_name, phone, role,
             email_verified, created_at, last_login, is_active,
             login_failed_count, login_locked_until, totp_enabled, totp_secret,
             withdraw_pin_hash
-     FROM users WHERE username = ?`,
+     FROM users WHERE LOWER(username) = LOWER(?)`,
     [username],
   );
 
@@ -985,7 +999,7 @@ export async function getUserByEmail(
 ): Promise<{ id: number; username: string; email_verified: boolean } | null> {
   const database = await getDb();
   const row = await database.get(
-    "SELECT id, username, email_verified FROM users WHERE email = ?",
+    "SELECT id, username, email_verified FROM users WHERE LOWER(email) = LOWER(?)",
     [email],
   );
   if (!row) return null;
@@ -1240,7 +1254,7 @@ export async function updateUserProfile(
   const database = await getDb();
 
   if (data.email) {
-    const existing = await database.get("SELECT id FROM users WHERE email = ? AND id != ?", [
+    const existing = await database.get("SELECT id FROM users WHERE LOWER(email) = LOWER(?) AND id != ?", [
       data.email,
       userId,
     ]);
@@ -1486,7 +1500,7 @@ export async function createWithdrawRequest(
 
 export async function resetWallet(username: string): Promise<{ success: boolean; error?: string }> {
   const database = await getDb();
-  const user = await database.get("SELECT id FROM users WHERE username = ?", [username]);
+  const user = await database.get("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", [username]);
   if (!user) return { success: false, error: "Không tìm thấy người dùng" };
   await database.run("DELETE FROM wallet WHERE user_id = ?", [Number(user.id)]);
   return { success: true };
@@ -1496,7 +1510,7 @@ export async function getWalletBalance(
   username: string,
 ): Promise<{ success: boolean; balance?: number; error?: string }> {
   const database = await getDb();
-  const user = await database.get("SELECT id FROM users WHERE username = ?", [username]);
+  const user = await database.get("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", [username]);
   if (!user) return { success: false, error: "Không tìm thấy người dùng" };
   const row = await database.get(
     "SELECT COALESCE(SUM(CASE WHEN type='credit' THEN amount ELSE -amount END), 0) AS balance FROM wallet WHERE user_id = ?",
@@ -1511,7 +1525,7 @@ export async function addBalance(
   label: string = "Biến động số dư",
 ): Promise<{ success: boolean; error?: string }> {
   const database = await getDb();
-  const user = await database.get("SELECT id FROM users WHERE username = ?", [username]);
+  const user = await database.get("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", [username]);
   if (!user) return { success: false, error: "Không tìm thấy người dùng" };
   await database.run(
     "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
@@ -1526,7 +1540,7 @@ export async function subtractBalance(
   label: string = "Biến động số dư",
 ): Promise<{ success: boolean; error?: string }> {
   const database = await getDb();
-  const user = await database.get("SELECT id FROM users WHERE username = ?", [username]);
+  const user = await database.get("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", [username]);
   if (!user) return { success: false, error: "Không tìm thấy người dùng" };
 
   const row = await database.get(
@@ -1629,7 +1643,7 @@ export async function createPasswordResetToken(
 ): Promise<{ success: boolean; token?: string; userId?: number; username?: string; error?: string }> {
   const database = await getDb();
   const user = await database.get(
-    "SELECT id, username, is_active FROM users WHERE email = ?",
+    "SELECT id, username, is_active FROM users WHERE LOWER(email) = LOWER(?)",
     [email],
   );
   if (!user) return { success: false, error: "Email không hợp lệ" };
@@ -3311,7 +3325,7 @@ export async function attachReferral(
 ): Promise<{ success: boolean; error?: string }> {
   const database = await getDb();
   const refRow = await database.get(
-    "SELECT id, is_active FROM users WHERE username = ?",
+    "SELECT id, is_active FROM users WHERE LOWER(username) = LOWER(?)",
     [referrerUsername],
   );
   if (!refRow) return { success: false, error: "Người giới thiệu không tồn tại" };

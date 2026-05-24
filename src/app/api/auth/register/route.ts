@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
           // Lấy referrer ID từ username
           const { getDb } = await import("@/lib/db");
           const db = await getDb();
-          const refUser = await db.get("SELECT id FROM users WHERE username = ?", [ref.trim()]);
+          const refUser = await db.get("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", [ref.trim()]);
           if (refUser) {
             await checkSelfReferral(Number(refUser.id), result.user!.id);
           }
