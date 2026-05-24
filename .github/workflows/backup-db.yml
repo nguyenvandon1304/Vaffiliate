@@ -31,12 +31,12 @@ jobs:
       - name: Checkout (chỉ để có git context)
         uses: actions/checkout@v4
 
-      - name: Cài đặt postgresql-client (pg_dump 16)
+      - name: Cài đặt postgresql-client (pg_dump 17)
         run: |
           sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
           curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
           sudo apt-get update
-          sudo apt-get install -y postgresql-client-16
+          sudo apt-get install -y postgresql-client-17
 
       - name: Verify pg_dump version
         run: pg_dump --version

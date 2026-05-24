@@ -85,8 +85,8 @@ hoặc **Backblaze B2** (rẻ hơn S3, $0.005/GB).
 
 ### Workflow fail với "pg_dump: server version mismatch"
 - pg_dump trong workflow phải khớp Postgres server version. Supabase đang
-  dùng Postgres 16, workflow đang cài `postgresql-client-16` → ổn.
-- Nếu Supabase nâng version, sửa `postgresql-client-16` → version mới.
+  dùng Postgres 17, workflow đang cài `postgresql-client-17` → ổn.
+- Nếu Supabase nâng version, sửa `postgresql-client-17` → version mới.
 
 ### Workflow fail với "could not connect to server"
 - Check secret `DATABASE_URL` đúng format Session Pooler chưa
