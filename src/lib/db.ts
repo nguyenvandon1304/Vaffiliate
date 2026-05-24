@@ -2019,22 +2019,34 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
     "Đã hoàn tiền": 3,
   };
 
-  // Pre-load tier config 1 lần
-  const basePercent = Number(await getSetting("cashback_base_percent")) || 50;
-  const milestone = Math.max(1, Number(await getSetting("referral_milestone_count")) || 50);
-  const bonusPercent = Number(await getSetting("referral_milestone_bonus_percent")) || 5;
+  // Pre-load tier list 1 lần — tier system mới (Bronze/Silver/Gold/VIP).
+  const { getTiers } = await import("@/lib/tier");
+  const tierList = await getTiers();
 
-  // Async cache rate per user
+  // Async cache rate per user — tính rate dựa trên tier (orders + referrals).
+  // Cache trong batch tránh query lặp lại với cùng user.
   const rateCache = new Map<number, number>();
   async function getRate(tx: DbAdapter, userId: number): Promise<number> {
     const cached = rateCache.get(userId);
     if (cached !== undefined) return cached;
     const row = await tx.get(
-      "SELECT COUNT(*) AS c FROM referrals WHERE referrer_user_id = ? AND bonus_credited = 1",
+      `SELECT
+        COALESCE((SELECT COUNT(*) FROM orders WHERE user_id = $1 AND status = 'Đã hoàn tiền'), 0) AS orders_count,
+        COALESCE((SELECT COUNT(*) FROM referrals WHERE referrer_user_id = $1 AND bonus_credited = 1), 0) AS referrals_count`,
       [userId],
     );
-    const active = Number(row?.c ?? 0);
-    const rate = active >= milestone ? basePercent + bonusPercent : basePercent;
+    const ordersCount = Number(row?.orders_count ?? 0);
+    const referralsCount = Number(row?.referrals_count ?? 0);
+
+    // Duyệt từ VIP xuống → tìm tier cao nhất user qualified.
+    let rate = tierList[0].cashbackPercent; // Bronze fallback
+    for (let i = tierList.length - 1; i >= 0; i--) {
+      const t = tierList[i];
+      if (ordersCount >= t.minOrders || referralsCount >= t.minReferrals) {
+        rate = t.cashbackPercent;
+        break;
+      }
+    }
     rateCache.set(userId, rate);
     return rate;
   }
@@ -2116,32 +2128,16 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
               );
               const refUserId = Number(refRow.referrer_user_id);
               invalidateRate(refUserId);
-              const newCountRow = await tx.get(
-                "SELECT COUNT(*) AS c FROM referrals WHERE referrer_user_id = ? AND bonus_credited = 1",
-                [refUserId],
+              // Generic notification — tier system check riêng (gọi cuối transaction).
+              await tx.run(
+                "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
+                [
+                  refUserId,
+                  "🤝 Bạn bè đã có đơn đầu tiên!",
+                  `Bạn bè bạn giới thiệu đã có đơn hoàn tiền. Tiếp tục mời để lên tier cao hơn!`,
+                  "referral",
+                ],
               );
-              const newCount = Number(newCountRow?.c ?? 0);
-              if (newCount === milestone) {
-                await tx.run(
-                  "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
-                  [
-                    refUserId,
-                    `🎉 Đạt mốc ${milestone} bạn bè active!`,
-                    `Tỷ lệ hoàn tiền của bạn đã được nâng lên ${basePercent + bonusPercent}% (+${bonusPercent}%) cho mọi đơn từ giờ.`,
-                    "referral",
-                  ],
-                );
-              } else {
-                await tx.run(
-                  "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
-                  [
-                    refUserId,
-                    "Bạn bè đã có đơn đầu tiên!",
-                    `Bạn bè bạn giới thiệu đã có đơn hoàn tiền đầu tiên. Tiến độ ${newCount}/${milestone} để mở tier +${bonusPercent}%.`,
-                    "referral",
-                  ],
-                );
-              }
             }
           } else if (newStatus === "Đã hủy" && oldStatus === "Đã hoàn tiền" && oldCashback > 0) {
             await tx.run(
@@ -2248,32 +2244,16 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
           );
           const refUserId = Number(refRow.referrer_user_id);
           invalidateRate(refUserId);
-          const newCountRow = await tx.get(
-            "SELECT COUNT(*) AS c FROM referrals WHERE referrer_user_id = ? AND bonus_credited = 1",
-            [refUserId],
+          // Generic notification — tier check riêng cuối transaction.
+          await tx.run(
+            "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
+            [
+              refUserId,
+              "🤝 Bạn bè đã có đơn đầu tiên!",
+              `Bạn bè bạn giới thiệu đã có đơn hoàn tiền. Tiếp tục mời để lên tier cao hơn!`,
+              "referral",
+            ],
           );
-          const newCount = Number(newCountRow?.c ?? 0);
-          if (newCount === milestone) {
-            await tx.run(
-              "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
-              [
-                refUserId,
-                `🎉 Đạt mốc ${milestone} bạn bè active!`,
-                `Tỷ lệ hoàn tiền của bạn đã được nâng lên ${basePercent + bonusPercent}% (+${bonusPercent}%) cho mọi đơn từ giờ.`,
-                "referral",
-              ],
-            );
-          } else {
-            await tx.run(
-              "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
-              [
-                refUserId,
-                "Bạn bè đã có đơn đầu tiên!",
-                `Bạn bè bạn giới thiệu đã có đơn hoàn tiền đầu tiên. Tiến độ ${newCount}/${milestone} để mở tier +${bonusPercent}%.`,
-                "referral",
-              ],
-            );
-          }
         }
       }
 
@@ -2298,6 +2278,24 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
       });
     }
   });
+
+  // Sau transaction → check tier-up cho mọi user bị ảnh hưởng (đã import đơn).
+  // Chạy ngoài transaction vì checkAndNotifyTierUp tự dùng connection riêng.
+  const affectedUsers = new Set<number>();
+  for (const r of result.results) {
+    if (r.userId) affectedUsers.add(r.userId);
+  }
+  // Fire-and-forget — không cần đợi để response import nhanh.
+  void (async () => {
+    try {
+      const { checkAndNotifyTierUp } = await import("@/lib/tier");
+      for (const uid of affectedUsers) {
+        await checkAndNotifyTierUp(uid);
+      }
+    } catch (e) {
+      console.warn("[importOrders] tier check failed:", e);
+    }
+  })();
 
   return result;
 }
@@ -2587,6 +2585,17 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   cashback_base_percent: "50",
   referral_milestone_count: "50",
   referral_milestone_bonus_percent: "5",
+  // Tier system — Silver/Gold/VIP threshold + cashback %.
+  // Bronze dùng cashback_base_percent ở trên (default 50).
+  tier_silver_orders: "50",
+  tier_silver_referrals: "25",
+  tier_silver_percent: "53",
+  tier_gold_orders: "100",
+  tier_gold_referrals: "50",
+  tier_gold_percent: "55",
+  tier_vip_orders: "300",
+  tier_vip_referrals: "100",
+  tier_vip_percent: "58",
   // Mini-game vòng quay may mắn — earn-based, không phải cooldown.
   // User mua đủ N đơn hoàn tiền → +1 lượt. Mời đủ M bạn active → +1 lượt.
   spin_enabled: "1",
@@ -3032,30 +3041,34 @@ export interface CashbackRateInfo {
   basePercent: number;
   bonusPercent: number;
   reachedMilestone: boolean;
+  /** Tier code hiện tại — bronze/silver/gold/vip. Field mới cho tier system. */
+  tierCode?: string;
+  /** Tier name + icon. */
+  tierName?: string;
+  tierIcon?: string;
 }
 
 export async function getCashbackRateForUser(userId: number): Promise<CashbackRateInfo> {
-  const database = await getDb();
+  // Delegate sang tier system mới — tính rate dựa trên tier (Bronze/Silver/Gold/VIP),
+  // không phải milestone bool đơn giản như cũ.
+  const { getUserTier } = await import("@/lib/tier");
+  const tier = await getUserTier(userId);
 
-  const base = Number(await getSetting("cashback_base_percent")) || 50;
-  const milestone = Math.max(1, Number(await getSetting("referral_milestone_count")) || 50);
-  const bonus = Number(await getSetting("referral_milestone_bonus_percent")) || 5;
-
-  const row = await database.get(
-    "SELECT COUNT(*) AS c FROM referrals WHERE referrer_user_id = ? AND bonus_credited = 1",
-    [userId],
-  );
-  const active = Number(row?.c ?? 0);
-  const reached = active >= milestone;
-  const ratePercent = reached ? base + bonus : base;
+  // Giữ shape cũ cho callsite — milestone trỏ về Silver threshold (đầu tiên).
+  const { getTiers } = await import("@/lib/tier");
+  const tiers = await getTiers();
+  const silver = tiers.find((t) => t.code === "silver") ?? tiers[1];
 
   return {
-    ratePercent,
-    activeReferrals: active,
-    milestone,
-    basePercent: base,
-    bonusPercent: bonus,
-    reachedMilestone: reached,
+    ratePercent: tier.cashbackPercent,
+    activeReferrals: tier.referralsCount,
+    milestone: silver?.minReferrals ?? 25,
+    basePercent: tiers[0]?.cashbackPercent ?? 50,
+    bonusPercent: tier.cashbackPercent - (tiers[0]?.cashbackPercent ?? 50),
+    reachedMilestone: tier.current.code !== "bronze",
+    tierCode: tier.current.code,
+    tierName: tier.current.name,
+    tierIcon: tier.current.icon,
   };
 }
 

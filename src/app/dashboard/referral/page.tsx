@@ -29,6 +29,30 @@ interface RateInfo {
   basePercent: number;
   bonusPercent: number;
   reachedMilestone: boolean;
+  tierCode?: string;
+  tierName?: string;
+  tierIcon?: string;
+}
+
+interface TierData {
+  code: string;
+  name: string;
+  icon: string;
+  color: string;
+  minOrders: number;
+  minReferrals: number;
+  cashbackPercent: number;
+}
+
+interface TierInfo {
+  current: TierData;
+  next: TierData | null;
+  ordersCount: number;
+  referralsCount: number;
+  progressPercent: number;
+  ordersToNext: number;
+  referralsToNext: number;
+  cashbackPercent: number;
 }
 
 interface User { id: number; username: string; display_name: string | null; }
@@ -56,6 +80,8 @@ export default function ReferralPage() {
   const [user, setUser] = useState<User | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [rate, setRate] = useState<RateInfo | null>(null);
+  const [tier, setTier] = useState<TierInfo | null>(null);
+  const [allTiers, setAllTiers] = useState<TierData[]>([]);
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
   const [showQr, setShowQr] = useState(false);
@@ -64,13 +90,17 @@ export default function ReferralPage() {
     Promise.all([
       fetch("/api/auth/me").then(r => r.json()),
       fetch("/api/referrals").then(r => r.json()),
-      // sync=1 → backend tự catch up badge cũ rồi mới trả về danh sách.
       fetch("/api/achievements?sync=1").then(r => r.json()),
-    ]).then(([me, ref, ach]) => {
+      fetch("/api/tier").then(r => r.json()),
+    ]).then(([me, ref, ach, tierRes]) => {
       if (!me.success) { router.push("/"); return; }
       setUser(me.user);
       if (ref.success) { setStats(ref.stats); setRate(ref.rate); }
       if (ach.success) setBadges(ach.badges);
+      if (tierRes.success) {
+        setTier(tierRes.info);
+        setAllTiers(tierRes.tiers);
+      }
       setLoading(false);
     });
   }, [router]);
@@ -185,48 +215,120 @@ export default function ReferralPage() {
           </div>
         </section>
 
-        {/* Tier progress — chỉ hiện khi chưa đạt mốc, hoặc badge celebration khi đã đạt */}
-        {rate && (
-          <section className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm p-5">
-            {rate.reachedMilestone ? (
-              <div className="flex items-center gap-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-2xl shadow-md">
-                  🏆
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-gray-800 dark:text-zinc-100">
-                    Đã mở khoá tier {rate.ratePercent}%
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">
-                    Bạn đã có {rate.activeReferrals} bạn bè active. Mọi đơn hoàn tiền giờ nhận {rate.basePercent}% + {rate.bonusPercent}% = <b className="text-orange-600 dark:text-orange-400">{rate.ratePercent}%</b>.
-                  </p>
-                </div>
+        {/* Tier system — hiện current tier + progress đến tier kế + bảng so sánh */}
+        {tier && (
+          <section className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm p-5 space-y-4">
+            {/* Header: current tier + cashback rate */}
+            <div className="flex items-center gap-4">
+              <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-300 via-orange-400 to-rose-500 flex items-center justify-center text-3xl shadow-lg shadow-orange-500/30">
+                {tier.current.icon}
               </div>
-            ) : (
-              <>
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <p className="text-sm font-bold text-gray-800 dark:text-zinc-100">
-                      Tiến độ mở tier {rate.basePercent + rate.bonusPercent}%
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">
-                      Mời {rate.milestone} bạn bè có ít nhất 1 đơn hoàn tiền → cộng thêm {rate.bonusPercent}% vào tỷ lệ.
-                    </p>
-                  </div>
-                  <span className="text-sm font-bold text-orange-600 dark:text-orange-400 whitespace-nowrap">
-                    {rate.activeReferrals}/{rate.milestone}
-                  </span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline gap-2">
+                  <p className="text-sm text-gray-500 dark:text-zinc-400">Tier hiện tại</p>
+                  <span className="text-base font-bold text-gray-800 dark:text-zinc-100">{tier.current.name}</span>
                 </div>
-                <div className="w-full h-2.5 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                <p className="text-2xl font-extrabold bg-gradient-to-r from-orange-500 to-rose-500 bg-clip-text text-transparent">
+                  Hoàn {tier.cashbackPercent}% mỗi đơn
+                </p>
+              </div>
+            </div>
+
+            {/* Progress đến tier tiếp theo */}
+            {tier.next ? (
+              <div>
+                <div className="flex items-center justify-between mb-2 text-xs">
+                  <span className="text-gray-500 dark:text-zinc-400">
+                    Tiến độ lên <strong className="text-gray-800 dark:text-zinc-100">{tier.next.icon} {tier.next.name}</strong>
+                  </span>
+                  <span className="font-bold text-orange-600 dark:text-orange-400">{tier.progressPercent}%</span>
+                </div>
+                <div className="w-full h-3 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-orange-400 to-orange-500 rounded-full transition-all"
-                    style={{ width: `${Math.min(100, (rate.activeReferrals / rate.milestone) * 100)}%` }}
+                    className="h-full bg-gradient-to-r from-orange-400 via-rose-400 to-fuchsia-500 rounded-full transition-all"
+                    style={{ width: `${tier.progressPercent}%` }}
                   />
                 </div>
-                <p className="text-xs text-gray-400 dark:text-zinc-500 mt-2">
-                  Còn <b className="text-gray-600 dark:text-zinc-300">{Math.max(0, rate.milestone - rate.activeReferrals)}</b> bạn nữa để nâng từ {rate.basePercent}% lên {rate.basePercent + rate.bonusPercent}%.
+                <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
+                  <div className="bg-orange-50 dark:bg-orange-500/10 rounded-lg p-2">
+                    <div className="text-gray-500 dark:text-zinc-400">🛒 Đơn hoàn tiền</div>
+                    <div className="font-bold text-gray-800 dark:text-zinc-100 mt-0.5">
+                      {tier.ordersCount} <span className="text-gray-400 dark:text-zinc-500 font-normal">/ {tier.next.minOrders}</span>
+                    </div>
+                    {tier.ordersToNext > 0 && (
+                      <div className="text-[10px] text-orange-600 dark:text-orange-400 mt-0.5">
+                        Còn {tier.ordersToNext} đơn
+                      </div>
+                    )}
+                  </div>
+                  <div className="bg-rose-50 dark:bg-rose-500/10 rounded-lg p-2">
+                    <div className="text-gray-500 dark:text-zinc-400">🤝 Bạn mời active</div>
+                    <div className="font-bold text-gray-800 dark:text-zinc-100 mt-0.5">
+                      {tier.referralsCount} <span className="text-gray-400 dark:text-zinc-500 font-normal">/ {tier.next.minReferrals}</span>
+                    </div>
+                    {tier.referralsToNext > 0 && (
+                      <div className="text-[10px] text-rose-600 dark:text-rose-400 mt-0.5">
+                        Còn {tier.referralsToNext} bạn
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <p className="text-[11px] text-gray-400 dark:text-zinc-500 mt-2 text-center">
+                  💡 Đạt 1 trong 2 mốc trên là lên tier mới
                 </p>
-              </>
+              </div>
+            ) : (
+              <div className="bg-gradient-to-r from-violet-100 to-fuchsia-100 dark:from-violet-500/15 dark:to-fuchsia-500/15 rounded-xl p-4 text-center">
+                <p className="text-sm font-bold text-violet-700 dark:text-violet-300">
+                  💎 Bạn đã đạt tier cao nhất!
+                </p>
+                <p className="text-xs text-violet-600 dark:text-violet-400 mt-1">
+                  Hoàn {tier.cashbackPercent}% mãi mãi
+                </p>
+              </div>
+            )}
+
+            {/* Bảng so sánh tất cả tiers */}
+            {allTiers.length > 0 && (
+              <details className="group">
+                <summary className="text-xs font-semibold text-gray-500 dark:text-zinc-400 cursor-pointer hover:text-orange-500 select-none">
+                  Xem bảng tier đầy đủ ▾
+                </summary>
+                <div className="mt-3 overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="border-b border-gray-100 dark:border-zinc-800">
+                        <th className="text-left py-2 font-medium text-gray-400 dark:text-zinc-500">Tier</th>
+                        <th className="text-right py-2 font-medium text-gray-400 dark:text-zinc-500">Đơn HT</th>
+                        <th className="text-right py-2 font-medium text-gray-400 dark:text-zinc-500">Bạn mời</th>
+                        <th className="text-right py-2 font-medium text-gray-400 dark:text-zinc-500">Cashback</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allTiers.map((t) => {
+                        const isCurrent = t.code === tier.current.code;
+                        return (
+                          <tr
+                            key={t.code}
+                            className={`border-b border-gray-50 dark:border-zinc-800/50 last:border-0 ${
+                              isCurrent ? "bg-orange-50 dark:bg-orange-500/10 font-semibold" : ""
+                            }`}
+                          >
+                            <td className="py-2">
+                              <span className="mr-1.5">{t.icon}</span>
+                              {t.name}
+                              {isCurrent && <span className="ml-1.5 text-[9px] uppercase tracking-wider text-orange-600 dark:text-orange-400">Hiện tại</span>}
+                            </td>
+                            <td className="text-right py-2 text-gray-600 dark:text-zinc-300">{t.minOrders}+</td>
+                            <td className="text-right py-2 text-gray-600 dark:text-zinc-300">{t.minReferrals}+</td>
+                            <td className="text-right py-2 font-bold text-orange-600 dark:text-orange-400">{t.cashbackPercent}%</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </details>
             )}
           </section>
         )}
