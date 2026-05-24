@@ -5,6 +5,7 @@ import "./globals.css";
 import ChatButton from "@/components/ChatButton";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ToastProvider } from "@/components/Toast";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -95,6 +96,7 @@ export default function RootLayout({
           {children}
         </ToastProvider>
         <ChatButton />
+        <PWAInstallPrompt />
       </body>
     </html>
   );

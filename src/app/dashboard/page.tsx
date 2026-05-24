@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { CaffiliateLogo } from "@/components/icons";
 import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { NotificationBell } from "@/components/NotificationBell";
+import { useConfetti } from "@/components/Confetti";
+import { useOnboarding } from "@/components/OnboardingTour";
 import {
   ClockIcon3D,
   GridIcon3D,
@@ -182,6 +184,25 @@ function DashboardContent() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [leaderboardPeriod, setLeaderboardPeriod] = useState<"month" | "all">("month");
   const [loading, setLoading] = useState(true);
+
+  // Confetti khi user nhận cashback đầu tiên — trigger khi orders đầu tiên
+  // có status "Đã hoàn tiền" mà localStorage flag chưa set.
+  const { fire: fireConfetti, confettiNode } = useConfetti();
+
+  // Onboarding tour — chỉ hiện 1 lần khi user mới đăng nhập lần đầu.
+  const onboardingNode = useOnboarding();
+
+  useEffect(() => {
+    const completedOrders = orders.filter((o) => o.status === "Đã hoàn tiền");
+    if (completedOrders.length === 0) return;
+    const KEY = "first_cashback_celebrated";
+    try {
+      if (window.localStorage.getItem(KEY)) return;
+      window.localStorage.setItem(KEY, "1");
+      // Delay nhẹ để dashboard render xong + UI ổn định
+      window.setTimeout(() => fireConfetti(), 600);
+    } catch { /* localStorage chặn — bỏ qua */ }
+  }, [orders, fireConfetti]);
 
   const fetchLeaderboard = async (period: "month" | "all") => {
     try {
@@ -837,6 +858,8 @@ function DashboardContent() {
         )}
       </main>
       <Footer />
+      {confettiNode}
+      {onboardingNode}
     </div>
   );
 }
