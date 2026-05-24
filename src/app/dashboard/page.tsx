@@ -524,9 +524,9 @@ function DashboardContent() {
             </div>
           </section>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-            {/* Cột chính (2/3) — Đơn hàng + Đối tác */}
-            <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
+            {/* Cột chính (3/5) — Đơn hàng + Đối tác */}
+            <div className="lg:col-span-3 space-y-4 sm:space-y-6">
               {/* Đơn Hàng Gần Đây */}
               <div className="bg-white rounded-xl border border-gray-100 p-5">
                 <div className="flex items-center justify-between mb-4">
@@ -627,104 +627,114 @@ function DashboardContent() {
               </div>
             </div>
 
-            {/* Cột phụ (1/3) — Bảng xếp hạng */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl border border-gray-100 p-5 lg:sticky lg:top-20">
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-xl">🏆</span>
-                  <h2 className="text-base font-bold text-gray-800">Bảng Xếp Hạng</h2>
-                </div>
-
-                {/* Period Tabs */}
-                <div className="flex items-center gap-1 mb-4 p-0.5 bg-gray-100 rounded-full">
-                  {([["month", "Tháng này"], ["all", "Tất cả"]] as const).map(([key, label]) => (
-                    <button
-                      key={key}
-                      onClick={() => setLeaderboardPeriod(key)}
-                      className={`flex-1 px-3 py-1.5 text-xs font-semibold rounded-full transition-all ${
-                        leaderboardPeriod === key
-                          ? "bg-white text-orange-600 shadow-sm"
-                          : "text-gray-500 hover:text-gray-700"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Top 3 podium */}
-                {leaderboard.length >= 1 && (
-                  <div className="flex items-end justify-center gap-2 mb-4 px-2">
-                    {/* #2 (left) */}
-                    {leaderboard[1] ? (
-                      <PodiumCard
-                        rank={2}
-                        name={leaderboard[1].display_name}
-                        amount={Number(leaderboard[1].total_cashback)}
-                        height="h-20"
-                        gradient="from-gray-300 to-gray-400"
-                        crown="🥈"
-                      />
-                    ) : <div className="flex-1" />}
-                    {/* #1 (center) */}
-                    <PodiumCard
-                      rank={1}
-                      name={leaderboard[0].display_name}
-                      amount={Number(leaderboard[0].total_cashback)}
-                      height="h-24"
-                      gradient="from-amber-300 to-orange-500"
-                      crown="🥇"
-                      highlight
-                    />
-                    {/* #3 (right) */}
-                    {leaderboard[2] ? (
-                      <PodiumCard
-                        rank={3}
-                        name={leaderboard[2].display_name}
-                        amount={Number(leaderboard[2].total_cashback)}
-                        height="h-16"
-                        gradient="from-orange-300 to-orange-400"
-                        crown="🥉"
-                      />
-                    ) : <div className="flex-1" />}
+            {/* Cột phụ (2/5) — Bảng xếp hạng (rộng hơn so với trước) */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-xl border border-gray-100 p-5 h-full flex flex-col">
+                <div className="flex items-center justify-between gap-2 mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">🏆</span>
+                    <h2 className="text-base font-bold text-gray-800">Bảng Xếp Hạng</h2>
                   </div>
-                )}
 
-                {/* Rest of leaderboard */}
-                <div className="space-y-1.5">
-                  {leaderboard.length === 0 ? (
-                    <p className="text-sm text-gray-400 text-center py-8">Chưa có dữ liệu xếp hạng</p>
-                  ) : (
-                    leaderboard.slice(3).map((entry, index) => {
-                      const rank = index + 4;
-                      return (
-                        <div key={index} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-50 hover:bg-orange-50/50 transition-colors">
-                          <div className="w-6 h-6 rounded-full bg-white border border-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500 shrink-0">
-                            {rank}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-semibold text-gray-800 truncate">{entry.display_name}</p>
-                            <p className="text-[10px] text-gray-400">{entry.total_orders} đơn</p>
-                          </div>
-                          <span className="text-xs font-bold text-green-600 shrink-0">
-                            +{Number(entry.total_cashback).toLocaleString("vi-VN")}đ
-                          </span>
-                        </div>
-                      );
-                    })
-                  )}
+                  {/* Period Tabs */}
+                  <div className="flex items-center gap-1 p-0.5 bg-gray-100 rounded-full">
+                    {([["month", "Tháng"], ["all", "Tất cả"]] as const).map(([key, label]) => (
+                      <button
+                        key={key}
+                        onClick={() => setLeaderboardPeriod(key)}
+                        className={`px-3 py-1 text-xs font-semibold rounded-full transition-all ${
+                          leaderboardPeriod === key
+                            ? "bg-white text-orange-600 shadow-sm"
+                            : "text-gray-500 hover:text-gray-700"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                {/* CTA */}
-                {leaderboard.length > 0 && (
-                  <div className="mt-4 pt-3 border-t border-gray-100">
-                    <button
-                      onClick={() => router.push("/dashboard/cashback")}
-                      className="w-full text-xs font-semibold text-orange-600 hover:text-orange-700 hover:bg-orange-50 py-2 rounded-lg transition-colors"
-                    >
-                      Mua sắm ngay để vào top →
-                    </button>
+                {leaderboard.length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center py-10 text-center">
+                    <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mb-3">
+                      <span className="text-2xl">🏆</span>
+                    </div>
+                    <p className="text-sm font-bold text-gray-700 mb-1">Chưa có dữ liệu xếp hạng</p>
+                    <p className="text-xs text-gray-400 max-w-[260px]">
+                      Hãy là người đầu tiên mua sắm qua V-Affiliate để dẫn đầu bảng!
+                    </p>
                   </div>
+                ) : (
+                  <>
+                    {/* Top 3 podium */}
+                    {leaderboard.length >= 1 && (
+                      <div className="flex items-end justify-center gap-3 mb-4 px-2">
+                        {/* #2 (left) */}
+                        {leaderboard[1] ? (
+                          <PodiumCard
+                            rank={2}
+                            name={leaderboard[1].display_name}
+                            amount={Number(leaderboard[1].total_cashback)}
+                            height="h-20"
+                            gradient="from-gray-300 to-gray-400"
+                            crown="🥈"
+                          />
+                        ) : <div className="flex-1" />}
+                        {/* #1 (center) */}
+                        <PodiumCard
+                          rank={1}
+                          name={leaderboard[0].display_name}
+                          amount={Number(leaderboard[0].total_cashback)}
+                          height="h-24"
+                          gradient="from-amber-300 to-orange-500"
+                          crown="🥇"
+                          highlight
+                        />
+                        {/* #3 (right) */}
+                        {leaderboard[2] ? (
+                          <PodiumCard
+                            rank={3}
+                            name={leaderboard[2].display_name}
+                            amount={Number(leaderboard[2].total_cashback)}
+                            height="h-16"
+                            gradient="from-orange-300 to-orange-400"
+                            crown="🥉"
+                          />
+                        ) : <div className="flex-1" />}
+                      </div>
+                    )}
+
+                    {/* Rest of leaderboard - flex-1 để chiếm hết phần còn trống */}
+                    <div className="space-y-1.5 flex-1">
+                      {leaderboard.slice(3).map((entry, index) => {
+                        const rank = index + 4;
+                        return (
+                          <div key={index} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-50 hover:bg-orange-50/50 transition-colors">
+                            <div className="w-6 h-6 rounded-full bg-white border border-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500 shrink-0">
+                              {rank}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-semibold text-gray-800 truncate">{entry.display_name}</p>
+                              <p className="text-[10px] text-gray-400">{entry.total_orders} đơn</p>
+                            </div>
+                            <span className="text-xs font-bold text-green-600 shrink-0">
+                              +{Number(entry.total_cashback).toLocaleString("vi-VN")}đ
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* CTA */}
+                    <div className="mt-4 pt-3 border-t border-gray-100">
+                      <button
+                        onClick={() => router.push("/dashboard/cashback")}
+                        className="w-full text-xs font-semibold text-orange-600 hover:text-orange-700 hover:bg-orange-50 py-2 rounded-lg transition-colors"
+                      >
+                        Mua sắm ngay để vào top →
+                      </button>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
