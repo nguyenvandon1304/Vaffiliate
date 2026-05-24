@@ -122,6 +122,11 @@ jobs:
             --title "$TITLE" \
             --notes "Automated daily backup of Supabase Postgres. Auto-deleted after 30 days." \
             --prerelease
+          # Lưu thông tin cho notify step
+          DUMP_SIZE=$(du -h "$DUMP_FILE" | cut -f1)
+          REPO_URL="https://github.com/${GITHUB_REPOSITORY}"
+          echo "DUMP_SIZE=$DUMP_SIZE" >> $GITHUB_ENV
+          echo "RELEASE_URL=${REPO_URL}/releases/tag/${TAG}" >> $GITHUB_ENV
 
       - name: Cleanup releases older than 30 days
         env:
@@ -137,6 +142,20 @@ jobs:
               echo "Deleting old release: $tag"
               gh release delete "$tag" --yes --cleanup-tag || true
             done
+
+      - name: Notify on success
+        if: success()
+        env:
+          TG_BOT: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
+        run: |
+          if [ -n "$TG_BOT" ] && [ -n "$TG_CHAT" ]; then
+            MESSAGE="✅ V-Affiliate: Backup DB thành công%0A%0A📦 File: ${DUMP_FILE##*/}%0A💾 Dung lượng: ${DUMP_SIZE}%0A🕐 Thời gian: ${STAMP} UTC%0A🔗 ${RELEASE_URL}"
+            curl -s "https://api.telegram.org/bot${TG_BOT}/sendMessage" \
+              -d "chat_id=${TG_CHAT}" \
+              -d "text=${MESSAGE}" \
+              -d "disable_web_page_preview=true"
+          fi
 
       - name: Notify on failure
         if: failure()
