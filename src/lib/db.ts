@@ -358,6 +358,28 @@ async function initSchema(database: DbAdapter): Promise<void> {
     )
   `);
 
+  // Wishlist — user paste link Shopee để theo dõi giá. App tự check giá định kỳ
+  // (lazy check khi user mở trang) và notify khi giảm giá.
+  await database.exec(`
+    CREATE TABLE IF NOT EXISTS wishlist (
+      id BIGSERIAL PRIMARY KEY,
+      user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      shop_id TEXT NOT NULL,
+      item_id TEXT NOT NULL,
+      product_name TEXT NOT NULL,
+      product_image TEXT,
+      product_link TEXT NOT NULL,
+      affiliate_link TEXT,
+      initial_price BIGINT NOT NULL DEFAULT 0,
+      current_price BIGINT NOT NULL DEFAULT 0,
+      lowest_price BIGINT NOT NULL DEFAULT 0,
+      commission_rate TEXT,
+      last_checked_at TIMESTAMPTZ DEFAULT NOW(),
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(user_id, shop_id, item_id)
+    )
+  `);
+
   // Anti-fraud — flag hành vi bất thường để admin review.
   // type: same_ip_register | self_referral | rapid_withdraw | suspicious_login
   // severity: low | medium | high
@@ -403,6 +425,8 @@ async function initSchema(database: DbAdapter): Promise<void> {
   await database.exec("CREATE INDEX IF NOT EXISTS idx_spin_user_time ON spin_history(user_id, spun_at DESC)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_fraud_unresolved ON fraud_flags(resolved, severity, created_at DESC)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_fraud_user ON fraud_flags(user_id)");
+  await database.exec("CREATE INDEX IF NOT EXISTS idx_wishlist_user ON wishlist(user_id, created_at DESC)");
+  await database.exec("CREATE INDEX IF NOT EXISTS idx_wishlist_check ON wishlist(last_checked_at)");
 
   // Seed default admin
   const adminExists = await database.get("SELECT id FROM users WHERE username = 'admin'", []);

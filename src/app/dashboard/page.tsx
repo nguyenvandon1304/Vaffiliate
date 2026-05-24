@@ -501,6 +501,14 @@ function DashboardContent() {
                     Vòng quay
                   </button>
                   <button
+                    onClick={() => router.push("/dashboard/wishlist")}
+                    className="inline-flex items-center gap-2 bg-gradient-to-r from-rose-400 to-fuchsia-500 hover:from-rose-500 hover:to-fuchsia-600 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-lg shadow-md shadow-rose-500/40 transition-all hover:scale-105"
+                    title="Wishlist — theo dõi giá Shopee"
+                  >
+                    <span className="text-base">❤️</span>
+                    Wishlist
+                  </button>
+                  <button
                     onClick={() => router.push("/dashboard/help")}
                     className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm hover:bg-white/25 border border-white/30 text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
                   >
