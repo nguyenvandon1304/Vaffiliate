@@ -81,11 +81,16 @@ function AdminPageInner() {
   const tabParam = params.get("tab") as Tab | null;
   const tab: Tab = tabParam && VALID_TABS.includes(tabParam) ? tabParam : "overview";
 
+  // Mobile drawer (≤lg) — đóng mặc định, mở khi bấm hamburger.
+  // Khai báo trước setTab để callback có thể dùng setMobileSidebarOpen.
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
   const setTab = useCallback((t: Tab) => {
     const next = new URLSearchParams(params.toString());
     if (t === "overview") next.delete("tab");
     else next.set("tab", t);
     router.replace(`/admin?${next}`);
+    setMobileSidebarOpen(false); // Đóng drawer sau khi chọn tab
   }, [params, router]);
 
   // Khi click card "Cần xử lý" → setTab + filter status. Reset filter cũ để tránh xung đột.
@@ -94,6 +99,7 @@ function AdminPageInner() {
     next.set("tab", t);
     next.set("status", statusVal);
     router.replace(`/admin?${next}`);
+    setMobileSidebarOpen(false);
   }, [router]);
 
   const [loading, setLoading] = useState(true);
@@ -225,16 +231,69 @@ function AdminPageInner() {
 
   return (
     <div className="min-h-screen flex bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
-      {/* Sidebar */}
-      <aside className="w-60 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
-        <div className="p-5 border-b border-gray-200 dark:border-gray-700">
+      {/* Mobile top header — chỉ hiện ≤lg */}
+      <header className="lg:hidden fixed top-0 inset-x-0 z-30 h-14 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-3 gap-2">
+        <button
+          type="button"
+          onClick={() => setMobileSidebarOpen(true)}
+          className="p-2 -ml-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+          aria-label="Mở menu"
+        >
+          <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+        <div className="flex-1 min-w-0">
+          <CaffiliateLogo title="Admin" subtitle={tabs.find((t) => t.key === tab)?.label ?? "Bảng điều khiển"} />
+        </div>
+        {pendingCounts.pendingWithdrawals > 0 && (
+          <button
+            onClick={() => setTabWithStatus("withdrawals", "pending")}
+            className="relative p-2 -mr-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+            aria-label="Yêu cầu rút tiền chờ duyệt"
+          >
+            <span className="text-xl">💸</span>
+            <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 animate-pulse">
+              {pendingCounts.pendingWithdrawals > 99 ? "99+" : pendingCounts.pendingWithdrawals}
+            </span>
+          </button>
+        )}
+      </header>
+
+      {/* Backdrop khi sidebar mở trên mobile */}
+      {mobileSidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity"
+          onClick={() => setMobileSidebarOpen(false)}
+          aria-hidden
+        />
+      )}
+
+      {/* Sidebar — desktop static, mobile drawer */}
+      <aside className={`fixed lg:sticky top-0 left-0 h-screen w-64 lg:w-60 z-50 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-transform duration-300 ease-out ${
+        mobileSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      }`}>
+        <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <button
             type="button"
             onClick={() => setTab("overview")}
-            className="cursor-pointer text-left"
+            className="cursor-pointer text-left flex-1 min-w-0"
             title="Về tổng quan"
           >
             <CaffiliateLogo title="Admin V-Affiliate" subtitle="Bảng điều khiển" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileSidebarOpen(false)}
+            className="lg:hidden p-1 -mr-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 shrink-0"
+            aria-label="Đóng menu"
+          >
+            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
           </button>
         </div>
         <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
@@ -294,7 +353,7 @@ function AdminPageInner() {
         </div>
       </aside>
 
-      <main className="flex-1 p-6 overflow-auto">
+      <main className="flex-1 p-4 sm:p-6 pt-20 lg:pt-6 overflow-auto min-w-0">
         {tab === "overview" && (
           <OverviewSection stats={stats} timeseries={timeseries} tsRange={tsRange} setTsRange={setTsRange} pendingCounts={pendingCounts} setTabWithStatus={setTabWithStatus} />
         )}
@@ -366,17 +425,17 @@ function OverviewSection({ stats, timeseries, tsRange, setTsRange, pendingCounts
   const totalPending = pendingCounts.pendingWithdrawals + pendingCounts.unverifiedUsers + pendingCounts.stuckOrders;
   return (
     <>
-      <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Tổng Quan Hệ Thống</h2>
+      <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Tổng Quan Hệ Thống</h2>
 
       {/* Cần xử lý — chỉ hiển thị khi có việc */}
       {totalPending > 0 && (
-        <div className="mb-6">
+        <div className="mb-5 sm:mb-6">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-base">🔔</span>
             <h3 className="text-sm font-bold text-gray-900 dark:text-white">Cần xử lý</h3>
             <span className="text-xs text-gray-500 dark:text-gray-400">({totalPending} mục)</span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {pendingCounts.pendingWithdrawals > 0 && (
               <button
                 onClick={() => setTabWithStatus("withdrawals", "pending")}
@@ -420,7 +479,7 @@ function OverviewSection({ stats, timeseries, tsRange, setTsRange, pendingCounts
         </div>
       )}
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
         <StatCard label="Người dùng" value={String(stats.totalUsers)} icon="👥" bg="bg-blue-500/10 border-blue-500/30" text="text-blue-600 dark:text-blue-400" />
         <StatCard label="Đơn hàng" value={String(stats.totalOrders)} icon="📦" bg="bg-green-500/10 border-green-500/30" text="text-green-600 dark:text-green-400" />
         <StatCard label="Tổng cashback" value={formatVND(stats.totalCashback)} icon="💰" bg="bg-orange-500/10 border-orange-500/30" text="text-orange-600 dark:text-orange-400" />
@@ -482,12 +541,12 @@ function OverviewSection({ stats, timeseries, tsRange, setTsRange, pendingCounts
 
 function StatCard({ label, value, icon, bg, text }: { label: string; value: string; icon: string; bg: string; text: string }) {
   return (
-    <div className={`rounded-xl border p-4 ${bg}`}>
-      <div className="flex items-start justify-between mb-2">
-        <span className="text-2xl">{icon}</span>
+    <div className={`rounded-xl border p-3 sm:p-4 ${bg}`}>
+      <div className="flex items-start justify-between mb-1.5 sm:mb-2">
+        <span className="text-xl sm:text-2xl">{icon}</span>
       </div>
-      <p className={`text-xl font-bold ${text}`}>{value}</p>
-      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{label}</p>
+      <p className={`text-base sm:text-xl font-bold ${text} truncate`}>{value}</p>
+      <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">{label}</p>
     </div>
   );
 }
