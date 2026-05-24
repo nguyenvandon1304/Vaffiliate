@@ -1,0 +1,114 @@
+name: Backup Supabase Database
+
+# Backup tự động Supabase Postgres mỗi đêm 03:00 UTC (10:00 Hà Nội).
+# Lưu dump nén bằng gzip làm GitHub Release asset → giữ 30 ngày tự động cleanup.
+#
+# YÊU CẦU SECRETS:
+# - DATABASE_URL: connection string Supabase (Session Pooler — port 5432)
+#   VD: postgres://postgres.<ref>:<password>@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres
+#
+# Có thể trigger thủ công bằng workflow_dispatch.
+
+on:
+  schedule:
+    # 03:00 UTC = 10:00 Asia/Ho_Chi_Minh — sau giờ "đêm" của user
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Lý do backup thủ công"
+        required: false
+        default: "manual"
+
+permissions:
+  contents: write
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout (chỉ để có git context)
+        uses: actions/checkout@v4
+
+      - name: Cài đặt postgresql-client (pg_dump 16)
+        run: |
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-16
+
+      - name: Verify pg_dump version
+        run: pg_dump --version
+
+      - name: Tạo dump
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "❌ Thiếu DATABASE_URL secret!"
+            exit 1
+          fi
+          mkdir -p backups
+          STAMP=$(date -u +"%Y-%m-%d_%H%M%S")
+          DUMP_FILE="backups/vaffiliate_${STAMP}.sql.gz"
+          echo "Backup → $DUMP_FILE"
+          pg_dump "$DATABASE_URL" \
+            --no-owner \
+            --no-privileges \
+            --clean \
+            --if-exists \
+            --quote-all-identifiers \
+            --format=plain \
+            | gzip -9 > "$DUMP_FILE"
+          ls -lh "$DUMP_FILE"
+          echo "DUMP_FILE=$DUMP_FILE" >> $GITHUB_ENV
+          echo "STAMP=$STAMP" >> $GITHUB_ENV
+
+      - name: Verify dump integrity
+        run: |
+          gzip -t "$DUMP_FILE"
+          SIZE=$(stat -c%s "$DUMP_FILE")
+          if [ "$SIZE" -lt 1000 ]; then
+            echo "❌ Dump quá nhỏ ($SIZE bytes) — chắc chắn lỗi!"
+            exit 1
+          fi
+          echo "✅ Dump integrity OK ($SIZE bytes)"
+
+      - name: Upload backup as GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="backup-${STAMP}"
+          TITLE="DB Backup ${STAMP}"
+          gh release create "$TAG" "$DUMP_FILE" \
+            --title "$TITLE" \
+            --notes "Automated daily backup of Supabase Postgres. Auto-deleted after 30 days." \
+            --prerelease
+
+      - name: Cleanup releases older than 30 days
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Xoá tag/release backup cũ hơn 30 ngày để khỏi tốn dung lượng repo.
+          # Giữ lại tag "backup-*" còn trẻ.
+          CUTOFF=$(date -d "30 days ago" -u +%Y-%m-%d)
+          echo "Cutoff: $CUTOFF"
+          gh release list --limit 1000 --json tagName,createdAt | \
+            jq -r --arg cutoff "$CUTOFF" '.[] | select(.tagName | startswith("backup-")) | select(.createdAt < $cutoff) | .tagName' | \
+            while read -r tag; do
+              echo "Deleting old release: $tag"
+              gh release delete "$tag" --yes --cleanup-tag || true
+            done
+
+      - name: Notify on failure
+        if: failure()
+        env:
+          TG_BOT: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
+        run: |
+          if [ -n "$TG_BOT" ] && [ -n "$TG_CHAT" ]; then
+            curl -s "https://api.telegram.org/bot${TG_BOT}/sendMessage" \
+              -d "chat_id=${TG_CHAT}" \
+              -d "text=🚨 V-Affiliate: Backup DB FAILED tại run #${{ github.run_id }}. Check GitHub Actions log."
+          fi

@@ -1023,11 +1023,101 @@ export async function logAudit(
 }
 
 export async function getAuditLogs(limit: number = 200): Promise<Record<string, unknown>[]> {
+  // Backwards compatible — basic limit-only fetch.
   const database = await getDb();
   return await database.all(
     "SELECT id, user_id, action, target, ip, user_agent, detail, created_at FROM audit_logs ORDER BY id DESC LIMIT ?",
     [limit],
   );
+}
+
+export interface AuditLogFilter {
+  action?: string;
+  userId?: number;
+  username?: string;
+  ip?: string;
+  search?: string;
+  fromDate?: string; // ISO yyyy-mm-dd
+  toDate?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface AuditLogResult {
+  rows: Array<{
+    id: number;
+    user_id: number | null;
+    username: string | null;
+    display_name: string | null;
+    action: string;
+    target: string | null;
+    ip: string | null;
+    user_agent: string | null;
+    detail: string | null;
+    created_at: string;
+  }>;
+  total: number;
+}
+
+/**
+ * Filter audit logs với nhiều tiêu chí + JOIN users để hiện username.
+ * Dùng cho UI advanced + export CSV.
+ */
+export async function searchAuditLogs(filter: AuditLogFilter): Promise<AuditLogResult> {
+  const database = await getDb();
+  const limit = Math.min(Math.max(filter.limit ?? 100, 1), 5000);
+  const offset = Math.max(filter.offset ?? 0, 0);
+
+  const where: string[] = [];
+  const params: SqlValue[] = [];
+  if (filter.action) { where.push("a.action = ?"); params.push(filter.action); }
+  if (filter.userId) { where.push("a.user_id = ?"); params.push(filter.userId); }
+  if (filter.username) { where.push("u.username = ?"); params.push(filter.username); }
+  if (filter.ip) { where.push("a.ip = ?"); params.push(filter.ip); }
+  if (filter.fromDate) { where.push("a.created_at >= ?::timestamp"); params.push(filter.fromDate); }
+  if (filter.toDate) { where.push("a.created_at < (?::date + interval '1 day')"); params.push(filter.toDate); }
+  if (filter.search) {
+    where.push("(a.action ILIKE ? OR a.target ILIKE ? OR a.detail ILIKE ? OR u.username ILIKE ?)");
+    const q = `%${filter.search}%`;
+    params.push(q, q, q, q);
+  }
+  const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+  const countRow = await database.get(
+    `SELECT COUNT(*) AS c FROM audit_logs a LEFT JOIN users u ON a.user_id = u.id ${whereSql}`,
+    params,
+  );
+  const rows = await database.all(
+    `SELECT a.id, a.user_id, u.username, u.display_name, a.action, a.target, a.ip, a.user_agent, a.detail, a.created_at
+     FROM audit_logs a
+     LEFT JOIN users u ON a.user_id = u.id
+     ${whereSql}
+     ORDER BY a.id DESC
+     LIMIT ? OFFSET ?`,
+    [...params, limit, offset],
+  );
+  return {
+    rows: rows.map((r) => ({
+      id: Number(r.id),
+      user_id: r.user_id === null ? null : Number(r.user_id),
+      username: r.username === null ? null : String(r.username),
+      display_name: r.display_name === null ? null : String(r.display_name),
+      action: String(r.action),
+      target: r.target === null ? null : String(r.target),
+      ip: r.ip === null ? null : String(r.ip),
+      user_agent: r.user_agent === null ? null : String(r.user_agent),
+      detail: r.detail === null ? null : String(r.detail),
+      created_at: String(r.created_at),
+    })),
+    total: Number(countRow?.c ?? 0),
+  };
+}
+
+/** Lấy danh sách distinct action values — cho dropdown filter */
+export async function getDistinctAuditActions(): Promise<string[]> {
+  const database = await getDb();
+  const rows = await database.all("SELECT DISTINCT action FROM audit_logs ORDER BY action");
+  return rows.map((r) => String(r.action));
 }
 
 /* ─────────────── User dashboard ─────────────── */
@@ -1676,6 +1766,227 @@ export async function getAllUsers(): Promise<Record<string, unknown>[]> {
   return await database.all(
     "SELECT id, username, email, display_name, phone, role, is_active, email_verified, created_at, last_login FROM users ORDER BY id DESC",
   );
+}
+
+/* ─────────────── ADMIN: ANALYTICS (Group 3 #9) ─────────────── */
+
+export interface FunnelData {
+  totalUsers: number;
+  usersWithLink: number;
+  usersWithOrder: number;
+  usersWithCompletedOrder: number;
+  totalLinks: number;
+  totalOrders: number;
+  completedOrders: number;
+  /** Conversion: tỷ lệ user có order / user có link */
+  linkToOrderRate: number;
+  /** Conversion: tỷ lệ order completed / order tổng */
+  orderToCompletedRate: number;
+}
+
+/**
+ * Funnel conversion từ user → click (link) → order → completed order.
+ * Đếm DISTINCT user_id để tránh trùng lặp.
+ */
+export async function getFunnelData(): Promise<FunnelData> {
+  const database = await getDb();
+  const row = await database.get(
+    `SELECT
+      COALESCE((SELECT COUNT(*) FROM users WHERE role = 'user'), 0) AS total_users,
+      COALESCE((SELECT COUNT(DISTINCT user_id) FROM affiliate_links), 0) AS users_with_link,
+      COALESCE((SELECT COUNT(DISTINCT user_id) FROM orders), 0) AS users_with_order,
+      COALESCE((SELECT COUNT(DISTINCT user_id) FROM orders WHERE status = 'Đã hoàn tiền'), 0) AS users_with_completed,
+      COALESCE((SELECT COUNT(*) FROM affiliate_links), 0) AS total_links,
+      COALESCE((SELECT COUNT(*) FROM orders), 0) AS total_orders,
+      COALESCE((SELECT COUNT(*) FROM orders WHERE status = 'Đã hoàn tiền'), 0) AS completed_orders`,
+    [],
+  );
+  const usersWithLink = Number(row?.users_with_link ?? 0);
+  const usersWithOrder = Number(row?.users_with_order ?? 0);
+  const totalOrders = Number(row?.total_orders ?? 0);
+  const completedOrders = Number(row?.completed_orders ?? 0);
+  return {
+    totalUsers: Number(row?.total_users ?? 0),
+    usersWithLink,
+    usersWithOrder,
+    usersWithCompletedOrder: Number(row?.users_with_completed ?? 0),
+    totalLinks: Number(row?.total_links ?? 0),
+    totalOrders,
+    completedOrders,
+    linkToOrderRate: usersWithLink > 0 ? Math.round((usersWithOrder / usersWithLink) * 1000) / 10 : 0,
+    orderToCompletedRate: totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 1000) / 10 : 0,
+  };
+}
+
+export interface HourlyHeatmapPoint {
+  /** 0 = CN, 1 = T2 ... 6 = T7 */
+  dayOfWeek: number;
+  /** 0..23 */
+  hour: number;
+  count: number;
+}
+
+/**
+ * Heatmap đơn hàng theo (dayOfWeek × hour).
+ * Lấy từ `orders` trong N ngày gần nhất (mặc định 30).
+ */
+export async function getHourlyHeatmap(days: number = 30): Promise<HourlyHeatmapPoint[]> {
+  const database = await getDb();
+  const safeDays = Math.min(Math.max(days, 1), 365);
+  const rows = await database.all(
+    `SELECT
+       EXTRACT(DOW FROM created_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::int AS dow,
+       EXTRACT(HOUR FROM created_at AT TIME ZONE 'Asia/Ho_Chi_Minh')::int AS hr,
+       COUNT(*) AS c
+     FROM orders
+     WHERE created_at >= NOW() - ($1 || ' days')::interval
+     GROUP BY dow, hr`,
+    [String(safeDays)],
+  );
+  // Fill 7×24 zero matrix
+  const map = new Map<string, number>();
+  for (const r of rows) {
+    map.set(`${r.dow}-${r.hr}`, Number(r.c) || 0);
+  }
+  const out: HourlyHeatmapPoint[] = [];
+  for (let d = 0; d < 7; d++) {
+    for (let h = 0; h < 24; h++) {
+      out.push({ dayOfWeek: d, hour: h, count: map.get(`${d}-${h}`) ?? 0 });
+    }
+  }
+  return out;
+}
+
+export interface TopProduct {
+  itemId: string;
+  shopId: string;
+  productName: string;
+  totalSold: number;
+  totalRevenue: number;
+  totalCommission: number;
+}
+
+/**
+ * Top sản phẩm bán nhiều nhất — match qua `affiliate_links` (item_id).
+ * Vì `orders` không có item_id trực tiếp, ta join qua user_id + thời gian gần
+ * nhau (nếu có cấu trúc đó). Hiện tại đơn giản: lấy top theo `affiliate_links`
+ * có nhiều click/order nhất → fallback lấy từ affiliate_links có cashback > 0.
+ */
+export async function getTopProducts(limit: number = 10): Promise<TopProduct[]> {
+  const database = await getDb();
+  const safeLimit = Math.min(Math.max(limit, 1), 100);
+  // Group affiliate_links theo (shop_id, item_id) — đếm số user đã tạo link
+  // và tổng commission. Đây là proxy cho "sản phẩm phổ biến".
+  const rows = await database.all(
+    `SELECT
+        item_id,
+        shop_id,
+        MAX(product_name) AS product_name,
+        COUNT(*) AS total_sold,
+        COALESCE(SUM(product_price), 0) AS total_revenue,
+        COALESCE(SUM(commission), 0) AS total_commission
+     FROM affiliate_links
+     GROUP BY item_id, shop_id
+     ORDER BY total_sold DESC, total_commission DESC
+     LIMIT ?`,
+    [safeLimit],
+  );
+  return rows.map((r) => ({
+    itemId: String(r.item_id ?? ""),
+    shopId: String(r.shop_id ?? ""),
+    productName: String(r.product_name ?? "—"),
+    totalSold: Number(r.total_sold ?? 0),
+    totalRevenue: Number(r.total_revenue ?? 0),
+    totalCommission: Number(r.total_commission ?? 0),
+  }));
+}
+
+export interface CohortRow {
+  /** ISO yyyy-mm */
+  cohortMonth: string;
+  /** Tổng user đăng ký trong tháng đó */
+  totalUsers: number;
+  /** mảng tỉ lệ retention từ tháng 0..N (0 = tháng đăng ký, 1 = tháng sau...) */
+  retention: number[];
+}
+
+/**
+ * Cohort retention: nhóm user theo tháng đăng ký, đo % user còn active trong N
+ * tháng tiếp theo (active = có session hoặc order trong tháng đó).
+ *
+ * Trả về mảng cohort, mỗi cohort kèm mảng retention[i] = % user còn active ở tháng thứ i.
+ */
+export async function getCohortRetention(monthsBack: number = 6): Promise<CohortRow[]> {
+  const database = await getDb();
+  const safeMonths = Math.min(Math.max(monthsBack, 1), 24);
+
+  // 1) Lấy users theo cohort tháng đăng ký
+  const cohortUsers = await database.all(
+    `SELECT
+        to_char(date_trunc('month', created_at), 'YYYY-MM') AS cohort_month,
+        id AS user_id
+     FROM users
+     WHERE role = 'user'
+       AND created_at >= date_trunc('month', NOW() - ($1 || ' months')::interval)
+     ORDER BY created_at`,
+    [String(safeMonths)],
+  );
+
+  // 2) Lấy active months (user có order trong tháng nào)
+  const activity = await database.all(
+    `SELECT
+        user_id,
+        to_char(date_trunc('month', created_at), 'YYYY-MM') AS active_month
+     FROM orders
+     WHERE created_at >= date_trunc('month', NOW() - ($1 || ' months')::interval)
+     GROUP BY user_id, active_month
+     UNION
+     SELECT
+        user_id,
+        to_char(date_trunc('month', created_at), 'YYYY-MM') AS active_month
+     FROM sessions
+     WHERE created_at >= date_trunc('month', NOW() - ($1 || ' months')::interval)
+     GROUP BY user_id, active_month`,
+    [String(safeMonths)],
+  );
+
+  // Build map: user_id → set of active_months
+  const userActivity = new Map<number, Set<string>>();
+  for (const a of activity) {
+    const uid = Number(a.user_id);
+    if (!userActivity.has(uid)) userActivity.set(uid, new Set());
+    userActivity.get(uid)!.add(String(a.active_month));
+  }
+
+  // Build cohorts: cohort_month → user_ids
+  const cohortMap = new Map<string, number[]>();
+  for (const c of cohortUsers) {
+    const m = String(c.cohort_month);
+    if (!cohortMap.has(m)) cohortMap.set(m, []);
+    cohortMap.get(m)!.push(Number(c.user_id));
+  }
+
+  // Tính retention cho mỗi cohort
+  const sortedCohorts = Array.from(cohortMap.keys()).sort();
+  const result: CohortRow[] = [];
+  const now = new Date();
+  for (const cohort of sortedCohorts) {
+    const userIds = cohortMap.get(cohort)!;
+    const total = userIds.length;
+    if (total === 0) continue;
+    const [yStr, mStr] = cohort.split("-");
+    const cohortDate = new Date(Number(yStr), Number(mStr) - 1, 1);
+    const monthsSince = (now.getFullYear() - cohortDate.getFullYear()) * 12 + (now.getMonth() - cohortDate.getMonth());
+    const retention: number[] = [];
+    for (let i = 0; i <= monthsSince && i < safeMonths; i++) {
+      const targetDate = new Date(cohortDate.getFullYear(), cohortDate.getMonth() + i, 1);
+      const targetMonth = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, "0")}`;
+      const activeCount = userIds.filter((uid) => userActivity.get(uid)?.has(targetMonth)).length;
+      retention.push(Math.round((activeCount / total) * 1000) / 10);
+    }
+    result.push({ cohortMonth: cohort, totalUsers: total, retention });
+  }
+  return result;
 }
 
 /* ─────────────── ADMIN: paged lists ─────────────── */

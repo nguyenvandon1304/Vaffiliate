@@ -13,6 +13,7 @@ import { BroadcastTab } from "@/components/admin/BroadcastTab";
 import { FraudTab } from "@/components/admin/FraudTab";
 import { SettingsTab } from "@/components/admin/SettingsTab";
 import { ImportHistoryTab } from "@/components/admin/ImportHistoryTab";
+import { AnalyticsTab } from "@/components/admin/AnalyticsTab";
 import { playNotificationSound } from "@/lib/notification-sound";
 
 interface AdminStats {
@@ -31,6 +32,7 @@ interface PendingCounts {
 
 type Tab =
   | "overview"
+  | "analytics"
   | "users"
   | "orders"
   | "withdrawals"
@@ -42,7 +44,7 @@ type Tab =
   | "settings";
 
 const VALID_TABS: Tab[] = [
-  "overview", "users", "orders", "withdrawals",
+  "overview", "analytics", "users", "orders", "withdrawals",
   "balance", "import", "import-history", "broadcast", "fraud", "settings",
 ];
 
@@ -206,6 +208,7 @@ function AdminPageInner() {
 
   const tabs: { key: Tab; label: string; icon: string }[] = [
     { key: "overview", label: "Tổng quan", icon: "📊" },
+    { key: "analytics", label: "Analytics chi tiết", icon: "📈" },
     { key: "users", label: "Người dùng", icon: "👥" },
     { key: "orders", label: "Đơn hàng", icon: "📦" },
     { key: "withdrawals", label: "Rút tiền", icon: "💸" },
@@ -294,6 +297,7 @@ function AdminPageInner() {
         )}
 
         {tab === "users" && <UsersTab />}
+        {tab === "analytics" && <AnalyticsTab />}
         {tab === "orders" && <OrdersTab />}
         {tab === "withdrawals" && <WithdrawalsTab />}
         {tab === "import-history" && <ImportHistoryTab />}
