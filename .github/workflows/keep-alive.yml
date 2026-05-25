@@ -1,0 +1,40 @@
+name: Keep Render App Awake
+
+# Ping app mỗi 14 phút để Render free tier không sleep (Render sleep sau 15 phút idle).
+# Mục tiêu: user không phải chờ ~30s wake-up khi vào trang.
+#
+# Chi phí: GitHub Actions free 2000 phút/tháng. Mỗi ping ~10s = ~24 phút/ngày
+# = ~720 phút/tháng → còn dư 1280 phút/tháng cho các workflow khác (CI, backup).
+#
+# YÊU CẦU SECRETS:
+# - APP_BASE_URL (optional): URL app, vd "https://vaffiliate-app.onrender.com"
+#   Nếu không set, dùng URL default ở dưới.
+
+on:
+  schedule:
+    # Mỗi 14 phút — vừa khít trước Render 15-minute sleep timeout
+    - cron: "*/14 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Ping app
+        env:
+          APP_URL: ${{ secrets.APP_BASE_URL || 'https://vaffiliate-app.onrender.com' }}
+        run: |
+          # Ping homepage — nhẹ, có cache. Không cần đụng DB.
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "$APP_URL/")
+          echo "Ping $APP_URL → HTTP $STATUS"
+          # 200 = OK, 503/502 = Render đang restart (bình thường)
+          # Bỏ qua exit non-zero để không gửi noise alert
+          if [ "$STATUS" = "200" ]; then
+            echo "✅ App awake"
+          elif [ "$STATUS" = "502" ] || [ "$STATUS" = "503" ]; then
+            echo "⚠️ App đang khởi động lại — sẽ ping lại sau 14 phút"
+          else
+            echo "❌ Unexpected status $STATUS"
+            exit 1
+          fi
