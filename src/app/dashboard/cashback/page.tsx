@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CaffiliateLogo } from "@/components/icons";
 import { ThemeToggleButton } from "@/components/ThemeToggle";
@@ -51,6 +51,9 @@ interface ProductInfo {
   commission: number;
   commissionRate: string;
   cashback: number;
+  cashbackRate?: number; // % theo tier user (50/53/55/58)
+  tierCode?: string;
+  tierName?: string;
   affiliateLink: string;
   productUrl?: string;
   shopId?: string;
@@ -68,6 +71,25 @@ export default function CashbackPage() {
   const [copied, setCopied] = useState(false);
   const [product, setProduct] = useState<ProductInfo | null>(null);
   const [error, setError] = useState("");
+
+  // Tier info của user — để hiện đúng % hoàn tiền theo hạng (Bronze 50% / Silver 53% / Gold 55% / VIP 58%)
+  const [userTier, setUserTier] = useState<{ ratePercent: number; tierName: string; tierCode: string } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/tier", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled || !d.success) return;
+        setUserTier({
+          ratePercent: d.info.cashbackPercent,
+          tierName: d.info.current?.name ?? "Đồng",
+          tierCode: d.info.current?.code ?? "bronze",
+        });
+      })
+      .catch(() => { /* silent — fallback 50% */ });
+    return () => { cancelled = true; };
+  }, []);
 
   const handleGenerate = async () => {
     if (!productLink.trim()) return;
@@ -191,7 +213,12 @@ export default function CashbackPage() {
             Công Cụ <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-400">Hoàn Tiền</span>
           </h1>
           <p className="text-sm text-gray-500 max-w-md">
-            Chọn sàn thương mại điện tử và dán link sản phẩm để lấy link mua sắm hoàn 50% tiền hoa hồng.
+            Chọn sàn thương mại điện tử và dán link sản phẩm để lấy link mua sắm hoàn{" "}
+            <strong className="text-orange-500">{userTier?.ratePercent ?? 50}%</strong> tiền hoa hồng
+            {userTier && userTier.tierCode !== "bronze" && (
+              <span className="ml-1 text-amber-600 font-semibold">(hạng {userTier.tierName})</span>
+            )}
+            .
           </p>
         </div>
 
@@ -400,7 +427,12 @@ export default function CashbackPage() {
                       <svg viewBox="0 0 24 24" className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>
                     </div>
                     <div>
-                      <p className="text-[10px] text-orange-500 font-semibold uppercase tracking-wider">Hoàn tiền 50% cho bạn</p>
+                      <p className="text-[10px] text-orange-500 font-semibold uppercase tracking-wider">
+                        Hoàn tiền {product.cashbackRate ?? 50}% cho bạn
+                        {product.tierName && product.tierCode !== "bronze" && (
+                          <span className="ml-1 text-amber-500 normal-case font-bold">({product.tierName})</span>
+                        )}
+                      </p>
                       <p className="text-base font-bold text-orange-500">~đ{formatPrice(product.cashback)}</p>
                     </div>
                   </div>

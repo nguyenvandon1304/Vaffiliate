@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUserByToken, getDb, createNotification } from "@/lib/db";
+import { getUserByToken, getDb, createNotification, getCashbackRateForUser, calcCashback } from "@/lib/db";
 import { grantBadge } from "@/lib/achievements";
 
 const GOAFFILIATE_CHECK_COMMISSION_URL = "https://goaffiliate.online/api/check-commission";
@@ -157,9 +157,19 @@ export async function POST(request: NextRequest) {
     // Tạo affiliate link trực tiếp với Shopee Affiliate ID + user tracking
     const affiliateLink = buildAffiliateLink(ids.shopId, ids.itemId, user?.id);
 
-    // Điểm mua sắm = 50% tổng hoa hồng
+    // Cashback rate theo tier user (Bronze 50% / Silver 53% / Gold 55% / VIP 58%).
+    // Nếu chưa login thì dùng tier Bronze (50%) làm fallback.
+    let cashbackRate = 50;
+    let tierCode = "bronze";
+    let tierName = "Đồng";
+    if (user) {
+      const rateInfo = await getCashbackRateForUser(user.id);
+      cashbackRate = rateInfo.ratePercent;
+      tierCode = rateInfo.tierCode ?? "bronze";
+      tierName = rateInfo.tierName ?? "Đồng";
+    }
     const commissionAmount = parsePrice(info?.commission || "");
-    const cashback = Math.round(commissionAmount * 0.5);
+    const cashback = calcCashback(commissionAmount, cashbackRate);
 
     const product = {
       name: info?.name || "Sản phẩm Shopee",
@@ -169,6 +179,9 @@ export async function POST(request: NextRequest) {
       commission: commissionAmount,
       commissionRate: info?.commissionRate || "",
       cashback,
+      cashbackRate, // % thực tế áp dụng cho user (50/53/55/58)
+      tierCode,
+      tierName,
       affiliateLink,
       productUrl: cleanProductUrl,
       shopId: ids.shopId,
@@ -185,7 +198,7 @@ export async function POST(request: NextRequest) {
           "INSERT INTO affiliate_links (user_id, shop_id, item_id, product_name, product_price, commission, commission_rate, cashback, affiliate_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
           [user.id, ids.shopId, ids.itemId, product.name, product.price, product.commission, product.commissionRate, product.cashback, affiliateLink]
         );
-        await createNotification(user.id, "Tạo link thành công", `Link hoàn tiền cho "${product.name}" đã được tạo. Cashback dự kiến: ${product.cashback.toLocaleString("vi-VN")}đ`, "link");
+        await createNotification(user.id, "Tạo link thành công", `Link hoàn tiền ${cashbackRate}% cho "${product.name}" đã được tạo. Cashback dự kiến: ${product.cashback.toLocaleString("vi-VN")}đ`, "link");
         // Grant badge "first_link" — idempotent, chỉ earn lần đầu.
         void grantBadge(user.id, "first_link");
       } catch (e) {
