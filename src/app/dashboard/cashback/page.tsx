@@ -561,10 +561,10 @@ export default function CashbackPage() {
           <div className="lg:col-span-3 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             {/* Header */}
             <div className="flex items-center gap-2 text-sm px-6 pt-5 sm:px-8">
-              <span className="text-orange-500 text-base">💡</span>
-              <span className="text-gray-600">Mẹo săn mã giảm giá</span>
-              <span className="font-bold text-gray-800">tốt nhất</span>
-              <span className="text-gray-600">khi mua sắm</span>
+              <span className="text-orange-500 text-base">✨</span>
+              <span className="text-gray-600">Cách săn thêm</span>
+              <span className="font-bold text-gray-800">voucher 20-25%</span>
+              <span className="text-gray-600">từ Shopee</span>
             </div>
 
             {/* Content with max-height + fade */}
@@ -574,70 +574,75 @@ export default function CashbackPage() {
                   showGuide ? "max-h-[2000px]" : "max-h-[320px]"
                 }`}
               >
-                {/* Khung giờ back lượt */}
+                {/* Tổng quan voucher social */}
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-base">⏰</span>
-                    <h3 className="text-sm font-bold text-gray-800">Khung giờ back lượt mã giảm giá</h3>
+                    <span className="text-base">🎁</span>
+                    <h3 className="text-sm font-bold text-gray-800">Voucher social từ Shopee là gì?</h3>
                   </div>
-                  <div className="flex items-center gap-3 mb-4 ml-6">
-                    {["0H", "9H", "15H", "20H"].map((t) => (
-                      <span key={t} className="text-xs font-bold text-orange-500 bg-orange-50 border border-orange-200 px-3 py-1 rounded-full">{t}</span>
-                    ))}
-                  </div>
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-3">
-                    <p className="flex items-start gap-2 text-xs text-gray-600 leading-relaxed">
-                      <span className="text-amber-500 shrink-0">⚠️</span>
-                      <span>Mã giảm giá back đúng giờ nhưng thường <span className="font-bold">phải chờ thêm ~10 phút</span> mới lấy được mã mới (ví dụ back lượt 20H thì ~20H10 mới lấy được).</span>
+                  <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-3 ml-6">
+                    <p className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
+                      <span className="text-orange-500 shrink-0">💰</span>
+                      <span>
+                        Khi bạn comment link sản phẩm vào <span className="font-bold">bài viết ghim trong group V-Affiliate</span>,
+                        Shopee có thể tặng thêm <span className="font-bold text-orange-600">voucher giảm 20-25%</span> trên giá sản phẩm.
+                        Voucher xuất hiện <span className="font-semibold">ngẫu nhiên</span> tuỳ shop có chạy chiến dịch hay không.
+                      </span>
                     </p>
                   </div>
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-3">
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 ml-6">
                     <p className="text-xs text-gray-700">
-                      <span className="text-red-500 font-bold">Đừng bấm link sớm quá!</span> Nếu bấm sớm sẽ không lấy được mã tốt nhất. Sàn giới hạn chỉ lấy <span className="font-bold">5 mã/ngày</span>.
+                      <span className="text-emerald-600 font-bold">✓ Yên tâm:</span> Dù có voucher hay không,
+                      <span className="font-bold"> tiền hoàn 50% vẫn về ví đầy đủ</span> như đã cam kết.
                     </p>
                   </div>
                 </div>
 
-                {/* Chiến thuật */}
+                {/* Chiến thuật 3 bước */}
                 <div>
-                  <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mb-4">Chiến thuật săn mã nhanh</p>
+                  <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mb-4">Quy trình 3 bước</p>
 
                   <div className="relative pl-10 pb-6 border-l-2 border-orange-200 ml-3">
                     <div className="absolute left-[-13px] top-0 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm shadow-orange-200">1</div>
-                    <h4 className="text-sm font-bold text-gray-800 mb-1">Chuẩn bị link trước</h4>
+                    <h4 className="text-sm font-bold text-gray-800 mb-1">Tạo link và bấm COPY LINK</h4>
                     <p className="text-xs text-gray-500 leading-relaxed">
-                      <span className="font-semibold">Trước khi</span> mã back lượt, hãy chuyển đổi sẵn các link sản phẩm. Ví dụ, mã chuẩn bị back lượt lúc 20H thì chuẩn bị link trước từ 19H — đừng đợi đến lúc back lượt mới tạo link.
+                      Dán link sản phẩm Shopee vào ô phía trên → bấm <span className="font-semibold">Lấy Link</span>.
+                      Sau khi hệ thống tạo xong, bấm <span className="font-semibold text-orange-600">COPY LINK</span> để lưu vào clipboard.
                     </p>
                   </div>
 
                   <div className="relative pl-10 pb-6 border-l-2 border-orange-200 ml-3">
                     <div className="absolute left-[-13px] top-0 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm shadow-orange-200">2</div>
-                    <h4 className="text-sm font-bold text-gray-800 mb-1">Lưu link sẵn lên Facebook</h4>
+                    <h4 className="text-sm font-bold text-gray-800 mb-1">Mở bài viết ghim group V-Affiliate</h4>
                     <p className="text-xs text-gray-500 leading-relaxed mb-2">
-                      Sau khi copy link, <span className="font-semibold">comment các link đó vào một bài đăng trên Facebook cá nhân</span> để chế độ &quot;Chỉ mình tôi&quot; cho tiện sử dụng.
+                      Bấm nút <span className="font-semibold text-orange-600">📌 Group V-Affiliate (bài ghim)</span> màu cam đã sáng lên.
+                      Tab mới sẽ tự động mở thẳng vào bài viết.
                     </p>
-                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-2.5">
-                      <p className="text-[11px] text-purple-700">💡 Mẹo: Lưu 50~100 link sản phẩm để tăng cơ hội — vì mã lọc sản phẩm áp dụng!</p>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5">
+                      <p className="text-[11px] text-blue-700">📘 Group đã đăng ký affiliate với Shopee → comment vào đây mới được nhận voucher social.</p>
                     </div>
                   </div>
 
                   <div className="relative pl-10 pb-1 ml-3">
                     <div className="absolute left-[-13px] top-0 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm shadow-orange-200">3</div>
-                    <h4 className="text-sm font-bold text-gray-800 mb-1">Bấm link đúng giờ</h4>
+                    <h4 className="text-sm font-bold text-gray-800 mb-1">Comment link và quay lại bấm mua</h4>
                     <p className="text-xs text-gray-500 leading-relaxed mb-2">
-                      Đợi đến đúng khung giờ back lượt + thêm ~10 phút. Mở Facebook → bấm các link đã chuẩn bị sẵn.
+                      Trong bài viết ghim → kéo xuống ô bình luận → <span className="font-semibold">paste link</span> đã copy → đăng comment.
+                      Sau đó bấm vào chính link vừa comment để mở Shopee và mua hàng.
                     </p>
                     <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5">
-                      <p className="text-[11px] text-amber-700">⚡ Không mất thời gian tạo link = tăng cơ hội lấy được mã!</p>
+                      <p className="text-[11px] text-amber-700">⚡ Nếu shop đang chạy chiến dịch social, voucher 20-25% sẽ tự động áp vào đơn hàng của bạn.</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Mẹo thêm */}
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
                   <p className="text-xs text-gray-700 leading-relaxed">
-                    <span className="text-blue-600 font-bold">💡 Mẹo thêm: Thêm vào giỏ hàng trước</span><br />
-                    Nếu bạn bấm vào link sản phẩm khi mà giảm giá <span className="font-bold">đang còn lượt</span> và <span className="font-bold">thêm sản phẩm vào giỏ hàng</span>, hệ thống sẽ ghi nhận. Nhờ vậy ở các khung giờ sau, khi mà back lượt bạn vẫn dùng được mã giảm giá tốt nhất cho sản phẩm đó.
+                    <span className="text-purple-600 font-bold">💡 Mẹo thêm: Tăng tỉ lệ trúng voucher</span><br />
+                    Comment <span className="font-bold">nhiều sản phẩm khác nhau</span> trong cùng phiên mua sắm — voucher social
+                    không apply cho mọi shop, càng nhiều link càng tăng cơ hội ít nhất 1 sản phẩm trúng voucher.
+                    Mỗi link là 1 lần hệ thống Shopee xét chiến dịch social bonus.
                   </p>
                 </div>
               </div>
@@ -653,7 +658,7 @@ export default function CashbackPage() {
               onClick={() => setShowGuide(!showGuide)}
               className="w-full flex items-center justify-center gap-2 py-3 border-t border-gray-100 text-sm font-medium text-orange-500 hover:text-orange-600 hover:bg-orange-50/30 transition-colors"
             >
-              {showGuide ? "Thu gọn" : "Đọc toàn bộ hướng dẫn"}
+              {showGuide ? "Thu gọn" : "Xem hướng dẫn săn voucher đầy đủ"}
               <svg
                 viewBox="0 0 24 24"
                 className={`w-4 h-4 transition-transform duration-300 ${showGuide ? "rotate-180" : "animate-bounce"}`}
