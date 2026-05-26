@@ -228,13 +228,77 @@ export function SettingsTab() {
                 }}
                 className="text-xs font-medium px-3 py-1.5 rounded-lg bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-500/20"
               >
-                🗜 Cleanup + VACUUM
+                ⚙️ Cleanup + VACUUM
               </button>
             </div>
           </div>
         </div>
       )}
+
+      <TestEmailSection />
     </>
+  );
+}
+
+function TestEmailSection() {
+  const toast = useToast();
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+
+  const handleTest = async () => {
+    if (!email) { toast.error("Nhập email"); return; }
+    setLoading(true);
+    setResult(null);
+    try {
+      const res = await fetch("/api/admin/test-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      setResult(JSON.stringify(data, null, 2));
+      if (data.success) {
+        toast.success(`✅ Email gửi thành công (${data.elapsedMs}ms). Check hộp thư!`);
+      } else {
+        toast.error(`❌ ${data.error || "Lỗi gửi email"}`);
+      }
+    } catch (e) {
+      setResult(String(e));
+      toast.error("Lỗi kết nối");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 mb-6">
+      <h3 className="text-base font-bold text-gray-900 dark:text-white mb-2">📨 Test gửi email SMTP</h3>
+      <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+        Gửi email thật tới địa chỉ bên dưới để verify SMTP cấu hình đúng. Nếu fail, kết quả sẽ hiện chi tiết error.
+      </p>
+      <div className="flex gap-2">
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="email@gmail.com"
+          className="flex-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm outline-none focus:border-orange-500"
+        />
+        <button
+          onClick={handleTest}
+          disabled={loading}
+          className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors whitespace-nowrap"
+        >
+          {loading ? "Đang gửi..." : "📤 Test gửi"}
+        </button>
+      </div>
+      {result && (
+        <pre className="mt-3 text-xs bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-3 overflow-x-auto whitespace-pre-wrap break-all">
+          {result}
+        </pre>
+      )}
+    </div>
   );
 }
 
