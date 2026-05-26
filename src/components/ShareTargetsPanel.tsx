@@ -14,6 +14,10 @@ import { useEffect, useState } from "react";
  *
  * KHÔNG cho user thêm group/bài ghim cá nhân — vì các nguồn ngoài không
  * được Shopee track → không có cashback bonus, đăng vô ích.
+ *
+ * Nút LUÔN sáng (active) — không disable theo `hasCopied` để user chậm vẫn
+ * bấm được. Khi click sẽ tự copy lại link 1 lần nữa rồi mở tab mới → user
+ * không cần lo clipboard bị mất.
  */
 
 interface CommunityTarget {
@@ -23,11 +27,13 @@ interface CommunityTarget {
 }
 
 interface Props {
-  hasCopied: boolean;
+  /** Optional: chỉ dùng để hiển thị message gợi ý. Không disable button. */
+  hasCopied?: boolean;
+  /** Re-copy link trước khi mở tab — đảm bảo clipboard luôn có link mới nhất. */
   onCopyAgain: () => void;
 }
 
-export function ShareTargetsPanel({ hasCopied, onCopyAgain }: Props) {
+export function ShareTargetsPanel({ hasCopied = false, onCopyAgain }: Props) {
   const [community, setCommunity] = useState<CommunityTarget | null>(null);
   const [loading, setLoading] = useState(true);
   const [opened, setOpened] = useState(false);
@@ -51,7 +57,7 @@ export function ShareTargetsPanel({ hasCopied, onCopyAgain }: Props) {
     onCopyAgain();
     window.open(community.url, "_blank", "noopener,noreferrer");
     setOpened(true);
-    setTimeout(() => setOpened(false), 2500);
+    setTimeout(() => setOpened(false), 3500);
   };
 
   // Không render gì nếu admin tắt feature (hoặc đang load).
@@ -71,53 +77,42 @@ export function ShareTargetsPanel({ hasCopied, onCopyAgain }: Props) {
         </div>
       </div>
 
+      {/* Nút LUÔN sáng — không disable theo hasCopied. User chậm cũng bấm được. */}
       <button
         type="button"
         onClick={handleOpen}
-        disabled={!hasCopied}
-        title={hasCopied ? `Mở: ${community.label}` : "Bấm COPY LINK trước rồi quay lại đây"}
-        className={`relative w-full text-left rounded-xl p-3.5 transition-all border-2 ${
-          hasCopied
-            ? "bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 text-white border-transparent shadow-lg shadow-orange-200 hover:shadow-xl hover:scale-[1.01] cursor-pointer"
-            : "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
-        }`}
+        title={`Mở: ${community.label}`}
+        className="relative w-full text-left rounded-xl p-3.5 transition-all border-2 border-transparent bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 text-white shadow-lg shadow-orange-200 hover:shadow-xl hover:scale-[1.01] cursor-pointer"
       >
-        <span className={`absolute -top-2 right-3 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-          hasCopied ? "bg-white text-orange-600 shadow" : "bg-gray-200 text-gray-500"
-        }`}>
+        <span className="absolute -top-2 right-3 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-white text-orange-600 shadow">
           ⭐ Khuyên dùng
         </span>
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl shrink-0 ${
-            hasCopied ? "bg-white/20" : "bg-gray-100"
-          }`}>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl shrink-0 bg-white/20">
             📌
           </div>
           <div className="flex-1 min-w-0">
-            <p className={`text-[10px] uppercase tracking-wider font-bold mb-0.5 ${
-              hasCopied ? "text-white/80" : "text-gray-400"
-            }`}>
+            <p className="text-[10px] uppercase tracking-wider font-bold mb-0.5 text-white/80">
               Cộng đồng V-Affiliate
             </p>
-            <p className={`text-sm font-bold truncate ${hasCopied ? "text-white" : "text-gray-500"}`}>
+            <p className="text-sm font-bold truncate text-white">
               {opened ? "✓ Đã mở — paste link Shopee vào comment!" : community.label}
             </p>
           </div>
-          <svg viewBox="0 0 24 24" className={`w-5 h-5 shrink-0 ${hasCopied ? "text-white/80" : "text-gray-300"}`} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg viewBox="0 0 24 24" className="w-5 h-5 shrink-0 text-white/80" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M7 17l9.2-9.2M17 17V7H7" />
           </svg>
         </div>
       </button>
 
-      {!hasCopied && (
-        <p className="text-[11px] text-orange-500/80 mt-2.5 text-center font-medium">
-          ↑ Bấm <span className="font-bold">COPY LINK</span> trước, rồi click để mở bài viết.
-        </p>
-      )}
-
-      {hasCopied && (
+      {/* Hint dưới nút — đổi theo trạng thái user đã copy hay chưa. */}
+      {hasCopied ? (
         <p className="text-[11px] text-gray-500 mt-2.5 px-1 leading-relaxed text-center">
           💡 Sau khi mở: kéo xuống ô bình luận → paste link → đăng.
+        </p>
+      ) : (
+        <p className="text-[11px] text-orange-600/80 mt-2.5 text-center font-medium">
+          Tip: Bấm <span className="font-bold">COPY LINK</span> trước, rồi click nút trên để mở bài viết.
         </p>
       )}
     </div>
