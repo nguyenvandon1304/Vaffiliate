@@ -1,24 +1,39 @@
 import nodemailer from "nodemailer";
+import dns from "node:dns";
 
 /**
  * Gmail SMTP transporter — explicit IPv4 + STARTTLS (port 587).
  *
  * Quan trọng:
- * - KHÔNG dùng `service: "gmail"` vì nodemailer mặc định prefer IPv6 →
- *   Render free tier không hỗ trợ IPv6 outbound → ENETUNREACH error.
- * - Port 587 + STARTTLS hoạt động trên mọi cloud provider (Render, Vercel, Fly).
- *   Port 465 (SSL) hay bị block ở 1 số nhà cung cấp.
- * - Để force IPv4, set Node.js DNS lookup default = IPv4 ở module scope (xem dưới).
+ * - Render free tier KHÔNG hỗ trợ IPv6 outbound → connect AAAA record của
+ *   smtp.gmail.com sẽ ENETUNREACH.
+ * - Phải force resolve IPv4 ở MỌI tầng:
+ *   1. dns.setDefaultResultOrder('ipv4first') — Node global
+ *   2. Custom lookup function trong transporter — chỉ trả IPv4
+ * - Port 587 (STARTTLS) chuẩn hơn port 465 (SSL) cho cloud.
  */
 
-// Force IPv4 cho TẤT CẢ DNS lookup từ Node — Render free không hỗ trợ IPv6 outbound.
-// Phải set ở module scope (chạy 1 lần khi server start).
-import dns from "node:dns";
+// Force IPv4 cho TẤT CẢ DNS lookup từ Node — module scope.
 try {
   dns.setDefaultResultOrder("ipv4first");
 } catch {
   /* Node < 18 không có method này, bỏ qua */
 }
+
+/**
+ * Custom DNS lookup function — chỉ resolve IPv4.
+ * Truyền vào nodemailer để chắc chắn không bao giờ trả IPv6.
+ */
+const lookupIPv4Only = (
+  hostname: string,
+  options: dns.LookupOptions | ((err: NodeJS.ErrnoException | null, address: string, family: number) => void),
+  callback?: (err: NodeJS.ErrnoException | null, address: string, family: number) => void,
+) => {
+  const cb = typeof options === "function" ? options : callback;
+  if (!cb) return;
+  // Force family=4 bất kể options truyền vào là gì
+  return dns.lookup(hostname, { family: 4, all: false }, cb);
+};
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -28,11 +43,15 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  // Force IPv4 — Render free không có IPv6 outbound.
+  // `lookup` không có trong type Options chính thức nhưng nodemailer pass through
+  // tới Net.connect, nên cần cast để bypass typecheck.
+  lookup: lookupIPv4Only,
   // Timeout dài hơn vì Render free latency cao
   connectionTimeout: 30_000,
   greetingTimeout: 30_000,
   socketTimeout: 30_000,
-});
+} as Parameters<typeof nodemailer.createTransport>[0]);
 
 export async function sendPasswordResetEmail(to: string, username: string, resetToken: string): Promise<{ success: boolean; error?: string }> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
@@ -132,11 +151,6 @@ export async function sendEmailVerification(
   }
 }
 
-
-/**
- * Email cảnh báo khi user login từ thiết bị / IP lạ. Gửi async, không block
- * login flow — fire-and-forget.
- */
 export async function sendNewDeviceAlertEmail(
   to: string,
   username: string,
@@ -145,37 +159,35 @@ export async function sendNewDeviceAlertEmail(
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
   const securityUrl = `${baseUrl}/dashboard/security`;
   const time = meta.loginAt.toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" });
-  const ip = meta.ip || "không rõ";
-  const ua = (meta.userAgent || "không rõ").slice(0, 200);
 
   const html = `
-    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #f0f0f0;">
-      <div style="background: linear-gradient(135deg, #f97316, #ef4444); padding: 28px 24px; text-align: center;">
-        <div style="display: inline-block; width: 44px; height: 44px; background: rgba(255,255,255,0.2); border-radius: 50%; line-height: 44px; font-size: 20px; color: white; margin-bottom: 8px;">🔐</div>
-        <h1 style="color: white; font-size: 18px; margin: 0; font-weight: 700;">Phát hiện đăng nhập mới</h1>
+    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #f0f0f0;">
+      <div style="background: linear-gradient(135deg, #f59e0b, #ef4444); padding: 32px 24px; text-align: center;">
+        <div style="display: inline-block; width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 12px; line-height: 48px; font-size: 26px; font-weight: 800; color: white; margin-bottom: 12px;">⚠</div>
+        <h1 style="color: white; font-size: 20px; margin: 0; font-weight: 700;">Phát hiện đăng nhập mới</h1>
+        <p style="color: rgba(255,255,255,0.85); font-size: 12px; margin: 4px 0 0 0;">V-Affiliate Bảo Mật</p>
       </div>
-      <div style="padding: 28px 24px;">
+      <div style="padding: 32px 24px;">
         <p style="color: #6b7280; font-size: 14px; line-height: 1.6; margin: 0 0 16px 0;">
           Xin chào <strong>${username}</strong>,<br/>
-          Tài khoản V-Affiliate của bạn vừa được đăng nhập từ một thiết bị mới:
+          Tài khoản của bạn vừa đăng nhập từ <strong>thiết bị mới</strong>.
         </p>
-        <div style="background: #f9fafb; border-radius: 12px; padding: 16px; margin: 16px 0;">
-          <p style="margin: 0 0 8px 0; font-size: 13px; color: #374151;"><b>Thời gian:</b> ${time}</p>
-          <p style="margin: 0 0 8px 0; font-size: 13px; color: #374151;"><b>IP:</b> <code style="font-family: monospace;">${ip}</code></p>
-          <p style="margin: 0; font-size: 12px; color: #6b7280;"><b>Thiết bị:</b> ${ua}</p>
+        <div style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; padding: 16px; margin: 16px 0;">
+          <p style="margin: 0 0 6px 0; color: #9a3412; font-size: 13px;"><strong>Thời gian:</strong> ${time}</p>
+          <p style="margin: 0 0 6px 0; color: #9a3412; font-size: 13px;"><strong>IP:</strong> ${meta.ip ?? "—"}</p>
+          <p style="margin: 0; color: #9a3412; font-size: 13px;"><strong>Trình duyệt:</strong> ${(meta.userAgent ?? "—").slice(0, 80)}</p>
         </div>
-        <p style="color: #6b7280; font-size: 13px; line-height: 1.6; margin: 16px 0;">
-          ✅ Nếu là bạn → có thể bỏ qua email này.<br/>
-          ⚠️ Nếu KHÔNG phải bạn → đổi mật khẩu ngay và đăng xuất các thiết bị khác:
+        <p style="color: #6b7280; font-size: 13px; line-height: 1.6; margin: 16px 0 0 0;">
+          Nếu <strong>không phải bạn</strong>, hãy đổi mật khẩu ngay và đăng xuất tất cả thiết bị.
         </p>
         <div style="text-align: center; margin: 24px 0;">
-          <a href="${securityUrl}" style="display: inline-block; background: #ef4444; color: white; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-size: 13px; font-weight: 700;">
-            BẢO MẬT TÀI KHOẢN
+          <a href="${securityUrl}" style="display: inline-block; background: linear-gradient(135deg, #f97316, #ea580c); color: white; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-size: 13px; font-weight: 700;">
+            QUẢN LÝ BẢO MẬT
           </a>
         </div>
-        <hr style="border: none; border-top: 1px solid #f3f4f6; margin: 20px 0;" />
+        <hr style="border: none; border-top: 1px solid #f3f4f6; margin: 24px 0;" />
         <p style="color: #d1d5db; font-size: 11px; text-align: center; margin: 0;">
-          &copy; 2026 V-Affiliate. Email tự động, vui lòng không trả lời.
+          &copy; 2026 V-Affiliate Team. Email tự động, vui lòng không trả lời.
         </p>
       </div>
     </div>
@@ -190,7 +202,7 @@ export async function sendNewDeviceAlertEmail(
     });
     return { success: true };
   } catch (err) {
-    console.error("[Email] Failed to send new device alert:", err);
+    console.error("[Email] Failed to send security alert:", err);
     return { success: false, error: "Không thể gửi email cảnh báo." };
   }
 }
