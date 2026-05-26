@@ -35,18 +35,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(generic);
   }
 
-  const { token } = await createEmailVerificationToken(user.id);
-  const send = await sendEmailVerification(email, user.username, token);
+  // Gửi email background (fire-and-forget) — Render free + Gmail SMTP có thể
+  // mất 20-60s mỗi connection → user bị stuck "Đang gửi..." nếu await.
+  // Audit log ghi lại kết quả async để admin biết nếu fail.
+  const ip = getClientIp(request.headers);
+  const userAgent = request.headers.get("user-agent");
+  const userId = user.id;
+  const username = user.username;
+  void (async () => {
+    try {
+      const { token } = await createEmailVerificationToken(userId);
+      const send = await sendEmailVerification(email, username, token);
+      await logAudit("user.email.resend", {
+        userId,
+        ip,
+        userAgent,
+        detail: send.success ? "sent" : `failed: ${send.error ?? "unknown"}`,
+      });
+    } catch (e) {
+      console.error("[verify-email/resend] email send failed:", e);
+    }
+  })();
 
-  await logAudit("user.email.resend", {
-    userId: user.id,
-    ip: getClientIp(request.headers),
-    userAgent: request.headers.get("user-agent"),
-    detail: send.success ? null : send.error ?? null,
-  });
-
-  if (!send.success) {
-    return NextResponse.json({ success: false, error: send.error }, { status: 500 });
-  }
   return NextResponse.json(generic);
 }
