@@ -51,11 +51,15 @@ export async function POST(request: NextRequest) {
   // UX mượt hơn cho user thông thường, không bị spam captcha.
   // Implementation: chỉ skip verify khi rate-limit count < CAPTCHA_THRESHOLD.
   // Lookup count từ rate-limit map qua key tạm.
+  // KHÔNG check captcha khi đây là step 2 (TOTP) — token Turnstile chỉ dùng được
+  // 1 lần ở step 1. Step 2 user đã chứng minh có password đúng nên skip captcha
+  // an toàn (nếu password sai thì login fail trước khi check TOTP).
+  const isTotpStep = !!totpCode;
   const failKey = getRateLimitKey(request.headers, "login-fail");
   const probe = rateLimit(failKey, { max: 999_999, windowMs: 15 * 60 * 1000 });
   // probe.remaining = max - count → count = max - remaining - 1 (do probe vừa increment)
   const failCount = 999_999 - probe.remaining - 1;
-  const requireCaptcha = failCount >= CAPTCHA_THRESHOLD;
+  const requireCaptcha = !isTotpStep && failCount >= CAPTCHA_THRESHOLD;
 
   if (requireCaptcha) {
     const captcha = await verifyTurnstile(captchaToken, ip);
