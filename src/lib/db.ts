@@ -252,11 +252,24 @@ async function initSchema(database: DbAdapter): Promise<void> {
       target_url TEXT NOT NULL,
       shop_id TEXT,
       item_id TEXT,
+      product_name TEXT,
+      product_image TEXT,
+      product_price BIGINT,
+      cashback_amount BIGINT,
       click_count BIGINT DEFAULT 0,
       last_clicked_at TIMESTAMPTZ,
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `);
+  // Migration cho DB cũ — short_links đã tồn tại nhưng thiếu cột product info.
+  try {
+    await database.exec("ALTER TABLE short_links ADD COLUMN IF NOT EXISTS product_name TEXT");
+    await database.exec("ALTER TABLE short_links ADD COLUMN IF NOT EXISTS product_image TEXT");
+    await database.exec("ALTER TABLE short_links ADD COLUMN IF NOT EXISTS product_price BIGINT");
+    await database.exec("ALTER TABLE short_links ADD COLUMN IF NOT EXISTS cashback_amount BIGINT");
+  } catch (e) {
+    console.warn("[migration] add product info columns to short_links:", e);
+  }
   await database.exec(`
     CREATE TABLE IF NOT EXISTS notifications (
       id BIGSERIAL PRIMARY KEY,
@@ -3714,16 +3727,36 @@ export async function createShortLink(args: {
   targetUrl: string;
   shopId?: string;
   itemId?: string;
+  productName?: string;
+  productImage?: string;
+  productPrice?: number;
+  cashbackAmount?: number;
 }): Promise<string> {
   const database = await getDb();
 
-  // Re-use nếu đã có (cùng user + cùng product).
+  // Re-use nếu đã có (cùng user + cùng product). Update lại product info
+  // (giá có thể đã thay đổi) trước khi return.
   if (args.userId && args.shopId && args.itemId) {
     const existing = await database.get(
       "SELECT code FROM short_links WHERE user_id = ? AND shop_id = ? AND item_id = ? ORDER BY id DESC LIMIT 1",
       [args.userId, args.shopId, args.itemId],
     );
-    if (existing?.code) return String(existing.code);
+    if (existing?.code) {
+      const code = String(existing.code);
+      // Update lại product info — giá có thể đã thay đổi từ lần share trước.
+      await database.run(
+        "UPDATE short_links SET target_url = ?, product_name = ?, product_image = ?, product_price = ?, cashback_amount = ? WHERE code = ?",
+        [
+          args.targetUrl,
+          args.productName ?? null,
+          args.productImage ?? null,
+          args.productPrice ?? null,
+          args.cashbackAmount ?? null,
+          code,
+        ],
+      );
+      return code;
+    }
   }
 
   // Sinh code unique — retry tối đa 5 lần phòng collision (xác suất cực thấp).
@@ -3731,8 +3764,18 @@ export async function createShortLink(args: {
     const code = generateShortCode();
     try {
       await database.run(
-        "INSERT INTO short_links (code, user_id, target_url, shop_id, item_id) VALUES (?, ?, ?, ?, ?)",
-        [code, args.userId, args.targetUrl, args.shopId ?? null, args.itemId ?? null],
+        "INSERT INTO short_links (code, user_id, target_url, shop_id, item_id, product_name, product_image, product_price, cashback_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          code,
+          args.userId,
+          args.targetUrl,
+          args.shopId ?? null,
+          args.itemId ?? null,
+          args.productName ?? null,
+          args.productImage ?? null,
+          args.productPrice ?? null,
+          args.cashbackAmount ?? null,
+        ],
       );
       return code;
     } catch (e) {
@@ -3746,23 +3789,51 @@ export async function createShortLink(args: {
 }
 
 /**
- * Lookup target URL theo code. Side-effect: tăng click_count + last_clicked_at.
+ * Lookup full info short link theo code (cho landing page render).
+ * Side-effect: tăng click_count + last_clicked_at.
  * Trả null nếu code không tồn tại → caller redirect về 404.
  */
-export async function resolveShortLink(code: string): Promise<string | null> {
+export interface ShortLinkInfo {
+  targetUrl: string;
+  productName: string | null;
+  productImage: string | null;
+  productPrice: number | null;
+  cashbackAmount: number | null;
+  shopId: string | null;
+  itemId: string | null;
+}
+
+export async function lookupShortLinkFull(code: string): Promise<ShortLinkInfo | null> {
   if (!code || !/^[a-zA-Z0-9]{4,16}$/.test(code)) return null;
   const database = await getDb();
   const row = await database.get(
-    "SELECT target_url FROM short_links WHERE code = ?",
+    "SELECT target_url, product_name, product_image, product_price, cashback_amount, shop_id, item_id FROM short_links WHERE code = ?",
     [code],
   );
   if (!row?.target_url) return null;
 
-  // Tăng click count async — không await để không chặn redirect.
+  // Tăng click count async — không await để không chặn render.
   void database.run(
     "UPDATE short_links SET click_count = click_count + 1, last_clicked_at = NOW() WHERE code = ?",
     [code],
   );
 
-  return String(row.target_url);
+  return {
+    targetUrl: String(row.target_url),
+    productName: row.product_name ? String(row.product_name) : null,
+    productImage: row.product_image ? String(row.product_image) : null,
+    productPrice: row.product_price !== null && row.product_price !== undefined ? Number(row.product_price) : null,
+    cashbackAmount: row.cashback_amount !== null && row.cashback_amount !== undefined ? Number(row.cashback_amount) : null,
+    shopId: row.shop_id ? String(row.shop_id) : null,
+    itemId: row.item_id ? String(row.item_id) : null,
+  };
+}
+
+/**
+ * Lookup target URL theo code. Side-effect: tăng click_count + last_clicked_at.
+ * Trả null nếu code không tồn tại → caller redirect về 404.
+ */
+export async function resolveShortLink(code: string): Promise<string | null> {
+  const info = await lookupShortLinkFull(code);
+  return info?.targetUrl ?? null;
 }

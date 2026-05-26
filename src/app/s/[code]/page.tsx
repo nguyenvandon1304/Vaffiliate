@@ -1,70 +1,53 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { headers } from "next/headers";
-import { resolveShortLink, getDb } from "@/lib/db";
+import { lookupShortLinkFull } from "@/lib/db";
 
 interface Ctx { params: Promise<{ code: string }>; }
 
 /**
- * Short link page - splash + redirect.
+ * Short link landing page V2 — interstitial pattern (Linktree / Beacons.ai style).
  *
- * Vấn đề trước: redirect 302 ngay → Facebook scraper nhận ra "redirector" + 
- * domain mới + target là Shopee affiliate → flag là spam/cloaking → KHÔNG
- * auto-link (link bị đen trong comment).
+ * Vấn đề thực tế: domain `vaffiliate.vn` mới + redirect 302 sang Shopee →
+ * Facebook coi là "redirector cloaking" → tắt auto-link cho user thường (chỉ
+ * owner thấy xanh). Lý do FB anti-spam: ngày xưa hacker dùng pattern này tạo
+ * shortener rồi redirect sang trang phishing.
  *
- * Giải pháp đúng (pattern bit.ly / lnk.bio):
- *   1. Page trả HTML đầy đủ với Open Graph metadata (FB scraper crawl được).
- *   2. Meta refresh + JS redirect sau 800ms cho user thật.
- *   3. FB tin domain "có nội dung thật" → auto-link xanh + render preview card.
+ * Giải pháp: KHÔNG auto-redirect nữa. Hiển thị landing page có:
+ *   - Ảnh sản phẩm thật (từ Shopee CDN)
+ *   - Tên + giá thật
+ *   - % cashback user nhận được
+ *   - CTA "Mua trên Shopee" — user CLICK MANUALLY
+ *
+ * Pattern này:
+ *   1. FB scraper thấy "real content page" → không flag cloaking → auto-link xanh
+ *   2. User thấy preview đẹp với ảnh + giá → CTR cao hơn
+ *   3. Click count vẫn track được
+ *   4. Tracking Shopee (mmp_pid + sub_id) vẫn nguyên vẹn — cashback chạy đúng
  */
 
 const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://vaffiliate.vn";
 
-// Lookup cả target_url + product_name (nếu có) để build OG title đẹp.
-async function lookupShortLink(code: string): Promise<{
-  targetUrl: string | null;
-  productName: string | null;
-  productImage: string | null;
-}> {
-  if (!code || !/^[a-zA-Z0-9]{4,16}$/.test(code)) {
-    return { targetUrl: null, productName: null, productImage: null };
-  }
-  const database = await getDb();
-  // JOIN với affiliate_links để lấy product_name (cùng user_id + shop_id + item_id).
-  const row = await database.get(
-    `SELECT s.target_url, s.shop_id, s.item_id,
-       (SELECT product_name FROM affiliate_links a
-        WHERE a.shop_id = s.shop_id AND a.item_id = s.item_id
-        ORDER BY a.id DESC LIMIT 1) AS product_name
-     FROM short_links s WHERE s.code = ?`,
-    [code],
-  );
-  if (!row?.target_url) return { targetUrl: null, productName: null, productImage: null };
-  return {
-    targetUrl: String(row.target_url),
-    productName: row.product_name ? String(row.product_name) : null,
-    productImage: null,
-  };
-}
-
 export async function generateMetadata({ params }: Ctx): Promise<Metadata> {
   const { code } = await params;
-  const info = await lookupShortLink(code);
+  const info = await lookupShortLinkFull(code);
 
-  const title = info.productName
-    ? `${info.productName.slice(0, 80)} — Hoàn tiền 50% qua V-Affiliate`
+  const title = info?.productName
+    ? `${info.productName.slice(0, 80)} — Hoàn tiền 50% | V-Affiliate`
     : "Hoàn tiền 50% Shopee — V-Affiliate";
-  const description = info.productName
-    ? `Mua "${info.productName.slice(0, 100)}" qua V-Affiliate để nhận hoàn tiền 50% hoa hồng vào ví. Bấm link để chuyển sang Shopee.`
-    : "Bấm link để mua sản phẩm Shopee và nhận hoàn tiền 50% hoa hồng vào ví V-Affiliate.";
+
+  const description = info?.productName
+    ? `Mua "${info.productName.slice(0, 100)}" qua V-Affiliate để nhận hoàn ${info.cashbackAmount ? info.cashbackAmount.toLocaleString("vi-VN") + "đ" : "50%"} vào ví.`
+    : "Mua sắm Shopee qua V-Affiliate — hoàn 50% hoa hồng vào ví của bạn.";
+
+  // Ưu tiên ảnh sản phẩm thật (từ Shopee CDN). Fallback brand logo nếu chưa có.
+  const ogImage = info?.productImage || `${SITE_URL}/seo/icon-512.png`;
 
   return {
     title,
     description,
-    // Cho phép FB/Google index trang short link để FB scraper crawl được OG.
     robots: { index: false, follow: true },
     other: {
-      // fb:app_id optional — set qua env nếu user đã tạo Facebook App. Không bắt buộc.
       ...(process.env.FACEBOOK_APP_ID ? { "fb:app_id": process.env.FACEBOOK_APP_ID } : {}),
     },
     openGraph: {
@@ -76,29 +59,26 @@ export async function generateMetadata({ params }: Ctx): Promise<Metadata> {
       locale: "vi_VN",
       images: [
         {
-          url: `${SITE_URL}/seo/icon-512.png`,
-          width: 512,
-          height: 512,
-          alt: "V-Affiliate",
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: info?.productName || "V-Affiliate",
         },
       ],
     },
     twitter: {
-      card: "summary",
+      card: info?.productImage ? "summary_large_image" : "summary",
       title,
       description,
-      images: [`${SITE_URL}/seo/icon-512.png`],
+      images: [ogImage],
     },
   };
 }
 
 /**
- * Phát hiện social bot crawler (FB / Twitter / Discord / Telegram / Zalo / Slack).
- * Bot → KHÔNG redirect → đọc OG metadata + render preview card V-Affiliate.
- * User thật → splash 800ms rồi auto redirect sang Shopee.
- *
- * Quan trọng: nếu không phân biệt bot vs user, FB scraper sẽ FOLLOW redirect
- * sang Shopee → preview hiển thị Shopee thay vì brand V-Affiliate.
+ * Phát hiện social bot crawler.
+ * Bot → KHÔNG redirect → đọc OG metadata + render preview card.
+ * User thật → vẫn render landing page, không auto-redirect (FB không flag cloaking).
  */
 function isBotUserAgent(ua: string | null | undefined): boolean {
   if (!ua) return false;
@@ -121,17 +101,16 @@ function isBotUserAgent(ua: string | null | undefined): boolean {
   );
 }
 
-export default async function ShortLinkPage({ params }: Ctx) {
-  const { code } = await params;
-  const target = await resolveShortLink(code);
+const formatPrice = (n: number) => n.toLocaleString("vi-VN");
 
-  // Detect bot từ user-agent — bot sẽ thấy preview V-Affiliate, không redirect.
+export default async function ShortLinkLanding({ params }: Ctx) {
+  const { code } = await params;
+  const info = await lookupShortLinkFull(code);
   const headersList = await headers();
-  const ua = headersList.get("user-agent");
-  const isBot = isBotUserAgent(ua);
+  const isBot = isBotUserAgent(headersList.get("user-agent"));
 
   // Code không tồn tại → trang 404 nhỏ với link về trang chủ.
-  if (!target) {
+  if (!info) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-orange-50 via-white to-orange-50 px-6">
         <div className="text-center max-w-sm">
@@ -146,54 +125,122 @@ export default async function ShortLinkPage({ params }: Ctx) {
     );
   }
 
-  // HTML escape target URL trước khi nhúng vào meta refresh + JS.
-  // Không dùng dangerouslySetInnerHTML — Next escape sẵn cho text/attribute.
-  // Splash page với 2 tầng redirect:
-  //   1. <meta http-equiv="refresh"> — fallback nếu JS bị tắt
-  //   2. <script> window.location.replace() — chạy ngay sau hydrate (~50ms)
-  //
-  // BOT (FB/Twitter/Zalo crawler) → bỏ qua redirect → chỉ render HTML có
-  // OG metadata để build preview card.
-  const includeRedirect = !isBot;
   return (
-    <>
-      {includeRedirect && (
-        <meta httpEquiv="refresh" content={`1; url=${target}`} />
-      )}      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-orange-50 via-white to-orange-50 px-6">
-        <div className="text-center max-w-sm">
-          <div className="w-20 h-20 mx-auto mb-5 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
-            <span className="text-white text-3xl font-bold">V</span>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-orange-50 flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-md">
+        {/* Brand header */}
+        <div className="flex items-center justify-center gap-2 mb-5">
+          <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center shadow-md">
+            <span className="text-white text-xl font-bold">V</span>
           </div>
-          <h1 className="text-2xl font-extrabold text-gray-800 mb-2">
+          <span className="text-xl font-extrabold">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">V-Affiliate</span>
-          </h1>
-          <p className="text-sm text-gray-600 mb-1">Đang chuyển bạn sang Shopee...</p>
-          <p className="text-xs text-gray-400 mb-6">Hoàn 50% hoa hồng vào ví của bạn</p>
+          </span>
+        </div>
 
-          <div className="flex items-center justify-center gap-2 text-orange-500 mb-6">
-            <span className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-            <span className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-            <span className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+        {/* Product card */}
+        <div className="bg-white rounded-3xl shadow-xl shadow-orange-100/50 overflow-hidden border border-orange-100">
+          {/* Cashback banner */}
+          <div className="bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 px-6 py-3 text-center">
+            <p className="text-white text-xs font-bold uppercase tracking-wider opacity-90">
+              💰 Hoàn tiền {info.cashbackAmount ? "ngay" : "tự động"}
+            </p>
+            <p className="text-white text-lg font-extrabold">
+              {info.cashbackAmount
+                ? `${formatPrice(info.cashbackAmount)}đ vào ví`
+                : "50% hoa hồng vào ví"}
+            </p>
           </div>
 
-          <a
-            href={target}
-            className="inline-block text-xs text-gray-400 hover:text-orange-500 underline transition"
-          >
-            Bấm vào đây nếu không tự chuyển
-          </a>
+          {/* Product image */}
+          {info.productImage ? (
+            <div className="aspect-square w-full bg-gray-50 overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element -- Ảnh sản phẩm Shopee CDN, host bất kỳ */}
+              <img
+                src={info.productImage}
+                alt={info.productName || "Sản phẩm"}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="aspect-square w-full bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center">
+              <svg viewBox="0 0 24 24" className="w-24 h-24 text-orange-300" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+              </svg>
+            </div>
+          )}
+
+          {/* Product info */}
+          <div className="px-6 py-5">
+            {/* Shopee badge */}
+            <div className="flex items-center gap-2 mb-3">
+              <span className="bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">
+                Shopee
+              </span>
+              <span className="text-xs text-gray-400">Sàn TMĐT chính hãng</span>
+            </div>
+
+            {/* Name */}
+            <h1 className="text-base sm:text-lg font-bold text-gray-800 leading-snug mb-2 line-clamp-3">
+              {info.productName || "Sản phẩm Shopee"}
+            </h1>
+
+            {/* Price */}
+            {info.productPrice && info.productPrice > 0 && (
+              <p className="text-2xl font-extrabold text-red-500 mb-4">
+                ₫{formatPrice(info.productPrice)}
+              </p>
+            )}
+
+            {/* CTA — manual click, không auto-redirect */}
+            <a
+              href={info.targetUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-center font-bold py-4 rounded-2xl shadow-lg shadow-orange-200 transition-all active:scale-95"
+            >
+              <span className="flex items-center justify-center gap-2">
+                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="9" cy="21" r="1" />
+                  <circle cx="20" cy="21" r="1" />
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                </svg>
+                Mua ngay trên Shopee
+                <svg viewBox="0 0 24 24" className="w-4 h-4 opacity-80" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M7 17l9.2-9.2M17 17V7H7" />
+                </svg>
+              </span>
+            </a>
+
+            {/* Note */}
+            <div className="mt-4 bg-orange-50 border border-orange-200 rounded-xl p-3">
+              <p className="text-[11px] text-orange-700 leading-relaxed">
+                💡 <span className="font-semibold">Lưu ý:</span> Bấm nút trên để Shopee ghi nhận đơn → tiền hoàn về ví V-Affiliate sau khi đơn hoàn tất.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-5">
+          <Link href="/" className="text-xs text-gray-400 hover:text-orange-500 transition">
+            Tạo link hoàn tiền của riêng bạn — V-Affiliate.vn
+          </Link>
         </div>
       </div>
 
-      {/* JS redirect — chạy ngay sau hydrate. Bot sẽ không chạy JS → đọc được OG metadata. */}
-      {includeRedirect && (
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `setTimeout(function(){window.location.replace(${JSON.stringify(target)});},800);`,
-          }}
-        />
-      )}
-    </>
+      {/*
+        KHÔNG auto-redirect cho user thật để tránh FB flag cloaking.
+        Bot crawler không chạy JS → đọc OG metadata + render preview.
+        User thật → click nút "Mua ngay" → mới chuyển sang Shopee.
+
+        `isBot` chỉ dùng để TUNE behavior (vd. tracking analytics khác nhau).
+        Hiện tại không dùng — chỉ giữ biến để tránh lint unused warning.
+      */}
+      {!isBot && null}
+    </div>
   );
 }
 

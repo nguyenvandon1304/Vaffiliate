@@ -70,6 +70,7 @@ export default function CashbackPage() {
   const [showGuide, setShowGuide] = useState(false);
   const [showAllChannels, setShowAllChannels] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedFull, setCopiedFull] = useState(false); // copy state riêng cho link Shopee đầy đủ
   const [product, setProduct] = useState<ProductInfo | null>(null);
   const [error, setError] = useState("");
 
@@ -446,7 +447,7 @@ export default function CashbackPage() {
                     FB chỉ auto-link URL ngắn → link bị đen với URL Shopee 200+ ký tự. */}
                 <div className="border border-gray-200 rounded-xl p-4 mb-4">
                   <p className="text-xs text-gray-400 mb-2">
-                    Link hoàn tiền <span className="text-orange-500 font-semibold">(rút gọn — copy thoải mái)</span>:
+                    Link rút gọn <span className="text-orange-500 font-semibold">(landing page có ảnh sản phẩm)</span>:
                   </p>
                   <div className="flex items-center gap-2">
                     <input
@@ -460,9 +461,49 @@ export default function CashbackPage() {
                       className={`p-2 rounded-lg transition-all shrink-0 ${
                         copied ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                       }`}
-                      title="Sao chép"
+                      title="Sao chép link rút gọn"
                     >
                       {copied ? (
+                        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                      ) : (
+                        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Link Shopee đầy đủ — fallback cho trường hợp FB không auto-link domain mới.
+                    User copy link này → paste lên FB sẽ XANH chắc chắn (FB tin Shopee tuyệt đối).
+                    Cashback vẫn track đúng vì link đã có sẵn mmp_pid + sub_id. */}
+                <div className="border border-amber-200 bg-amber-50/40 rounded-xl p-4 mb-4">
+                  <div className="flex items-start gap-2 mb-2">
+                    <span className="text-amber-500 text-sm">💡</span>
+                    <div className="flex-1">
+                      <p className="text-xs font-semibold text-amber-700 mb-0.5">
+                        Link Shopee đầy đủ <span className="font-normal text-amber-600">(dùng nếu FB không tự link xanh)</span>
+                      </p>
+                      <p className="text-[11px] text-amber-600/80">Cashback vẫn track đầy đủ • FB nhận diện 100%</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={product.affiliateLink}
+                      readOnly
+                      className="flex-1 text-sm text-gray-600 bg-white border border-amber-200 rounded-lg px-3 py-2 outline-none font-mono truncate"
+                    />
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(product.affiliateLink);
+                        setCopiedFull(true);
+                        setTimeout(() => setCopiedFull(false), 2000);
+                      }}
+                      className={`p-2 rounded-lg transition-all shrink-0 ${
+                        copiedFull ? "bg-green-100 text-green-600" : "bg-amber-100 text-amber-600 hover:bg-amber-200"
+                      }`}
+                      title="Sao chép link Shopee đầy đủ"
+                    >
+                      {copiedFull ? (
                         <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                       ) : (
                         <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>

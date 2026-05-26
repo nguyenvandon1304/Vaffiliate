@@ -157,23 +157,6 @@ export async function POST(request: NextRequest) {
     // Tạo affiliate link trực tiếp với Shopee Affiliate ID + user tracking
     const affiliateLink = buildAffiliateLink(ids.shopId, ids.itemId, user?.id);
 
-    // Tạo SHORT LINK gọn để user copy ra Facebook/Zalo/Telegram.
-    // Vấn đề: link Shopee dài 200+ ký tự → FB không auto-link (link đen).
-    // Short link `https://vaffiliate.vn/s/xxxxxxxx` gọn → FB tự nhận thành link xanh.
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://vaffiliate.vn";
-    let shortLink = affiliateLink; // fallback: nếu sinh short fail thì vẫn trả link đầy đủ
-    try {
-      const code = await createShortLink({
-        userId: user?.id ?? null,
-        targetUrl: affiliateLink,
-        shopId: ids.shopId,
-        itemId: ids.itemId,
-      });
-      shortLink = `${baseUrl}/s/${code}`;
-    } catch (e) {
-      console.error("[Affiliate] Failed to create short link:", e);
-    }
-
     // Cashback rate theo tier user (Bronze 50% / Silver 53% / Gold 55% / VIP 58%).
     // Nếu chưa login thì dùng tier Bronze (50%) làm fallback.
     let cashbackRate = 50;
@@ -187,6 +170,28 @@ export async function POST(request: NextRequest) {
     }
     const commissionAmount = parsePrice(info?.commission || "");
     const cashback = calcCashback(commissionAmount, cashbackRate);
+
+    // Tạo SHORT LINK gọn để user copy ra Facebook/Zalo/Telegram.
+    // Vấn đề: link Shopee dài 200+ ký tự → FB không auto-link (link đen).
+    // Short link `https://vaffiliate.vn/s/xxxxxxxx` gọn + landing page có content
+    // sản phẩm → FB tin domain hơn, tăng khả năng auto-link xanh.
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://vaffiliate.vn";
+    let shortLink = affiliateLink; // fallback: nếu sinh short fail thì vẫn trả link đầy đủ
+    try {
+      const code = await createShortLink({
+        userId: user?.id ?? null,
+        targetUrl: affiliateLink,
+        shopId: ids.shopId,
+        itemId: ids.itemId,
+        productName: info?.name || undefined,
+        productImage: info?.image || undefined,
+        productPrice: parsePrice(info?.price || "") || undefined,
+        cashbackAmount: cashback || undefined,
+      });
+      shortLink = `${baseUrl}/s/${code}`;
+    } catch (e) {
+      console.error("[Affiliate] Failed to create short link:", e);
+    }
 
     const product = {
       name: info?.name || "Sản phẩm Shopee",
