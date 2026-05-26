@@ -3726,14 +3726,38 @@ function isAllowedShareUrl(url: string): boolean {
 
 /**
  * Tự suy ra platform từ URL — UI hiển thị icon đúng.
+ * Phân biệt thêm "facebook_post" (URL bài viết / reel / video / photo cụ thể)
+ * vs "facebook" (group / page chung) để UI gợi ý đúng cho user click vào
+ * bài viết ghim → comment box hiện ngay.
  */
 function detectPlatform(url: string): string {
   try {
-    const host = new URL(url).hostname.toLowerCase();
-    if (host.includes("facebook") || host.includes("fb.com") || host === "m.me" || host.includes("messenger")) return "facebook";
+    const u = new URL(url);
+    const host = u.hostname.toLowerCase();
+    const path = u.pathname.toLowerCase();
+    if (host.includes("facebook") || host.includes("fb.com") || host === "m.me" || host.includes("messenger")) {
+      // URL bài viết / reel / video / photo cụ thể.
+      if (
+        path.includes("/posts/") ||
+        path.includes("/permalink") ||
+        path.includes("/photo") ||
+        path.includes("/videos") ||
+        path.includes("/reel") ||
+        path.includes("/share/p/") ||
+        path.includes("/share/v/") ||
+        path.includes("/story.php") ||
+        u.searchParams.has("story_fbid")
+      ) {
+        return "facebook_post";
+      }
+      return "facebook";
+    }
     if (host.includes("zalo")) return "zalo";
     if (host === "t.me") return "telegram";
-    if (host.includes("instagram")) return "instagram";
+    if (host.includes("instagram")) {
+      if (path.includes("/p/") || path.includes("/reel/")) return "instagram_post";
+      return "instagram";
+    }
     if (host.includes("tiktok")) return "tiktok";
     if (host.includes("twitter") || host === "x.com") return "twitter";
     if (host.includes("threads")) return "threads";

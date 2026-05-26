@@ -28,9 +28,11 @@ interface Props {
 
 const PLATFORM_META: Record<string, { name: string; emoji: string; color: string }> = {
   facebook: { name: "Facebook", emoji: "📘", color: "from-blue-500 to-blue-600" },
+  facebook_post: { name: "Bài viết FB", emoji: "📌", color: "from-blue-600 to-indigo-600" },
   zalo: { name: "Zalo", emoji: "💬", color: "from-sky-500 to-sky-600" },
   telegram: { name: "Telegram", emoji: "✈️", color: "from-cyan-500 to-cyan-600" },
   instagram: { name: "Instagram", emoji: "📷", color: "from-pink-500 to-rose-600" },
+  instagram_post: { name: "Bài IG", emoji: "📌", color: "from-pink-600 to-rose-700" },
   tiktok: { name: "TikTok", emoji: "🎵", color: "from-gray-800 to-black" },
   twitter: { name: "X / Twitter", emoji: "𝕏", color: "from-gray-700 to-black" },
   threads: { name: "Threads", emoji: "@", color: "from-gray-700 to-black" },
@@ -114,10 +116,10 @@ export function ShareTargetsPanel({ hasCopied, onCopyAgain }: Props) {
         <span className="text-blue-500 text-lg leading-none">📘</span>
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-bold text-blue-800">
-            Đăng link vào nhóm Facebook / Zalo
+            Đăng nhanh vào Facebook / Zalo
           </h3>
           <p className="text-[11px] text-blue-600/80 leading-relaxed">
-            FB thường auto-link xanh trong group dù domain mới. Lưu sẵn nơi đăng → 1 click mở tab mới → paste link.
+            Lưu link <span className="font-semibold">bài viết ghim</span> hoặc <span className="font-semibold">group</span>. 1 click mở thẳng tab mới → paste link đã copy → đăng. Trong group / bài viết, FB auto-link xanh dù domain mới.
           </p>
         </div>
       </div>
@@ -131,13 +133,13 @@ export function ShareTargetsPanel({ hasCopied, onCopyAgain }: Props) {
         <>
           {targets.length === 0 && !showAddForm && (
             <div className="bg-white/60 border border-dashed border-blue-200 rounded-lg p-3 text-center mb-2">
-              <p className="text-xs text-gray-500 mb-2">Bạn chưa lưu nhóm nào.</p>
+              <p className="text-xs text-gray-500 mb-2">Bạn chưa lưu nơi đăng nào.</p>
               <button
                 type="button"
                 onClick={() => setShowAddForm(true)}
                 className="text-xs font-semibold text-blue-600 hover:text-blue-700"
               >
-                + Thêm nhóm đầu tiên
+                + Thêm bài viết ghim / group đầu tiên
               </button>
             </div>
           )}
@@ -200,7 +202,7 @@ export function ShareTargetsPanel({ hasCopied, onCopyAgain }: Props) {
                 type="text"
                 value={newLabel}
                 onChange={(e) => setNewLabel(e.target.value)}
-                placeholder="Tên gợi nhớ (vd. Group săn sale Hà Nội)"
+                placeholder="Tên gợi nhớ (vd. Bài ghim FB cá nhân)"
                 maxLength={80}
                 className="w-full text-xs border border-gray-200 rounded-md px-2.5 py-1.5 outline-none focus:border-blue-400"
               />
@@ -208,7 +210,7 @@ export function ShareTargetsPanel({ hasCopied, onCopyAgain }: Props) {
                 type="url"
                 value={newUrl}
                 onChange={(e) => setNewUrl(e.target.value)}
-                placeholder="URL nhóm Facebook / Zalo / Telegram..."
+                placeholder="Dán URL bài viết ghim / group / page..."
                 className="w-full text-xs border border-gray-200 rounded-md px-2.5 py-1.5 outline-none focus:border-blue-400 font-mono"
               />
               {error && (
@@ -231,9 +233,17 @@ export function ShareTargetsPanel({ hasCopied, onCopyAgain }: Props) {
                   Huỷ
                 </button>
               </div>
-              <p className="text-[10px] text-gray-400 leading-relaxed">
-                Hỗ trợ: facebook.com, fb.com, zalo.me, t.me, instagram.com, tiktok.com, x.com, threads.net.
-              </p>
+              <details className="text-[10px] text-gray-500 leading-relaxed">
+                <summary className="cursor-pointer text-blue-600 hover:text-blue-700 font-semibold">
+                  ❓ Cách lấy URL bài viết ghim
+                </summary>
+                <ol className="list-decimal pl-4 mt-1.5 space-y-0.5">
+                  <li>Vào trang Facebook cá nhân / page → tìm bài đã ghim.</li>
+                  <li>Bấm vào <span className="font-semibold">thời gian đăng</span> (vd. &quot;2 ngày trước&quot;) → bài mở rộng full.</li>
+                  <li>Copy URL trên thanh địa chỉ trình duyệt → dán vào ô trên.</li>
+                </ol>
+                <p className="mt-1">Hỗ trợ: facebook.com, fb.com, zalo.me, t.me, instagram.com, tiktok.com, x.com, threads.net.</p>
+              </details>
             </div>
           )}
         </>
