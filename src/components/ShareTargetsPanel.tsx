@@ -21,6 +21,12 @@ interface ShareTarget {
   platform: string;
 }
 
+interface CommunityTarget {
+  url: string;
+  label: string;
+  platform: string;
+}
+
 interface Props {
   hasCopied: boolean;
   onCopyAgain: () => void;
@@ -41,24 +47,27 @@ const PLATFORM_META: Record<string, { name: string; emoji: string; color: string
 
 export function ShareTargetsPanel({ hasCopied, onCopyAgain }: Props) {
   const [targets, setTargets] = useState<ShareTarget[]>([]);
+  const [community, setCommunity] = useState<CommunityTarget | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newLabel, setNewLabel] = useState("");
   const [newUrl, setNewUrl] = useState("");
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
-  const [openedId, setOpenedId] = useState<number | null>(null);
+  const [openedKey, setOpenedKey] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/share-targets", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((d) => {
-        if (cancelled) return;
-        if (d.success) setTargets(d.targets || []);
-      })
-      .catch(() => { /* silent */ })
-      .finally(() => { if (!cancelled) setLoading(false); });
+    // Fetch song song: user targets + community preset.
+    Promise.all([
+      fetch("/api/share-targets", { cache: "no-store" }).then((r) => r.json()).catch(() => null),
+      fetch("/api/share-targets/community", { cache: "no-store" }).then((r) => r.json()).catch(() => null),
+    ]).then(([userData, communityData]) => {
+      if (cancelled) return;
+      if (userData?.success) setTargets(userData.targets || []);
+      if (communityData?.success && communityData.target) setCommunity(communityData.target);
+      setLoading(false);
+    });
     return () => { cancelled = true; };
   }, []);
 
@@ -102,12 +111,13 @@ export function ShareTargetsPanel({ hasCopied, onCopyAgain }: Props) {
     } catch { /* silent */ }
   };
 
-  const handleOpen = (target: ShareTarget) => {
+  const handleOpen = (target: { id?: number; label: string; url: string }) => {
     // Copy link 1 lần nữa cho chắc — phòng clipboard bị clear bởi user lúc browse.
     onCopyAgain();
     window.open(target.url, "_blank", "noopener,noreferrer");
-    setOpenedId(target.id);
-    setTimeout(() => setOpenedId(null), 2000);
+    const key = target.id ? `user-${target.id}` : "community";
+    setOpenedKey(key);
+    setTimeout(() => setOpenedKey(null), 2000);
   };
 
   return (
@@ -131,59 +141,120 @@ export function ShareTargetsPanel({ hasCopied, onCopyAgain }: Props) {
         </div>
       ) : (
         <>
+          {/* Community share preset — bài viết ghim do admin V-Affiliate cấu hình.
+              Hiện riêng ra khỏi list user targets — highlight đặc biệt với gradient
+              orange + badge "GỢI Ý" để dụ user click vào đăng cộng đồng. */}
+          {community && (
+            <div className="mb-3">
+              <button
+                type="button"
+                onClick={() => handleOpen(community)}
+                disabled={!hasCopied}
+                title={hasCopied ? `Mở: ${community.label}` : "Bấm COPY LINK trước rồi quay lại đây"}
+                className={`relative w-full text-left rounded-xl p-3.5 transition-all border-2 ${
+                  hasCopied
+                    ? "bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 text-white border-transparent shadow-lg shadow-orange-200 hover:shadow-xl hover:scale-[1.01] cursor-pointer"
+                    : "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
+                }`}
+              >
+                <span className={`absolute -top-2 right-3 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                  hasCopied ? "bg-white text-orange-600 shadow" : "bg-gray-200 text-gray-500"
+                }`}>
+                  ⭐ Khuyên dùng
+                </span>
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl shrink-0 ${
+                    hasCopied ? "bg-white/20" : "bg-gray-100"
+                  }`}>
+                    📌
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-[10px] uppercase tracking-wider font-bold mb-0.5 ${
+                      hasCopied ? "text-white/80" : "text-gray-400"
+                    }`}>
+                      Cộng đồng V-Affiliate
+                    </p>
+                    <p className={`text-sm font-bold truncate ${hasCopied ? "text-white" : "text-gray-500"}`}>
+                      {openedKey === "community" ? "✓ Đã mở — paste link Shopee vào comment!" : community.label}
+                    </p>
+                  </div>
+                  <svg viewBox="0 0 24 24" className={`w-5 h-5 shrink-0 ${hasCopied ? "text-white/80" : "text-gray-300"}`} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M7 17l9.2-9.2M17 17V7H7" />
+                  </svg>
+                </div>
+              </button>
+              {hasCopied && (
+                <p className="text-[11px] text-gray-500 mt-1.5 px-1 leading-relaxed">
+                  💡 <span className="font-semibold text-orange-600">Mẹo:</span> Đăng vào group V-Affiliate giúp link xanh chắc chắn + cộng đồng lớn dần, ai cũng được lợi.
+                </p>
+              )}
+            </div>
+          )}
+
           {targets.length === 0 && !showAddForm && (
             <div className="bg-white/60 border border-dashed border-blue-200 rounded-lg p-3 text-center mb-2">
-              <p className="text-xs text-gray-500 mb-2">Bạn chưa lưu nơi đăng nào.</p>
+              <p className="text-xs text-gray-500 mb-2">
+                {community
+                  ? "Bạn cũng có thể thêm group / bài ghim của riêng mình."
+                  : "Bạn chưa lưu nơi đăng nào."}
+              </p>
               <button
                 type="button"
                 onClick={() => setShowAddForm(true)}
                 className="text-xs font-semibold text-blue-600 hover:text-blue-700"
               >
-                + Thêm bài viết ghim / group đầu tiên
+                + Thêm bài viết ghim / group {community ? "khác" : "đầu tiên"}
               </button>
             </div>
           )}
 
           {targets.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-2">
-              {targets.map((t) => {
-                const meta = PLATFORM_META[t.platform] || PLATFORM_META.other;
-                const justOpened = openedId === t.id;
-                return (
-                  <div key={t.id} className="relative group">
-                    <button
-                      type="button"
-                      onClick={() => handleOpen(t)}
-                      disabled={!hasCopied}
-                      title={hasCopied ? `Mở ${t.label}` : "Bấm COPY LINK trước rồi quay lại đây"}
-                      className={`w-full text-left rounded-lg p-2.5 transition-all border ${
-                        hasCopied
-                          ? `bg-gradient-to-br ${meta.color} text-white border-transparent shadow-sm hover:shadow-md hover:scale-[1.02] cursor-pointer`
-                          : "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
-                      }`}
-                    >
-                      <div className="flex items-center gap-1.5 mb-0.5">
-                        <span className="text-base leading-none">{meta.emoji}</span>
-                        <span className={`text-[9px] uppercase tracking-wider font-bold ${hasCopied ? "text-white/80" : "text-gray-400"}`}>
-                          {meta.name}
-                        </span>
-                      </div>
-                      <p className={`text-xs font-semibold truncate ${hasCopied ? "text-white" : "text-gray-500"}`}>
-                        {justOpened ? "✓ Đã mở — paste link!" : t.label}
-                      </p>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); handleDelete(t.id); }}
-                      className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-white text-gray-400 hover:text-red-500 rounded-full shadow border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity text-xs flex items-center justify-center"
-                      title="Xoá"
-                    >
-                      ×
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
+            <>
+              {community && (
+                <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1.5 mt-1">
+                  Nơi đăng của bạn
+                </p>
+              )}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-2">
+                {targets.map((t) => {
+                  const meta = PLATFORM_META[t.platform] || PLATFORM_META.other;
+                  const justOpened = openedKey === `user-${t.id}`;
+                  return (
+                    <div key={t.id} className="relative group">
+                      <button
+                        type="button"
+                        onClick={() => handleOpen(t)}
+                        disabled={!hasCopied}
+                        title={hasCopied ? `Mở ${t.label}` : "Bấm COPY LINK trước rồi quay lại đây"}
+                        className={`w-full text-left rounded-lg p-2.5 transition-all border ${
+                          hasCopied
+                            ? `bg-gradient-to-br ${meta.color} text-white border-transparent shadow-sm hover:shadow-md hover:scale-[1.02] cursor-pointer`
+                            : "bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed"
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span className="text-base leading-none">{meta.emoji}</span>
+                          <span className={`text-[9px] uppercase tracking-wider font-bold ${hasCopied ? "text-white/80" : "text-gray-400"}`}>
+                            {meta.name}
+                          </span>
+                        </div>
+                        <p className={`text-xs font-semibold truncate ${hasCopied ? "text-white" : "text-gray-500"}`}>
+                          {justOpened ? "✓ Đã mở — paste link!" : t.label}
+                        </p>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handleDelete(t.id); }}
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-white text-gray-400 hover:text-red-500 rounded-full shadow border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity text-xs flex items-center justify-center"
+                        title="Xoá"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           )}
 
           {!showAddForm ? (
@@ -269,7 +340,7 @@ export function ShareTargetsPanel({ hasCopied, onCopyAgain }: Props) {
         </>
       )}
 
-      {!hasCopied && targets.length > 0 && (
+      {!hasCopied && (community || targets.length > 0) && (
         <p className="text-[11px] text-blue-500/80 mt-2 text-center font-medium">
           ↑ Bấm <span className="font-bold">COPY LINK</span> trước, rồi chọn nơi đăng để mở.
         </p>

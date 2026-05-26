@@ -1,4 +1,4 @@
-﻿import postgres from "postgres";
+import postgres from "postgres";
 import crypto from "crypto";
 import { warnMissingEnv } from "@/lib/env-check";
 
@@ -3073,6 +3073,14 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   spin_enabled: "1",
   spin_orders_per_token: "10",       // 10 Ä‘Æ¡n hoÃ n tiá»n = 1 lÆ°á»£t quay
   spin_referrals_per_token: "5",     // 5 báº¡n má»i active = 1 lÆ°á»£t quay
+  // Bai viet ghim cong dong V-Affiliate trong group Facebook -
+  // user moi vao tao link cashback xong se thay preset nut "Dang vao
+  // group V-Affiliate" -> 1 click mo thang bai ghim -> comment link da copy.
+  // Muc dich: tang traffic group + warm-up domain vaffiliate.vn nhanh hon
+  // (FB tin domain hon khi nhieu nguoi dang vao cung 1 bai community).
+  community_share_post_url: "https://www.facebook.com/groups/1277321027865135/posts/1316717423925495",
+  community_share_post_label: "Group V-Affiliate (bai ghim)",
+  community_share_post_enabled: "1",
 };
 
 export async function getSetting(key: string): Promise<string> {

@@ -155,6 +155,48 @@ export function SettingsTab() {
         </div>
       </div>
 
+      {/* Community share post — bài viết ghim group V-Affiliate */}
+      <div className="mt-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+        <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1">📌 Bài viết ghim cộng đồng</h3>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+          User sau khi tạo link cashback sẽ thấy nút <b>&quot;Đăng vào group V-Affiliate&quot;</b> (gradient cam, badge ⭐ Khuyên dùng).
+          Click → mở thẳng bài viết ghim → user paste link Shopee đã copy. Tăng traffic group + warm-up domain trên FB.
+        </p>
+        <div className="space-y-3">
+          <ToggleRow
+            label="Bật nút Đăng vào group V-Affiliate"
+            hint="Tắt nếu chưa muốn dụ user share vào group cộng đồng."
+            checked={s.community_share_post_enabled === "1"}
+            onChange={(v) => set("community_share_post_enabled", v ? "1" : "0")}
+          />
+          <div>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">URL bài viết ghim</label>
+            <input
+              type="url"
+              value={s.community_share_post_url || ""}
+              onChange={(e) => set("community_share_post_url", e.target.value)}
+              placeholder="https://www.facebook.com/groups/.../posts/..."
+              className="mt-1 w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-xs font-mono text-gray-900 dark:text-white outline-none focus:border-orange-500"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Dán URL bài viết ghim trong group. Dạng: <code className="font-mono">facebook.com/groups/&lt;id&gt;/posts/&lt;id&gt;</code>
+            </p>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Nhãn hiển thị</label>
+            <input
+              type="text"
+              value={s.community_share_post_label || ""}
+              onChange={(e) => set("community_share_post_label", e.target.value)}
+              placeholder="Group V-Affiliate (bài ghim)"
+              maxLength={80}
+              className="mt-1 w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Tên hiển thị trên nút (max 80 ký tự).</p>
+          </div>
+        </div>
+      </div>
+
       <div className="mt-4">
         <button
           disabled={saving}
