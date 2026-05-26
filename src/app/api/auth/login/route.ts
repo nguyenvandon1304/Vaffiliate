@@ -26,7 +26,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const limit = await rateLimitAsync(getRateLimitKey(request.headers, "login"), { max: 10, windowMs: 15 * 60 * 1000 });
+  // Rate limit login: max 20 trong 15 phút.
+  // Lưu ý: với 2FA flow, mỗi lần login user là 2 request (step 1 + step 2 TOTP)
+  // → effective ~10 attempt thật. Cao hơn 1 chút để dev/test thoải mái.
+  const limit = await rateLimitAsync(getRateLimitKey(request.headers, "login"), { max: 20, windowMs: 15 * 60 * 1000 });
   if (!limit.allowed) {
     return NextResponse.json(
       { success: false, error: `Quá nhiều lần thử. Vui lòng đợi ${limit.retryAfterSec}s rồi thử lại.` },
