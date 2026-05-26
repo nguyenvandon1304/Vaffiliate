@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { resolveShortLink, getDb } from "@/lib/db";
 
 interface Ctx { params: Promise<{ code: string }>; }
@@ -62,6 +63,10 @@ export async function generateMetadata({ params }: Ctx): Promise<Metadata> {
     description,
     // Cho phép FB/Google index trang short link để FB scraper crawl được OG.
     robots: { index: false, follow: true },
+    other: {
+      // fb:app_id optional — set qua env nếu user đã tạo Facebook App. Không bắt buộc.
+      ...(process.env.FACEBOOK_APP_ID ? { "fb:app_id": process.env.FACEBOOK_APP_ID } : {}),
+    },
     openGraph: {
       type: "website",
       url: `${SITE_URL}/s/${code}`,
@@ -87,9 +92,43 @@ export async function generateMetadata({ params }: Ctx): Promise<Metadata> {
   };
 }
 
+/**
+ * Phát hiện social bot crawler (FB / Twitter / Discord / Telegram / Zalo / Slack).
+ * Bot → KHÔNG redirect → đọc OG metadata + render preview card V-Affiliate.
+ * User thật → splash 800ms rồi auto redirect sang Shopee.
+ *
+ * Quan trọng: nếu không phân biệt bot vs user, FB scraper sẽ FOLLOW redirect
+ * sang Shopee → preview hiển thị Shopee thay vì brand V-Affiliate.
+ */
+function isBotUserAgent(ua: string | null | undefined): boolean {
+  if (!ua) return false;
+  const u = ua.toLowerCase();
+  return (
+    u.includes("facebookexternalhit") ||
+    u.includes("facebookcatalog") ||
+    u.includes("twitterbot") ||
+    u.includes("linkedinbot") ||
+    u.includes("discordbot") ||
+    u.includes("telegrambot") ||
+    u.includes("zalo") ||
+    u.includes("skypeuripreview") ||
+    u.includes("slackbot") ||
+    u.includes("whatsapp") ||
+    u.includes("googlebot") ||
+    u.includes("bingbot") ||
+    u.includes("applebot") ||
+    u.includes("pinterest")
+  );
+}
+
 export default async function ShortLinkPage({ params }: Ctx) {
   const { code } = await params;
   const target = await resolveShortLink(code);
+
+  // Detect bot từ user-agent — bot sẽ thấy preview V-Affiliate, không redirect.
+  const headersList = await headers();
+  const ua = headersList.get("user-agent");
+  const isBot = isBotUserAgent(ua);
 
   // Code không tồn tại → trang 404 nhỏ với link về trang chủ.
   if (!target) {
@@ -112,11 +151,15 @@ export default async function ShortLinkPage({ params }: Ctx) {
   // Splash page với 2 tầng redirect:
   //   1. <meta http-equiv="refresh"> — fallback nếu JS bị tắt
   //   2. <script> window.location.replace() — chạy ngay sau hydrate (~50ms)
+  //
+  // BOT (FB/Twitter/Zalo crawler) → bỏ qua redirect → chỉ render HTML có
+  // OG metadata để build preview card.
+  const includeRedirect = !isBot;
   return (
     <>
-      {/* Meta refresh fallback — 1 giây cho UX nhìn thấy "đang chuyển" */}
-      <meta httpEquiv="refresh" content={`1; url=${target}`} />
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-orange-50 via-white to-orange-50 px-6">
+      {includeRedirect && (
+        <meta httpEquiv="refresh" content={`1; url=${target}`} />
+      )}      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-orange-50 via-white to-orange-50 px-6">
         <div className="text-center max-w-sm">
           <div className="w-20 h-20 mx-auto mb-5 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
             <span className="text-white text-3xl font-bold">V</span>
@@ -143,11 +186,13 @@ export default async function ShortLinkPage({ params }: Ctx) {
       </div>
 
       {/* JS redirect — chạy ngay sau hydrate. Bot sẽ không chạy JS → đọc được OG metadata. */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `setTimeout(function(){window.location.replace(${JSON.stringify(target)});},800);`,
-        }}
-      />
+      {includeRedirect && (
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `setTimeout(function(){window.location.replace(${JSON.stringify(target)});},800);`,
+          }}
+        />
+      )}
     </>
   );
 }
