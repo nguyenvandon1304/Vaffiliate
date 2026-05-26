@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     // bị stuck ở "Đang xử lý...". Chấp nhận trade-off: không biết email gửi
     // thành công hay không trong response, nhưng có nút "Gửi lại email" trong
     // UI để retry, và audit log sẽ ghi lại lỗi nếu fail.
-    const smtpConfigured = !!(process.env.SMTP_USER && process.env.SMTP_PASS);
+    const smtpConfigured = !!process.env.RESEND_API_KEY;
     if (smtpConfigured) {
       void (async () => {
         try {

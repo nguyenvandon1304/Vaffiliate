@@ -18,17 +18,17 @@ export async function POST(request: NextRequest) {
   }
 
   // Check env trước
-  const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS;
+  const resendKey = process.env.RESEND_API_KEY;
+  const fromEmail = process.env.RESEND_FROM_EMAIL;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
-  if (!smtpUser || !smtpPass) {
+  if (!resendKey) {
     return NextResponse.json({
       success: false,
-      error: "SMTP env missing",
+      error: "RESEND_API_KEY chưa cấu hình ở Render Environment",
       debug: {
-        SMTP_USER: smtpUser ? "✓ set" : "✗ MISSING",
-        SMTP_PASS: smtpPass ? `✓ set (${smtpPass.length} chars)` : "✗ MISSING",
+        RESEND_API_KEY: "✗ MISSING",
+        RESEND_FROM_EMAIL: fromEmail ?? "(default: V-Affiliate <noreply@vaffiliate.vn>)",
         NEXT_PUBLIC_BASE_URL: baseUrl ?? "(not set)",
       },
     }, { status: 500 });
@@ -43,8 +43,8 @@ export async function POST(request: NextRequest) {
       error: result.error,
       elapsedMs,
       debug: {
-        SMTP_USER: `${smtpUser.slice(0, 3)}***@${smtpUser.split("@")[1] ?? "?"}`,
-        SMTP_PASS_LEN: smtpPass.length,
+        RESEND_API_KEY: `✓ set (${resendKey.length} chars)`,
+        RESEND_FROM_EMAIL: fromEmail ?? "(default)",
         BASE_URL: baseUrl,
         TARGET: email,
       },

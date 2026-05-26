@@ -34,8 +34,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      console.error("[ForgotPassword] SMTP_USER hoặc SMTP_PASS chưa được cấu hình trong .env.local");
+    if (!process.env.RESEND_API_KEY) {
+      console.error("[ForgotPassword] RESEND_API_KEY chưa được cấu hình");
       return NextResponse.json({ success: false, error: "Chức năng gửi email chưa được cấu hình. Vui lòng liên hệ admin." }, { status: 500 });
     }
 

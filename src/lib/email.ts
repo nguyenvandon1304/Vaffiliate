@@ -1,82 +1,64 @@
-import nodemailer from "nodemailer";
-import dns from "node:dns";
+import { Resend } from "resend";
 
 /**
- * Gmail SMTP transporter — explicit IPv4 + STARTTLS (port 587).
+ * Email service — Resend HTTPS API.
  *
- * Quan trọng:
- * - Render free tier có IPv6 interface nhưng KHÔNG có IPv6 outbound routing
- *   → connect AAAA record của smtp.gmail.com sẽ ENETUNREACH.
- * - Nodemailer check `os.networkInterfaces()` để quyết định family. Nó thấy
- *   có IPv6 → thử IPv6 trước → fail. Phải patch để nodemailer chỉ thấy IPv4.
- * - Port 587 (STARTTLS) chuẩn hơn port 465 (SSL) cho cloud.
+ * Tại sao Resend thay vì Gmail SMTP?
+ * - Render Free tier BLOCK SMTP outbound (port 25/465/587) chống abuse spam.
+ * - Resend dùng HTTPS API → không bị block.
+ * - Free 100 email/ngày, 3000/tháng — đủ cho V-Affiliate launch.
+ * - DKIM/SPF auto setup khi verify domain → Outlook/Gmail nhận vào Inbox.
+ * - Email gửi từ `[email protected]` → branding chuyên nghiệp.
+ *
+ * Setup:
+ *   1. https://resend.com → Sign up + verify domain `vaffiliate.vn`
+ *   2. API Keys → Create → copy key
+ *   3. Render env:
+ *        RESEND_API_KEY=re_xxxxxxxxxxxx
+ *        RESEND_FROM_EMAIL=noreply@vaffiliate.vn  (optional, default below)
+ *
+ * Fallback:
+ * - Nếu thiếu RESEND_API_KEY → email sẽ fail với error rõ ràng (không crash).
  */
 
-// Force IPv4 cho TẤT CẢ DNS lookup từ Node — module scope.
-try {
-  dns.setDefaultResultOrder("ipv4first");
-} catch {
-  /* Node < 18 không có method này, bỏ qua */
-}
+const RESEND_API_KEY = process.env.RESEND_API_KEY ?? "";
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "V-Affiliate <noreply@vaffiliate.vn>";
+const SECURITY_FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "V-Affiliate Bảo mật <noreply@vaffiliate.vn>";
 
-// Patch nodemailer's networkInterfaces để chỉ trả IPv4. Đây là cách triệt để
-// nhất ép nodemailer không thử IPv6 trên Render free.
-try {
-  /* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any */
-  const nmShared = require("nodemailer/lib/shared");
-  if (nmShared.networkInterfaces) {
-    const original = nmShared.networkInterfaces;
-    const filtered: Record<string, unknown[]> = {};
-    for (const [key, val] of Object.entries(original)) {
-      if (Array.isArray(val)) {
-        const ipv4Only = (val as Array<Record<string, unknown>>).filter(
-          (i) => i.family === "IPv4" || i.family === 4,
-        );
-        if (ipv4Only.length > 0) filtered[key] = ipv4Only;
-      }
-    }
-    nmShared.networkInterfaces = filtered as any;
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
+
+async function sendEmail(opts: {
+  to: string;
+  from?: string;
+  subject: string;
+  html: string;
+}): Promise<{ success: boolean; error?: string }> {
+  if (!resend) {
+    return {
+      success: false,
+      error: "RESEND_API_KEY chưa cấu hình. Liên hệ admin.",
+    };
   }
-  /* eslint-enable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any */
-} catch (e) {
-  console.warn("[Email] Failed to patch nodemailer networkInterfaces:", e);
+  try {
+    const result = await resend.emails.send({
+      from: opts.from ?? FROM_EMAIL,
+      to: opts.to,
+      subject: opts.subject,
+      html: opts.html,
+    });
+    if (result.error) {
+      console.error("[Email] Resend error:", result.error);
+      return { success: false, error: result.error.message ?? "Resend API error" };
+    }
+    return { success: true };
+  } catch (err) {
+    console.error("[Email] Failed to send:", err);
+    return { success: false, error: "Không thể gửi email. Vui lòng thử lại sau." };
+  }
 }
-
-/**
- * Custom DNS lookup function — chỉ resolve IPv4.
- * Truyền vào nodemailer để chắc chắn không bao giờ trả IPv6.
- */
-const lookupIPv4Only = (
-  hostname: string,
-  options: dns.LookupOptions | ((err: NodeJS.ErrnoException | null, address: string, family: number) => void),
-  callback?: (err: NodeJS.ErrnoException | null, address: string, family: number) => void,
-) => {
-  const cb = typeof options === "function" ? options : callback;
-  if (!cb) return;
-  // Force family=4 bất kể options truyền vào là gì
-  return dns.lookup(hostname, { family: 4, all: false }, cb);
-};
-
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // STARTTLS thay vì SSL trực tiếp
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-  // Force IPv4 — Render free không có IPv6 outbound.
-  // `lookup` không có trong type Options chính thức nhưng nodemailer pass through
-  // tới Net.connect, nên cần cast để bypass typecheck.
-  lookup: lookupIPv4Only,
-  // Timeout dài hơn vì Render free latency cao
-  connectionTimeout: 30_000,
-  greetingTimeout: 30_000,
-  socketTimeout: 30_000,
-} as Parameters<typeof nodemailer.createTransport>[0]);
 
 export async function sendPasswordResetEmail(to: string, username: string, resetToken: string): Promise<{ success: boolean; error?: string }> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://vaffiliate.vn";
   const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
 
   const html = `
@@ -108,18 +90,11 @@ export async function sendPasswordResetEmail(to: string, username: string, reset
     </div>
   `;
 
-  try {
-    await transporter.sendMail({
-      from: `"V-Affiliate" <${process.env.SMTP_USER}>`,
-      to,
-      subject: "Đặt lại mật khẩu - V-Affiliate",
-      html,
-    });
-    return { success: true };
-  } catch (err) {
-    console.error("[Email] Failed to send:", err);
-    return { success: false, error: "Không thể gửi email. Vui lòng thử lại sau." };
-  }
+  return sendEmail({
+    to,
+    subject: "Đặt lại mật khẩu - V-Affiliate",
+    html,
+  });
 }
 
 export async function sendEmailVerification(
@@ -127,7 +102,7 @@ export async function sendEmailVerification(
   username: string,
   verifyToken: string,
 ): Promise<{ success: boolean; error?: string }> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://vaffiliate.vn";
   const verifyLink = `${baseUrl}/verify-email?token=${verifyToken}`;
 
   const html = `
@@ -159,18 +134,11 @@ export async function sendEmailVerification(
     </div>
   `;
 
-  try {
-    await transporter.sendMail({
-      from: `"V-Affiliate" <${process.env.SMTP_USER}>`,
-      to,
-      subject: "Xác thực email - V-Affiliate",
-      html,
-    });
-    return { success: true };
-  } catch (err) {
-    console.error("[Email] Failed to send verification:", err);
-    return { success: false, error: "Không thể gửi email xác thực. Vui lòng thử lại sau." };
-  }
+  return sendEmail({
+    to,
+    subject: "Xác thực email - V-Affiliate",
+    html,
+  });
 }
 
 export async function sendNewDeviceAlertEmail(
@@ -178,7 +146,7 @@ export async function sendNewDeviceAlertEmail(
   username: string,
   meta: { ip: string | null; userAgent: string | null; loginAt: Date },
 ): Promise<{ success: boolean; error?: string }> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://vaffiliate.vn";
   const securityUrl = `${baseUrl}/dashboard/security`;
   const time = meta.loginAt.toLocaleString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" });
 
@@ -215,16 +183,10 @@ export async function sendNewDeviceAlertEmail(
     </div>
   `;
 
-  try {
-    await transporter.sendMail({
-      from: `"V-Affiliate Bảo mật" <${process.env.SMTP_USER}>`,
-      to,
-      subject: "[Bảo mật] Đăng nhập từ thiết bị mới — V-Affiliate",
-      html,
-    });
-    return { success: true };
-  } catch (err) {
-    console.error("[Email] Failed to send security alert:", err);
-    return { success: false, error: "Không thể gửi email cảnh báo." };
-  }
+  return sendEmail({
+    to,
+    from: SECURITY_FROM_EMAIL,
+    subject: "[Bảo mật] Đăng nhập từ thiết bị mới — V-Affiliate",
+    html,
+  });
 }

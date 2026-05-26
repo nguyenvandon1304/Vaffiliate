@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: "Email không hợp lệ" }, { status: 400 });
   }
 
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+  if (!process.env.RESEND_API_KEY) {
     return NextResponse.json({ success: false, error: "Chức năng gửi email chưa được cấu hình. Vui lòng liên hệ admin." }, { status: 500 });
   }
 

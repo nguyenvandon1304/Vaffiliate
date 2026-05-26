@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
   });
 
   // Gửi email verify đến địa chỉ mới — fire-and-forget để response nhanh
-  if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+  if (process.env.RESEND_API_KEY) {
     void (async () => {
       try {
         const { token } = await createEmailVerificationToken(result.userId!);

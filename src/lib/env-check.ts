@@ -24,9 +24,9 @@ export function warnMissingEnv(): void {
     issues.push("NEXT_PUBLIC_TURNSTILE_SITE_KEY + TURNSTILE_SECRET_KEY chưa cấu hình → captcha không bảo vệ được brute-force.");
   }
 
-  // Email
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    issues.push("SMTP_USER / SMTP_PASS chưa cấu hình → reset password & verify email sẽ không gửi được.");
+  // Email (Resend)
+  if (!process.env.RESEND_API_KEY) {
+    issues.push("RESEND_API_KEY chưa cấu hình → reset password & verify email sẽ không gửi được. Đăng ký free tại https://resend.com.");
   }
 
   // Base URL — link trong email sẽ trỏ về localhost

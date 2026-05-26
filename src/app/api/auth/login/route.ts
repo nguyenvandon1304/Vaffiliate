@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
   });
 
   // Email alert thiết bị mới — fire-and-forget, không block response.
-  if (result.isNewDevice && result.user?.email && process.env.SMTP_USER && process.env.SMTP_PASS) {
+  if (result.isNewDevice && result.user?.email && process.env.RESEND_API_KEY) {
     void sendNewDeviceAlertEmail(result.user.email, result.user.username, {
       ip: ip ?? null,
       userAgent: userAgent ?? null,
