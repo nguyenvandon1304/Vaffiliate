@@ -529,10 +529,12 @@ export default function CashbackPage() {
                     <svg viewBox="0 0 24 24" className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-yellow-700 mb-1">Chú ý:</p>
-                    <p className="text-xs text-yellow-600 leading-relaxed">
-                      Sau khi copy link, comment vào <span className="font-bold">bài viết đã ghim ở group V-Affiliate</span> để nhận <span className="font-bold">voucher ngẫu nhiên từ 20% đến 25%</span> tuỳ sản phẩm, tuỳ shop có chạy chiến dịch hay không. Nếu không có voucher, mua như bình thường tiền hoàn sẽ vẫn được cập nhật đúng như dự kiến.
-                    </p>
+                    <p className="text-xs font-bold text-yellow-700 mb-1.5">✨ Cách săn thêm voucher:</p>
+                    <ul className="text-xs text-yellow-600 leading-relaxed space-y-0.5 list-none">
+                      <li>• Comment link vào <span className="font-semibold">bài ghim group V-Affiliate</span></li>
+                      <li>• <span className="font-semibold">Voucher 20-25% từ social media</span> sẽ ngẫu nhiên xuất hiện tuỳ shop có đang chạy chiến dịch</li>
+                      <li>• Nếu không có voucher: cứ mua bình thường, <span className="font-semibold">tiền hoàn vẫn được cập nhật đầy đủ</span></li>
+                    </ul>
                   </div>
                 </div>
               </div>
