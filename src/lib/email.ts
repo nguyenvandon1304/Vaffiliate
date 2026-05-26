@@ -1,11 +1,29 @@
 import nodemailer from "nodemailer";
 
+/**
+ * Gmail SMTP transporter — explicit IPv4 + STARTTLS (port 587).
+ *
+ * Quan trọng:
+ * - KHÔNG dùng `service: "gmail"` vì nodemailer mặc định prefer IPv6 →
+ *   Render free tier không hỗ trợ IPv6 outbound → ENETUNREACH error.
+ * - Set `family: 4` để force lookup IPv4 only.
+ * - Port 587 + STARTTLS hoạt động trên mọi cloud provider (Render, Vercel, Fly).
+ *   Port 465 (SSL) hay bị block ở 1 số nhà cung cấp.
+ */
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // STARTTLS thay vì SSL trực tiếp
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  // Force IPv4 — Render free không có IPv6 outbound
+  family: 4,
+  // Timeout dài hơn vì Render free latency cao
+  connectionTimeout: 30_000,
+  greetingTimeout: 30_000,
+  socketTimeout: 30_000,
 });
 
 export async function sendPasswordResetEmail(to: string, username: string, resetToken: string): Promise<{ success: boolean; error?: string }> {
