@@ -239,6 +239,24 @@ async function initSchema(database: DbAdapter): Promise<void> {
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `);
+  // ─── Short links (URL shortener cho copy/share trên Facebook) ───
+  // Vấn đề: link Shopee đầy đủ ~200+ ký tự với nhiều query param → Facebook
+  // KHÔNG auto-link (link bị đen, không click được). Sinh code 8 ký tự,
+  // redirect 302 server-side sang URL gốc → FB nhận diện được như link bình
+  // thường + mỗi lần click count luôn cho analytics.
+  await database.exec(`
+    CREATE TABLE IF NOT EXISTS short_links (
+      id BIGSERIAL PRIMARY KEY,
+      code TEXT NOT NULL UNIQUE,
+      user_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
+      target_url TEXT NOT NULL,
+      shop_id TEXT,
+      item_id TEXT,
+      click_count BIGINT DEFAULT 0,
+      last_clicked_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
   await database.exec(`
     CREATE TABLE IF NOT EXISTS notifications (
       id BIGSERIAL PRIMARY KEY,
@@ -410,6 +428,8 @@ async function initSchema(database: DbAdapter): Promise<void> {
   await database.exec("CREATE INDEX IF NOT EXISTS idx_bank_user ON bank_accounts(user_id)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_withdrawals_user ON withdrawals(user_id)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_affiliate_links_user ON affiliate_links(user_id)");
+  await database.exec("CREATE INDEX IF NOT EXISTS idx_short_links_code ON short_links(code)");
+  await database.exec("CREATE INDEX IF NOT EXISTS idx_short_links_user ON short_links(user_id, created_at DESC)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_notifications_user_read ON notifications(user_id, is_read)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_reset_token ON password_reset_tokens(token)");
@@ -3666,4 +3686,83 @@ export async function getPendingCounts(): Promise<PendingCounts> {
     unverifiedUsers: Number(row?.unverified_users ?? 0),
     stuckOrders: Number(row?.stuck_orders ?? 0),
   };
+}
+
+/* ─────────────── Short links (URL shortener) ─────────────── */
+
+/**
+ * Sinh code 8 ký tự alphanumeric không nhập nhằng (loại 0/O, 1/l/I).
+ * 32^8 ~ 1.1 * 10^12 tổ hợp → đủ dùng cho dự án nhỏ.
+ */
+function generateShortCode(): string {
+  const alphabet = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const buf = crypto.randomBytes(8);
+  let code = "";
+  for (let i = 0; i < buf.length; i++) code += alphabet[buf[i] % alphabet.length];
+  return code;
+}
+
+/**
+ * Tạo short link mới cho 1 affiliate URL. Idempotent theo (user_id, shop_id, item_id):
+ * nếu user đã từng tạo short link cho chính sản phẩm đó thì re-use → tránh
+ * spam DB và giữ link cũ vẫn dùng được khi user share lại.
+ *
+ * Trả về `code` 8 ký tự — caller ghép thành `${baseUrl}/s/${code}`.
+ */
+export async function createShortLink(args: {
+  userId: number | null;
+  targetUrl: string;
+  shopId?: string;
+  itemId?: string;
+}): Promise<string> {
+  const database = await getDb();
+
+  // Re-use nếu đã có (cùng user + cùng product).
+  if (args.userId && args.shopId && args.itemId) {
+    const existing = await database.get(
+      "SELECT code FROM short_links WHERE user_id = ? AND shop_id = ? AND item_id = ? ORDER BY id DESC LIMIT 1",
+      [args.userId, args.shopId, args.itemId],
+    );
+    if (existing?.code) return String(existing.code);
+  }
+
+  // Sinh code unique — retry tối đa 5 lần phòng collision (xác suất cực thấp).
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const code = generateShortCode();
+    try {
+      await database.run(
+        "INSERT INTO short_links (code, user_id, target_url, shop_id, item_id) VALUES (?, ?, ?, ?, ?)",
+        [code, args.userId, args.targetUrl, args.shopId ?? null, args.itemId ?? null],
+      );
+      return code;
+    } catch (e) {
+      const msg = (e as Error).message || "";
+      // 23505 = unique_violation Postgres → trùng code → retry.
+      if (msg.includes("duplicate") || msg.includes("23505")) continue;
+      throw e;
+    }
+  }
+  throw new Error("Không thể sinh short code unique sau 5 lần thử");
+}
+
+/**
+ * Lookup target URL theo code. Side-effect: tăng click_count + last_clicked_at.
+ * Trả null nếu code không tồn tại → caller redirect về 404.
+ */
+export async function resolveShortLink(code: string): Promise<string | null> {
+  if (!code || !/^[a-zA-Z0-9]{4,16}$/.test(code)) return null;
+  const database = await getDb();
+  const row = await database.get(
+    "SELECT target_url FROM short_links WHERE code = ?",
+    [code],
+  );
+  if (!row?.target_url) return null;
+
+  // Tăng click count async — không await để không chặn redirect.
+  void database.run(
+    "UPDATE short_links SET click_count = click_count + 1, last_clicked_at = NOW() WHERE code = ?",
+    [code],
+  );
+
+  return String(row.target_url);
 }

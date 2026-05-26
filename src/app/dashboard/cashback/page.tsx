@@ -55,6 +55,7 @@ interface ProductInfo {
   tierCode?: string;
   tierName?: string;
   affiliateLink: string;
+  shortLink?: string; // link gọn dạng /s/xxxxx — copy/share lên FB sẽ auto-link xanh
   productUrl?: string;
   shopId?: string;
   itemId?: string;
@@ -122,8 +123,11 @@ export default function CashbackPage() {
   };
 
   const handleCopy = () => {
-    if (!product?.affiliateLink) return;
-    navigator.clipboard.writeText(product.affiliateLink);
+    if (!product) return;
+    // Ưu tiên short link (FB auto-link xanh); fallback link đầy đủ nếu chưa có.
+    const linkToCopy = product.shortLink || product.affiliateLink;
+    if (!linkToCopy) return;
+    navigator.clipboard.writeText(linkToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -438,13 +442,16 @@ export default function CashbackPage() {
                   </div>
                 </div>
 
-                {/* Link hoàn tiền */}
+                {/* Link hoàn tiền — hiển thị SHORT LINK gọn để user copy share lên FB.
+                    FB chỉ auto-link URL ngắn → link bị đen với URL Shopee 200+ ký tự. */}
                 <div className="border border-gray-200 rounded-xl p-4 mb-4">
-                  <p className="text-xs text-gray-400 mb-2">Link hoàn tiền:</p>
+                  <p className="text-xs text-gray-400 mb-2">
+                    Link hoàn tiền <span className="text-orange-500 font-semibold">(rút gọn — copy thoải mái)</span>:
+                  </p>
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
-                      value={product.affiliateLink}
+                      value={product.shortLink || product.affiliateLink}
                       readOnly
                       className="flex-1 text-sm text-gray-600 bg-transparent outline-none font-mono truncate"
                     />
