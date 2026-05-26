@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUserByToken, getDb, createNotification, getCashbackRateForUser, calcCashback, createShortLink } from "@/lib/db";
+import { getUserByToken, getDb, createNotification, getCashbackRateForUser, calcCashback } from "@/lib/db";
 import { grantBadge } from "@/lib/achievements";
 
 const GOAFFILIATE_CHECK_COMMISSION_URL = "https://goaffiliate.online/api/check-commission";
@@ -171,28 +171,6 @@ export async function POST(request: NextRequest) {
     const commissionAmount = parsePrice(info?.commission || "");
     const cashback = calcCashback(commissionAmount, cashbackRate);
 
-    // Tạo SHORT LINK gọn để user copy ra Facebook/Zalo/Telegram.
-    // Vấn đề: link Shopee dài 200+ ký tự → FB không auto-link (link đen).
-    // Short link `https://vaffiliate.vn/s/xxxxxxxx` gọn + landing page có content
-    // sản phẩm → FB tin domain hơn, tăng khả năng auto-link xanh.
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://vaffiliate.vn";
-    let shortLink = affiliateLink; // fallback: nếu sinh short fail thì vẫn trả link đầy đủ
-    try {
-      const code = await createShortLink({
-        userId: user?.id ?? null,
-        targetUrl: affiliateLink,
-        shopId: ids.shopId,
-        itemId: ids.itemId,
-        productName: info?.name || undefined,
-        productImage: info?.image || undefined,
-        productPrice: parsePrice(info?.price || "") || undefined,
-        cashbackAmount: cashback || undefined,
-      });
-      shortLink = `${baseUrl}/s/${code}`;
-    } catch (e) {
-      console.error("[Affiliate] Failed to create short link:", e);
-    }
-
     const product = {
       name: info?.name || "Sản phẩm Shopee",
       image: info?.image || "",
@@ -205,7 +183,6 @@ export async function POST(request: NextRequest) {
       tierCode,
       tierName,
       affiliateLink,
-      shortLink, // ← link gọn để copy/share trên FB (auto-link xanh)
       productUrl: cleanProductUrl,
       shopId: ids.shopId,
       itemId: ids.itemId,
