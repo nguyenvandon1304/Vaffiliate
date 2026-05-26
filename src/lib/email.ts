@@ -6,10 +6,20 @@ import nodemailer from "nodemailer";
  * Quan trọng:
  * - KHÔNG dùng `service: "gmail"` vì nodemailer mặc định prefer IPv6 →
  *   Render free tier không hỗ trợ IPv6 outbound → ENETUNREACH error.
- * - Set `family: 4` để force lookup IPv4 only.
  * - Port 587 + STARTTLS hoạt động trên mọi cloud provider (Render, Vercel, Fly).
  *   Port 465 (SSL) hay bị block ở 1 số nhà cung cấp.
+ * - Để force IPv4, set Node.js DNS lookup default = IPv4 ở module scope (xem dưới).
  */
+
+// Force IPv4 cho TẤT CẢ DNS lookup từ Node — Render free không hỗ trợ IPv6 outbound.
+// Phải set ở module scope (chạy 1 lần khi server start).
+import dns from "node:dns";
+try {
+  dns.setDefaultResultOrder("ipv4first");
+} catch {
+  /* Node < 18 không có method này, bỏ qua */
+}
+
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
@@ -18,8 +28,6 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
-  // Force IPv4 — Render free không có IPv6 outbound
-  family: 4,
   // Timeout dài hơn vì Render free latency cao
   connectionTimeout: 30_000,
   greetingTimeout: 30_000,
