@@ -5,11 +5,10 @@ import dns from "node:dns";
  * Gmail SMTP transporter — explicit IPv4 + STARTTLS (port 587).
  *
  * Quan trọng:
- * - Render free tier KHÔNG hỗ trợ IPv6 outbound → connect AAAA record của
- *   smtp.gmail.com sẽ ENETUNREACH.
- * - Phải force resolve IPv4 ở MỌI tầng:
- *   1. dns.setDefaultResultOrder('ipv4first') — Node global
- *   2. Custom lookup function trong transporter — chỉ trả IPv4
+ * - Render free tier có IPv6 interface nhưng KHÔNG có IPv6 outbound routing
+ *   → connect AAAA record của smtp.gmail.com sẽ ENETUNREACH.
+ * - Nodemailer check `os.networkInterfaces()` để quyết định family. Nó thấy
+ *   có IPv6 → thử IPv6 trước → fail. Phải patch để nodemailer chỉ thấy IPv4.
  * - Port 587 (STARTTLS) chuẩn hơn port 465 (SSL) cho cloud.
  */
 
@@ -18,6 +17,29 @@ try {
   dns.setDefaultResultOrder("ipv4first");
 } catch {
   /* Node < 18 không có method này, bỏ qua */
+}
+
+// Patch nodemailer's networkInterfaces để chỉ trả IPv4. Đây là cách triệt để
+// nhất ép nodemailer không thử IPv6 trên Render free.
+try {
+  /* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any */
+  const nmShared = require("nodemailer/lib/shared");
+  if (nmShared.networkInterfaces) {
+    const original = nmShared.networkInterfaces;
+    const filtered: Record<string, unknown[]> = {};
+    for (const [key, val] of Object.entries(original)) {
+      if (Array.isArray(val)) {
+        const ipv4Only = (val as Array<Record<string, unknown>>).filter(
+          (i) => i.family === "IPv4" || i.family === 4,
+        );
+        if (ipv4Only.length > 0) filtered[key] = ipv4Only;
+      }
+    }
+    nmShared.networkInterfaces = filtered as any;
+  }
+  /* eslint-enable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any */
+} catch (e) {
+  console.warn("[Email] Failed to patch nodemailer networkInterfaces:", e);
 }
 
 /**
