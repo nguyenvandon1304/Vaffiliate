@@ -237,12 +237,32 @@ export function ShareTargetsPanel({ hasCopied, onCopyAgain }: Props) {
                 <summary className="cursor-pointer text-blue-600 hover:text-blue-700 font-semibold">
                   ❓ Cách lấy URL bài viết ghim
                 </summary>
-                <ol className="list-decimal pl-4 mt-1.5 space-y-0.5">
-                  <li>Vào trang Facebook cá nhân / page → tìm bài đã ghim.</li>
-                  <li>Bấm vào <span className="font-semibold">thời gian đăng</span> (vd. &quot;2 ngày trước&quot;) → bài mở rộng full.</li>
-                  <li>Copy URL trên thanh địa chỉ trình duyệt → dán vào ô trên.</li>
-                </ol>
-                <p className="mt-1">Hỗ trợ: facebook.com, fb.com, zalo.me, t.me, instagram.com, tiktok.com, x.com, threads.net.</p>
+                <div className="mt-2 space-y-2">
+                  <div>
+                    <p className="font-semibold text-gray-700">📌 Bài ghim trong group:</p>
+                    <ol className="list-decimal pl-4 mt-0.5 space-y-0.5">
+                      <li>Vào group → tìm bài đã ghim ở đầu group.</li>
+                      <li>
+                        Trên máy tính: bấm <span className="font-semibold">thời gian đăng</span> (vd. &quot;2 giờ trước&quot;) → copy URL trên thanh địa chỉ.<br />
+                        Trên điện thoại: bấm <span className="font-semibold">3 chấm (…)</span> góc trên bài → <span className="font-semibold">Sao chép liên kết</span>.
+                      </li>
+                      <li>URL có dạng: <span className="font-mono text-blue-700">facebook.com/groups/.../permalink/...</span></li>
+                    </ol>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-700">📌 Bài ghim trên trang cá nhân / page:</p>
+                    <ol className="list-decimal pl-4 mt-0.5 space-y-0.5">
+                      <li>Vào trang Facebook cá nhân → tìm bài đã ghim.</li>
+                      <li>Bấm <span className="font-semibold">thời gian đăng</span> → bài mở rộng full → copy URL.</li>
+                      <li>URL có dạng: <span className="font-mono text-blue-700">facebook.com/yourname/posts/...</span></li>
+                    </ol>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-700">💬 Group / page chung (không phải bài cụ thể):</p>
+                    <p className="pl-4">Copy URL group / page là được. Khi click sẽ vào trang chính, kéo xuống box đăng bài.</p>
+                  </div>
+                </div>
+                <p className="mt-2 text-gray-400">Hỗ trợ: facebook.com, fb.com, zalo.me, t.me, instagram.com, tiktok.com, x.com, threads.net.</p>
               </details>
             </div>
           )}
