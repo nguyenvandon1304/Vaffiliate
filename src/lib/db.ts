@@ -1058,6 +1058,63 @@ export async function getUserByEmail(
   };
 }
 
+/**
+ * Đổi email cho user CHƯA verify — chỉ cho phép khi email_verified = 0.
+ * Dùng khi user nhập sai email lúc đăng ký, muốn sửa lại.
+ *
+ * Bảo mật:
+ * - Yêu cầu username + password để xác thực owner
+ * - Email mới phải chưa được dùng bởi user khác
+ * - Không cho dùng nếu user đã verify (đã có email + dùng forgot-password / profile thay)
+ */
+export async function changeUnverifiedEmail(
+  username: string,
+  password: string,
+  newEmail: string,
+): Promise<{ success: boolean; error?: string; userId?: number }> {
+  const database = await getDb();
+  const row = await database.get(
+    "SELECT id, password_hash, email_verified FROM users WHERE LOWER(username) = LOWER(?)",
+    [username],
+  );
+  if (!row) {
+    // Verify password để giữ timing constant
+    await verifyPassword(password, "pbkdf2$10000$00$00", null);
+    return { success: false, error: "Tên đăng nhập hoặc mật khẩu không đúng" };
+  }
+  const ok = await verifyPassword(password, row.password_hash as string, null);
+  if (!ok) return { success: false, error: "Tên đăng nhập hoặc mật khẩu không đúng" };
+
+  if (Number(row.email_verified) === 1) {
+    return { success: false, error: "Tài khoản đã xác minh email. Vui lòng dùng tính năng cập nhật profile để đổi email." };
+  }
+
+  const userId = Number(row.id);
+  const normalizedEmail = newEmail.trim().toLowerCase();
+
+  // Check email mới chưa bị user khác dùng
+  const existing = await database.get(
+    "SELECT id FROM users WHERE LOWER(email) = LOWER(?) AND id != ?",
+    [normalizedEmail, userId],
+  );
+  if (existing) {
+    return { success: false, error: "Email đã được tài khoản khác sử dụng" };
+  }
+
+  await database.run(
+    "UPDATE users SET email = ?, updated_at = NOW() WHERE id = ?",
+    [normalizedEmail, userId],
+  );
+
+  // Vô hiệu hoá tất cả token verify cũ (để link cũ không dùng được nữa)
+  await database.run(
+    "UPDATE email_verification_tokens SET used = 1 WHERE user_id = ? AND used = 0",
+    [userId],
+  );
+
+  return { success: true, userId };
+}
+
 /* ─────────────── Audit log ─────────────── */
 
 export async function logAudit(

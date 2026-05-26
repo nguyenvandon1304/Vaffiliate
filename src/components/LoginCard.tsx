@@ -37,6 +37,11 @@ export function LoginCard() {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [needVerifyEmail, setNeedVerifyEmail] = useState<string | null>(null);
+  const [showChangeEmail, setShowChangeEmail] = useState(false);
+  const [changeEmailUsername, setChangeEmailUsername] = useState("");
+  const [changeEmailPassword, setChangeEmailPassword] = useState("");
+  const [changeEmailNew, setChangeEmailNew] = useState("");
+  const [changingEmail, setChangingEmail] = useState(false);
   const [resending, setResending] = useState(false);
   const [loading, setLoading] = useState(false);
   // Khi server trả needTotp=true → chuyển sang bước nhập TOTP với cùng username/password.
@@ -73,6 +78,42 @@ export function LoginCard() {
       setError("Lỗi kết nối. Vui lòng thử lại.");
     } finally {
       setResending(false);
+    }
+  };
+
+  const handleChangeEmail = async () => {
+    if (!changeEmailUsername || !changeEmailPassword || !changeEmailNew) {
+      setError("Vui lòng điền đầy đủ thông tin");
+      return;
+    }
+    setChangingEmail(true);
+    setError("");
+    setInfo("");
+    try {
+      const res = await fetch("/api/auth/change-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: changeEmailUsername,
+          password: changeEmailPassword,
+          newEmail: changeEmailNew,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setInfo(data.message || "Đã đổi email thành công.");
+        setNeedVerifyEmail(data.email ?? changeEmailNew);
+        setShowChangeEmail(false);
+        setChangeEmailUsername("");
+        setChangeEmailPassword("");
+        setChangeEmailNew("");
+      } else {
+        setError(data.error || "Không đổi được email.");
+      }
+    } catch {
+      setError("Lỗi kết nối. Vui lòng thử lại.");
+    } finally {
+      setChangingEmail(false);
     }
   };
 
@@ -275,14 +316,61 @@ export function LoginCard() {
               <p className="text-amber-700 dark:text-amber-300 font-medium mb-2">
                 Email <strong>{needVerifyEmail}</strong> chưa được xác thực.
               </p>
-              <button
-                type="button"
-                onClick={handleResendVerify}
-                disabled={resending}
-                className="text-xs font-semibold text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300 underline disabled:opacity-50"
-              >
-                {resending ? "Đang gửi..." : "Gửi lại link xác thực"}
-              </button>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <button
+                  type="button"
+                  onClick={handleResendVerify}
+                  disabled={resending}
+                  className="text-xs font-semibold text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300 underline disabled:opacity-50"
+                >
+                  {resending ? "Đang gửi..." : "Gửi lại link xác thực"}
+                </button>
+                <span className="text-amber-400">·</span>
+                <button
+                  type="button"
+                  onClick={() => { setShowChangeEmail(!showChangeEmail); setError(""); setInfo(""); }}
+                  className="text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline"
+                >
+                  {showChangeEmail ? "Hủy đổi email" : "Đổi sang email khác"}
+                </button>
+              </div>
+
+              {showChangeEmail && (
+                <div className="mt-3 pt-3 border-t border-amber-200 dark:border-amber-900/50 space-y-2">
+                  <p className="text-[11px] text-amber-700 dark:text-amber-300/90">
+                    Nhập username + password tài khoản và email mới. Link xác thực sẽ gửi tới email mới.
+                  </p>
+                  <input
+                    type="text"
+                    value={changeEmailUsername}
+                    onChange={(e) => setChangeEmailUsername(e.target.value)}
+                    placeholder="Tên đăng nhập"
+                    className="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-900 border border-amber-300 dark:border-amber-800 rounded outline-none focus:border-orange-500"
+                  />
+                  <input
+                    type="password"
+                    value={changeEmailPassword}
+                    onChange={(e) => setChangeEmailPassword(e.target.value)}
+                    placeholder="Mật khẩu"
+                    className="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-900 border border-amber-300 dark:border-amber-800 rounded outline-none focus:border-orange-500"
+                  />
+                  <input
+                    type="email"
+                    value={changeEmailNew}
+                    onChange={(e) => setChangeEmailNew(e.target.value)}
+                    placeholder="Email mới"
+                    className="w-full px-3 py-2 text-xs bg-white dark:bg-zinc-900 border border-amber-300 dark:border-amber-800 rounded outline-none focus:border-orange-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleChangeEmail}
+                    disabled={changingEmail}
+                    className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-xs font-bold py-2 rounded transition-colors"
+                  >
+                    {changingEmail ? "Đang xử lý..." : "Cập nhật email"}
+                  </button>
+                </div>
+              )}
             </div>
           )}
           {mode === "login" && totpRequired ? (

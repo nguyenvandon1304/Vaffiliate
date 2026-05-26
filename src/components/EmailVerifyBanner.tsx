@@ -21,6 +21,11 @@ export function EmailVerifyBanner({ user, onVerified }: { user: BannerUser; onVe
   const [resending, setResending] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [verified, setVerified] = useState(user.email_verified);
+  const [showChangeEmail, setShowChangeEmail] = useState(false);
+  const [changeUsername, setChangeUsername] = useState("");
+  const [changePassword, setChangePassword] = useState("");
+  const [changeNewEmail, setChangeNewEmail] = useState("");
+  const [changing, setChanging] = useState(false);
 
   // Poll /api/auth/me mỗi 15s — phát hiện khi user click link verify ở email
   useEffect(() => {
@@ -78,6 +83,39 @@ export function EmailVerifyBanner({ user, onVerified }: { user: BannerUser; onVe
     } catch { toast.error("Lỗi kiểm tra"); }
   };
 
+  const handleChangeEmail = async () => {
+    if (!changeUsername || !changePassword || !changeNewEmail) {
+      toast.error("Vui lòng điền đầy đủ thông tin");
+      return;
+    }
+    setChanging(true);
+    try {
+      const res = await fetch("/api/auth/change-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: changeUsername,
+          password: changePassword,
+          newEmail: changeNewEmail,
+        }),
+      });
+      const d = await res.json();
+      if (d.success) {
+        toast.success("📨 " + (d.message || "Đã đổi email và gửi link xác minh."));
+        setShowChangeEmail(false);
+        setChangeUsername(""); setChangePassword(""); setChangeNewEmail("");
+        // Force refresh user info để banner cập nhật email mới
+        setTimeout(() => onVerified?.(), 500);
+      } else {
+        toast.error(d.error || "Không đổi được email");
+      }
+    } catch {
+      toast.error("Lỗi kết nối");
+    } finally {
+      setChanging(false);
+    }
+  };
+
   return (
     <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-300 dark:border-amber-500/40 rounded-xl p-4 mb-4 shadow-sm">
       <div className="flex items-start gap-3">
@@ -103,7 +141,49 @@ export function EmailVerifyBanner({ user, onVerified }: { user: BannerUser; onVe
             >
               ↻ Tôi đã xác minh
             </button>
+            <button
+              onClick={() => setShowChangeEmail(!showChangeEmail)}
+              className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline px-2"
+            >
+              {showChangeEmail ? "Hủy" : "✏️ Đổi email khác"}
+            </button>
           </div>
+
+          {showChangeEmail && (
+            <div className="mt-3 pt-3 border-t border-amber-300 dark:border-amber-500/30 space-y-2">
+              <p className="text-[11px] text-amber-700 dark:text-amber-300/90">
+                Nếu bạn nhập sai email lúc đăng ký, có thể đổi lại tại đây. Cần xác nhận username + password.
+              </p>
+              <input
+                type="text"
+                value={changeUsername}
+                onChange={(e) => setChangeUsername(e.target.value)}
+                placeholder="Tên đăng nhập"
+                className="w-full px-3 py-2 text-xs bg-white dark:bg-gray-800 border border-amber-300 dark:border-amber-500/40 rounded outline-none focus:border-orange-500"
+              />
+              <input
+                type="password"
+                value={changePassword}
+                onChange={(e) => setChangePassword(e.target.value)}
+                placeholder="Mật khẩu"
+                className="w-full px-3 py-2 text-xs bg-white dark:bg-gray-800 border border-amber-300 dark:border-amber-500/40 rounded outline-none focus:border-orange-500"
+              />
+              <input
+                type="email"
+                value={changeNewEmail}
+                onChange={(e) => setChangeNewEmail(e.target.value)}
+                placeholder="Email mới"
+                className="w-full px-3 py-2 text-xs bg-white dark:bg-gray-800 border border-amber-300 dark:border-amber-500/40 rounded outline-none focus:border-orange-500"
+              />
+              <button
+                onClick={handleChangeEmail}
+                disabled={changing}
+                className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-xs font-bold py-2 rounded transition-colors"
+              >
+                {changing ? "Đang cập nhật..." : "Cập nhật email"}
+              </button>
+            </div>
+          )}
         </div>
         <button
           onClick={() => setHidden(true)}
