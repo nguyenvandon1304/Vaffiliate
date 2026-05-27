@@ -1338,6 +1338,111 @@ export async function getDashboardStats(userId: number): Promise<DashboardStats>
   };
 }
 
+export interface UserStatsTimeseries {
+  /** 14 ngày gần nhất, index 0 = hôm nay - 13, index 13 = hôm nay. */
+  ordersDaily: number[];
+  cashbackDaily: number[];
+  walletDaily: number[];   // running balance (credit - debit cumulative)
+  pendingDaily: number[];  // số đơn pending mỗi ngày (snapshot cuối ngày)
+}
+
+/**
+ * Lấy timeseries 14 ngày cho user dashboard.
+ * Tuần này (7 ngày gần nhất) + tuần trước (7 ngày trước đó) để compare WoW%.
+ */
+export async function getUserTimeseries(userId: number): Promise<UserStatsTimeseries> {
+  const database = await getDb();
+  // Postgres `date_trunc('day', col)` group by day; CURRENT_DATE - INTERVAL '13 days'.
+  const orderRows = await database.all(
+    `SELECT
+       DATE(created_at) AS d,
+       COUNT(*)::int AS cnt,
+       COALESCE(SUM(CASE WHEN status = 'Đã hoàn tiền' THEN cashback ELSE 0 END), 0)::int AS cb
+     FROM orders
+     WHERE user_id = $1 AND created_at >= CURRENT_DATE - INTERVAL '13 days'
+     GROUP BY DATE(created_at)
+     ORDER BY d ASC`,
+    [userId],
+  );
+  const walletRows = await database.all(
+    `SELECT
+       DATE(created_at) AS d,
+       COALESCE(SUM(CASE WHEN type='credit' THEN amount ELSE -amount END), 0)::int AS delta
+     FROM wallet
+     WHERE user_id = $1 AND created_at >= CURRENT_DATE - INTERVAL '13 days'
+     GROUP BY DATE(created_at)
+     ORDER BY d ASC`,
+    [userId],
+  );
+
+  // Build 14-day arrays filled with zeros, then map rows in.
+  const ordersDaily: number[] = new Array(14).fill(0);
+  const cashbackDaily: number[] = new Array(14).fill(0);
+  const walletDeltaDaily: number[] = new Array(14).fill(0);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const dayKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+  // Map từ keyDate → index (0 = today-13, 13 = today)
+  const indexMap = new Map<string, number>();
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - (13 - i));
+    indexMap.set(dayKey(d), i);
+  }
+
+  for (const r of orderRows) {
+    const d = r.d instanceof Date ? r.d : new Date(String(r.d));
+    const key = dayKey(d);
+    const idx = indexMap.get(key);
+    if (idx !== undefined) {
+      ordersDaily[idx] = Number(r.cnt);
+      cashbackDaily[idx] = Number(r.cb);
+    }
+  }
+  for (const r of walletRows) {
+    const d = r.d instanceof Date ? r.d : new Date(String(r.d));
+    const key = dayKey(d);
+    const idx = indexMap.get(key);
+    if (idx !== undefined) {
+      walletDeltaDaily[idx] = Number(r.delta);
+    }
+  }
+
+  // Wallet running balance: cumulative sum của delta (lấy historical balance trước 14 ngày làm baseline = 0, chỉ hiện shape).
+  const walletDaily: number[] = [];
+  let running = 0;
+  for (let i = 0; i < 14; i++) {
+    running += walletDeltaDaily[i];
+    walletDaily.push(running);
+  }
+
+  // Pending orders mỗi ngày khó snapshot chính xác — dùng count hôm đó tạo đơn pending.
+  const pendingRows = await database.all(
+    `SELECT
+       DATE(created_at) AS d,
+       COUNT(*)::int AS cnt
+     FROM orders
+     WHERE user_id = $1 AND status IN ('Đang xử lý', 'Chờ xác nhận')
+       AND created_at >= CURRENT_DATE - INTERVAL '13 days'
+     GROUP BY DATE(created_at)
+     ORDER BY d ASC`,
+    [userId],
+  );
+  const pendingDaily: number[] = new Array(14).fill(0);
+  for (const r of pendingRows) {
+    const d = r.d instanceof Date ? r.d : new Date(String(r.d));
+    const key = dayKey(d);
+    const idx = indexMap.get(key);
+    if (idx !== undefined) {
+      pendingDaily[idx] = Number(r.cnt);
+    }
+  }
+
+  return { ordersDaily, cashbackDaily, walletDaily, pendingDaily };
+}
+
 export interface LeaderboardEntry {
   display_name: string;
   total_orders: number;

@@ -6,6 +6,7 @@ import { CaffiliateLogo } from "@/components/icons";
 import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { NotificationBell } from "@/components/NotificationBell";
 import { TierPill, TierHeroCard, useTierInfo } from "@/components/TierDisplay";
+import { StatCard as StatCardNew } from "@/components/StatCard";
 import { useConfetti } from "@/components/Confetti";
 import { useOnboarding } from "@/components/OnboardingTour";
 import { EmailVerifyBanner } from "@/components/EmailVerifyBanner";
@@ -182,6 +183,25 @@ function DashboardContent() {
 
   // Tier info — fetch 1 lần, cache 60s qua sessionStorage.
   const { info: tierInfo, tiers: tierList } = useTierInfo();
+
+  // Timeseries 14 ngày cho stat cards sparkline + WoW delta.
+  const [timeseries, setTimeseries] = useState<{
+    ordersDaily: number[];
+    cashbackDaily: number[];
+    walletDaily: number[];
+    pendingDaily: number[];
+  } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/stats/timeseries", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled) return;
+        if (d?.success && d.data) setTimeseries(d.data);
+      })
+      .catch(() => { /* silent */ });
+    return () => { cancelled = true; };
+  }, []);
 
   const fetchLinkHistory = async () => {
     try {
@@ -526,12 +546,43 @@ function DashboardContent() {
 
         {!accountView && (
         <>
-        {/* Stats Cards — real data */}
+        {/* Stats Cards — sparkline + WoW delta + click to drill down */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-          <StatCard label="Tổng hoàn tiền" value={formatVND(stats.totalCashback)} icon="💰" color="bg-orange-50 text-orange-600" />
-          <StatCard label="Đơn hàng" value={String(stats.totalOrders)} icon="📦" color="bg-blue-50 text-blue-600" />
-          <StatCard label="Đơn chờ duyệt" value={String(stats.pendingOrders)} icon="⏳" color="bg-amber-50 text-amber-600" />
-          <StatCard label="Số dư ví" value={formatVND(stats.walletBalance)} icon="💳" color="bg-green-50 text-green-600" />
+          <StatCardNew
+            label="Tổng hoàn tiền"
+            value={formatVND(stats.totalCashback)}
+            icon="💰"
+            tone="orange"
+            series={timeseries?.cashbackDaily}
+            ariaLabel={`Tổng hoàn tiền: ${formatVND(stats.totalCashback)}`}
+          />
+          <StatCardNew
+            label="Đơn hàng"
+            value={String(stats.totalOrders)}
+            icon="📦"
+            tone="blue"
+            series={timeseries?.ordersDaily}
+            onClick={() => goToTab("orders")}
+            ariaLabel={`Đơn hàng: ${stats.totalOrders}`}
+          />
+          <StatCardNew
+            label="Đơn chờ duyệt"
+            value={String(stats.pendingOrders)}
+            icon="⏳"
+            tone="amber"
+            series={timeseries?.pendingDaily}
+            onClick={() => goToTab("orders")}
+            ariaLabel={`Đơn chờ duyệt: ${stats.pendingOrders}`}
+          />
+          <StatCardNew
+            label="Số dư ví"
+            value={formatVND(stats.walletBalance)}
+            icon="💳"
+            tone="green"
+            series={timeseries?.walletDaily}
+            onClick={() => goToTab("wallet")}
+            ariaLabel={`Số dư ví: ${formatVND(stats.walletBalance)}`}
+          />
         </div>
 
         {activeTab === "overview" && (
@@ -2168,15 +2219,6 @@ function PaginationControls({ page, totalPages, onChange }: { page: number; tota
       >
         Sau →
       </button>
-    </div>
-  );
-}
-function StatCard({ label, value, icon, color }: { label: string; value: string; icon: string; color: string }) {
-  return (
-    <div className={`rounded-xl p-3 sm:p-4 ${color}`}>
-      <div className="text-xl sm:text-2xl mb-1 sm:mb-2">{icon}</div>
-      <p className="text-[10px] sm:text-xs font-medium opacity-70 mb-0.5">{label}</p>
-      <p className="text-sm sm:text-lg font-bold truncate">{value}</p>
     </div>
   );
 }
