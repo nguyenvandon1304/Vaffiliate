@@ -1725,7 +1725,7 @@ function WalletTab({
               </div>
               <div>
                 <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100">Yêu Cầu Rút Tiền Hoàn</h3>
-                <p className="text-[11px] text-gray-400">Tạo yêu cầu rút điểm về tài khoản NH</p>
+                <p className="text-[11px] text-gray-400">Tạo yêu cầu rút tiền về tài khoản NH</p>
               </div>
             </div>
             <svg viewBox="0 0 24 24" className={`w-4 h-4 text-gray-400 transition-transform ${showWithdrawPanel ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1775,7 +1775,7 @@ function WalletTab({
               <div className="flex items-center justify-center gap-2 mb-4">
                 <div className={`flex items-center gap-1.5 ${withdrawStep === 1 ? "text-orange-600" : "text-gray-400"}`}>
                   <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${withdrawStep === 1 ? "bg-orange-500 text-white" : "bg-gray-200"}`}>1</div>
-                  <span className="text-xs font-semibold">Số lượng</span>
+                  <span className="text-xs font-semibold">Nhập số tiền</span>
                 </div>
                 <div className="w-8 h-px bg-gray-200" />
                 <div className={`flex items-center gap-1.5 ${withdrawStep === 2 ? "text-orange-600" : "text-gray-400"}`}>
