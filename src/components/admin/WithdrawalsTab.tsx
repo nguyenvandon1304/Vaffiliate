@@ -154,16 +154,21 @@ export function WithdrawalsTab() {
                   <td className="px-4 py-3 text-gray-600 dark:text-gray-300 text-xs">{w.account_holder || "—"}</td>
                   <td className="px-4 py-3 text-right text-orange-600 dark:text-orange-400 font-bold">{formatVND(w.amount)}</td>
                   <td className="px-4 py-3 text-center">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                      w.status === "approved" ? "bg-green-500/20 text-green-600 dark:text-green-400" :
-                      w.status === "rejected" ? "bg-red-500/20 text-red-600 dark:text-red-400" :
-                      "bg-amber-500/20 text-amber-600 dark:text-amber-400"
-                    }`}>{w.status === "pending" ? "Chờ duyệt" : w.status === "approved" ? "Đã duyệt" : "Từ chối"}</span>
+                    {(() => {
+                      // Status có thể là English (legacy) hoặc tiếng Việt (default schema mới).
+                      const isApproved = w.status === "approved" || w.status === "Đã chuyển" || w.status === "Đã duyệt";
+                      const isRejected = w.status === "rejected" || w.status === "Đã hủy" || w.status === "Đã huỷ";
+                      const cls = isApproved ? "bg-green-500/20 text-green-600 dark:text-green-400"
+                        : isRejected ? "bg-red-500/20 text-red-600 dark:text-red-400"
+                        : "bg-amber-500/20 text-amber-600 dark:text-amber-400";
+                      const label = isApproved ? "Đã duyệt" : isRejected ? "Từ chối" : "Chờ duyệt";
+                      return <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${cls}`}>{label}</span>;
+                    })()}
                   </td>
                   <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 max-w-[200px] truncate" title={w.admin_note || ""}>{w.admin_note || "—"}</td>
                   <td className="px-4 py-3 text-right text-gray-500 dark:text-gray-400 text-xs">{formatDate(w.created_at)}</td>
                   <td className="px-4 py-3 text-center">
-                    {w.status === "pending" && (
+                    {(w.status === "pending" || w.status === "Đang xử lý") && (
                       <div className="flex items-center justify-center gap-1">
                         <button onClick={() => handleApprove(w.id)} className="text-xs font-medium px-2.5 py-1 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20">Duyệt</button>
                         <button onClick={() => setRejecting(w)} className="text-xs font-medium px-2.5 py-1 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20">Từ chối</button>
