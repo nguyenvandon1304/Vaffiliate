@@ -538,7 +538,12 @@ function DashboardContent() {
           <>
           {/* Tier Hero Card — hiển thị cấp bậc + tiến độ + cashback%. */}
           <section id="tier-hero-card" className="mb-6">
-            <TierHeroCard info={tierInfo} tiers={tierList} />
+            <TierHeroCard
+              info={tierInfo}
+              tiers={tierList}
+              totalCashback={stats.totalCashback}
+              walletBalance={stats.walletBalance}
+            />
           </section>
 
           {/* Welcome Banner — thay cho phần "Bảng Xếp Hạng" cũ.

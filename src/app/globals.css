@@ -431,6 +431,63 @@
   }
 }
 
+/* ─── Tier card animations ─── */
+
+/* Card mount: fade-in + scale slightly */
+@keyframes tier-card-in {
+  0%   { opacity: 0; transform: translateY(8px) scale(0.97); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-tier-card-in {
+  animation: tier-card-in 500ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+/* Medal idle pulse — gentle glow */
+@keyframes medal-glow {
+  0%, 100% { box-shadow: 0 4px 20px -4px rgba(251, 146, 60, 0.35), 0 0 0 0 rgba(251, 146, 60, 0); }
+  50%      { box-shadow: 0 6px 28px -2px rgba(251, 146, 60, 0.55), 0 0 0 6px rgba(251, 146, 60, 0.08); }
+}
+.animate-medal-glow {
+  animation: medal-glow 3.6s ease-in-out infinite;
+}
+
+/* Medal subtle tilt — turning gold coin feel */
+@keyframes medal-tilt {
+  0%, 100% { transform: rotate(-3deg); }
+  50%      { transform: rotate(3deg); }
+}
+.animate-medal-tilt {
+  animation: medal-tilt 5s ease-in-out infinite;
+}
+
+/* Progress shimmer — moving highlight stripe */
+@keyframes progress-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
+.animate-progress-shimmer {
+  animation: progress-shimmer 2.4s linear infinite;
+}
+
+/* Float decorative shapes */
+@keyframes tier-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+.animate-tier-float {
+  animation: tier-float 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-tier-card-in,
+  .animate-medal-glow,
+  .animate-medal-tilt,
+  .animate-progress-shimmer,
+  .animate-tier-float {
+    animation: none !important;
+  }
+}
+
 
 /* ─── PWA standalone mode safe-area ───
  * Khi user cài app vào Home Screen (display: standalone) trên iPhone, viewport
