@@ -9,6 +9,7 @@ import { TierPill, TierHeroCard, useTierInfo } from "@/components/TierDisplay";
 import { StatCard as StatCardNew } from "@/components/StatCard";
 import { EmptyState, IllustrationBox, IllustrationLink, IllustrationWallet } from "@/components/EmptyState";
 import { WalletHero } from "@/components/WalletHero";
+import { OrderList } from "@/components/OrderCard";
 import { useConfetti } from "@/components/Confetti";
 import { useOnboarding } from "@/components/OnboardingTour";
 import { EmailVerifyBanner } from "@/components/EmailVerifyBanner";
@@ -1160,33 +1161,8 @@ function DashboardContent() {
                 }
 
                 return (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-gray-100 bg-gray-50/50">
-                          <th className="text-left px-4 py-3 font-medium text-gray-500">Mã đơn</th>
-                          <th className="text-left px-4 py-3 font-medium text-gray-500">Cửa hàng</th>
-                          <th className="text-right px-4 py-3 font-medium text-gray-500">Giá trị</th>
-                          <th className="text-right px-4 py-3 font-medium text-gray-500">Hoàn tiền</th>
-                          <th className="text-center px-4 py-3 font-medium text-gray-500">Trạng thái</th>
-                          <th className="text-right px-4 py-3 font-medium text-gray-500">Ngày</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filtered.map((order) => (
-                          <tr key={order.id} className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors">
-                            <td className="px-4 py-3 font-mono text-xs text-gray-600">{order.order_code}</td>
-                            <td className="px-4 py-3 font-medium text-gray-800">{order.store}</td>
-                            <td className="px-4 py-3 text-right text-gray-600">{formatVND(order.amount)}</td>
-                            <td className="px-4 py-3 text-right font-semibold text-orange-500">{formatVND(order.cashback)}</td>
-                            <td className="px-4 py-3 text-center">
-                              <StatusBadge status={order.status} />
-                            </td>
-                            <td className="px-4 py-3 text-right text-gray-400 text-xs">{formatDate(order.created_at)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div className="px-3 sm:px-4 py-4">
+                    <OrderList orders={filtered} />
                   </div>
                 );
               })()}
