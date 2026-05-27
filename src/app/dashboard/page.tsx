@@ -1438,7 +1438,7 @@ function WalletTab({
       return;
     }
     if (amount > stats.walletBalance) {
-      setWithdrawErr("Số dư không đủ");
+      setWithdrawErr(`Số dư không đủ (khả dụng: ${formatVND(stats.walletBalance)})`);
       return;
     }
     if (!canWithdraw) {
@@ -1723,7 +1723,6 @@ function WalletTab({
                         onChange={(e) => setWithdrawAmount(e.target.value)}
                         placeholder="0"
                         min={MIN_WITHDRAW}
-                        max={stats.walletBalance}
                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-base font-bold focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all pr-12"
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">đ</span>
@@ -1733,7 +1732,7 @@ function WalletTab({
                         Tối thiểu: <span className="font-semibold text-gray-600">{formatPrice(MIN_WITHDRAW)}đ</span>
                       </span>
                       <span className="text-gray-400">
-                        Tối đa: <span className="font-semibold text-orange-500">{formatPrice(stats.walletBalance)}đ</span>
+                        Tối đa: <span className="font-semibold text-orange-500">Không giới hạn</span>
                       </span>
                     </div>
                   </div>
@@ -1780,41 +1779,72 @@ function WalletTab({
                 </div>
               )}
 
-              {/* Step 2: chọn ngân hàng + nhập PIN */}
+              {/* Step 2: preview bill + nhập PIN */}
               {withdrawStep === 2 && (
                 <div className="space-y-3">
-                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] text-orange-600 font-semibold uppercase tracking-wider">Số tiền rút</p>
-                      <p className="text-lg font-extrabold text-orange-600">{formatPrice(Number(withdrawAmount))}đ</p>
+                  {/* ─── Preview bill ─── */}
+                  <div className="border-2 border-orange-200 bg-gradient-to-br from-orange-50 via-amber-50 to-orange-50 rounded-xl overflow-hidden">
+                    {/* Header bill */}
+                    <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-2.5 text-white text-center">
+                      <p className="text-[10px] font-bold uppercase tracking-widest opacity-90">Yêu cầu rút tiền</p>
+                      <p className="text-lg font-extrabold">-{formatPrice(Number(withdrawAmount))}đ</p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => { setWithdrawStep(1); setWithdrawErr(""); }}
-                      className="text-xs font-semibold text-orange-600 hover:text-orange-700"
-                    >
-                      Sửa
-                    </button>
+
+                    {/* Body */}
+                    <div className="p-3.5 space-y-2.5">
+                      <BillRow
+                        label="Tài khoản nhận"
+                        value={
+                          bankAccounts.find((b) => String(b.id) === selectedBankId)?.bank_name ?? defaultBank?.bank_name ?? "—"
+                        }
+                      />
+                      <BillRow
+                        label="Số tài khoản"
+                        value={
+                          bankAccounts.find((b) => String(b.id) === selectedBankId)?.account_number ?? defaultBank?.account_number ?? "—"
+                        }
+                        mono
+                      />
+                      <BillRow
+                        label="Chủ tài khoản"
+                        value={
+                          bankAccounts.find((b) => String(b.id) === selectedBankId)?.account_holder ?? defaultBank?.account_holder ?? "—"
+                        }
+                      />
+                      <div className="border-t border-orange-200/60 pt-2.5">
+                        <BillRow label="Số tiền" value={`${formatPrice(Number(withdrawAmount))}đ`} highlight />
+                        <BillRow label="Phí giao dịch" value="Miễn phí" />
+                        <BillRow label="Số dư sau rút" value={`${formatPrice(Math.max(0, stats.walletBalance - Number(withdrawAmount)))}đ`} />
+                      </div>
+                      <div className="bg-blue-50 border border-blue-200 rounded-md p-2 mt-1">
+                        <p className="text-[10px] text-blue-700 leading-relaxed">
+                          ⏱️ <span className="font-semibold">Thời gian xử lý:</span> 1-3 ngày làm việc kể từ khi admin duyệt yêu cầu.
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                      Tài khoản nhận <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={selectedBankId}
-                      onChange={(e) => setSelectedBankId(e.target.value)}
-                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition bg-white"
-                    >
-                      <option value="">— Chọn tài khoản —</option>
-                      {bankAccounts.map((acc) => (
-                        <option key={acc.id} value={acc.id}>
-                          {acc.bank_name} · {acc.account_number} · {acc.account_holder}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  {/* Đổi ngân hàng (nếu có >1 bank) */}
+                  {bankAccounts.length > 1 && (
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Đổi tài khoản nhận
+                      </label>
+                      <select
+                        value={selectedBankId}
+                        onChange={(e) => setSelectedBankId(e.target.value)}
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition bg-white"
+                      >
+                        {bankAccounts.map((acc) => (
+                          <option key={acc.id} value={acc.id}>
+                            {acc.bank_name} · {acc.account_number} · {acc.account_holder}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
+                  {/* ─── Nhập PIN ─── */}
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 mb-1.5">
                       Mật khẩu rút tiền <span className="text-red-500">*</span>
@@ -1822,30 +1852,34 @@ function WalletTab({
                     <input
                       type="password"
                       value={withdrawPin}
-                      onChange={(e) => setWithdrawPin(e.target.value)}
-                      placeholder="Nhập mã PIN 6 chữ số"
+                      onChange={(e) => setWithdrawPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                      placeholder="••••••"
                       maxLength={6}
                       inputMode="numeric"
-                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm font-mono tracking-widest focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition"
+                      autoComplete="one-time-code"
+                      className="w-full px-3 py-3 border-2 border-gray-200 rounded-lg text-center text-lg font-mono tracking-[0.5em] focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition"
                     />
+                    <p className="text-[10px] text-gray-400 mt-1 text-center">
+                      Nhập mã PIN 6 chữ số đã đặt trong phần ngân hàng
+                    </p>
                   </div>
 
                   {withdrawErr && (
-                    <p className="text-xs text-red-500 font-medium">{withdrawErr}</p>
+                    <p className="text-xs text-red-500 font-medium text-center">{withdrawErr}</p>
                   )}
 
                   <div className="flex gap-2">
                     <button
                       type="button"
-                      onClick={() => { setWithdrawStep(1); setWithdrawErr(""); }}
+                      onClick={() => { setWithdrawStep(1); setWithdrawErr(""); setWithdrawPin(""); }}
                       className="px-4 border-2 border-gray-200 text-gray-600 text-sm font-semibold py-2.5 rounded-xl hover:bg-gray-50 transition"
                     >
-                      ← Quay lại
+                      ← Sửa
                     </button>
                     <button
                       type="button"
                       onClick={handleWithdraw}
-                      disabled={submitting || !selectedBankId || !withdrawPin}
+                      disabled={submitting || !selectedBankId || withdrawPin.length !== 6}
                       className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-sm font-bold py-2.5 rounded-xl shadow-sm shadow-orange-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {submitting ? "Đang gửi..." : "✓ Xác nhận rút"}
@@ -1984,6 +2018,21 @@ function EmptyHistory({ msg }: { msg: string }) {
       </div>
       <p className="text-sm font-semibold text-gray-600 mb-0.5">Chưa có giao dịch quy đổi nào</p>
       <p className="text-xs text-gray-400">{msg}</p>
+    </div>
+  );
+}
+
+/**
+ * Một dòng trong preview bill rút tiền — label trái, value phải.
+ * `highlight=true` cho dòng quan trọng (số tiền chính), `mono` cho format số tài khoản.
+ */
+function BillRow({ label, value, highlight = false, mono = false }: { label: string; value: string; highlight?: boolean; mono?: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-2 text-xs">
+      <span className="text-gray-500">{label}</span>
+      <span className={`${highlight ? "text-base font-extrabold text-orange-600" : "font-semibold text-gray-800"} ${mono ? "font-mono" : ""} text-right`}>
+        {value}
+      </span>
     </div>
   );
 }
