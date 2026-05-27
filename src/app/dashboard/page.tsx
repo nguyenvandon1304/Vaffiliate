@@ -1574,7 +1574,7 @@ function WalletTab({
           </div>
           <button
             type="button"
-            onClick={() => router.push("/dashboard?view=bank")}
+            onClick={() => router.push("/dashboard?tab=wallet&view=bank")}
             className="text-xs text-orange-500 hover:text-orange-600 font-semibold flex items-center gap-1"
           >
             <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1591,7 +1591,7 @@ function WalletTab({
             <p className="text-xs text-amber-700 leading-relaxed flex-1">
               Bạn chưa cập nhật thông tin ngân hàng.{" "}
               <button
-                onClick={() => router.push("/dashboard?view=bank")}
+                onClick={() => router.push("/dashboard?tab=wallet&view=bank")}
                 className="font-bold underline hover:text-amber-800"
               >
                 Cập nhật ngay
@@ -1625,7 +1625,7 @@ function WalletTab({
             <p className="text-xs text-amber-700 leading-relaxed flex-1">
               Chưa đặt mật khẩu rút tiền.{" "}
               <button
-                onClick={() => router.push("/dashboard?view=bank")}
+                onClick={() => router.push("/dashboard?tab=wallet&view=bank")}
                 className="font-bold underline hover:text-amber-800"
               >
                 Đặt ngay
@@ -1688,7 +1688,7 @@ function WalletTab({
                   </ul>
                   <button
                     type="button"
-                    onClick={() => router.push(isVerified ? "/dashboard?view=bank" : "/dashboard?view=profile")}
+                    onClick={() => router.push(isVerified ? "/dashboard?tab=wallet&view=bank" : "/dashboard?tab=wallet&view=profile")}
                     className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-md transition"
                   >
                     🔧 Cập nhật hồ sơ
