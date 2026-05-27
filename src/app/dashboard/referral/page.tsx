@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CaffiliateLogo } from "@/components/icons";
 import { DashboardNavIcons } from "@/components/DashboardNavIcons";
+import { EmptyState } from "@/components/EmptyState";
 import { Modal } from "@/components/Modal";
+import { ProgressRing } from "@/components/ProgressRing";
+import { ShareMenu } from "@/components/ShareMenu";
 import { QrCode } from "@/components/QrCode";
 import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { useToast } from "@/components/Toast";
@@ -172,25 +175,85 @@ export default function ReferralPage() {
 
         {/* Hero — gradient cam */}
         <section className="relative bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 rounded-3xl shadow-xl shadow-orange-500/30 p-6 sm:p-8 overflow-hidden">
-          {/* Decorative circles */}
-          <div className="absolute top-4 right-4 w-32 h-32 rounded-full bg-white/10 -translate-y-1/3 translate-x-1/3" />
-          <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-white/10 -translate-x-1/3 translate-y-1/3" />
-          <div className="absolute bottom-4 right-12 w-3 h-3 rounded-full bg-white/30" />
-          <div className="absolute top-12 left-8 w-2 h-2 rounded-full bg-white/30" />
+          {/* Decorative blobs */}
+          <div className="pointer-events-none absolute -top-20 -right-20 w-56 h-56 rounded-full bg-yellow-300/30 blur-3xl animate-tier-float" />
+          <div className="pointer-events-none absolute -bottom-16 -left-12 w-44 h-44 rounded-full bg-rose-400/25 blur-3xl" />
+          <div className="pointer-events-none absolute top-12 left-8 text-white/30 text-2xl">★</div>
+          <div className="pointer-events-none absolute bottom-8 right-16 text-white/30 text-lg">✦</div>
 
-          <div className="relative text-center">
-            <p className="text-xs font-bold tracking-[0.2em] text-white/90 uppercase">Tổng thưởng đã nhận</p>
-            <div className="mt-2 flex items-center justify-center gap-2">
-              <span className="text-5xl font-black text-white">{(stats?.totalBonus ?? 0).toLocaleString("vi-VN")}</span>
-              <span className="text-3xl">💰</span>
+          <div className="relative">
+            <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
+              {/* Progress Ring with bonus count */}
+              <div className="shrink-0 flex flex-col items-center">
+                <ProgressRing
+                  percent={Math.min(100, ((rate?.activeReferrals ?? 0) / (rate?.milestone ?? 50)) * 100)}
+                  size={140}
+                  strokeWidth={10}
+                  trackClass="text-white"
+                  bgClass="text-white/20"
+                >
+                  <div className="text-center text-white">
+                    <p className="text-3xl font-black tabular-nums leading-none">{rate?.activeReferrals ?? 0}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-80 mt-1">/{rate?.milestone ?? 50}</p>
+                    <p className="text-[10px] font-semibold opacity-90 mt-0.5">bạn active</p>
+                  </div>
+                </ProgressRing>
+              </div>
+
+              {/* Right: title + bonus + pills */}
+              <div className="flex-1 min-w-0 text-center sm:text-left text-white">
+                <p className="text-[11px] font-bold tracking-[0.2em] text-white/90 uppercase">Tổng thưởng đã nhận</p>
+                <div className="flex items-center justify-center sm:justify-start gap-2 mt-1">
+                  <span className="text-4xl sm:text-5xl font-black tabular-nums drop-shadow-md">
+                    {(stats?.totalBonus ?? 0).toLocaleString("vi-VN")}
+                  </span>
+                  <span className="text-2xl sm:text-3xl">💰</span>
+                </div>
+
+                {/* Pills */}
+                <div className="mt-3 flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+                  <Pill icon="💎" label={`Đang nhận ${rate?.ratePercent ?? 50}%`} />
+                  <Pill icon="📅" label="365 ngày" />
+                  {rate?.tierName && <Pill icon={rate.tierIcon ?? "🏅"} label={`Tier ${rate.tierName}`} />}
+                </div>
+              </div>
             </div>
 
-            {/* Pills */}
-            <div className="mt-4 flex items-center justify-center gap-2 flex-wrap">
-              <Pill icon="💎" label={`Đang nhận ${rate?.ratePercent ?? 50}%`} />
-              <Pill icon="📅" label="365 ngày" />
-              <Pill icon="👥" label={`${stats?.bonusCredited ?? 0}/${rate?.milestone ?? 50} bạn active`} />
-            </div>
+            {/* Recent referrals avatar carousel */}
+            {stats && stats.recent.length > 0 && (
+              <div className="mt-5 pt-5 border-t border-white/20 flex items-center justify-center gap-3 flex-wrap">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-white/80">
+                  Bạn bè đã tham gia:
+                </p>
+                <div className="flex items-center -space-x-2">
+                  {stats.recent.slice(0, 5).map((r) => {
+                    const name = r.referee_display_name || r.referee_username;
+                    const initial = name.charAt(0).toUpperCase();
+                    return (
+                      <div
+                        key={r.id}
+                        title={`${name}${r.bonus_credited ? " · Đã active ✓" : " · Chờ kích hoạt"}`}
+                        className={`relative w-9 h-9 rounded-full border-2 border-white shadow-md flex items-center justify-center text-sm font-black text-white ${
+                          r.bonus_credited ? "bg-gradient-to-br from-emerald-400 to-emerald-600" : "bg-gradient-to-br from-white/30 to-white/20 backdrop-blur"
+                        }`}
+                      >
+                        {initial}
+                        {r.bonus_credited === 1 && (
+                          <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-[7px]">
+                            ✓
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {stats.recent.length > 5 && (
+                    <div className="relative w-9 h-9 rounded-full border-2 border-white bg-white/20 backdrop-blur shadow-md flex items-center justify-center text-[11px] font-black text-white">
+                      +{stats.recent.length - 5}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Link box */}
             <div className="mt-5 bg-white rounded-full px-5 py-3 flex items-center justify-center shadow-md">
@@ -208,6 +271,20 @@ export default function ReferralPage() {
                 <CopyIcon className="w-4 h-4" />
                 <span>Sao Chép</span>
               </button>
+              <ShareMenu
+                url={refLink || ""}
+                text="Tham gia V-Affiliate cùng mình — hoàn 50% hoa hồng cho mỗi đơn Shopee. Mua sắm thông minh hơn!"
+                buttonClass="flex items-center gap-2 bg-white hover:bg-orange-50 text-orange-600 text-sm font-bold px-6 py-2.5 rounded-xl shadow-md transition-all hover:scale-105"
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="18" cy="5" r="3" />
+                  <circle cx="6" cy="12" r="3" />
+                  <circle cx="18" cy="19" r="3" />
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                </svg>
+                <span>Chia Sẻ</span>
+              </ShareMenu>
               <button
                 onClick={() => setShowQr(true)}
                 className="flex items-center gap-2 bg-white hover:bg-orange-50 text-orange-600 text-sm font-bold px-6 py-2.5 rounded-xl shadow-md transition-all hover:scale-105"
@@ -419,12 +496,12 @@ export default function ReferralPage() {
                 </table>
               </div>
             ) : (
-              <div className="py-12 text-center">
-                <div className="w-14 h-14 mx-auto rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center mb-3">
-                  <InboxIcon className="w-7 h-7 text-gray-400 dark:text-zinc-500" />
-                </div>
-                <p className="text-sm text-gray-500 dark:text-zinc-400">Chưa có dữ liệu giới thiệu</p>
-              </div>
+              <EmptyState
+                icon="🤝"
+                title="Chưa có dữ liệu giới thiệu"
+                description="Bạn bè đăng ký qua link sẽ xuất hiện ở đây. Khi họ có đơn hoàn tiền đầu tiên, bạn được tính 'active'."
+                tip="Mẹo: Chia sẻ link qua Zalo, Facebook hoặc Telegram để mời bạn nhanh nhất."
+              />
             )}
             {stats && stats.totalBonus > 0 && (
               <div className="px-4 py-3 border-t border-gray-100 dark:border-zinc-800 bg-orange-50/40 dark:bg-orange-900/10 flex items-center justify-between text-sm">
