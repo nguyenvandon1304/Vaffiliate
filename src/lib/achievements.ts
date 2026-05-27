@@ -74,8 +74,8 @@ export async function grantBadge(
       // Notification trong app + log audit.
       await createNotification(
         userId,
-        `${meta.icon} Huy hiệu mới: ${meta.name}`,
-        meta.description,
+        `${meta.icon} Huy hiệu mới đã mở khoá!`,
+        `Bạn vừa nhận được huy hiệu "${meta.name}" — ${meta.description}. Tiếp tục bứt phá để sưu tầm thêm nhiều thành tích nữa nhé! 🏅`,
         "achievement",
       );
       return { granted: true };

@@ -189,8 +189,8 @@ export async function checkAndNotifyTierUp(userId: number): Promise<void> {
   // Notification + audit log.
   await createNotification(
     userId,
-    `${info.current.icon} Chúc mừng! Bạn đã lên tier ${info.current.name}`,
-    `Cashback của bạn được nâng lên ${info.current.cashbackPercent}%. Mỗi đơn từ giờ sẽ có hoa hồng cao hơn.`,
+    `${info.current.icon} Chúc mừng! Bạn đã lên tier ${info.current.name}!`,
+    `Tuyệt vời! Bạn vừa thăng hạng lên tier ${info.current.name} — cashback từ nay tăng lên ${info.current.cashbackPercent}% cho MỌI đơn hàng. Càng mua sắm, càng tiết kiệm hơn nữa! 🎊`,
     "achievement",
   );
   await db.run(

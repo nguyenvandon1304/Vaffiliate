@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: result.error }, { status: 400 });
   }
 
-  await createNotification(auth.user.id, "Yêu cầu rút tiền", `Bạn đã gửi yêu cầu rút ${amount.toLocaleString("vi-VN")}đ. Đang xử lý...`, "withdraw");
+  await createNotification(auth.user.id, "💸 Yêu cầu rút tiền đã gửi", `Bạn vừa gửi yêu cầu rút ${amount.toLocaleString("vi-VN")}đ. Đội ngũ V-Affiliate sẽ xử lý ngay khi có thể, thường trong vòng vài giờ. Cảm ơn bạn đã đồng hành! 💚`, "withdraw");
 
   // Telegram alert cho admin — fire-and-forget. Lookup bank info để hiện đầy đủ.
   void (async () => {

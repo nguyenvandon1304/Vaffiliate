@@ -2327,19 +2327,19 @@ export async function updateWithdrawalStatus(
         [userId, "Hoàn tiền rút bị từ chối", amount, "credit"],
       );
       const msg = note
-        ? `Yêu cầu rút ${amount.toLocaleString("vi-VN")}đ bị từ chối. Lý do: ${note}. Số tiền đã hoàn lại ví.`
-        : `Yêu cầu rút ${amount.toLocaleString("vi-VN")}đ bị từ chối. Số tiền đã hoàn lại ví.`;
+        ? `Yêu cầu rút ${amount.toLocaleString("vi-VN")}đ chưa được duyệt lần này. Lý do: ${note}. Số tiền đã được hoàn về ví của bạn — bạn có thể thử rút lại bất cứ lúc nào nhé! 💪`
+        : `Yêu cầu rút ${amount.toLocaleString("vi-VN")}đ chưa được duyệt lần này. Số tiền đã được hoàn về ví của bạn — bạn có thể thử rút lại bất cứ lúc nào nhé! 💪`;
       await tx.run(
         "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
-        [userId, "Rút tiền bị từ chối", msg, "withdrawal"],
+        [userId, "💔 Rút tiền chưa thành công", msg, "withdrawal"],
       );
     } else if (status === "approved") {
       await tx.run(
         "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
         [
           userId,
-          "Rút tiền đã duyệt",
-          `Yêu cầu rút ${amount.toLocaleString("vi-VN")}đ đã được duyệt và đang chuyển khoản.`,
+          "🎉 Rút tiền thành công!",
+          `Số tiền ${amount.toLocaleString("vi-VN")}đ đã được chuyển về tài khoản ngân hàng của bạn. Hãy kiểm tra app ngân hàng — tiền sẽ về trong vài phút tới. Cảm ơn bạn đã tin dùng V-Affiliate! 🥰`,
           "withdrawal",
         ],
       );
@@ -2591,8 +2591,8 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
               "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
               [
                 userId,
-                "Đơn hàng đã duyệt",
-                `Đơn ${item.orderCode} đã hoàn thành! +${cashback.toLocaleString("vi-VN")}đ đã cộng vào ví.`,
+                "🎉 Tiền hoàn đã về ví!",
+                `Đơn ${item.orderCode} của bạn đã được duyệt thành công! +${cashback.toLocaleString("vi-VN")}đ vừa được cộng vào ví. Tiếp tục mua sắm để hoàn tiền thêm nhé! 💰`,
                 "order",
               ],
             );
@@ -2614,8 +2614,8 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
                 "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
                 [
                   refUserId,
-                  "🤝 Bạn bè đã có đơn đầu tiên!",
-                  `Bạn bè bạn giới thiệu đã có đơn hoàn tiền. Tiếp tục mời để lên tier cao hơn!`,
+                  "🤝 Người bạn giới thiệu đã có đơn đầu tiên!",
+                  `Tuyệt vời! Người bạn giới thiệu vừa hoàn thành đơn cashback đầu tiên. Mời thêm bạn bè để cùng nhau lên tier cao hơn — cashback của bạn sẽ tăng thêm! 🚀`,
                   "referral",
                 ],
               );
@@ -2629,8 +2629,8 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
               "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
               [
                 userId,
-                "Đơn hàng bị hủy",
-                `Đơn ${item.orderCode} đã bị hủy. -${oldCashback.toLocaleString("vi-VN")}đ.`,
+                "💔 Đơn hàng đã bị huỷ",
+                `Đơn ${item.orderCode} đã bị huỷ — số tiền hoàn ${oldCashback.toLocaleString("vi-VN")}đ đã được trừ khỏi ví. Đừng buồn, bạn vẫn có thể đặt đơn mới qua link V-Affiliate để tiếp tục nhận hoàn tiền nhé!`,
                 "order",
               ],
             );
@@ -2730,8 +2730,8 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
             "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
             [
               refUserId,
-              "🤝 Bạn bè đã có đơn đầu tiên!",
-              `Bạn bè bạn giới thiệu đã có đơn hoàn tiền. Tiếp tục mời để lên tier cao hơn!`,
+              "🤝 Người bạn giới thiệu đã có đơn đầu tiên!",
+              `Tuyệt vời! Người bạn giới thiệu vừa hoàn thành đơn cashback đầu tiên. Mời thêm bạn bè để cùng nhau lên tier cao hơn — cashback của bạn sẽ tăng thêm! 🚀`,
               "referral",
             ],
           );
@@ -2742,8 +2742,8 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
         "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
         [
           userId,
-          "Đơn hàng mới",
-          `Đơn ${item.orderCode} - ${item.productName}. Cashback: ${cashback.toLocaleString("vi-VN")}đ (${newStatus})`,
+          "📦 Đơn hàng mới đã được ghi nhận",
+          `Đơn ${item.orderCode} - "${item.productName}" đã được ghi nhận. Cashback dự kiến: ${cashback.toLocaleString("vi-VN")}đ (trạng thái: ${newStatus}). Khi đơn hoàn thành, tiền sẽ tự động vào ví của bạn!`,
           "order",
         ],
       );
@@ -2879,8 +2879,8 @@ export async function adminResetUserPassword(
     "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
     [
       targetUserId,
-      "Mật khẩu đã được đặt lại",
-      "Quản trị viên đã đặt lại mật khẩu cho tài khoản của bạn. Vui lòng liên hệ admin để nhận mật khẩu tạm và đổi lại sau khi đăng nhập.",
+      "🔑 Mật khẩu đã được đặt lại",
+      "Quản trị viên V-Affiliate vừa đặt lại mật khẩu cho tài khoản của bạn. Vui lòng liên hệ admin để nhận mật khẩu tạm thời, đăng nhập rồi đổi sang mật khẩu mới ngay để bảo vệ tài khoản nhé!",
       "security",
     ],
   );
@@ -2921,8 +2921,8 @@ export async function adminMarkEmailVerified(
     "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
     [
       targetUserId,
-      "Email đã được xác minh",
-      "Email tài khoản của bạn đã được quản trị viên xác minh thủ công. Bạn có thể đăng nhập bình thường.",
+      "✅ Email đã được xác minh!",
+      "Tuyệt vời! Email tài khoản của bạn đã được V-Affiliate xác minh thành công. Giờ thì bạn có thể sử dụng đầy đủ mọi tính năng — tạo link cashback, rút tiền, săn voucher... Chúc bạn mua sắm thật vui! 🎊",
       "security",
     ],
   );

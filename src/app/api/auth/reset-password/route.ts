@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (check.userId) {
-    await createNotification(check.userId, "Mật khẩu đã thay đổi", "Mật khẩu tài khoản của bạn đã được đặt lại thành công.", "info");
+    await createNotification(check.userId, "🔐 Mật khẩu đã đổi thành công", "Mật khẩu mới của bạn đã được lưu. Nếu không phải bạn thực hiện thao tác này, hãy liên hệ ngay với V-Affiliate để bảo vệ tài khoản!", "info");
   }
 
   return NextResponse.json({ success: true, message: "Mật khẩu đã được đặt lại thành công. Vui lòng đăng nhập lại." });

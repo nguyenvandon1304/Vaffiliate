@@ -50,8 +50,8 @@ export async function PUT(request: NextRequest) {
 
   await createNotification(
     auth.user.id,
-    "Mật khẩu đã thay đổi",
-    "Mật khẩu tài khoản của bạn vừa được cập nhật. Mọi thiết bị khác đã được đăng xuất.",
+    "🔐 Mật khẩu đã đổi thành công",
+    "Mật khẩu mới đã được lưu. Để bảo mật tối đa, mọi thiết bị đang đăng nhập trước đó đã được tự động đăng xuất. Hãy đăng nhập lại trên các thiết bị khác bằng mật khẩu mới nhé!",
     "info",
   );
   await logAudit("user.password.change", {

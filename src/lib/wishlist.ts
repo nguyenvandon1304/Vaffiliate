@@ -249,8 +249,8 @@ export async function refreshStaleItems(userId: number): Promise<{ updated: numb
       if (dropPercent >= PRICE_DROP_NOTIFY_PERCENT) {
         await createNotification(
           userId,
-          `🔥 Giảm giá ${dropPercent}%!`,
-          `${info.name} đang giảm từ ${oldPrice.toLocaleString("vi-VN")}đ → ${newPrice.toLocaleString("vi-VN")}đ. Vào wishlist mua ngay để hoàn tiền!`,
+          `🔥 Săn ngay! Giảm sâu ${dropPercent}%`,
+          `"${info.name}" vừa giảm từ ${oldPrice.toLocaleString("vi-VN")}đ xuống còn ${newPrice.toLocaleString("vi-VN")}đ! Mở wishlist mua ngay qua link V-Affiliate để vừa hời, vừa được hoàn tiền — cơ hội không thường có đâu nhé! ⚡`,
           "wishlist",
         );
         dropped++;

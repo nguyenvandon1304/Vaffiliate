@@ -30,11 +30,11 @@ async function notifyBalanceChange(
     const userId = Number(row.id);
     const sign = type === "credit" ? "+" : "-";
     const formatted = amount.toLocaleString("vi-VN");
-    const title = type === "credit" ? "💰 Số dư đã được cộng" : "📤 Số dư đã trừ";
+    const title = type === "credit" ? "💰 Tiền vừa về ví của bạn!" : "📤 Số dư vừa được điều chỉnh";
     const message =
       type === "credit"
-        ? `Tài khoản của bạn vừa được cộng ${sign}${formatted}đ. ${label ? `Lý do: ${label}.` : ""} Vào ví để kiểm tra số dư.`
-        : `Tài khoản của bạn vừa bị trừ ${sign}${formatted}đ. ${label ? `Lý do: ${label}.` : ""} Vào ví để kiểm tra chi tiết.`;
+        ? `Chúc mừng! Ví của bạn vừa được cộng thêm ${sign}${formatted}đ.${label ? ` Lý do: ${label}.` : ""} Mở ví ngay để kiểm tra số dư mới nhé! 🎉`
+        : `Số dư của bạn vừa được điều chỉnh ${sign}${formatted}đ.${label ? ` Lý do: ${label}.` : ""} Vào ví để xem chi tiết. Nếu có thắc mắc, hãy liên hệ V-Affiliate ngay nhé!`;
     await createNotification(userId, title, message, "wallet");
   } catch (e) {
     console.error("[balance] notifyBalanceChange failed:", e);
