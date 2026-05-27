@@ -1979,12 +1979,19 @@ interface UserWithdrawal {
 
 function WithdrawalRow({ w }: { w: UserWithdrawal }) {
   const statusMeta: Record<string, { label: string; color: string }> = {
-    pending: { label: "Đang xử lý", color: "bg-amber-100 text-amber-700" },
-    approved: { label: "Đã duyệt", color: "bg-emerald-100 text-emerald-700" },
-    rejected: { label: "Từ chối", color: "bg-red-100 text-red-700" },
-    cancelled: { label: "Đã huỷ", color: "bg-gray-100 text-gray-600" },
+    // Tiếng Anh (legacy)
+    pending: { label: "Đang xử lý", color: "bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300" },
+    approved: { label: "Đã duyệt", color: "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300" },
+    rejected: { label: "Từ chối", color: "bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300" },
+    cancelled: { label: "Đã huỷ", color: "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300" },
+    // Tiếng Việt (default schema)
+    "Đang xử lý": { label: "Đang xử lý", color: "bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300" },
+    "Đã chuyển": { label: "Đã chuyển", color: "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300" },
+    "Đã duyệt": { label: "Đã duyệt", color: "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300" },
+    "Đã hủy": { label: "Đã huỷ", color: "bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300" },
+    "Đã huỷ": { label: "Đã huỷ", color: "bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300" },
   };
-  const meta = statusMeta[w.status] ?? { label: w.status, color: "bg-gray-100 text-gray-600" };
+  const meta = statusMeta[w.status] ?? { label: w.status, color: "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300" };
   return (
     <div className="border border-gray-100 dark:border-gray-700 rounded-lg p-3 hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors">
       <div className="flex items-start justify-between gap-2 mb-1">
