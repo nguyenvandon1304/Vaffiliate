@@ -60,7 +60,7 @@ export function ShareTargetsPanel({ hasCopied, onCopyAgain }: Props) {
   if (loading || !community) return null;
 
   return (
-    <div className="border border-orange-200 bg-gradient-to-br from-orange-50/60 to-amber-50/40 rounded-xl p-3 mb-4">
+    <div className="border border-orange-200/70 dark:border-orange-500/20 bg-gradient-to-br from-orange-50/60 to-amber-50/40 dark:from-orange-500/[0.06] dark:to-amber-500/[0.04] rounded-xl p-3 mb-4">
       <button
         type="button"
         onClick={handleOpen}
@@ -68,46 +68,56 @@ export function ShareTargetsPanel({ hasCopied, onCopyAgain }: Props) {
         title={hasCopied ? `Mở: ${community.label}` : "Bấm COPY LINK trước rồi quay lại đây"}
         className={`relative w-full text-left rounded-xl p-3.5 transition-all border-2 ${
           hasCopied
-            ? "bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 text-white border-transparent shadow-lg shadow-orange-200 hover:shadow-xl hover:scale-[1.01] cursor-pointer"
-            : "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+            ? "bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 text-white border-transparent shadow-lg shadow-orange-200 dark:shadow-orange-900/30 hover:shadow-xl hover:scale-[1.01] cursor-pointer"
+            : "bg-gray-100 dark:bg-zinc-800/60 text-gray-400 dark:text-zinc-500 border-gray-200 dark:border-zinc-700 cursor-not-allowed"
         }`}
       >
         <span className={`absolute -top-2 right-3 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-          hasCopied ? "bg-white text-orange-600 shadow" : "bg-gray-200 text-gray-500"
+          hasCopied ? "bg-white text-orange-600 shadow" : "bg-gray-200 dark:bg-zinc-700 text-gray-500 dark:text-zinc-400"
         }`}>
           ⭐ Khuyên dùng
         </span>
         <div className="flex items-center gap-3">
           <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl shrink-0 ${
-            hasCopied ? "bg-white/20" : "bg-gray-200"
+            hasCopied ? "bg-white/20" : "bg-gray-200 dark:bg-zinc-700"
           }`}>
             📌
           </div>
           <div className="flex-1 min-w-0">
             <p className={`text-[10px] uppercase tracking-wider font-bold mb-0.5 ${
-              hasCopied ? "text-white/80" : "text-gray-400"
+              hasCopied ? "text-white/80" : "text-gray-400 dark:text-zinc-500"
             }`}>
               Cộng đồng V-Affiliate
             </p>
-            <p className={`text-sm font-bold truncate ${hasCopied ? "text-white" : "text-gray-500"}`}>
+            <p className={`text-sm font-bold truncate ${hasCopied ? "text-white" : "text-gray-500 dark:text-zinc-400"}`}>
               {opened ? "✓ Đã mở — paste link Shopee vào comment!" : community.label}
             </p>
           </div>
-          <svg viewBox="0 0 24 24" className={`w-5 h-5 shrink-0 ${hasCopied ? "text-white/80" : "text-gray-300"}`} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg viewBox="0 0 24 24" className={`w-5 h-5 shrink-0 ${hasCopied ? "text-white/80" : "text-gray-300 dark:text-zinc-600"}`} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M7 17l9.2-9.2M17 17V7H7" />
           </svg>
         </div>
       </button>
 
-      {/* Tip dưới nút — text contrast cao, đọc rõ trên cả light/dark mode. */}
+      {/* Tip dưới nút — info-style với contrast tốt cả light + dark, không chói. */}
       {hasCopied ? (
-        <p className="text-xs text-gray-600 mt-2.5 px-1 leading-relaxed text-center">
-          💡 Sau khi mở: kéo xuống ô bình luận → paste link → đăng.
-        </p>
+        <div className="mt-3 flex items-start gap-2 px-1">
+          <span className="text-base leading-none mt-0.5">💡</span>
+          <p className="text-xs leading-relaxed text-gray-700 dark:text-zinc-300">
+            Sau khi mở: kéo xuống ô bình luận, paste link rồi đăng.
+          </p>
+        </div>
       ) : (
-        <p className="text-xs text-orange-600 mt-2.5 text-center font-semibold">
-          Tip: Bấm <span className="font-bold underline decoration-orange-400 underline-offset-2">COPY LINK</span> trước, rồi click nút trên để mở bài viết.
-        </p>
+        <div className="mt-3 flex items-start gap-2 rounded-lg bg-white/70 dark:bg-zinc-800/60 border border-orange-100 dark:border-zinc-700 px-3 py-2">
+          <span className="text-base leading-none mt-0.5">👆</span>
+          <p className="text-xs leading-relaxed text-gray-700 dark:text-zinc-200">
+            Bấm
+            <span className="mx-1 inline-flex items-center px-1.5 py-0.5 rounded-md bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-300 font-semibold text-[11px]">
+              COPY LINK
+            </span>
+            trước, rồi quay lại đây mở bài viết.
+          </p>
+        </div>
       )}
     </div>
   );
