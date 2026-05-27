@@ -181,7 +181,7 @@ function DashboardContent() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Tier info — fetch 1 lần, cache 60s qua sessionStorage.
-  const { info: tierInfo } = useTierInfo();
+  const { info: tierInfo, tiers: tierList } = useTierInfo();
 
   const fetchLinkHistory = async () => {
     try {
@@ -538,7 +538,7 @@ function DashboardContent() {
           <>
           {/* Tier Hero Card — hiển thị cấp bậc + tiến độ + cashback%. */}
           <section id="tier-hero-card" className="mb-6">
-            <TierHeroCard info={tierInfo} />
+            <TierHeroCard info={tierInfo} tiers={tierList} />
           </section>
 
           {/* Welcome Banner — thay cho phần "Bảng Xếp Hạng" cũ.
