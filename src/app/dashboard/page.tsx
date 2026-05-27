@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { CaffiliateLogo } from "@/components/icons";
 import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { NotificationBell } from "@/components/NotificationBell";
+import { TierPill, TierHeroCard, useTierInfo } from "@/components/TierDisplay";
 import { useConfetti } from "@/components/Confetti";
 import { useOnboarding } from "@/components/OnboardingTour";
 import { EmailVerifyBanner } from "@/components/EmailVerifyBanner";
@@ -178,6 +179,9 @@ function DashboardContent() {
   const [linkCopiedId, setLinkCopiedId] = useState<number|null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Tier info — fetch 1 lần, cache 60s qua sessionStorage.
+  const { info: tierInfo } = useTierInfo();
 
   const fetchLinkHistory = async () => {
     try {
@@ -411,6 +415,18 @@ function DashboardContent() {
             </nav>
           </div>
           <div className="flex items-center gap-3">
+            {/* Tier pill — click để scroll xuống hero card */}
+            <div className="hidden sm:block">
+              <TierPill
+                info={tierInfo}
+                onClick={() => {
+                  if (activeTab !== "overview") goToTab("overview");
+                  setTimeout(() => {
+                    document.getElementById("tier-hero-card")?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  }, 100);
+                }}
+              />
+            </div>
             {/* Theme toggle — đặt cạnh chuông cho gọn */}
             <ThemeToggleButton />
             {/* Notification Bell — realtime SSE qua hook chung */}
@@ -520,6 +536,11 @@ function DashboardContent() {
 
         {activeTab === "overview" && (
           <>
+          {/* Tier Hero Card — hiển thị cấp bậc + tiến độ + cashback%. */}
+          <section id="tier-hero-card" className="mb-6">
+            <TierHeroCard info={tierInfo} />
+          </section>
+
           {/* Welcome Banner — thay cho phần "Bảng Xếp Hạng" cũ.
               Nội dung: lời chào + nhắc tỷ lệ 50% hoàn + 2 CTA (tạo link / mời bạn bè). */}
           <section className="mb-6 relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-400 via-orange-500 to-amber-500 shadow-lg shadow-orange-500/20">
