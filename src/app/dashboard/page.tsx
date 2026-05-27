@@ -482,7 +482,7 @@ function DashboardContent() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <StatCard label="Tổng hoàn tiền" value={formatVND(stats.totalCashback)} icon="💰" color="bg-orange-50 text-orange-600" />
           <StatCard label="Đơn hàng" value={String(stats.totalOrders)} icon="📦" color="bg-blue-50 text-blue-600" />
-          <StatCard label="Đang xử lý" value={String(stats.pendingOrders)} icon="⏳" color="bg-amber-50 text-amber-600" />
+          <StatCard label="Đơn chờ duyệt" value={String(stats.pendingOrders)} icon="⏳" color="bg-amber-50 text-amber-600" />
           <StatCard label="Số dư ví" value={formatVND(stats.walletBalance)} icon="💳" color="bg-green-50 text-green-600" />
         </div>
 
@@ -1519,7 +1519,7 @@ function WalletTab({
           {/* Chips: Chờ xử lý + Tổng đã rút */}
           <div className="flex flex-wrap gap-2">
             <div className="bg-white/20 backdrop-blur rounded-full px-3 py-1 flex items-center gap-1.5 text-xs">
-              <span className="opacity-80">⏳ Chờ xử lý:</span>
+              <span className="opacity-80">⏳ Rút chờ duyệt:</span>
               <span className="font-bold">{formatPrice(stats.pendingWithdrawAmount)}đ</span>
             </div>
             <div className="bg-white/20 backdrop-blur rounded-full px-3 py-1 flex items-center gap-1.5 text-xs">
