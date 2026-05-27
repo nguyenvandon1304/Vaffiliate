@@ -7,6 +7,7 @@ import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { NotificationBell } from "@/components/NotificationBell";
 import { TierPill, TierHeroCard, useTierInfo } from "@/components/TierDisplay";
 import { StatCard as StatCardNew } from "@/components/StatCard";
+import { EmptyState, IllustrationBox, IllustrationLink, IllustrationWallet } from "@/components/EmptyState";
 import { useConfetti } from "@/components/Confetti";
 import { useOnboarding } from "@/components/OnboardingTour";
 import { EmailVerifyBanner } from "@/components/EmailVerifyBanner";
@@ -898,9 +899,23 @@ function DashboardContent() {
             <h2 className="text-lg font-bold text-gray-800 mb-4">Lịch sử tạo link</h2>
             <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
               {linkHistory.length === 0 ? (
-                <div className="px-6 py-12 text-center">
-                  <p className="text-gray-400 text-sm">Chưa có link nào được tạo</p>
-                </div>
+                <EmptyState
+                  illustration={<IllustrationLink />}
+                  title="Chưa có link nào được tạo"
+                  description="Bắt đầu hành trình tiết kiệm bằng cách tạo link hoàn tiền cho sản phẩm bạn muốn mua trên Shopee."
+                  cta={{
+                    label: "Tạo link đầu tiên",
+                    onClick: () => router.push("/dashboard/cashback"),
+                    icon: (
+                      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                      </svg>
+                    ),
+                  }}
+                  secondaryCta={{ label: "Xem hướng dẫn", onClick: () => router.push("/dashboard/help") }}
+                  tip="Mẹo: Copy link sản phẩm Shopee bạn muốn mua, dán vào công cụ. Sau khi mua qua link, tiền hoàn tự động về ví trong 7-15 ngày."
+                />
               ) : (
                 <div className="divide-y divide-gray-50">
                   {linkHistory.map((link) => (
@@ -1099,30 +1114,47 @@ function DashboardContent() {
                 });
 
                 if (filtered.length === 0) {
-                  const emptyMsg = {
-                    pending: { icon: "📭", title: "Chưa có đơn chờ hoàn", desc: "Mua sắm qua link để đơn hàng xuất hiện ở đây." },
-                    completed: { icon: "🎉", title: "Chưa có đơn nào hoàn tất", desc: "Sau 7-14 ngày kể từ khi mua, đơn sẽ chuyển sang đây." },
-                    cancelled: { icon: "✓", title: "Không có đơn bị huỷ", desc: "Chúc bạn mua sắm thuận lợi." },
+                  const config = {
+                    pending: {
+                      illustration: <IllustrationBox />,
+                      title: "Chưa có đơn chờ hoàn tiền",
+                      description: "Khi bạn mua hàng qua link V-Affiliate, đơn sẽ xuất hiện ở đây với trạng thái đang xử lý.",
+                      tip: "Mẹo: Đơn đầu tiên thường mang về 50.000–200.000đ vào ví. Tạo link Shopee đầu tiên để bắt đầu tiết kiệm.",
+                      showCta: true,
+                    },
+                    completed: {
+                      illustration: <IllustrationBox />,
+                      title: "Chưa có đơn nào hoàn tất",
+                      description: "Sau 7–14 ngày kể từ khi nhận hàng, đơn sẽ tự động chuyển sang đây và tiền cộng vào ví.",
+                      tip: "Mẹo: Đừng huỷ đơn hoặc trả hàng — đơn cần ở trạng thái thành công Shopee mới được hoàn tiền.",
+                      showCta: false,
+                    },
+                    cancelled: {
+                      illustration: <IllustrationBox />,
+                      title: "Không có đơn bị huỷ",
+                      description: "Chúc bạn mua sắm thuận lợi! Đơn bị huỷ hoặc trả hàng sẽ xuất hiện ở đây.",
+                      tip: undefined,
+                      showCta: false,
+                    },
                   }[ordersFilter];
 
                   return (
-                    <div className="px-6 py-12 text-center">
-                      <div className="text-4xl mb-3">{emptyMsg.icon}</div>
-                      <p className="text-sm font-semibold text-gray-700 mb-1">{emptyMsg.title}</p>
-                      <p className="text-xs text-gray-400 mb-5">{emptyMsg.desc}</p>
-                      {ordersFilter === "pending" && (
-                        <button
-                          onClick={() => router.push("/dashboard/cashback")}
-                          className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-5 py-2.5 rounded-full shadow-sm shadow-orange-200 transition"
-                        >
-                          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <EmptyState
+                      illustration={config.illustration}
+                      title={config.title}
+                      description={config.description}
+                      tip={config.tip}
+                      cta={config.showCta ? {
+                        label: "Lấy link hoàn tiền",
+                        onClick: () => router.push("/dashboard/cashback"),
+                        icon: (
+                          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
                           </svg>
-                          Lấy link hoàn tiền ngay
-                        </button>
-                      )}
-                    </div>
+                        ),
+                      } : undefined}
+                    />
                   );
                 }
 
@@ -1360,14 +1392,17 @@ function BankSection({ user, bankAccounts, onBankUpdated, onProfileUpdated, onBa
         )}
 
         {bankAccounts.length === 0 && !showAddBank ? (
-          <div className="text-center py-8">
-            <svg viewBox="0 0 24 24" className="w-12 h-12 mx-auto text-gray-200 mb-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-              <line x1="1" x2="23" y1="10" y2="10" />
-            </svg>
-            <p className="text-gray-400 text-sm">Chưa có tài khoản ngân hàng nào</p>
-            <p className="text-gray-300 text-xs mt-1">Thêm tài khoản để rút tiền hoàn về</p>
-          </div>
+          <EmptyState
+            icon="💳"
+            title="Chưa có tài khoản ngân hàng"
+            description="Thêm tài khoản ngân hàng để có thể rút tiền hoàn về sau khi đơn được duyệt."
+            cta={{
+              label: "Thêm tài khoản",
+              onClick: () => setShowAddBank(true),
+              icon: <span className="text-base leading-none">+</span>,
+            }}
+            tip="Mẹo: Chỉ cần thêm 1 lần — sau đó tài khoản sẽ được lưu để rút lần sau nhanh hơn."
+          />
         ) : (
           <div className="space-y-3">
             {bankAccounts.map((acc) => (
@@ -2071,7 +2106,12 @@ function WalletTab({
           <div className="px-5 pb-5">
             {historyTab === "requests" ? (
               withdrawals.length === 0 ? (
-                <EmptyHistory msg="Chưa có giao dịch nào" />
+                <EmptyState
+                  illustration={<IllustrationWallet />}
+                  title="Chưa có yêu cầu rút tiền"
+                  description="Khi ví đủ 50.000đ, bạn có thể rút về tài khoản ngân hàng. Tiền thường về trong 1–2 ngày làm việc."
+                  tip="Mẹo: Hãy thêm tài khoản ngân hàng và đặt mã PIN rút tiền trước để rút nhanh khi cần."
+                />
               ) : (
                 <>
                   <div className="space-y-2">
@@ -2088,7 +2128,12 @@ function WalletTab({
               )
             ) : (
               walletHistory.length === 0 ? (
-                <EmptyHistory msg="Chưa có biến động tích luỹ nào" />
+                <EmptyState
+                  illustration={<IllustrationWallet />}
+                  title="Chưa có biến động ví"
+                  description="Mỗi đơn hoàn tiền hoặc giao dịch sẽ được ghi nhận tại đây với chi tiết đầy đủ."
+                  tip="Mẹo: Bấm vào Đơn hàng để theo dõi tiến độ — khi đơn duyệt, tiền sẽ tự động về ví."
+                />
               ) : (
                 <>
                   <div className="space-y-2">

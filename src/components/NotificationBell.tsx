@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useToast } from "@/components/Toast";
 import { useNotifications, type Notification } from "@/hooks/useNotifications";
+import { EmptyState, IllustrationBell } from "@/components/EmptyState";
 
 /**
  * Bell icon với dropdown notification list.
@@ -88,10 +89,12 @@ export function NotificationBell({ className = "" }: { className?: string }) {
 
             <div className="max-h-[60vh] overflow-y-auto">
               {notifications.length === 0 ? (
-                <div className="py-12 text-center">
-                  <div className="text-4xl mb-2">🔔</div>
-                  <p className="text-sm text-gray-400 dark:text-zinc-500">Chưa có thông báo nào</p>
-                </div>
+                <EmptyState
+                  illustration={<IllustrationBell />}
+                  title="Chưa có thông báo"
+                  description="Khi có đơn hoàn tiền, biến động ví hoặc tin khuyến mãi mới, bạn sẽ thấy ở đây."
+                  compact
+                />
               ) : (
                 <ul className="divide-y divide-gray-100 dark:divide-zinc-800">
                   {notifications.map((n) => (

@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { CaffiliateLogo } from "@/components/icons";
+import { EmptyState, IllustrationHeart } from "@/components/EmptyState";
 import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { useToast } from "@/components/Toast";
 
@@ -211,14 +212,13 @@ export default function WishlistPage() {
 
         {/* Empty state */}
         {!loading && items.length === 0 && (
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm py-12 text-center">
-            <div className="text-6xl mb-3">🛍️</div>
-            <p className="text-sm font-semibold text-gray-700 dark:text-zinc-200 mb-1">
-              Wishlist của bạn trống
-            </p>
-            <p className="text-xs text-gray-500 dark:text-zinc-400">
-              Dán link sản phẩm Shopee ở trên để bắt đầu theo dõi giá
-            </p>
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm">
+            <EmptyState
+              illustration={<IllustrationHeart />}
+              title="Wishlist của bạn còn trống"
+              description="Theo dõi giá sản phẩm Shopee — V-Affiliate sẽ thông báo khi giá giảm sâu để bạn săn đúng lúc."
+              tip="Mẹo: Dán link sản phẩm vào ô ở trên — hệ thống tự cập nhật giá mỗi ngày và báo bạn khi giảm ≥5%."
+            />
           </div>
         )}
 
