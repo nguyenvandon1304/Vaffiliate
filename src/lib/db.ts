@@ -1879,8 +1879,8 @@ export async function getAdminStats(): Promise<Record<string, unknown>> {
       COALESCE((SELECT COUNT(*) FROM users WHERE role = 'user'), 0) AS total_users,
       COALESCE((SELECT COUNT(*) FROM orders), 0) AS total_orders,
       COALESCE((SELECT SUM(cashback) FROM orders), 0) AS total_cashback,
-      COALESCE((SELECT COUNT(*) FROM withdrawals WHERE status = 'pending'), 0) AS pending_withdrawals,
-      COALESCE((SELECT SUM(amount) FROM withdrawals WHERE status = 'approved'), 0) AS total_withdrawn`,
+      COALESCE((SELECT COUNT(*) FROM withdrawals WHERE status IN ('pending', 'Đang xử lý')), 0) AS pending_withdrawals,
+      COALESCE((SELECT SUM(amount) FROM withdrawals WHERE status IN ('approved', 'Đã chuyển', 'Đã duyệt')), 0) AS total_withdrawn`,
     [],
   );
   return {
@@ -2239,7 +2239,19 @@ export async function getAllWithdrawalsPaged(
     where.push("(LOWER(u.username) LIKE ? OR LOWER(COALESCE(u.display_name,'')) LIKE ? OR LOWER(COALESCE(b.account_number,'')) LIKE ?)");
     params.push(q, q, q);
   }
-  if (filter.status && filter.status !== "all") { where.push("w.status = ?"); params.push(filter.status); }
+  if (filter.status && filter.status !== "all") {
+    // Map English filter → match cả tiếng Việt + tiếng Anh trong DB.
+    // (Schema default lưu tiếng Việt, code admin cũ truyền English).
+    const statusMap: Record<string, string[]> = {
+      pending: ["pending", "Đang xử lý"],
+      approved: ["approved", "Đã chuyển", "Đã duyệt"],
+      rejected: ["rejected", "Đã hủy", "Đã huỷ"],
+    };
+    const variants = statusMap[filter.status] || [filter.status];
+    const placeholders = variants.map(() => "?").join(",");
+    where.push(`w.status IN (${placeholders})`);
+    params.push(...variants);
+  }
   if (filter.fromDate) { where.push("w.created_at::date >= ?::date"); params.push(filter.fromDate); }
   if (filter.toDate) { where.push("w.created_at::date <= ?::date"); params.push(filter.toDate); }
 
@@ -2294,7 +2306,10 @@ export async function updateWithdrawalStatus(
     [withdrawalId],
   );
   if (!row) return { success: false, error: "Yêu cầu rút tiá»n khÃ´ng tá»“n táº¡i" };
-  if ((row.status as string) !== "pending") return { success: false, error: "Yêu cầu đã được xử lý" };
+  // Accept cả 2 hệ status: tiếng Việt (default schema) + tiếng Anh (legacy).
+  const currentStatus = String(row.status as string);
+  const isPending = currentStatus === "pending" || currentStatus === "Đang xử lý";
+  if (!isPending) return { success: false, error: "Yêu cầu đã được xử lý" };
 
   const note = (adminNote ?? "").toString().trim().slice(0, 500) || null;
 
@@ -3676,7 +3691,7 @@ export async function getPendingCounts(): Promise<PendingCounts> {
   const database = await getDb();
   const row = await database.get(
     `SELECT
-      COALESCE((SELECT COUNT(*) FROM withdrawals WHERE status = 'pending'), 0) AS pending_withdrawals,
+      COALESCE((SELECT COUNT(*) FROM withdrawals WHERE status IN ('pending', 'Đang xử lý')), 0) AS pending_withdrawals,
       COALESCE((SELECT COUNT(*) FROM users WHERE email_verified = 0 AND is_active = 1), 0) AS unverified_users,
       COALESCE((SELECT COUNT(*) FROM orders WHERE status = 'Đang xử lý' AND created_at < NOW() - INTERVAL '30 days'), 0) AS stuck_orders`,
     [],
