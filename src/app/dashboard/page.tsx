@@ -8,6 +8,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { TierPill, TierHeroCard, useTierInfo } from "@/components/TierDisplay";
 import { StatCard as StatCardNew } from "@/components/StatCard";
 import { EmptyState, IllustrationBox, IllustrationLink, IllustrationWallet } from "@/components/EmptyState";
+import { WalletHero } from "@/components/WalletHero";
 import { useConfetti } from "@/components/Confetti";
 import { useOnboarding } from "@/components/OnboardingTour";
 import { EmailVerifyBanner } from "@/components/EmailVerifyBanner";
@@ -1663,35 +1664,13 @@ function WalletTab({
 
   return (
     <section className="space-y-5">
-      {/* ═══ Hero Card — Khả Dụng ═══ */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 via-orange-500 to-amber-500 p-5 sm:p-6 text-white shadow-lg shadow-orange-200">
-        {/* Decorative circles */}
-        <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full" />
-        <div className="absolute -right-16 bottom-0 w-40 h-40 bg-white/5 rounded-full" />
-
-        <div className="relative">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider opacity-90 mb-1">
-            <span>💰</span>
-            <span>Khả dụng</span>
-          </div>
-          <p className="text-3xl sm:text-4xl font-extrabold mb-4 flex items-baseline gap-1">
-            <span>{formatPrice(stats.walletBalance)}</span>
-            <span className="text-base sm:text-lg font-bold opacity-80">đ</span>
-          </p>
-
-          {/* Chips: Chờ xử lý + Tổng đã rút */}
-          <div className="flex flex-wrap gap-2">
-            <div className="bg-white/20 backdrop-blur rounded-full px-3 py-1 flex items-center gap-1.5 text-xs">
-              <span className="opacity-80">⏳ Rút chờ duyệt:</span>
-              <span className="font-bold">{formatPrice(stats.pendingWithdrawAmount)}đ</span>
-            </div>
-            <div className="bg-white/20 backdrop-blur rounded-full px-3 py-1 flex items-center gap-1.5 text-xs">
-              <span className="opacity-80">↗️ Tổng đã rút:</span>
-              <span className="font-bold">{formatPrice(stats.totalWithdrawn)}đ</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* ═══ Hero Card — premium animated ═══ */}
+      <WalletHero
+        balance={stats.walletBalance}
+        pendingWithdraw={stats.pendingWithdrawAmount}
+        totalWithdrawn={stats.totalWithdrawn}
+        totalCashback={stats.totalCashback}
+      />
 
       {/* ═══ 2 Cards: Cộng + Trừ ═══ */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
