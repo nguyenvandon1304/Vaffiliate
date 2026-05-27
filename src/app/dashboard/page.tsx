@@ -64,6 +64,10 @@ interface Stats {
   totalOrders: number;
   pendingOrders: number;
   walletBalance: number;
+  pendingWithdrawAmount: number;
+  totalWithdrawn: number;
+  totalCredit: number;
+  totalDebit: number;
 }
 
 interface BankAccountData {
@@ -180,7 +184,10 @@ function DashboardContent() {
   }, []);
 
   const [user, setUser] = useState<UserInfo | null>(null);
-  const [stats, setStats] = useState<Stats>({ totalCashback: 0, totalOrders: 0, pendingOrders: 0, walletBalance: 0 });
+  const [stats, setStats] = useState<Stats>({
+    totalCashback: 0, totalOrders: 0, pendingOrders: 0, walletBalance: 0,
+    pendingWithdrawAmount: 0, totalWithdrawn: 0, totalCredit: 0, totalDebit: 0,
+  });
   const [orders, setOrders] = useState<OrderData[]>([]);
   // Filter cho tab "Đơn hàng": pending = Chờ xác nhận + Đang xử lý, completed = Đã hoàn tiền, cancelled = Đã hủy.
   const [ordersFilter, setOrdersFilter] = useState<"pending" | "completed" | "cancelled">("pending");
@@ -1379,7 +1386,12 @@ function WalletTab({
   onFetchBanks: () => void;
   onWithdrawSuccess: () => void;
 }) {
-  const [showWithdraw, setShowWithdraw] = useState(false);
+  const router = useRouter();
+
+  // ─── State withdraw form ───
+  // Wizard 2 step: 1=nhập số tiền, 2=xác nhận PIN+bank
+  const [withdrawStep, setWithdrawStep] = useState<1 | 2>(1);
+  const [showWithdrawPanel, setShowWithdrawPanel] = useState(true);
   const [selectedBankId, setSelectedBankId] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawPin, setWithdrawPin] = useState("");
@@ -1387,24 +1399,60 @@ function WalletTab({
   const [withdrawErr, setWithdrawErr] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const isVerified = !!user?.email_verified;
+  // ─── State history tabs ───
+  const [historyTab, setHistoryTab] = useState<"requests" | "wallet">("requests");
+  const [withdrawals, setWithdrawals] = useState<UserWithdrawal[]>([]);
+  const [historyPage, setHistoryPage] = useState(1);
+  const PAGE_SIZE = 5;
 
-  const openWithdraw = () => {
-    if (!isVerified) {
-      setWithdrawErr("⚠️ Vui lòng xác minh email trước khi rút tiền. Xem banner ở đầu trang.");
+  const isVerified = !!user?.email_verified;
+  const hasBankAccount = bankAccounts.length > 0;
+  const hasWithdrawPin = !!user?.has_withdraw_pin;
+  const canWithdraw = isVerified && hasBankAccount && hasWithdrawPin;
+
+  // Lấy default bank để hiển thị + auto select trong wizard
+  const defaultBank = bankAccounts.find((b) => b.is_default === 1) ?? bankAccounts[0] ?? null;
+
+  // Fetch withdrawals + banks khi mở tab
+  useEffect(() => {
+    onFetchBanks();
+    fetch("/api/withdraw/list", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => { if (d.success) setWithdrawals(d.withdrawals || []); })
+      .catch(() => { /* silent */ });
+  }, [onFetchBanks]);
+
+  // Auto select default bank khi load
+  useEffect(() => {
+    if (defaultBank && !selectedBankId) {
+      // queueMicrotask tránh "set state in effect" lint warning + cascading renders.
+      queueMicrotask(() => setSelectedBankId(String(defaultBank.id)));
+    }
+  }, [defaultBank, selectedBankId]);
+
+  const handleNextStep = () => {
+    setWithdrawErr("");
+    const amount = Number(withdrawAmount);
+    if (!amount || amount < MIN_WITHDRAW) {
+      setWithdrawErr(`Số tiền rút tối thiểu là ${formatVND(MIN_WITHDRAW)}`);
       return;
     }
-    onFetchBanks();
-    setShowWithdraw(true);
-    setWithdrawMsg("");
-    setWithdrawErr("");
+    if (amount > stats.walletBalance) {
+      setWithdrawErr("Số dư không đủ");
+      return;
+    }
+    if (!canWithdraw) {
+      if (!isVerified) setWithdrawErr("Vui lòng xác minh email trước khi rút tiền.");
+      else if (!hasBankAccount) setWithdrawErr("Bạn cần thêm tài khoản ngân hàng.");
+      else if (!hasWithdrawPin) setWithdrawErr("Bạn cần đặt mật khẩu rút tiền.");
+      return;
+    }
+    setWithdrawStep(2);
   };
 
   const handleWithdraw = async () => {
     const amount = Number(withdrawAmount);
     if (!selectedBankId) { setWithdrawErr("Vui lòng chọn tài khoản ngân hàng"); return; }
-    if (!amount || amount < MIN_WITHDRAW) { setWithdrawErr(`Số tiền rút tối thiểu là ${formatVND(MIN_WITHDRAW)}`); return; }
-    if (amount > stats.walletBalance) { setWithdrawErr("Số dư không đủ"); return; }
     if (!withdrawPin) { setWithdrawErr("Vui lòng nhập mật khẩu rút tiền"); return; }
 
     setSubmitting(true);
@@ -1417,12 +1465,16 @@ function WalletTab({
       });
       const data = await res.json();
       if (data.success) {
-        setWithdrawMsg("Yêu cầu rút tiền đã được gửi!");
+        setWithdrawMsg(`Yêu cầu rút ${formatVND(amount)} đã được gửi!`);
         setWithdrawAmount("");
-        setSelectedBankId("");
         setWithdrawPin("");
-        setShowWithdraw(false);
+        setWithdrawStep(1);
+        // Refresh list withdrawals + dashboard
+        const r = await fetch("/api/withdraw/list", { cache: "no-store" });
+        const d = await r.json();
+        if (d.success) setWithdrawals(d.withdrawals || []);
         onWithdrawSuccess();
+        setTimeout(() => setWithdrawMsg(""), 5000);
       } else {
         setWithdrawErr(data.error || "Rút tiền thất bại");
       }
@@ -1433,138 +1485,535 @@ function WalletTab({
     }
   };
 
+  const formatPrice = (n: number) => n.toLocaleString("vi-VN");
+
+  // Pagination cho lịch sử
+  const totalPages = (() => {
+    const list = historyTab === "requests" ? withdrawals : walletHistory;
+    return Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  })();
+  const pagedWithdrawals = withdrawals.slice((historyPage - 1) * PAGE_SIZE, historyPage * PAGE_SIZE);
+  const pagedWallet = walletHistory.slice((historyPage - 1) * PAGE_SIZE, historyPage * PAGE_SIZE);
+
+  // Reset page khi đổi tab
+  useEffect(() => { queueMicrotask(() => setHistoryPage(1)); }, [historyTab]);
+
   return (
-    <section>
-      <div className="max-w-md mx-auto">
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white mb-6">
-          <p className="text-sm opacity-80 mb-1">Số dư hiện tại</p>
-          <p className="text-3xl font-bold mb-4">{formatVND(stats.walletBalance)}</p>
+    <section className="space-y-5">
+      {/* ═══ Hero Card — Khả Dụng ═══ */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 via-orange-500 to-amber-500 p-5 sm:p-6 text-white shadow-lg shadow-orange-200">
+        {/* Decorative circles */}
+        <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full" />
+        <div className="absolute -right-16 bottom-0 w-40 h-40 bg-white/5 rounded-full" />
+
+        <div className="relative">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider opacity-90 mb-1">
+            <span>💰</span>
+            <span>Khả dụng</span>
+          </div>
+          <p className="text-3xl sm:text-4xl font-extrabold mb-4 flex items-baseline gap-1">
+            <span>{formatPrice(stats.walletBalance)}</span>
+            <span className="text-base sm:text-lg font-bold opacity-80">đ</span>
+          </p>
+
+          {/* Chips: Chờ xử lý + Tổng đã rút */}
+          <div className="flex flex-wrap gap-2">
+            <div className="bg-white/20 backdrop-blur rounded-full px-3 py-1 flex items-center gap-1.5 text-xs">
+              <span className="opacity-80">⏳ Chờ xử lý:</span>
+              <span className="font-bold">{formatPrice(stats.pendingWithdrawAmount)}đ</span>
+            </div>
+            <div className="bg-white/20 backdrop-blur rounded-full px-3 py-1 flex items-center gap-1.5 text-xs">
+              <span className="opacity-80">↗️ Tổng đã rút:</span>
+              <span className="font-bold">{formatPrice(stats.totalWithdrawn)}đ</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ═══ 2 Cards: Cộng + Trừ ═══ */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="7" y1="17" x2="17" y2="7" />
+                <polyline points="7 7 17 7 17 17" />
+              </svg>
+            </div>
+            <p className="text-xs text-gray-500 font-semibold">Cộng</p>
+          </div>
+          <p className="text-lg sm:text-xl font-bold text-emerald-600 mb-0.5">
+            +{formatPrice(stats.totalCredit)}đ
+          </p>
+          <p className="text-[10px] text-gray-400 leading-tight">Tổng các khoản cộng vào ví khả dụng</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center text-red-500">
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="17" y1="7" x2="7" y2="17" />
+                <polyline points="17 17 7 17 7 7" />
+              </svg>
+            </div>
+            <p className="text-xs text-gray-500 font-semibold">Trừ</p>
+          </div>
+          <p className="text-lg sm:text-xl font-bold text-red-500 mb-0.5">
+            -{formatPrice(stats.totalDebit)}đ
+          </p>
+          <p className="text-[10px] text-gray-400 leading-tight">Tổng các khoản trừ khỏi ví khả dụng</p>
+        </div>
+      </div>
+
+      {/* ═══ Section Tài khoản ═══ */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">🏦</span>
+            <h3 className="text-sm font-bold text-gray-800">Tài khoản</h3>
+          </div>
           <button
-            onClick={openWithdraw}
-            disabled={!isVerified}
-            className={`backdrop-blur text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors ${
-              isVerified
-                ? "bg-white/20 hover:bg-white/30"
-                : "bg-white/10 cursor-not-allowed opacity-60"
-            }`}
-            title={isVerified ? "Yêu cầu rút tiền" : "Cần xác minh email để rút tiền"}
+            type="button"
+            onClick={() => router.push("/dashboard?view=bank")}
+            className="text-xs text-orange-500 hover:text-orange-600 font-semibold flex items-center gap-1"
           >
-            {isVerified ? "Rút tiền" : "🔒 Rút tiền (cần verify email)"}
+            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+            {hasBankAccount ? "Chỉnh sửa" : "Thêm mới"}
           </button>
         </div>
 
-        {withdrawMsg && (
-          <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 mb-4">
-            <p className="text-sm text-green-700 font-medium">{withdrawMsg}</p>
+        {!hasBankAccount ? (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
+            <span className="text-amber-500 shrink-0">⚠️</span>
+            <p className="text-xs text-amber-700 leading-relaxed flex-1">
+              Bạn chưa cập nhật thông tin ngân hàng.{" "}
+              <button
+                onClick={() => router.push("/dashboard?view=bank")}
+                className="font-bold underline hover:text-amber-800"
+              >
+                Cập nhật ngay
+              </button>
+            </p>
           </div>
-        )}
-
-        {withdrawErr && !showWithdraw && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-4">
-            <p className="text-sm text-amber-700 font-medium">{withdrawErr}</p>
-          </div>
-        )}
-
-        {showWithdraw && (
-          <div className="bg-white rounded-xl border border-gray-100 p-5 mb-6">
-            <h3 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <svg viewBox="0 0 24 24" className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" x2="12" y1="1" y2="23" />
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-              </svg>
-              Rút tiền về ngân hàng
-            </h3>
-
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Chọn tài khoản ngân hàng</label>
-                {bankAccounts.length === 0 ? (
-                  <p className="text-sm text-red-400">Chưa có tài khoản ngân hàng. Vui lòng thêm trong phần <strong>Tài chính</strong>.</p>
-                ) : (
-                  <select
-                    value={selectedBankId}
-                    onChange={(e) => setSelectedBankId(e.target.value)}
-                    className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all bg-white"
-                  >
-                    <option value="">-- Chọn tài khoản --</option>
-                    {bankAccounts.map((acc) => (
-                      <option key={acc.id} value={acc.id}>
-                        {acc.bank_name} - {acc.account_number} ({acc.account_holder})
-                      </option>
-                    ))}
-                  </select>
-                )}
+        ) : (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-white border border-blue-200 flex items-center justify-center shrink-0">
+                <span className="text-base">🏦</span>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Số tiền rút</label>
-                <input
-                  type="number"
-                  value={withdrawAmount}
-                  onChange={(e) => setWithdrawAmount(e.target.value)}
-                  placeholder={`Tối thiểu ${formatVND(MIN_WITHDRAW)}`}
-                  min={MIN_WITHDRAW}
-                  className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all"
-                />
-                <p className="text-xs text-gray-400 mt-1">Số dư khả dụng: <span className="font-semibold text-orange-500">{formatVND(stats.walletBalance)}</span></p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-gray-800 truncate">{defaultBank?.bank_name}</p>
+                <p className="text-[11px] text-gray-500 font-mono">
+                  {defaultBank?.account_number} · {defaultBank?.account_holder}
+                </p>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Mật khẩu rút tiền</label>
-                <input
-                  type="password"
-                  value={withdrawPin}
-                  onChange={(e) => setWithdrawPin(e.target.value)}
-                  placeholder="Nhập mật khẩu rút tiền"
-                  maxLength={6}
-                  className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all"
-                />
-              </div>
-
-              {withdrawErr && <p className="text-sm text-red-500 font-medium">{withdrawErr}</p>}
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setShowWithdraw(false)}
-                  className="flex-1 border-2 border-gray-200 text-gray-600 text-sm font-semibold px-4 py-2.5 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Hủy
-                </button>
-                <button
-                  onClick={handleWithdraw}
-                  disabled={submitting || bankAccounts.length === 0}
-                  className="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors disabled:opacity-50"
-                >
-                  {submitting ? "Đang xử lý..." : "Xác nhận rút"}
-                </button>
-              </div>
+              {bankAccounts.length > 1 && (
+                <span className="text-[10px] text-blue-600 bg-blue-100 rounded-full px-2 py-0.5 shrink-0">
+                  +{bankAccounts.length - 1} khác
+                </span>
+              )}
             </div>
           </div>
         )}
 
-        <div className="bg-white rounded-xl border border-gray-100 p-5">
-          <h3 className="text-sm font-bold text-gray-800 mb-3">Lịch sử giao dịch</h3>
-          {walletHistory.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-4">Chưa có giao dịch nào</p>
-          ) : (
-            <div className="space-y-3">
-              {walletHistory.map((entry) => (
-                <WalletItem
-                  key={entry.id}
-                  label={entry.label}
-                  amount={entry.type === "credit" ? `+${formatVND(entry.amount)}` : `-${formatVND(Math.abs(entry.amount))}`}
-                  date={formatDate(entry.created_at)}
-                  positive={entry.type === "credit"}
-                />
-              ))}
+        {!hasWithdrawPin && hasBankAccount && (
+          <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
+            <span className="text-amber-500 shrink-0">🔒</span>
+            <p className="text-xs text-amber-700 leading-relaxed flex-1">
+              Chưa đặt mật khẩu rút tiền.{" "}
+              <button
+                onClick={() => router.push("/dashboard?view=bank")}
+                className="font-bold underline hover:text-amber-800"
+              >
+                Đặt ngay
+              </button>
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* ═══ Grid 2 cột: Yêu cầu rút + Lịch sử ═══ */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* ─── Yêu cầu rút tiền hoàn ─── */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setShowWithdrawPanel((v) => !v)}
+            className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50/50 transition-colors"
+          >
+            <div className="flex items-center gap-3 text-left">
+              <div className="w-9 h-9 bg-orange-500 rounded-lg flex items-center justify-center text-white text-base shrink-0">
+                💸
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-gray-800">Yêu Cầu Rút Tiền Hoàn</h3>
+                <p className="text-[11px] text-gray-400">Tạo yêu cầu rút điểm về tài khoản NH</p>
+              </div>
+            </div>
+            <svg viewBox="0 0 24 24" className={`w-4 h-4 text-gray-400 transition-transform ${showWithdrawPanel ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+
+          {showWithdrawPanel && (
+            <div className="px-5 pb-5 border-t border-gray-100 pt-4">
+              {/* Success message */}
+              {withdrawMsg && (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-3 flex items-start gap-2">
+                  <span className="text-emerald-500 shrink-0">✓</span>
+                  <p className="text-xs text-emerald-700 font-semibold flex-1">{withdrawMsg}</p>
+                </div>
+              )}
+
+              {/* Pre-flight check warning */}
+              {!canWithdraw && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
+                  <p className="text-xs font-bold text-amber-700 mb-1.5">⚠️ Cần Hoàn Thành Thông Tin</p>
+                  <ul className="space-y-0.5 text-[11px] text-amber-700">
+                    <li className="flex items-center gap-1.5">
+                      <span>{isVerified ? "✓" : "○"}</span>
+                      <span>{isVerified ? "Đã xác minh email" : "Chưa xác minh email"}</span>
+                    </li>
+                    <li className="flex items-center gap-1.5">
+                      <span>{hasBankAccount ? "✓" : "○"}</span>
+                      <span>{hasBankAccount ? "Đã có tài khoản ngân hàng" : "Chưa có tài khoản ngân hàng"}</span>
+                    </li>
+                    <li className="flex items-center gap-1.5">
+                      <span>{hasWithdrawPin ? "✓" : "○"}</span>
+                      <span>{hasWithdrawPin ? "Đã đặt mật khẩu rút tiền" : "Chưa có mật khẩu rút tiền"}</span>
+                    </li>
+                  </ul>
+                  <button
+                    type="button"
+                    onClick={() => router.push(isVerified ? "/dashboard?view=bank" : "/dashboard?view=profile")}
+                    className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-md transition"
+                  >
+                    🔧 Cập nhật hồ sơ
+                  </button>
+                </div>
+              )}
+
+              {/* Stepper indicator */}
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <div className={`flex items-center gap-1.5 ${withdrawStep === 1 ? "text-orange-600" : "text-gray-400"}`}>
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${withdrawStep === 1 ? "bg-orange-500 text-white" : "bg-gray-200"}`}>1</div>
+                  <span className="text-xs font-semibold">Số lượng</span>
+                </div>
+                <div className="w-8 h-px bg-gray-200" />
+                <div className={`flex items-center gap-1.5 ${withdrawStep === 2 ? "text-orange-600" : "text-gray-400"}`}>
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${withdrawStep === 2 ? "bg-orange-500 text-white" : "bg-gray-200"}`}>2</div>
+                  <span className="text-xs font-semibold">Xác nhận</span>
+                </div>
+              </div>
+
+              {/* Step 1: nhập số tiền */}
+              {withdrawStep === 1 && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                      Số tiền muốn rút <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={withdrawAmount}
+                        onChange={(e) => setWithdrawAmount(e.target.value)}
+                        placeholder="0"
+                        min={MIN_WITHDRAW}
+                        max={stats.walletBalance}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-base font-bold focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all pr-12"
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">đ</span>
+                    </div>
+                    <div className="flex items-center justify-between mt-1.5 text-[11px]">
+                      <span className="text-gray-400">
+                        Tối thiểu: <span className="font-semibold text-gray-600">{formatPrice(MIN_WITHDRAW)}đ</span>
+                      </span>
+                      <span className="text-gray-400">
+                        Tối đa: <span className="font-semibold text-orange-500">{formatPrice(stats.walletBalance)}đ</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Quick amount chips */}
+                  <div className="flex flex-wrap gap-2">
+                    {[50000, 100000, 200000, 500000].filter((v) => v <= stats.walletBalance).map((v) => (
+                      <button
+                        key={v}
+                        type="button"
+                        onClick={() => setWithdrawAmount(String(v))}
+                        className="text-xs font-semibold px-3 py-1.5 rounded-full border border-orange-200 text-orange-600 hover:bg-orange-50 transition"
+                      >
+                        {formatPrice(v)}đ
+                      </button>
+                    ))}
+                    {stats.walletBalance >= MIN_WITHDRAW && (
+                      <button
+                        type="button"
+                        onClick={() => setWithdrawAmount(String(stats.walletBalance))}
+                        className="text-xs font-bold px-3 py-1.5 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition"
+                      >
+                        Tất cả
+                      </button>
+                    )}
+                  </div>
+
+                  {withdrawErr && (
+                    <p className="text-xs text-red-500 font-medium">{withdrawErr}</p>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleNextStep}
+                    disabled={!canWithdraw || !withdrawAmount}
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-sm font-bold py-3 rounded-xl shadow-sm shadow-orange-200 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                  >
+                    Tiếp tục
+                    <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+
+              {/* Step 2: chọn ngân hàng + nhập PIN */}
+              {withdrawStep === 2 && (
+                <div className="space-y-3">
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] text-orange-600 font-semibold uppercase tracking-wider">Số tiền rút</p>
+                      <p className="text-lg font-extrabold text-orange-600">{formatPrice(Number(withdrawAmount))}đ</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { setWithdrawStep(1); setWithdrawErr(""); }}
+                      className="text-xs font-semibold text-orange-600 hover:text-orange-700"
+                    >
+                      Sửa
+                    </button>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                      Tài khoản nhận <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={selectedBankId}
+                      onChange={(e) => setSelectedBankId(e.target.value)}
+                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition bg-white"
+                    >
+                      <option value="">— Chọn tài khoản —</option>
+                      {bankAccounts.map((acc) => (
+                        <option key={acc.id} value={acc.id}>
+                          {acc.bank_name} · {acc.account_number} · {acc.account_holder}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                      Mật khẩu rút tiền <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="password"
+                      value={withdrawPin}
+                      onChange={(e) => setWithdrawPin(e.target.value)}
+                      placeholder="Nhập mã PIN 6 chữ số"
+                      maxLength={6}
+                      inputMode="numeric"
+                      className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm font-mono tracking-widest focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition"
+                    />
+                  </div>
+
+                  {withdrawErr && (
+                    <p className="text-xs text-red-500 font-medium">{withdrawErr}</p>
+                  )}
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => { setWithdrawStep(1); setWithdrawErr(""); }}
+                      className="px-4 border-2 border-gray-200 text-gray-600 text-sm font-semibold py-2.5 rounded-xl hover:bg-gray-50 transition"
+                    >
+                      ← Quay lại
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleWithdraw}
+                      disabled={submitting || !selectedBankId || !withdrawPin}
+                      className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-sm font-bold py-2.5 rounded-xl shadow-sm shadow-orange-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {submitting ? "Đang gửi..." : "✓ Xác nhận rút"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
+        </div>
+
+        {/* ─── Lịch sử ─── */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="px-5 pt-5 pb-3">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <h3 className="text-sm font-bold text-gray-800">Lịch sử hoàn tiền</h3>
+            </div>
+            {/* Tabs */}
+            <div className="flex gap-1.5 p-1 bg-gray-100 rounded-lg">
+              <button
+                type="button"
+                onClick={() => setHistoryTab("requests")}
+                className={`flex-1 text-xs font-semibold py-1.5 rounded-md transition ${historyTab === "requests" ? "bg-white text-orange-600 shadow-sm" : "text-gray-500"}`}
+              >
+                Lịch sử yêu cầu
+              </button>
+              <button
+                type="button"
+                onClick={() => setHistoryTab("wallet")}
+                className={`flex-1 text-xs font-semibold py-1.5 rounded-md transition ${historyTab === "wallet" ? "bg-white text-orange-600 shadow-sm" : "text-gray-500"}`}
+              >
+                Biến động tích luỹ
+              </button>
+            </div>
+          </div>
+
+          <div className="px-5 pb-5">
+            {historyTab === "requests" ? (
+              withdrawals.length === 0 ? (
+                <EmptyHistory msg="Chưa có giao dịch nào" />
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    {pagedWithdrawals.map((w) => (
+                      <WithdrawalRow key={w.id} w={w} />
+                    ))}
+                  </div>
+                  <PaginationControls
+                    page={historyPage}
+                    totalPages={totalPages}
+                    onChange={setHistoryPage}
+                  />
+                </>
+              )
+            ) : (
+              walletHistory.length === 0 ? (
+                <EmptyHistory msg="Chưa có biến động tích luỹ nào" />
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    {pagedWallet.map((entry) => (
+                      <WalletItem
+                        key={entry.id}
+                        label={entry.label}
+                        amount={entry.type === "credit" ? `+${formatVND(entry.amount)}` : `-${formatVND(Math.abs(entry.amount))}`}
+                        date={formatDate(entry.created_at)}
+                        positive={entry.type === "credit"}
+                      />
+                    ))}
+                  </div>
+                  <PaginationControls
+                    page={historyPage}
+                    totalPages={totalPages}
+                    onChange={setHistoryPage}
+                  />
+                </>
+              )
+            )}
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
+interface UserWithdrawal {
+  id: number;
+  amount: number;
+  status: string;
+  bank_name: string | null;
+  account_number: string | null;
+  account_holder: string | null;
+  admin_note: string | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+function WithdrawalRow({ w }: { w: UserWithdrawal }) {
+  const statusMeta: Record<string, { label: string; color: string }> = {
+    pending: { label: "Đang xử lý", color: "bg-amber-100 text-amber-700" },
+    approved: { label: "Đã duyệt", color: "bg-emerald-100 text-emerald-700" },
+    rejected: { label: "Từ chối", color: "bg-red-100 text-red-700" },
+    cancelled: { label: "Đã huỷ", color: "bg-gray-100 text-gray-600" },
+  };
+  const meta = statusMeta[w.status] ?? { label: w.status, color: "bg-gray-100 text-gray-600" };
+  return (
+    <div className="border border-gray-100 rounded-lg p-3 hover:bg-gray-50/50 transition-colors">
+      <div className="flex items-start justify-between gap-2 mb-1">
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-gray-800">-{w.amount.toLocaleString("vi-VN")}đ</p>
+          <p className="text-[10px] text-gray-400 font-mono truncate">
+            {w.bank_name ? `${w.bank_name} · ${w.account_number}` : "—"}
+          </p>
+        </div>
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${meta.color}`}>
+          {meta.label}
+        </span>
+      </div>
+      <p className="text-[10px] text-gray-400">
+        {new Date(w.created_at).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+      </p>
+      {w.admin_note && (
+        <p className="mt-1.5 text-[10px] text-gray-500 italic bg-gray-50 rounded px-2 py-1">
+          📝 {w.admin_note}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function EmptyHistory({ msg }: { msg: string }) {
+  return (
+    <div className="text-center py-10">
+      <div className="w-12 h-12 mx-auto mb-2 bg-gray-100 rounded-lg flex items-center justify-center text-2xl">
+        📭
+      </div>
+      <p className="text-sm font-semibold text-gray-600 mb-0.5">Chưa có giao dịch quy đổi nào</p>
+      <p className="text-xs text-gray-400">{msg}</p>
+    </div>
+  );
+}
+
+function PaginationControls({ page, totalPages, onChange }: { page: number; totalPages: number; onChange: (p: number) => void }) {
+  if (totalPages <= 1) return null;
+  return (
+    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+      <button
+        type="button"
+        onClick={() => onChange(Math.max(1, page - 1))}
+        disabled={page <= 1}
+        className="text-xs font-semibold text-gray-600 hover:text-orange-600 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"
+      >
+        ← Trước
+      </button>
+      <span className="text-xs text-gray-400">
+        Trang {page}/{totalPages}
+      </span>
+      <button
+        type="button"
+        onClick={() => onChange(Math.min(totalPages, page + 1))}
+        disabled={page >= totalPages}
+        className="text-xs font-semibold text-gray-600 hover:text-orange-600 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"
+      >
+        Sau →
+      </button>
+    </div>
+  );
+}
 function StatCard({ label, value, icon, color }: { label: string; value: string; icon: string; color: string }) {
   return (
     <div className={`rounded-xl p-3 sm:p-4 ${color}`}>

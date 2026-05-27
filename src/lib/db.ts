@@ -1264,6 +1264,10 @@ export interface DashboardStats {
   totalOrders: number;
   pendingOrders: number;
   walletBalance: number;
+  pendingWithdrawAmount: number;  // Tổng tiền các yêu cầu rút đang pending
+  totalWithdrawn: number;          // Tổng đã rút thành công (approved)
+  totalCredit: number;             // Tổng cộng vào ví (lifetime)
+  totalDebit: number;              // Tổng trừ ra khỏi ví (lifetime)
 }
 
 export interface BankAccount {
@@ -1315,7 +1319,11 @@ export async function getDashboardStats(userId: number): Promise<DashboardStats>
       COALESCE((SELECT SUM(cashback) FROM orders WHERE user_id = $1 AND status = 'ÄÃ£ hoÃ n tiá»n'), 0) AS total_cashback,
       COALESCE((SELECT COUNT(*) FROM orders WHERE user_id = $1), 0) AS total_orders,
       COALESCE((SELECT COUNT(*) FROM orders WHERE user_id = $1 AND status IN ('Äang xá»­ lÃ½', 'Chá» xÃ¡c nháº­n')), 0) AS pending_orders,
-      COALESCE((SELECT SUM(CASE WHEN type='credit' THEN amount ELSE -amount END) FROM wallet WHERE user_id = $1), 0) AS wallet_balance`,
+      COALESCE((SELECT SUM(CASE WHEN type='credit' THEN amount ELSE -amount END) FROM wallet WHERE user_id = $1), 0) AS wallet_balance,
+      COALESCE((SELECT SUM(amount) FROM withdrawals WHERE user_id = $1 AND status = 'pending'), 0) AS pending_withdraw_amount,
+      COALESCE((SELECT SUM(amount) FROM withdrawals WHERE user_id = $1 AND status = 'approved'), 0) AS total_withdrawn,
+      COALESCE((SELECT SUM(amount) FROM wallet WHERE user_id = $1 AND type = 'credit'), 0) AS total_credit,
+      COALESCE((SELECT SUM(amount) FROM wallet WHERE user_id = $1 AND type = 'debit'), 0) AS total_debit`,
     [userId],
   );
   return {
@@ -1323,6 +1331,10 @@ export async function getDashboardStats(userId: number): Promise<DashboardStats>
     totalOrders: Number(row?.total_orders ?? 0),
     pendingOrders: Number(row?.pending_orders ?? 0),
     walletBalance: Number(row?.wallet_balance ?? 0),
+    pendingWithdrawAmount: Number(row?.pending_withdraw_amount ?? 0),
+    totalWithdrawn: Number(row?.total_withdrawn ?? 0),
+    totalCredit: Number(row?.total_credit ?? 0),
+    totalDebit: Number(row?.total_debit ?? 0),
   };
 }
 
@@ -3674,4 +3686,56 @@ export async function getPendingCounts(): Promise<PendingCounts> {
     unverifiedUsers: Number(row?.unverified_users ?? 0),
     stuckOrders: Number(row?.stuck_orders ?? 0),
   };
+}
+
+
+/* ─────────────── User withdrawals list ─────────────── */
+
+export interface UserWithdrawal {
+  id: number;
+  amount: number;
+  status: string;
+  bank_name: string | null;
+  account_number: string | null;
+  account_holder: string | null;
+  admin_note: string | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+/**
+ * Lấy danh sách yêu cầu rút tiền của user — JOIN với bank_accounts để hiện
+ * thông tin ngân hàng (vì bank account có thể đã bị xoá sau khi rút).
+ */
+export async function getUserWithdrawals(userId: number, limit = 50): Promise<UserWithdrawal[]> {
+  const database = await getDb();
+  const rows = await database.all(
+    `SELECT
+        w.id,
+        w.amount,
+        w.status,
+        w.admin_note,
+        w.created_at,
+        w.updated_at,
+        b.bank_name,
+        b.account_number,
+        b.account_holder
+     FROM withdrawals w
+     LEFT JOIN bank_accounts b ON b.id = w.bank_account_id
+     WHERE w.user_id = ?
+     ORDER BY w.created_at DESC
+     LIMIT ?`,
+    [userId, limit],
+  );
+  return rows.map((r) => ({
+    id: Number(r.id),
+    amount: Number(r.amount ?? 0),
+    status: String(r.status ?? ""),
+    admin_note: r.admin_note ? String(r.admin_note) : null,
+    bank_name: r.bank_name ? String(r.bank_name) : null,
+    account_number: r.account_number ? String(r.account_number) : null,
+    account_holder: r.account_holder ? String(r.account_holder) : null,
+    created_at: toIso(r.created_at),
+    updated_at: r.updated_at ? toIso(r.updated_at) : null,
+  }));
 }
