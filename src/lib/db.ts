@@ -2585,14 +2585,14 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
           if (newStatus === "Đã hoàn tiền" && oldStatus !== "Đã hoàn tiền" && cashback > 0) {
             await tx.run(
               "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
-              [userId, `HoÃ n tiá»n Ä‘Æ¡n ${item.orderCode}`, cashback, "credit"],
+              [userId, `Hoàn tiền đơn ${item.orderCode}`, cashback, "credit"],
             );
             await tx.run(
               "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
               [
                 userId,
-                "ÄÆ¡n hÃ ng Ä‘Ã£ duyá»‡t",
-                `ÄÆ¡n ${item.orderCode} Ä‘Ã£ hoÃ n thÃ nh! +${cashback.toLocaleString("vi-VN")}Ä‘ Ä‘Ã£ cá»™ng vÃ o vÃ­.`,
+                "Đơn hàng đã duyệt",
+                `Đơn ${item.orderCode} đã hoàn thành! +${cashback.toLocaleString("vi-VN")}đ đã cộng vào ví.`,
                 "order",
               ],
             );
@@ -2615,7 +2615,7 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
                 [
                   refUserId,
                   "ðŸ¤ Bạn bè đã có đơn đầu tiên!",
-                  `Báº¡n bÃ¨ báº¡n giá»›i thiá»‡u Ä‘Ã£ cÃ³ Ä‘Æ¡n hoÃ n tiá»n. Tiáº¿p tá»¥c má»i Ä‘á»ƒ lÃªn tier cao hÆ¡n!`,
+                  `Bạn bè bạn giới thiệu đã có đơn hoàn tiền. Tiếp tục mời để lên tier cao hơn!`,
                   "referral",
                 ],
               );
@@ -2623,14 +2623,14 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
           } else if (newStatus === "Đã hủy" && oldStatus === "Đã hoàn tiền" && oldCashback > 0) {
             await tx.run(
               "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
-              [userId, `Há»§y Ä‘Æ¡n ${item.orderCode} - trá»« hoÃ n tiá»n`, oldCashback, "debit"],
+              [userId, `Hủy đơn ${item.orderCode} - trừ hoàn tiền`, oldCashback, "debit"],
             );
             await tx.run(
               "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
               [
                 userId,
-                "ÄÆ¡n hÃ ng bá»‹ há»§y",
-                `ÄÆ¡n ${item.orderCode} Ä‘Ã£ bá»‹ há»§y. -${oldCashback.toLocaleString("vi-VN")}Ä‘.`,
+                "Đơn hàng bị hủy",
+                `Đơn ${item.orderCode} đã bị hủy. -${oldCashback.toLocaleString("vi-VN")}đ.`,
                 "order",
               ],
             );
@@ -2649,7 +2649,7 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
             orderCode: item.orderCode,
             itemId: item.itemId,
             status: "skip",
-            message: `ÄÃ£ tá»“n táº¡i (${oldStatus}), khÃ´ng cáº§n cáº­p nháº­t`,
+            message: `Đã tồn tại (${oldStatus}), không cần cập nhật`,
           });
         }
         continue;
@@ -2711,7 +2711,7 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
       if (newStatus === "Đã hoàn tiền" && cashback > 0) {
         await tx.run(
           "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
-          [userId, `HoÃ n tiá»n Ä‘Æ¡n ${item.orderCode}`, cashback, "credit"],
+          [userId, `Hoàn tiền đơn ${item.orderCode}`, cashback, "credit"],
         );
 
         const refRow = await tx.get(
@@ -2731,7 +2731,7 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
             [
               refUserId,
               "ðŸ¤ Bạn bè đã có đơn đầu tiên!",
-              `Báº¡n bÃ¨ báº¡n giá»›i thiá»‡u Ä‘Ã£ cÃ³ Ä‘Æ¡n hoÃ n tiá»n. Tiáº¿p tá»¥c má»i Ä‘á»ƒ lÃªn tier cao hÆ¡n!`,
+              `Bạn bè bạn giới thiệu đã có đơn hoàn tiền. Tiếp tục mời để lên tier cao hơn!`,
               "referral",
             ],
           );
@@ -2742,8 +2742,8 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
         "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
         [
           userId,
-          "ÄÆ¡n hÃ ng má»›i",
-          `ÄÆ¡n ${item.orderCode} - ${item.productName}. Cashback: ${cashback.toLocaleString("vi-VN")}Ä‘ (${newStatus})`,
+          "Đơn hàng mới",
+          `Đơn ${item.orderCode} - ${item.productName}. Cashback: ${cashback.toLocaleString("vi-VN")}đ (${newStatus})`,
           "order",
         ],
       );
@@ -2755,7 +2755,7 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
         userId,
         username,
         status: "ok",
-        message: `Matched â†’ ${username} (ID: ${userId}), cashback: ${cashback}Ä‘ (${ratePercent}%)`,
+        message: `Matched → ${username} (ID: ${userId}), cashback: ${cashback}đ (${ratePercent}%)`,
       });
     }
   });
