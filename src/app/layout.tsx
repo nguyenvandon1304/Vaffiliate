@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import ChatButton from "@/components/ChatButton";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { ConditionalThemeToggle } from "@/components/ConditionalThemeToggle";
 import { ToastProvider } from "@/components/Toast";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 
@@ -108,7 +108,7 @@ export default function RootLayout({
          * gây hydration mismatch (lỗi hay gặp khi inline trong <head>).
          */}
         <Script src="/theme-init.js" strategy="beforeInteractive" />
-        <ThemeToggle />
+        <ConditionalThemeToggle />
         <ToastProvider>
           {children}
         </ToastProvider>
