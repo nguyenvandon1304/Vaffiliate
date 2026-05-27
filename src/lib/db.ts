@@ -3,10 +3,10 @@ import crypto from "crypto";
 import { warnMissingEnv } from "@/lib/env-check";
 
 /**
- * V-Affiliate DB layer â€” Supabase / PostgreSQL.
+ * V-Affiliate DB layer — Supabase / PostgreSQL.
  *
- * ÄÃ£ migrate tá»« `node:sqlite` (file local, sync API) sang `postgres` (network,
- * async). Giá»¯ nguyÃªn signature cÃ¡c hÃ m export Ä‘á»ƒ khÃ´ng pháº£i sá»­a callsite.
+ * Äã migrate từ `node:sqlite` (file local, sync API) sang `postgres` (network,
+ * async). Giữ nguyên signature các hàm export để không phải sửa callsite.
  *
  * Yêu cầu env: DATABASE_URL (connection string Postgres của Supabase).
  * Format: `postgres://postgres.<ref>:<password>@<host>:5432/postgres`
@@ -22,7 +22,7 @@ type SqlValue = string | number | boolean | null | Buffer | Date;
  * nguyên dạng theo thứ tự xuất hiện).
  */
 function convertPlaceholders(sql: string): string {
-  // TrÆ°á»›c: `?1, ?2, ?1` (SQLite reuse) â†’ Ä‘á»•i thÃ nh dáº¡ng `$1, $2, $1` (Postgres reuse Ä‘Æ°á»£c).
+  // Trước: `?1, ?2, ?1` (SQLite reuse) → đổi thành dạng `$1, $2, $1` (Postgres reuse được).
   let out = sql.replace(/\?(\d+)/g, (_, n) => `$${n}`);
   // Sau: `?, ?, ?` không số -> tăng dần $1, $2...
   let i = 0;
@@ -31,16 +31,16 @@ function convertPlaceholders(sql: string): string {
 }
 
 /**
- * Adapter má»ng quanh postgres.Sql vá»›i API tÆ°Æ¡ng thÃ­ch node:sqlite Adapter cÅ©.
- * Má»—i method async (Postgres lÃ  network call). Caller PHáº¢I `await`.
+ * Adapter mỏng quanh postgres.Sql với API tương thích node:sqlite Adapter cũ.
+ * Mỗi method async (Postgres là network call). Caller PHẢI `await`.
  */
 class DbAdapter {
   constructor(public readonly sql: postgres.Sql) {}
 
   /**
    * Chạy 1 statement - SELECT trả mảng row, INSERT/UPDATE/DELETE trả changes.
-   * Cho INSERT cáº§n `lastInsertRowid`, hãy thêm `RETURNING id` vÃ o SQL rá»“i Ä‘á»c
-   * result.lastInsertRowid (postgres-js tráº£ vá» .count + rows máº£ng).
+   * Cho INSERT cần `lastInsertRowid`, hãy thêm `RETURNING id` vào SQL rồi đọc
+   * result.lastInsertRowid (postgres-js trả về .count + rows mảng).
    */
   async run(
     sqlText: string,
@@ -56,7 +56,7 @@ class DbAdapter {
     };
   }
 
-  /** Láº¥y 1 row Ä‘áº§u tiÃªn (giá»‘ng .get() cá»§a SQLite). null náº¿u rá»—ng. */
+  /** Lấy 1 row đầu tiên (giống .get() của SQLite). null nếu rỗng. */
   async get(
     sqlText: string,
     params: SqlValue[] = [],
@@ -67,7 +67,7 @@ class DbAdapter {
     return rows[0] ?? null;
   }
 
-  /** Láº¥y toÃ n bá»™ row (giá»‘ng .all() cá»§a SQLite). */
+  /** Lấy toàn bộ row (giống .all() của SQLite). */
   async all(
     sqlText: string,
     params: SqlValue[] = [],
@@ -84,7 +84,7 @@ class DbAdapter {
 
   /**
    * Transaction - postgres-js wrap trong `sql.begin()`. Callback nhận adapter
-   * má»›i wrap quanh tx connection Ä‘á»ƒ má»i query bÃªn trong cÃ¹ng transaction.
+   * mới wrap quanh tx connection để mọi query bên trong cùng transaction.
    */
   async transaction<T>(fn: (tx: DbAdapter) => Promise<T>): Promise<T> {
     return (await this.sql.begin(async (txSql) => {
@@ -107,7 +107,7 @@ let initPromise: Promise<DbAdapter> | null = null;
 
 export async function getDb(): Promise<DbAdapter> {
   if (globalForDb.__vaff_db) return globalForDb.__vaff_db;
-  // Chá»‘ng race khi nhiá»u request Ä‘áº§u tiÃªn cÃ¹ng init.
+  // Chống race khi nhiều request đầu tiên cùng init.
   if (!initPromise) initPromise = doInit();
   return initPromise;
 }
@@ -116,7 +116,7 @@ async function doInit(): Promise<DbAdapter> {
   warnMissingEnv();
   if (!DATABASE_URL) {
     throw new Error(
-      "[V-Affiliate] DATABASE_URL chÆ°a Ä‘Æ°á»£c set. Láº¥y connection string Supabase táº¡i Project Settings â†’ Database â†’ Connection pooling (Transaction mode).",
+      "[V-Affiliate] DATABASE_URL chưa được set. Lấy connection string Supabase tại Project Settings → Database → Connection pooling (Transaction mode).",
     );
   }
 
@@ -137,7 +137,7 @@ async function doInit(): Promise<DbAdapter> {
 }
 
 /**
- * Táº¡o schema + migration nháº¹. Postgres há»— trá»£ `ADD COLUMN IF NOT EXISTS` nên
+ * Tạo schema + migration nhẹ. Postgres hỗ trợ `ADD COLUMN IF NOT EXISTS` nên
  * không cần try/catch như SQLite.
  */
 async function initSchema(database: DbAdapter): Promise<void> {
@@ -335,7 +335,7 @@ async function initSchema(database: DbAdapter): Promise<void> {
     )
   `);
 
-  // Báº£ng achievements â€” track huy hiá»‡u user Ä‘Ã£ Ä‘áº¡t Ä‘Æ°á»£c. Má»—i user 1 record / badge.
+  // Bảng achievements — track huy hiệu user đã đạt được. Mỗi user 1 record / badge.
   await database.exec(`
     CREATE TABLE IF NOT EXISTS user_achievements (
       id BIGSERIAL PRIMARY KEY,
@@ -359,7 +359,7 @@ async function initSchema(database: DbAdapter): Promise<void> {
   `);
 
   // Wishlist - user paste link Shopee để theo dõi giá. App tự check giá định kỳ
-  // (lazy check khi user má»Ÿ trang) vÃ  notify khi giáº£m giÃ¡.
+  // (lazy check khi user mở trang) và notify khi giảm giá.
   await database.exec(`
     CREATE TABLE IF NOT EXISTS wishlist (
       id BIGSERIAL PRIMARY KEY,
@@ -380,7 +380,7 @@ async function initSchema(database: DbAdapter): Promise<void> {
     )
   `);
 
-  // Anti-fraud â€” flag hÃ nh vi báº¥t thÆ°á»ng Ä‘á»ƒ admin review.
+  // Anti-fraud — flag hành vi bất thường để admin review.
   // type: same_ip_register | self_referral | rapid_withdraw | suspicious_login
   // severity: low | medium | high
   await database.exec(`
@@ -397,7 +397,7 @@ async function initSchema(database: DbAdapter): Promise<void> {
     )
   `);
 
-  // Indexes â€” all idempotent
+  // Indexes — all idempotent
   await database.exec("CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token)");
@@ -428,16 +428,16 @@ async function initSchema(database: DbAdapter): Promise<void> {
   await database.exec("CREATE INDEX IF NOT EXISTS idx_wishlist_user ON wishlist(user_id, created_at DESC)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_wishlist_check ON wishlist(last_checked_at)");
 
-  // â”€â”€â”€ Migrations idempotent: thÃªm cá»™t country cho known_devices â”€â”€â”€
-  // Postgres khÃ´ng cÃ³ "ADD COLUMN IF NOT EXISTS" trÃªn má»™t sá»‘ version cÅ© â†’ dÃ¹ng try/catch
+  // ─── Migrations idempotent: thêm cột country cho known_devices ───
+  // Postgres không có "ADD COLUMN IF NOT EXISTS" trên một số version cũ → dùng try/catch
   try {
     await database.exec("ALTER TABLE known_devices ADD COLUMN IF NOT EXISTS country TEXT");
   } catch (e) {
     console.warn("[migration] add country column to known_devices:", e);
   }
 
-  // â”€â”€â”€ Login history (Group 5 #19) â”€â”€â”€
-  // LÆ°u má»—i láº§n login thÃ nh cÃ´ng kÃ¨m IP + country + UA â†’ user xem map IP Ä‘Ã£ login.
+  // ─── Login history (Group 5 #19) ───
+  // Lưu mỗi lần login thành công kèm IP + country + UA → user xem map IP đã login.
   await database.exec(`
     CREATE TABLE IF NOT EXISTS login_history (
       id BIGSERIAL PRIMARY KEY,
@@ -452,8 +452,8 @@ async function initSchema(database: DbAdapter): Promise<void> {
   `);
   await database.exec("CREATE INDEX IF NOT EXISTS idx_login_history_user ON login_history(user_id, created_at DESC)");
 
-  // â”€â”€â”€ IP blocklist (Group 5 #19) â”€â”€â”€
-  // IP bá»‹ auto-block sau X láº§n fail rotation. Auto expire sau time-to-live.
+  // ─── IP blocklist (Group 5 #19) ───
+  // IP bị auto-block sau X lần fail rotation. Auto expire sau time-to-live.
   await database.exec(`
     CREATE TABLE IF NOT EXISTS ip_blocklist (
       id BIGSERIAL PRIMARY KEY,
@@ -478,20 +478,20 @@ async function initSchema(database: DbAdapter): Promise<void> {
     );
     if (process.env.NODE_ENV === "production" && !process.env.ADMIN_SEED_PASSWORD) {
       console.warn(
-        "[V-Affiliate] âš ï¸  TÃ i khoáº£n admin Ä‘Ã£ Ä‘Æ°á»£c táº¡o vá»›i password máº·c Ä‘á»‹nh 'admin123'. " +
-        "ÄÄ‚NG NHáº¬P NGAY vÃ  Ä‘á»•i password (vÃ o /dashboard/security), hoáº·c set ADMIN_SEED_PASSWORD trÆ°á»›c khi deploy láº§n sau.",
+        "[V-Affiliate] ⚠️  Tài khoản admin đã được tạo với password mặc định 'admin123'. " +
+        "ĐĂNG NHẬP NGAY và đổi password (vào /dashboard/security), hoặc set ADMIN_SEED_PASSWORD trước khi deploy lần sau.",
       );
     }
   }
 
   // Fix old labels (idempotent)
   await database.run(
-    "UPDATE wallet SET label = 'Biến động số dư' WHERE label IN ('Cong so du', 'C?ng s? du', 'Cá»™ng sá»‘ dÆ°')",
+    "UPDATE wallet SET label = 'Biến động số dư' WHERE label IN ('Cong so du', 'C?ng s? du', 'Cộng số dư')",
     [],
   );
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Crypto helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── Crypto helpers ─────────────── */
 
 const PBKDF2_ITERATIONS = 600_000;
 const PBKDF2_KEYLEN = 64;
@@ -561,7 +561,7 @@ function getEncKey(): Buffer {
       const buf = Buffer.from(envKey, "base64");
       if (buf.length === 32) return buf;
     } catch { /* fallthrough */ }
-    console.warn("[V-Affiliate] âš ï¸  APP_ENCRYPTION_KEY Ä‘á»‹nh dáº¡ng khÃ´ng há»£p lá»‡, dÃ¹ng fallback derived key.");
+    console.warn("[V-Affiliate] ⚠️  APP_ENCRYPTION_KEY định dạng không hợp lệ, dùng fallback derived key.");
   }
   // Fallback (KHÔNG dùng production) - derive từ DATABASE_URL để mỗi env có key khác.
   return crypto.createHash("sha256").update(`v-affiliate:${DATABASE_URL || "no-db"}`).digest();
@@ -596,7 +596,7 @@ export function decryptSecret(payload: string): string | null {
   }
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ User core â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── User core ─────────────── */
 
 export interface User {
   id: number;
@@ -641,10 +641,10 @@ export async function registerUser(
   password: string,
 ): Promise<{ success: boolean; error?: string; user?: User }> {
   if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
-    return { success: false, error: "TÃªn Ä‘Äƒng nháº­p chá»‰ chá»©a chá»¯, sá»‘, gáº¡ch dÆ°á»›i (3â€“20 kÃ½ tá»±)" };
+    return { success: false, error: "Tên đăng nhập chỉ chứa chữ, số, gạch dưới (3–20 ký tự)" };
   }
 
-  // Chuáº©n hÃ³a username vá» lowercase khi lÆ°u â€” login sáº½ so sÃ¡nh case-insensitive
+  // Chuẩn hóa username về lowercase khi lưu — login sẽ so sánh case-insensitive
   // Email cũng lowercase để khớp các flow gửi/xác minh email.
   const normalizedUsername = username.toLowerCase();
   const normalizedEmail = email.trim().toLowerCase();
@@ -656,13 +656,13 @@ export async function registerUser(
     "SELECT id FROM users WHERE LOWER(username) = LOWER(?)",
     [normalizedUsername],
   );
-  if (existingUser) return { success: false, error: "TÃªn Ä‘Äƒng nháº­p Ä‘Ã£ tá»“n táº¡i" };
+  if (existingUser) return { success: false, error: "Tên đăng nhập đã tồn tại" };
 
   const existingEmail = await database.get(
     "SELECT id FROM users WHERE LOWER(email) = LOWER(?)",
     [normalizedEmail],
   );
-  if (existingEmail) return { success: false, error: "Email Ä‘Ã£ Ä‘Æ°á»£c sá»­ dá»¥ng" };
+  if (existingEmail) return { success: false, error: "Email đã được sử dụng" };
 
   const passwordHash = await hashPasswordEncoded(password);
 
@@ -697,12 +697,12 @@ export async function loginUser(
 }> {
   const database = await getDb();
 
-  // Username so sánh "loose": cho phÃ©p nháº­p Ä‘Ãºng nguyÃªn username gá»‘c HOáº¶C
-  // chá»‰ viáº¿t hoa chá»¯ cÃ¡i Äáº¦U. VÃ­ dá»¥ user gá»‘c "nguyenvandon" thì:
-  //   - "nguyenvandon"  âœ…
-  //   - "Nguyenvandon"  âœ… (capitalize chá»¯ Ä‘áº§u)
-  //   - "NGUYENVANDON"  âŒ
-  //   - "NguyenVanDon"  âŒ
+  // Username so sánh "loose": cho phép nhập đúng nguyên username gốc HOẶC
+  // chỉ viết hoa chữ cái ĐẦU. Ví dụ user gốc "nguyenvandon" thì:
+  //   - "nguyenvandon"  ✅
+  //   - "Nguyenvandon"  ✅ (capitalize chữ đầu)
+  //   - "NGUYENVANDON"  ❌
+  //   - "NguyenVanDon"  ❌
   const row = await database.get(
     `SELECT id, username, email, password_hash, salt, display_name, phone, role,
             email_verified, created_at, last_login, is_active,
@@ -718,7 +718,7 @@ export async function loginUser(
     return { success: false, error: generic };
   }
 
-  // Validate format username: exact match HOáº¶C capitalize chá»¯ Ä‘áº§u
+  // Validate format username: exact match HOẶC capitalize chữ đầu
   const storedUsername = String(row.username);
   const capitalizedFirst = storedUsername.charAt(0).toUpperCase() + storedUsername.slice(1);
   if (username !== storedUsername && username !== capitalizedFirst) {
@@ -762,12 +762,12 @@ export async function loginUser(
   }
 
   if (Number(row.is_active) === 0) {
-    return { success: false, error: "TÃ i khoáº£n Ä‘Ã£ bá»‹ khoÃ¡. Vui lÃ²ng liÃªn há»‡ há»— trá»£." };
+    return { success: false, error: "Tài khoản đã bị khoá. Vui lòng liên hệ hỗ trợ." };
   }
 
   // Email chưa verify: KHÔNG block đăng nhập (Phương án C - Soft Email Gate).
   // User vẫn login được, dashboard hiện banner cảnh báo. Các API nhạy cảm
-  // (rÃºt tiá»n, Ä‘á»•i password, 2FA, referral bonus) sáº½ check qua requireVerified()
+  // (rút tiền, đổi password, 2FA, referral bonus) sẽ check qua requireVerified()
   // và trả 403.
 
   // 2FA TOTP
@@ -800,7 +800,7 @@ export async function loginUser(
         return { success: false, needTotp: true, error: "Tài khoản tạm khoá do sai nhiều lần. Thử lại sau ~15 phút." };
       }
       await database.run("UPDATE users SET login_failed_count = ? WHERE id = ?", [failed, userId]);
-      return { success: false, needTotp: true, error: "MÃ£ xÃ¡c thá»±c 2 lá»›p hoáº·c backup code khÃ´ng Ä‘Ãºng" };
+      return { success: false, needTotp: true, error: "Mã xác thực 2 lớp hoặc backup code không đúng" };
     }
   }
 
@@ -901,7 +901,7 @@ export async function deleteSession(token: string): Promise<void> {
   await database.run("DELETE FROM sessions WHERE token = ?", [token]);
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Sessions / account â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── Sessions / account ─────────────── */
 
 export interface SessionInfo {
   id: number;
@@ -944,7 +944,7 @@ export async function deleteSessionById(
     "SELECT id FROM sessions WHERE id = ? AND user_id = ?",
     [sessionId, userId],
   );
-  if (!row) return { success: false, error: "Session khÃ´ng tá»“n táº¡i" };
+  if (!row) return { success: false, error: "Session không tồn tại" };
   await database.run("DELETE FROM sessions WHERE id = ?", [sessionId]);
   return { success: true };
 }
@@ -999,7 +999,7 @@ export async function deleteUserAccount(
 }
 
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Email verification â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── Email verification ─────────────── */
 
 export async function createEmailVerificationToken(
   userId: number,
@@ -1028,10 +1028,10 @@ export async function verifyEmailToken(
     "SELECT id, user_id, expires_at, used FROM email_verification_tokens WHERE token = ?",
     [tokenHash],
   );
-  if (!row) return { success: false, error: "Link xÃ¡c thá»±c khÃ´ng há»£p lá»‡" };
+  if (!row) return { success: false, error: "Link xác thực không hợp lệ" };
   if (Number(row.used) === 1) return { success: false, error: "Link đã được sử dụng" };
   if (new Date(row.expires_at as Date | string) < new Date()) {
-    return { success: false, error: "Link Ä‘Ã£ háº¿t háº¡n (24h)" };
+    return { success: false, error: "Link đã hết hạn (24h)" };
   }
 
   await database.run("UPDATE email_verification_tokens SET used = 1 WHERE id = ?", [Number(row.id)]);
@@ -1059,7 +1059,7 @@ export async function getUserByEmail(
 }
 
 /**
- * Äá»•i email cho user CHÆ¯A verify â€” chá»‰ cho phÃ©p khi email_verified = 0.
+ * Đổi email cho user CHƯA verify — chỉ cho phép khi email_verified = 0.
  * Dùng khi user nhập sai email lúc đăng ký, muốn sửa lại.
  *
  * Bảo mật:
@@ -1086,19 +1086,19 @@ export async function changeUnverifiedEmail(
   if (!ok) return { success: false, error: "Tên đăng nhập hoặc mật khẩu không đúng" };
 
   if (Number(row.email_verified) === 1) {
-    return { success: false, error: "TÃ i khoáº£n Ä‘Ã£ xÃ¡c minh email. Vui lÃ²ng dÃ¹ng tÃ­nh nÄƒng cáº­p nháº­t profile Ä‘á»ƒ Ä‘á»•i email." };
+    return { success: false, error: "Tài khoản đã xác minh email. Vui lòng dùng tính năng cập nhật profile để đổi email." };
   }
 
   const userId = Number(row.id);
   const normalizedEmail = newEmail.trim().toLowerCase();
 
-  // Check email má»›i chÆ°a bá»‹ user khÃ¡c dÃ¹ng
+  // Check email mới chưa bị user khác dùng
   const existing = await database.get(
     "SELECT id FROM users WHERE LOWER(email) = LOWER(?) AND id != ?",
     [normalizedEmail, userId],
   );
   if (existing) {
-    return { success: false, error: "Email Ä‘Ã£ Ä‘Æ°á»£c tÃ i khoáº£n khÃ¡c sá»­ dá»¥ng" };
+    return { success: false, error: "Email đã được tài khoản khác sử dụng" };
   }
 
   await database.run(
@@ -1115,7 +1115,7 @@ export async function changeUnverifiedEmail(
   return { success: true, userId };
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Audit log â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── Audit log ─────────────── */
 
 export async function logAudit(
   action: string,
@@ -1142,7 +1142,7 @@ export async function logAudit(
 }
 
 export async function getAuditLogs(limit: number = 200): Promise<Record<string, unknown>[]> {
-  // Backwards compatible â€” basic limit-only fetch.
+  // Backwards compatible — basic limit-only fetch.
   const database = await getDb();
   return await database.all(
     "SELECT id, user_id, action, target, ip, user_agent, detail, created_at FROM audit_logs ORDER BY id DESC LIMIT ?",
@@ -1179,7 +1179,7 @@ export interface AuditLogResult {
 }
 
 /**
- * Filter audit logs vá»›i nhiá»u tiÃªu chÃ­ + JOIN users Ä‘á»ƒ hiá»‡n username.
+ * Filter audit logs với nhiều tiêu chí + JOIN users để hiện username.
  * Dùng cho UI advanced + export CSV.
  */
 export async function searchAuditLogs(filter: AuditLogFilter): Promise<AuditLogResult> {
@@ -1232,14 +1232,14 @@ export async function searchAuditLogs(filter: AuditLogFilter): Promise<AuditLogR
   };
 }
 
-/** Láº¥y danh sÃ¡ch distinct action values â€” cho dropdown filter */
+/** Lấy danh sách distinct action values — cho dropdown filter */
 export async function getDistinctAuditActions(): Promise<string[]> {
   const database = await getDb();
   const rows = await database.all("SELECT DISTINCT action FROM audit_logs ORDER BY action");
   return rows.map((r) => String(r.action));
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ User dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── User dashboard ─────────────── */
 
 export interface Order {
   id: number;
@@ -1375,7 +1375,7 @@ export async function updateUserProfile(
       data.email,
       userId,
     ]);
-    if (existing) return { success: false, error: "Email Ä‘Ã£ Ä‘Æ°á»£c sá»­ dá»¥ng bá»Ÿi tÃ i khoáº£n khÃ¡c" };
+    if (existing) return { success: false, error: "Email đã được sử dụng bởi tài khoản khác" };
   }
 
   const fields: string[] = [];
@@ -1394,7 +1394,7 @@ export async function updateUserProfile(
   return { success: true };
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Bank accounts + withdraw PIN + withdrawals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── Bank accounts + withdraw PIN + withdrawals ─────────────── */
 
 export async function getUserBankAccounts(userId: number): Promise<BankAccount[]> {
   const database = await getDb();
@@ -1424,10 +1424,10 @@ export async function addBankAccount(
 
   if (!bankCode || !bankName) return { success: false, error: "Vui lòng chọn ngân hàng" };
   if (!/^\d{6,20}$/.test(accountNumber)) {
-    return { success: false, error: "Sá»‘ tÃ i khoáº£n pháº£i lÃ  6â€“20 chá»¯ sá»‘" };
+    return { success: false, error: "Số tài khoản phải là 6–20 chữ số" };
   }
   if (accountHolder.length < 2 || accountHolder.length > 100) {
-    return { success: false, error: "TÃªn chá»§ tÃ i khoáº£n khÃ´ng há»£p lá»‡" };
+    return { success: false, error: "Tên chủ tài khoản không hợp lệ" };
   }
 
   const database = await getDb();
@@ -1453,7 +1453,7 @@ export async function deleteBankAccount(
     "SELECT id FROM bank_accounts WHERE id = ? AND user_id = ?",
     [bankId, userId],
   );
-  if (!row) return { success: false, error: "TÃ i khoáº£n ngÃ¢n hÃ ng khÃ´ng tá»“n táº¡i" };
+  if (!row) return { success: false, error: "Tài khoản ngân hàng không tồn tại" };
 
   await database.run("DELETE FROM bank_accounts WHERE id = ? AND user_id = ?", [bankId, userId]);
   return { success: true };
@@ -1468,7 +1468,7 @@ export async function setDefaultBankAccount(
     "SELECT id FROM bank_accounts WHERE id = ? AND user_id = ?",
     [bankId, userId],
   );
-  if (!row) return { success: false, error: "TÃ i khoáº£n ngÃ¢n hÃ ng khÃ´ng tá»“n táº¡i" };
+  if (!row) return { success: false, error: "Tài khoản ngân hàng không tồn tại" };
 
   await database.run("UPDATE bank_accounts SET is_default = 0 WHERE user_id = ?", [userId]);
   await database.run(
@@ -1558,14 +1558,14 @@ export async function createWithdrawRequest(
   amount: number,
   pin: string,
 ): Promise<{ success: boolean; error?: string }> {
-  if (!Number.isFinite(amount) || amount <= 0) return { success: false, error: "Sá»‘ tiá»n khÃ´ng há»£p lá»‡" };
+  if (!Number.isFinite(amount) || amount <= 0) return { success: false, error: "Số tiền không hợp lệ" };
   amount = Math.floor(amount);
 
   const database = await getDb();
 
   const userRow = await database.get("SELECT withdraw_pin_hash FROM users WHERE id = ?", [userId]);
   if (!userRow?.withdraw_pin_hash) {
-    return { success: false, error: "Vui lÃ²ng cÃ i Ä‘áº·t máº­t kháº©u rÃºt tiá»n trÆ°á»›c" };
+    return { success: false, error: "Vui lòng cài đặt mật khẩu rút tiền trước" };
   }
 
   const pinResult = await verifyWithdrawPin(userId, pin);
@@ -1590,7 +1590,7 @@ export async function createWithdrawRequest(
     "SELECT id FROM bank_accounts WHERE id = ? AND user_id = ?",
     [bankAccountId, userId],
   );
-  if (!bank) return { success: false, error: "TÃ i khoáº£n ngÃ¢n hÃ ng khÃ´ng há»£p lá»‡" };
+  if (!bank) return { success: false, error: "Tài khoản ngân hàng không hợp lệ" };
 
   const walletRow = await database.get(
     "SELECT COALESCE(SUM(CASE WHEN type='credit' THEN amount ELSE -amount END), 0) AS balance FROM wallet WHERE user_id = ?",
@@ -1613,7 +1613,7 @@ export async function createWithdrawRequest(
 }
 
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Wallet helpers (admin manual adjust) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── Wallet helpers (admin manual adjust) ─────────────── */
 
 export async function resetWallet(username: string): Promise<{ success: boolean; error?: string }> {
   const database = await getDb();
@@ -1674,7 +1674,7 @@ export async function subtractBalance(
   return { success: true };
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Notifications â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── Notifications ─────────────── */
 
 export interface Notification {
   id: number;
@@ -1748,12 +1748,12 @@ export async function deleteNotification(
     "SELECT id FROM notifications WHERE id = ? AND user_id = ?",
     [notifId, userId],
   );
-  if (!row) return { success: false, error: "ThÃ´ng bÃ¡o khÃ´ng tá»“n táº¡i" };
+  if (!row) return { success: false, error: "Thông báo không tồn tại" };
   await database.run("DELETE FROM notifications WHERE id = ?", [notifId]);
   return { success: true };
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Password reset â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── Password reset ─────────────── */
 
 export async function createPasswordResetToken(
   email: string,
@@ -1763,8 +1763,8 @@ export async function createPasswordResetToken(
     "SELECT id, username, is_active FROM users WHERE LOWER(email) = LOWER(?)",
     [email],
   );
-  if (!user) return { success: false, error: "Email khÃ´ng há»£p lá»‡" };
-  if (Number(user.is_active) === 0) return { success: false, error: "Email khÃ´ng há»£p lá»‡" };
+  if (!user) return { success: false, error: "Email không hợp lệ" };
+  if (Number(user.is_active) === 0) return { success: false, error: "Email không hợp lệ" };
 
   await database.run(
     "UPDATE password_reset_tokens SET used = 1 WHERE user_id = ? AND used = 0",
@@ -1809,7 +1809,7 @@ export async function resetPassword(
   if (!row) return { success: false, error: "Link đặt lại mật khẩu không hợp lệ" };
   if (Number(row.used) === 1) return { success: false, error: "Link đã được sử dụng" };
   if (new Date(row.expires_at as Date | string) < new Date()) {
-    return { success: false, error: "Link Ä‘Ã£ háº¿t háº¡n (30 phÃºt)" };
+    return { success: false, error: "Link đã hết hạn (30 phút)" };
   }
 
   const passwordHash = await hashPasswordEncoded(newPassword);
@@ -1826,7 +1826,7 @@ export async function resetPassword(
   return { success: true };
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ADMIN: timeseries + stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── ADMIN: timeseries + stats ─────────────── */
 
 export interface AdminTimeseriesPoint {
   date: string;
@@ -1899,7 +1899,7 @@ export async function getAllUsers(): Promise<Record<string, unknown>[]> {
   );
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ADMIN: ANALYTICS (Group 3 #9) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── ADMIN: ANALYTICS (Group 3 #9) ─────────────── */
 
 export interface FunnelData {
   totalUsers: number;
@@ -1909,15 +1909,15 @@ export interface FunnelData {
   totalLinks: number;
   totalOrders: number;
   completedOrders: number;
-  /** Conversion: tá»· lá»‡ user cÃ³ order / user cÃ³ link */
+  /** Conversion: tỷ lệ user có order / user có link */
   linkToOrderRate: number;
-  /** Conversion: tá»· lá»‡ order completed / order tá»•ng */
+  /** Conversion: tỷ lệ order completed / order tổng */
   orderToCompletedRate: number;
 }
 
 /**
  * Funnel conversion từ user -> click (link) -> order -> completed order.
- * Äáº¿m DISTINCT user_id Ä‘á»ƒ trÃ¡nh trÃ¹ng láº·p.
+ * Đếm DISTINCT user_id để tránh trùng lặp.
  */
 export async function getFunnelData(): Promise<FunnelData> {
   const database = await getDb();
@@ -1958,8 +1958,8 @@ export interface HourlyHeatmapPoint {
 }
 
 /**
- * Heatmap Ä‘Æ¡n hÃ ng theo (dayOfWeek Ã— hour).
- * Láº¥y tá»« `orders` trong N ngÃ y gáº§n nháº¥t (máº·c Ä‘á»‹nh 30).
+ * Heatmap đơn hàng theo (dayOfWeek × hour).
+ * Lấy từ `orders` trong N ngày gần nhất (mặc định 30).
  */
 export async function getHourlyHeatmap(days: number = 30): Promise<HourlyHeatmapPoint[]> {
   const database = await getDb();
@@ -1974,7 +1974,7 @@ export async function getHourlyHeatmap(days: number = 30): Promise<HourlyHeatmap
      GROUP BY dow, hr`,
     [String(safeDays)],
   );
-  // Fill 7Ã—24 zero matrix
+  // Fill 7×24 zero matrix
   const map = new Map<string, number>();
   for (const r of rows) {
     map.set(`${r.dow}-${r.hr}`, Number(r.c) || 0);
@@ -1998,16 +1998,16 @@ export interface TopProduct {
 }
 
 /**
- * Top sáº£n pháº©m bÃ¡n nhiá»u nháº¥t â€” match qua `affiliate_links` (item_id).
- * Vì `orders` khÃ´ng cÃ³ item_id trá»±c tiáº¿p, ta join qua user_id + thá»i gian gáº§n
+ * Top sản phẩm bán nhiều nhất — match qua `affiliate_links` (item_id).
+ * Vì `orders` không có item_id trực tiếp, ta join qua user_id + thời gian gần
  * nhau (nếu có cấu trúc đó). Hiện tại đơn giản: lấy top theo `affiliate_links`
- * cÃ³ nhiá»u click/order nháº¥t â†’ fallback láº¥y tá»« affiliate_links cÃ³ cashback > 0.
+ * có nhiều click/order nhất → fallback lấy từ affiliate_links có cashback > 0.
  */
 export async function getTopProducts(limit: number = 10): Promise<TopProduct[]> {
   const database = await getDb();
   const safeLimit = Math.min(Math.max(limit, 1), 100);
-  // Group affiliate_links theo (shop_id, item_id) â€” Ä‘áº¿m sá»‘ user Ä‘Ã£ táº¡o link
-  // vÃ  tá»•ng commission. ÄÃ¢y lÃ  proxy cho "sáº£n pháº©m phá»• biáº¿n".
+  // Group affiliate_links theo (shop_id, item_id) — đếm số user đã tạo link
+  // và tổng commission. Äây là proxy cho "sản phẩm phổ biến".
   const rows = await database.all(
     `SELECT
         item_id,
@@ -2025,7 +2025,7 @@ export async function getTopProducts(limit: number = 10): Promise<TopProduct[]> 
   return rows.map((r) => ({
     itemId: String(r.item_id ?? ""),
     shopId: String(r.shop_id ?? ""),
-    productName: String(r.product_name ?? "â€”"),
+    productName: String(r.product_name ?? "—"),
     totalSold: Number(r.total_sold ?? 0),
     totalRevenue: Number(r.total_revenue ?? 0),
     totalCommission: Number(r.total_commission ?? 0),
@@ -2035,23 +2035,23 @@ export async function getTopProducts(limit: number = 10): Promise<TopProduct[]> 
 export interface CohortRow {
   /** ISO yyyy-mm */
   cohortMonth: string;
-  /** Tá»•ng user Ä‘Äƒng kÃ½ trong thÃ¡ng Ä‘Ã³ */
+  /** Tổng user đăng ký trong tháng đó */
   totalUsers: number;
-  /** máº£ng tá»‰ lá»‡ retention tá»« thÃ¡ng 0..N (0 = thÃ¡ng Ä‘Äƒng kÃ½, 1 = thÃ¡ng sau...) */
+  /** mảng tỉ lệ retention từ tháng 0..N (0 = tháng đăng ký, 1 = tháng sau...) */
   retention: number[];
 }
 
 /**
- * Cohort retention: nhÃ³m user theo thÃ¡ng Ä‘Äƒng kÃ½, Ä‘o % user cÃ²n active trong N
- * thÃ¡ng tiáº¿p theo (active = cÃ³ session hoáº·c order trong thÃ¡ng Ä‘Ã³).
+ * Cohort retention: nhóm user theo tháng đăng ký, đo % user còn active trong N
+ * tháng tiếp theo (active = có session hoặc order trong tháng đó).
  *
- * Tráº£ vá» máº£ng cohort, má»—i cohort kÃ¨m máº£ng retention[i] = % user cÃ²n active á»Ÿ thÃ¡ng thá»© i.
+ * Trả về mảng cohort, mỗi cohort kèm mảng retention[i] = % user còn active ở tháng thứ i.
  */
 export async function getCohortRetention(monthsBack: number = 6): Promise<CohortRow[]> {
   const database = await getDb();
   const safeMonths = Math.min(Math.max(monthsBack, 1), 24);
 
-  // 1) Láº¥y users theo cohort thÃ¡ng Ä‘Äƒng kÃ½
+  // 1) Lấy users theo cohort tháng đăng ký
   const cohortUsers = await database.all(
     `SELECT
         to_char(date_trunc('month', created_at), 'YYYY-MM') AS cohort_month,
@@ -2081,7 +2081,7 @@ export async function getCohortRetention(monthsBack: number = 6): Promise<Cohort
     [String(safeMonths)],
   );
 
-  // Build map: user_id â†’ set of active_months
+  // Build map: user_id → set of active_months
   const userActivity = new Map<number, Set<string>>();
   for (const a of activity) {
     const uid = Number(a.user_id);
@@ -2089,7 +2089,7 @@ export async function getCohortRetention(monthsBack: number = 6): Promise<Cohort
     userActivity.get(uid)!.add(String(a.active_month));
   }
 
-  // Build cohorts: cohort_month â†’ user_ids
+  // Build cohorts: cohort_month → user_ids
   const cohortMap = new Map<string, number[]>();
   for (const c of cohortUsers) {
     const m = String(c.cohort_month);
@@ -2097,7 +2097,7 @@ export async function getCohortRetention(monthsBack: number = 6): Promise<Cohort
     cohortMap.get(m)!.push(Number(c.user_id));
   }
 
-  // TÃ­nh retention cho má»—i cohort
+  // Tính retention cho mỗi cohort
   const sortedCohorts = Array.from(cohortMap.keys()).sort();
   const result: CohortRow[] = [];
   const now = new Date();
@@ -2120,7 +2120,7 @@ export async function getCohortRetention(monthsBack: number = 6): Promise<Cohort
   return result;
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ADMIN: paged lists â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── ADMIN: paged lists ─────────────── */
 
 export interface PagedResult<T> {
   rows: T[];
@@ -2305,7 +2305,7 @@ export async function updateWithdrawalStatus(
     "SELECT id, user_id, amount, status FROM withdrawals WHERE id = ?",
     [withdrawalId],
   );
-  if (!row) return { success: false, error: "Yêu cầu rút tiá»n khÃ´ng tá»“n táº¡i" };
+  if (!row) return { success: false, error: "Yêu cầu rút tiền không tồn tại" };
   // Accept cả 2 hệ status: tiếng Việt (default schema) + tiếng Anh (legacy).
   const currentStatus = String(row.status as string);
   const isPending = currentStatus === "pending" || currentStatus === "Đang xử lý";
@@ -2359,7 +2359,7 @@ export async function adminCreateOrder(
 ): Promise<{ success: boolean; error?: string }> {
   const database = await getDb();
   const user = await database.get("SELECT id FROM users WHERE id = ?", [userId]);
-  if (!user) return { success: false, error: "User khÃ´ng tá»“n táº¡i" };
+  if (!user) return { success: false, error: "User không tồn tại" };
 
   await database.run(
     "INSERT INTO orders (user_id, order_code, store, amount, cashback, status) VALUES (?, ?, ?, ?, ?, ?)",
@@ -2369,7 +2369,7 @@ export async function adminCreateOrder(
   if (status === "Đã hoàn tiền") {
     await database.run(
       "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
-      [userId, "HoÃ n tiá»n Ä‘Æ¡n hÃ ng", cashback, "credit"],
+      [userId, "Hoàn tiền đơn hàng", cashback, "credit"],
     );
     await markRefereeActive(userId);
   }
@@ -2409,7 +2409,7 @@ export async function setUserRole(
   currentAdminId?: number,
 ): Promise<{ success: boolean; error?: string }> {
   if (newRole !== "admin" && newRole !== "user") {
-    return { success: false, error: "Role khÃ´ng há»£p lá»‡" };
+    return { success: false, error: "Role không hợp lệ" };
   }
   const database = await getDb();
   const user = await database.get(
@@ -2423,14 +2423,14 @@ export async function setUserRole(
   }
 
   const currentRole = (user.role as string) || "user";
-  if (currentRole === newRole) return { success: false, error: "NgÆ°á»i dÃ¹ng Ä‘Ã£ cÃ³ role nÃ y" };
+  if (currentRole === newRole) return { success: false, error: "Người dùng đã có role này" };
 
   if (newRole === "admin") {
     if (Number(user.is_active) === 0) {
-      return { success: false, error: "KhÃ´ng thá»ƒ cáº¥p quyá»n admin cho tÃ i khoáº£n Ä‘ang bá»‹ khoÃ¡" };
+      return { success: false, error: "Không thể cấp quyền admin cho tài khoản đang bị khoá" };
     }
     if (Number(user.email_verified) === 0) {
-      return { success: false, error: "NgÆ°á»i dÃ¹ng cáº§n xÃ¡c thá»±c email trÆ°á»›c khi Ä‘Æ°á»£c cáº¥p quyá»n admin" };
+      return { success: false, error: "Người dùng cần xác thực email trước khi được cấp quyền admin" };
     }
   } else {
     const adminCountRow = await database.get(
@@ -2438,7 +2438,7 @@ export async function setUserRole(
       [],
     );
     if (Number(adminCountRow?.c ?? 0) <= 1) {
-      return { success: false, error: "KhÃ´ng thá»ƒ háº¡ cáº¥p admin cuá»‘i cÃ¹ng" };
+      return { success: false, error: "Không thể hạ cấp admin cuối cùng" };
     }
   }
 
@@ -2453,7 +2453,7 @@ export async function setUserRole(
 }
 
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Import orders â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── Import orders ─────────────── */
 
 export interface ImportOrderItem {
   orderCode: string;
@@ -2500,12 +2500,12 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
     "Đã hoàn tiền": 3,
   };
 
-  // Pre-load tier list 1 láº§n â€” tier system má»›i (Bronze/Silver/Gold/VIP).
+  // Pre-load tier list 1 lần — tier system mới (Bronze/Silver/Gold/VIP).
   const { getTiers } = await import("@/lib/tier");
   const tierList = await getTiers();
 
-  // Async cache rate per user â€” tÃ­nh rate dá»±a trÃªn tier (orders + referrals).
-  // Cache trong batch trÃ¡nh query láº·p láº¡i vá»›i cÃ¹ng user.
+  // Async cache rate per user — tính rate dựa trên tier (orders + referrals).
+  // Cache trong batch tránh query lặp lại với cùng user.
   const rateCache = new Map<number, number>();
   async function getRate(tx: DbAdapter, userId: number): Promise<number> {
     const cached = rateCache.get(userId);
@@ -2519,7 +2519,7 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
     const ordersCount = Number(row?.orders_count ?? 0);
     const referralsCount = Number(row?.referrals_count ?? 0);
 
-    // Duyá»‡t tá»« VIP xuá»‘ng â†’ tÃ¬m tier cao nháº¥t user qualified.
+    // Duyệt từ VIP xuống → tìm tier cao nhất user qualified.
     let rate = tierList[0].cashbackPercent; // Bronze fallback
     for (let i = tierList.length - 1; i >= 0; i--) {
       const t = tierList[i];
@@ -2542,14 +2542,14 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
     ) return "Đã hoàn tiền";
     if (
       s === "PENDING" || s === "PROCESSING" ||
-      s === "ÄANG CHá»œ Xá»¬ LÃ" || s === "DANG CHO XU LY" ||
+      s === "ĐANG CHỜ XỬ LÝ" || s === "DANG CHO XU LY" ||
       s === "ĐANG XỬ LÝ" || s === "DANG XU LY" ||
-      s === "ÄANG CHá»œ" || s === "DANG CHO"
+      s === "ĐANG CHỜ" || s === "DANG CHO"
     ) return "Đang xử lý";
     if (
       s === "CANCELLED" || s === "CANCELED" ||
       s === "ĐÒ HỦY" || s === "ĐÒ HUỶ" || s === "DA HUY" ||
-      s === "INVALID" || s === "VÃ” HIá»†U" || s === "VO HIEU"
+      s === "INVALID" || s === "VÔ HIỆU" || s === "VO HIEU"
     ) return "Đã hủy";
     if (s === "UNPAID" || s === "CHƯA THANH TOÁN" || s === "CHUA THANH TOAN") {
       return "Chờ xác nhận";
@@ -2609,12 +2609,12 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
               );
               const refUserId = Number(refRow.referrer_user_id);
               invalidateRate(refUserId);
-              // Generic notification â€” tier system check riÃªng (gá»i cuá»‘i transaction).
+              // Generic notification — tier system check riêng (gọi cuối transaction).
               await tx.run(
                 "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
                 [
                   refUserId,
-                  "ðŸ¤ Bạn bè đã có đơn đầu tiên!",
+                  "🤝 Bạn bè đã có đơn đầu tiên!",
                   `Bạn bè bạn giới thiệu đã có đơn hoàn tiền. Tiếp tục mời để lên tier cao hơn!`,
                   "referral",
                 ],
@@ -2641,7 +2641,7 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
             orderCode: item.orderCode,
             itemId: item.itemId,
             status: "updated",
-            message: `Cáº­p nháº­t: ${oldStatus} â†’ ${newStatus}`,
+            message: `Cập nhật: ${oldStatus} → ${newStatus}`,
           });
         } else {
           result.duplicated++;
@@ -2725,12 +2725,12 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
           );
           const refUserId = Number(refRow.referrer_user_id);
           invalidateRate(refUserId);
-          // Generic notification â€” tier check riÃªng cuá»‘i transaction.
+          // Generic notification — tier check riêng cuối transaction.
           await tx.run(
             "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
             [
               refUserId,
-              "ðŸ¤ Bạn bè đã có đơn đầu tiên!",
+              "🤝 Bạn bè đã có đơn đầu tiên!",
               `Bạn bè bạn giới thiệu đã có đơn hoàn tiền. Tiếp tục mời để lên tier cao hơn!`,
               "referral",
             ],
@@ -2760,7 +2760,7 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
     }
   });
 
-  // Sau transaction â†’ check tier-up cho má»i user bá»‹ áº£nh hÆ°á»Ÿng (Ä‘Ã£ import Ä‘Æ¡n).
+  // Sau transaction → check tier-up cho mọi user bị ảnh hưởng (đã import đơn).
   // Chạy ngoài transaction vì checkAndNotifyTierUp tự dùng connection riêng.
   const affectedUsers = new Set<number>();
   for (const r of result.results) {
@@ -2781,7 +2781,7 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
   return result;
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ADMIN: User detail / management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── ADMIN: User detail / management ─────────────── */
 
 export interface UserDetail {
   user: Record<string, unknown>;
@@ -2880,7 +2880,7 @@ export async function adminResetUserPassword(
     [
       targetUserId,
       "Mật khẩu đã được đặt lại",
-      "Quáº£n trá»‹ viÃªn Ä‘Ã£ Ä‘áº·t láº¡i máº­t kháº©u cho tÃ i khoáº£n cá»§a báº¡n. Vui lÃ²ng liÃªn há»‡ admin Ä‘á»ƒ nháº­n máº­t kháº©u táº¡m vÃ  Ä‘á»•i láº¡i sau khi Ä‘Äƒng nháº­p.",
+      "Quản trị viên đã đặt lại mật khẩu cho tài khoản của bạn. Vui lòng liên hệ admin để nhận mật khẩu tạm và đổi lại sau khi đăng nhập.",
       "security",
     ],
   );
@@ -2892,7 +2892,7 @@ export async function adminForceLogout(
   currentAdminId: number,
 ): Promise<{ success: boolean; error?: string; revoked?: number }> {
   if (targetUserId === currentAdminId) {
-    return { success: false, error: "KhÃ´ng thá»ƒ tá»± logout chÃ­nh mÃ¬nh tá»« Ä‘Ã¢y" };
+    return { success: false, error: "Không thể tự logout chính mình từ đây" };
   }
   const database = await getDb();
   const result = await database.run("DELETE FROM sessions WHERE user_id = ?", [targetUserId]);
@@ -2908,7 +2908,7 @@ export async function adminMarkEmailVerified(
     [targetUserId],
   );
   if (!user) return { success: false, error: "Không tìm thấy người dùng" };
-  if (Number(user.email_verified) === 1) return { success: false, error: "Email Ä‘Ã£ Ä‘Æ°á»£c xÃ¡c minh" };
+  if (Number(user.email_verified) === 1) return { success: false, error: "Email đã được xác minh" };
   await database.run(
     "UPDATE users SET email_verified = 1, updated_at = NOW() WHERE id = ?",
     [targetUserId],
@@ -2921,15 +2921,15 @@ export async function adminMarkEmailVerified(
     "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
     [
       targetUserId,
-      "Email Ä‘Ã£ Ä‘Æ°á»£c xÃ¡c minh",
-      "Email tÃ i khoáº£n cá»§a báº¡n Ä‘Ã£ Ä‘Æ°á»£c quáº£n trá»‹ viÃªn xÃ¡c minh thá»§ cÃ´ng. Báº¡n cÃ³ thá»ƒ Ä‘Äƒng nháº­p bÃ¬nh thÆ°á»ng.",
+      "Email đã được xác minh",
+      "Email tài khoản của bạn đã được quản trị viên xác minh thủ công. Bạn có thể đăng nhập bình thường.",
       "security",
     ],
   );
   return { success: true };
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ADMIN: order edit/delete â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── ADMIN: order edit/delete ─────────────── */
 
 export interface AdminOrderUpdate {
   amount?: number;
@@ -2947,17 +2947,17 @@ export async function adminUpdateOrder(
     "SELECT id, user_id, order_code, amount, cashback, status FROM orders WHERE id = ?",
     [orderId],
   );
-  if (!existing) return { success: false, error: "ÄÆ¡n hÃ ng khÃ´ng tá»“n táº¡i" };
+  if (!existing) return { success: false, error: "Đơn hàng không tồn tại" };
 
   const allowedStatus = new Set(["Đã hoàn tiền", "Đang xử lý", "Chờ xác nhận", "Đã hủy"]);
   if (update.status !== undefined && !allowedStatus.has(update.status)) {
-    return { success: false, error: "Tráº¡ng thÃ¡i khÃ´ng há»£p lá»‡" };
+    return { success: false, error: "Trạng thái không hợp lệ" };
   }
   if (update.amount !== undefined && (!Number.isFinite(update.amount) || update.amount < 0)) {
-    return { success: false, error: "GiÃ¡ trá»‹ khÃ´ng há»£p lá»‡" };
+    return { success: false, error: "Giá trị không hợp lệ" };
   }
   if (update.cashback !== undefined && (!Number.isFinite(update.cashback) || update.cashback < 0)) {
-    return { success: false, error: "Cashback khÃ´ng há»£p lá»‡" };
+    return { success: false, error: "Cashback không hợp lệ" };
   }
 
   const newAmount = update.amount !== undefined ? Math.floor(update.amount) : Number(existing.amount);
@@ -2979,7 +2979,7 @@ export async function adminUpdateOrder(
     if (oldStatus !== "Đã hoàn tiền" && newStatus === "Đã hoàn tiền" && newCashback > 0) {
       await tx.run(
         "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
-        [userId, `HoÃ n tiá»n Ä‘Æ¡n ${orderCode}`, newCashback, "credit"],
+        [userId, `Hoàn tiền đơn ${orderCode}`, newCashback, "credit"],
       );
       const refRow = await tx.get(
         "SELECT id, bonus_credited FROM referrals WHERE referee_user_id = ?",
@@ -2994,7 +2994,7 @@ export async function adminUpdateOrder(
     } else if (oldStatus === "Đã hoàn tiền" && newStatus !== "Đã hoàn tiền" && oldCashback > 0) {
       await tx.run(
         "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
-        [userId, `Äiá»u chá»‰nh Ä‘Æ¡n ${orderCode} - thu há»“i hoÃ n tiá»n`, oldCashback, "debit"],
+        [userId, `Điều chỉnh đơn ${orderCode} - thu hồi hoàn tiền`, oldCashback, "debit"],
       );
     } else if (oldStatus === "Đã hoàn tiền" && newStatus === "Đã hoàn tiền" && newCashback !== oldCashback) {
       const delta = newCashback - oldCashback;
@@ -3003,7 +3003,7 @@ export async function adminUpdateOrder(
           "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
           [
             userId,
-            `Äiá»u chá»‰nh Ä‘Æ¡n ${orderCode} +${delta.toLocaleString("vi-VN")}Ä‘`,
+            `Điều chỉnh đơn ${orderCode} +${delta.toLocaleString("vi-VN")}đ`,
             delta,
             "credit",
           ],
@@ -3013,7 +3013,7 @@ export async function adminUpdateOrder(
           "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
           [
             userId,
-            `Äiá»u chá»‰nh Ä‘Æ¡n ${orderCode} ${delta.toLocaleString("vi-VN")}Ä‘`,
+            `Điều chỉnh đơn ${orderCode} ${delta.toLocaleString("vi-VN")}đ`,
             -delta,
             "debit",
           ],
@@ -3033,7 +3033,7 @@ export async function adminDeleteOrder(
     "SELECT id, user_id, order_code, cashback, status FROM orders WHERE id = ?",
     [orderId],
   );
-  if (!existing) return { success: false, error: "ÄÆ¡n hÃ ng khÃ´ng tá»“n táº¡i" };
+  if (!existing) return { success: false, error: "Đơn hàng không tồn tại" };
 
   await database.transaction(async (tx) => {
     if ((existing.status as string) === "Đã hoàn tiền" && Number(existing.cashback) > 0) {
@@ -3041,7 +3041,7 @@ export async function adminDeleteOrder(
         "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
         [
           Number(existing.user_id),
-          `XoÃ¡ Ä‘Æ¡n ${existing.order_code as string} - thu há»“i hoÃ n tiá»n`,
+          `Xoá đơn ${existing.order_code as string} - thu hồi hoàn tiền`,
           Number(existing.cashback),
           "debit",
         ],
@@ -3054,20 +3054,20 @@ export async function adminDeleteOrder(
 }
 
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ System settings â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── System settings ─────────────── */
 
 export const DEFAULT_SETTINGS: Record<string, string> = {
   withdrawals_enabled: "1",
   registration_enabled: "1",
   min_withdraw_amount: "50000",
   maintenance_mode: "0",
-  maintenance_message: "Há»‡ thá»‘ng Ä‘ang báº£o trÃ¬, vui lÃ²ng quay láº¡i sau.",
+  maintenance_message: "Hệ thống đang bảo trì, vui lòng quay lại sau.",
   require_admin_2fa: "0",
   cashback_base_percent: "50",
   referral_milestone_count: "50",
   referral_milestone_bonus_percent: "5",
-  // Tier system â€” Silver/Gold/VIP threshold + cashback %.
-  // Bronze dÃ¹ng cashback_base_percent á»Ÿ trÃªn (default 50).
+  // Tier system — Silver/Gold/VIP threshold + cashback %.
+  // Bronze dùng cashback_base_percent ở trên (default 50).
   tier_silver_orders: "50",
   tier_silver_referrals: "25",
   tier_silver_percent: "53",
@@ -3077,10 +3077,10 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   tier_vip_orders: "300",
   tier_vip_referrals: "100",
   tier_vip_percent: "58",
-  // Mini-game vÃ²ng quay may máº¯n â€” earn-based, khÃ´ng pháº£i cooldown.
-  // User mua Ä‘á»§ N Ä‘Æ¡n hoÃ n tiá»n â†’ +1 lÆ°á»£t. Má»i Ä‘á»§ M báº¡n active â†’ +1 lÆ°á»£t.
+  // Mini-game vòng quay may mắn — earn-based, không phải cooldown.
+  // User mua đủ N đơn hoàn tiền → +1 lượt. Mời đủ M bạn active → +1 lượt.
   spin_enabled: "1",
-  spin_orders_per_token: "10",       // 10 Ä‘Æ¡n hoÃ n tiá»n = 1 lÆ°á»£t quay
+  spin_orders_per_token: "10",       // 10 đơn hoàn tiền = 1 lượt quay
   spin_referrals_per_token: "5",     // 5 bạn mời active = 1 lượt quay
   // Bai viet ghim cong dong V-Affiliate trong group Facebook -
   // user moi vao tao link cashback xong se thay preset nut "Dang vao
@@ -3109,10 +3109,10 @@ export async function getAllSettings(): Promise<Record<string, string>> {
 
 export async function setSetting(key: string, value: string): Promise<void> {
   if (!Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS, key)) {
-    throw new Error(`Setting key khÃ´ng há»£p lá»‡: ${key}`);
+    throw new Error(`Setting key không hợp lệ: ${key}`);
   }
   const database = await getDb();
-  // Postgres syntax: ON CONFLICT (PRIMARY KEY) DO UPDATE â€” tÆ°Æ¡ng Ä‘Æ°Æ¡ng UPSERT cá»§a SQLite
+  // Postgres syntax: ON CONFLICT (PRIMARY KEY) DO UPDATE — tương đương UPSERT của SQLite
   await database.run(
     `INSERT INTO system_settings (key, value, updated_at) VALUES (?, ?, NOW())
      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
@@ -3120,7 +3120,7 @@ export async function setSetting(key: string, value: string): Promise<void> {
   );
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Import history â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── Import history ─────────────── */
 
 export interface ImportHistoryEntry {
   id: number;
@@ -3178,7 +3178,7 @@ export async function getImportHistory(limit: number = 50): Promise<ImportHistor
   }));
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Broadcast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── Broadcast ─────────────── */
 
 export async function broadcastNotification(
   title: string,
@@ -3187,7 +3187,7 @@ export async function broadcastNotification(
 ): Promise<{ count: number }> {
   const t = (title || "").trim();
   const m = (message || "").trim();
-  if (!t || !m) throw new Error("TiÃªu Ä‘á» vÃ  ná»™i dung báº¯t buá»™c");
+  if (!t || !m) throw new Error("Tiêu đề và nội dung bắt buộc");
 
   const database = await getDb();
   const role = options.targetRole || "all";
@@ -3207,7 +3207,7 @@ export async function broadcastNotification(
   return { count: users.length };
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ DB stats (admin) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── DB stats (admin) ─────────────── */
 
 export interface DbStats {
   users: number;
@@ -3257,7 +3257,7 @@ export async function getDbStats(): Promise<DbStats> {
   };
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ TOTP 2FA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── TOTP 2FA ─────────────── */
 
 export function generateTotpSecret(): string {
   const buf = crypto.randomBytes(20);
@@ -3331,7 +3331,7 @@ export async function startTotpSetup(
 ): Promise<{ secret: string; otpauthUrl: string }> {
   const database = await getDb();
   const row = await database.get("SELECT username, email FROM users WHERE id = ?", [userId]);
-  if (!row) throw new Error("User khÃ´ng tá»“n táº¡i");
+  if (!row) throw new Error("User không tồn tại");
   const secret = generateTotpSecret();
   const enc = encryptSecret(secret);
   await database.run(
@@ -3356,9 +3356,9 @@ export async function confirmTotpSetup(
 ): Promise<{ success: boolean; error?: string }> {
   const database = await getDb();
   const secret = await readTotpSecret(database, userId);
-  if (!secret) return { success: false, error: "ChÆ°a khá»Ÿi táº¡o TOTP" };
+  if (!secret) return { success: false, error: "Chưa khởi tạo TOTP" };
   if (!verifyTotpCode(secret, code)) {
-    return { success: false, error: "MÃ£ xÃ¡c thá»±c khÃ´ng Ä‘Ãºng" };
+    return { success: false, error: "Mã xác thực không đúng" };
   }
   await database.run(
     "UPDATE users SET totp_enabled = 1, updated_at = NOW() WHERE id = ?",
@@ -3373,11 +3373,11 @@ export async function disableTotp(
 ): Promise<{ success: boolean; error?: string }> {
   const database = await getDb();
   const row = await database.get("SELECT totp_enabled FROM users WHERE id = ?", [userId]);
-  if (!row || !row.totp_enabled) return { success: false, error: "TOTP chÆ°a Ä‘Æ°á»£c báº­t" };
+  if (!row || !row.totp_enabled) return { success: false, error: "TOTP chưa được bật" };
   const secret = await readTotpSecret(database, userId);
-  if (!secret) return { success: false, error: "TOTP secret khÃ´ng Ä‘á»c Ä‘Æ°á»£c" };
+  if (!secret) return { success: false, error: "TOTP secret không đọc được" };
   if (!verifyTotpCode(secret, code)) {
-    return { success: false, error: "MÃ£ xÃ¡c thá»±c khÃ´ng Ä‘Ãºng" };
+    return { success: false, error: "Mã xác thực không đúng" };
   }
   await database.run(
     "UPDATE users SET totp_secret = NULL, totp_enabled = 0, updated_at = NOW() WHERE id = ?",
@@ -3392,7 +3392,7 @@ export async function getTotpStatus(userId: number): Promise<{ enabled: boolean 
   return { enabled: Number(row?.totp_enabled ?? 0) === 1 };
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Cleanup / vacuum â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── Cleanup / vacuum ─────────────── */
 
 export interface CleanupResult {
   expiredSessions: number;
@@ -3443,7 +3443,7 @@ export async function cleanupExpired(
 }
 
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Referral system â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── Referral system ─────────────── */
 
 export interface ReferralStats {
   totalReferred: number;
@@ -3468,13 +3468,13 @@ export async function attachReferral(
     "SELECT id, is_active FROM users WHERE LOWER(username) = LOWER(?)",
     [referrerUsername],
   );
-  if (!refRow) return { success: false, error: "NgÆ°á»i giá»›i thiá»‡u khÃ´ng tá»“n táº¡i" };
+  if (!refRow) return { success: false, error: "Người giới thiệu không tồn tại" };
   if (Number(refRow.is_active) === 0) {
-    return { success: false, error: "NgÆ°á»i giá»›i thiá»‡u Ä‘Ã£ bá»‹ khoÃ¡" };
+    return { success: false, error: "Người giới thiệu đã bị khoá" };
   }
   const referrerId = Number(refRow.id);
   if (referrerId === refereeUserId) {
-    return { success: false, error: "KhÃ´ng tá»± giá»›i thiá»‡u chÃ­nh mÃ¬nh Ä‘Æ°á»£c" };
+    return { success: false, error: "Không tự giới thiệu chính mình được" };
   }
 
   // Postgres equivalent của INSERT OR IGNORE: ON CONFLICT DO NOTHING
@@ -3497,7 +3497,7 @@ export async function getReferralStats(userId: number): Promise<ReferralStats> {
     [userId],
   );
   const bonusRow = await database.get(
-    "SELECT COALESCE(SUM(amount), 0) AS s FROM wallet WHERE user_id = ? AND label LIKE 'ThÆ°á»Ÿng giá»›i thiá»‡u%'",
+    "SELECT COALESCE(SUM(amount), 0) AS s FROM wallet WHERE user_id = ? AND label LIKE 'Thưởng giới thiệu%'",
     [userId],
   );
   const recent = await database.all(
@@ -3530,7 +3530,7 @@ export interface CashbackRateInfo {
   basePercent: number;
   bonusPercent: number;
   reachedMilestone: boolean;
-  /** Tier code hiá»‡n táº¡i â€” bronze/silver/gold/vip. Field má»›i cho tier system. */
+  /** Tier code hiện tại — bronze/silver/gold/vip. Field mới cho tier system. */
   tierCode?: string;
   /** Tier name + icon. */
   tierName?: string;
@@ -3538,12 +3538,12 @@ export interface CashbackRateInfo {
 }
 
 export async function getCashbackRateForUser(userId: number): Promise<CashbackRateInfo> {
-  // Delegate sang tier system má»›i â€” tÃ­nh rate dá»±a trÃªn tier (Bronze/Silver/Gold/VIP),
-  // khÃ´ng pháº£i milestone bool Ä‘Æ¡n giáº£n nhÆ° cÅ©.
+  // Delegate sang tier system mới — tính rate dựa trên tier (Bronze/Silver/Gold/VIP),
+  // không phải milestone bool đơn giản như cũ.
   const { getUserTier } = await import("@/lib/tier");
   const tier = await getUserTier(userId);
 
-  // Giá»¯ shape cÅ© cho callsite â€” milestone trá» vá» Silver threshold (Ä‘áº§u tiÃªn).
+  // Giữ shape cũ cho callsite — milestone trỏ về Silver threshold (đầu tiên).
   const { getTiers } = await import("@/lib/tier");
   const tiers = await getTiers();
   const silver = tiers.find((t) => t.code === "silver") ?? tiers[1];
@@ -3583,7 +3583,7 @@ export async function markRefereeActive(refereeUserId: number): Promise<boolean>
   return true;
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ TOTP backup codes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── TOTP backup codes ─────────────── */
 
 export async function generateBackupCodes(userId: number): Promise<string[]> {
   const database = await getDb();
@@ -3647,7 +3647,7 @@ export async function countBackupCodes(
   };
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Device tracking â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── Device tracking ─────────────── */
 
 export async function trackKnownDevice(
   userId: number,
@@ -3679,7 +3679,7 @@ export async function trackKnownDevice(
   return { isNew: isReallyNew };
 }
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Pending counts (admin widget) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─────────────── Pending counts (admin widget) ─────────────── */
 
 export interface PendingCounts {
   pendingWithdrawals: number;

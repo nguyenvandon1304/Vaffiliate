@@ -133,6 +133,16 @@ function formatDate(dateStr: string): string {
   return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
 }
 
+// "HH:MM DD/MM/YYYY" — dùng cho wallet history để khớp format với withdraw list.
+function formatDateTime(dateStr: string): string {
+  const d = new Date(dateStr);
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mo = String(d.getMonth() + 1).padStart(2, "0");
+  return `${hh}:${mm} ${dd}/${mo}/${d.getFullYear()}`;
+}
+
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -2010,7 +2020,7 @@ function WalletTab({
                         key={entry.id}
                         label={entry.label}
                         amount={entry.type === "credit" ? `+${formatVND(entry.amount)}` : `-${formatVND(Math.abs(entry.amount))}`}
-                        date={formatDate(entry.created_at)}
+                        date={formatDateTime(entry.created_at)}
                         positive={entry.type === "credit"}
                       />
                     ))}

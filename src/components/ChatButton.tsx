@@ -1,13 +1,32 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 export default function ChatButton() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname() || "";
+  // /dashboard có MobileBottomNav (~64px) → đẩy chat button lên trên nav.
+  // /admin và các trang khác không có nav → để sát bottom.
+  const isDashboard = pathname.startsWith("/dashboard");
+
+  // Inline style cho bottom: dùng max(...) để vừa sát bottom trên Android (safe-area = 0)
+  // vừa tránh home-indicator iOS (safe-area ≈ 34px).
+  const wrapperStyle: React.CSSProperties = isDashboard
+    ? {
+        // Dashboard: nav cao ~64px + safe-area; chat button cách nav 8px.
+        bottom: "max(72px, calc(64px + env(safe-area-inset-bottom, 0px) + 8px))",
+      }
+    : {
+        // Admin và khác: sát bottom-right; tối thiểu 8px, hoặc safe-area iOS.
+        bottom: "max(8px, env(safe-area-inset-bottom, 8px))",
+      };
 
   return (
-    <div className="fixed bottom-24 right-4 md:bottom-6 md:right-6 z-50 flex flex-col items-end gap-2"
-         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+    <div
+      className="fixed right-4 md:right-6 z-50 flex flex-col items-end gap-2"
+      style={wrapperStyle}
+    >
       {/* Popup chọn người liên hệ */}
       {open && (
         <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-gray-200 dark:border-zinc-800 p-3 w-64 mb-1 animate-in fade-in slide-in-from-bottom-2 duration-200">

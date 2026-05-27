@@ -150,8 +150,9 @@ function ParticleBurst({ particles, isDark }: { particles: Particle[]; isDark: b
 }
 
 /**
- * Nút toggle theme inline — chỉ hiện ở mobile (≤ md), đặt cạnh chuông trong header.
- * Trên desktop ẩn để dùng `ThemeToggle` floating top-right như cũ.
+ * Nút toggle theme inline — hiện ở mọi viewport (mobile + desktop).
+ * Dùng trong header / sidebar khi page muốn có toggle inline thay vì
+ * floating top-right (vd. /admin, /dashboard).
  */
 export function ThemeToggleButton({ className = "" }: { className?: string }) {
   useSystemThemeSync();
@@ -163,7 +164,7 @@ export function ThemeToggleButton({ className = "" }: { className?: string }) {
       onClick={toggle}
       aria-label="Chuyển chế độ sáng / tối"
       title={isDark ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
-      className={`md:hidden relative w-9 h-9 rounded-full overflow-visible flex items-center justify-center transition-all duration-300 ${
+      className={`relative w-9 h-9 rounded-full overflow-visible flex items-center justify-center transition-all duration-300 ${
         animating
           ? "scale-110 bg-gradient-to-br from-amber-100 to-indigo-100 dark:from-indigo-900/50 dark:to-amber-900/50"
           : "hover:bg-gray-100 dark:hover:bg-zinc-800"
