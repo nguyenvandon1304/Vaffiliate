@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (result.user) {
-    await createNotification(result.user.id, "🎊 Chào mừng đến với V-Affiliate!", "Cảm ơn bạn đã tham gia cộng đồng săn voucher & hoàn tiền lớn nhất Việt Nam! Hãy xác thực email để mở khoá đầy đủ tính năng và bắt đầu kiếm tiền từ những đơn hàng Shopee đầu tiên. 💸", "welcome");
+    await createNotification(result.user.id, "🎊 Chào mừng đến với V-Affiliate!", "Cảm ơn bạn đã tham gia cộng đồng săn voucher & hoàn tiền lớn nhất Việt Nam! Hãy xác thực email để mở khoá đầy đủ tính năng. Từ giờ, mỗi đơn hàng trên Shopee đều có thể tiết kiệm từ 50% hoa hồng — mua sắm thông minh hơn cùng V-Affiliate! 🛍️", "welcome");
 
     // Telegram alert cho admin — fire-and-forget. Skip nếu env chưa set.
     void notifyNewUser({ username: result.user.username, email });

@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
           "INSERT INTO affiliate_links (user_id, shop_id, item_id, product_name, product_price, commission, commission_rate, cashback, affiliate_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
           [user.id, ids.shopId, ids.itemId, product.name, product.price, product.commission, product.commissionRate, product.cashback, affiliateLink]
         );
-        await createNotification(user.id, "✨ Link hoàn tiền đã sẵn sàng!", `Link cashback ${cashbackRate}% cho "${product.name}" đã được tạo thành công. Khi có người mua qua link này, bạn nhận về ngay ${product.cashback.toLocaleString("vi-VN")}đ — chia sẻ ngay nào! 🚀`, "link");
+        await createNotification(user.id, "✨ Link hoàn tiền đã sẵn sàng!", `Link cashback ${cashbackRate}% cho "${product.name}" đã được tạo. Bấm vào link rồi mua sản phẩm như bình thường — sau khi nhận hàng, ${product.cashback.toLocaleString("vi-VN")}đ sẽ tự động về ví của bạn. Chúc bạn mua sắm tiết kiệm! 🛍️`, "link");
         // Grant badge "first_link" — idempotent, chỉ earn lần đầu.
         void grantBadge(user.id, "first_link");
       } catch (e) {
