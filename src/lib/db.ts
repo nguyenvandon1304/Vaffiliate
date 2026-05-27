@@ -2324,11 +2324,11 @@ export async function updateWithdrawalStatus(
     if (status === "rejected") {
       await tx.run(
         "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
-        [userId, "HoÃ n tiá»n rÃºt bá»‹ tá»« chá»‘i", amount, "credit"],
+        [userId, "Hoàn tiền rút bị từ chối", amount, "credit"],
       );
       const msg = note
-        ? `Yêu cầu rút ${amount.toLocaleString("vi-VN")}Ä‘ bị từ chối. Lý do: ${note}. Sá»‘ tiá»n Ä‘Ã£ hoÃ n láº¡i vÃ­.`
-        : `Yêu cầu rút ${amount.toLocaleString("vi-VN")}Ä‘ bá»‹ tá»« chá»‘i. Sá»‘ tiá»n Ä‘Ã£ hoÃ n láº¡i vÃ­.`;
+        ? `Yêu cầu rút ${amount.toLocaleString("vi-VN")}đ bị từ chối. Lý do: ${note}. Số tiền đã hoàn lại ví.`
+        : `Yêu cầu rút ${amount.toLocaleString("vi-VN")}đ bị từ chối. Số tiền đã hoàn lại ví.`;
       await tx.run(
         "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
         [userId, "Rút tiền bị từ chối", msg, "withdrawal"],
@@ -2339,7 +2339,7 @@ export async function updateWithdrawalStatus(
         [
           userId,
           "Rút tiền đã duyệt",
-          `Yêu cầu rút ${amount.toLocaleString("vi-VN")}Ä‘ Ä‘Ã£ Ä‘Æ°á»£c duyá»‡t vÃ  Ä‘ang chuyá»ƒn khoáº£n.`,
+          `Yêu cầu rút ${amount.toLocaleString("vi-VN")}đ đã được duyệt và đang chuyển khoản.`,
           "withdrawal",
         ],
       );
