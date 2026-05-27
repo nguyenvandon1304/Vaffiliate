@@ -5,6 +5,59 @@ import { useToast } from "@/components/Toast";
 import { useNotifications, type Notification } from "@/hooks/useNotifications";
 import { EmptyState, IllustrationBell } from "@/components/EmptyState";
 
+type FilterCat = "all" | "money" | "order" | "other";
+
+const TYPE_COLORS: Record<string, string> = {
+  achievement: "from-violet-400 to-fuchsia-500",
+  spin:        "from-pink-400 to-rose-500",
+  withdrawal:  "from-emerald-400 to-green-500",
+  withdraw:    "from-emerald-400 to-green-500",
+  wallet:      "from-emerald-400 to-teal-500",
+  order:       "from-orange-400 to-amber-500",
+  referral:    "from-rose-400 to-pink-500",
+  security:    "from-red-500 to-rose-600",
+  welcome:     "from-yellow-400 to-amber-400",
+  link:        "from-blue-400 to-indigo-500",
+  system:      "from-slate-400 to-slate-600",
+};
+
+function colorForType(type: string): string {
+  return TYPE_COLORS[type] ?? "from-orange-400 to-orange-500";
+}
+
+function categoryOf(type: string): FilterCat {
+  if (type === "withdrawal" || type === "withdraw" || type === "wallet") return "money";
+  if (type === "order" || type === "link") return "order";
+  return "other";
+}
+
+/** Group notifications by date bucket (today / yesterday / this week / older). */
+function groupNotifications(items: Notification[]): Array<{ label: string; notifs: Notification[] }> {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - 7);
+
+  const groups: Record<string, Notification[]> = {
+    "Hôm nay": [],
+    "Hôm qua": [],
+    "Tuần này": [],
+    "Cũ hơn": [],
+  };
+  for (const n of items) {
+    const t = new Date(n.created_at);
+    if (t >= today) groups["Hôm nay"].push(n);
+    else if (t >= yesterday) groups["Hôm qua"].push(n);
+    else if (t >= weekStart) groups["Tuần này"].push(n);
+    else groups["Cũ hơn"].push(n);
+  }
+  return Object.entries(groups)
+    .filter(([, arr]) => arr.length > 0)
+    .map(([label, notifs]) => ({ label, notifs }));
+}
+
 /**
  * Bell icon với dropdown notification list.
  * Realtime qua SSE — toast khi có notification mới + sound nhẹ.
@@ -16,6 +69,7 @@ export function NotificationBell({ className = "" }: { className?: string }) {
   const toast = useToast();
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState<Notification | null>(null);
+  const [filter, setFilter] = useState<FilterCat>("all");
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const { notifications, unreadCount, markRead, remove } = useNotifications({
@@ -87,27 +141,77 @@ export function NotificationBell({ className = "" }: { className?: string }) {
               )}
             </div>
 
+            {/* Filter pills */}
+            {notifications.length > 0 && (
+              <div className="flex items-center gap-1.5 px-3 py-2 border-b border-gray-100 dark:border-zinc-800 overflow-x-auto">
+                {([
+                  { key: "all" as const, label: "Tất cả" },
+                  { key: "money" as const, label: "💰 Tiền" },
+                  { key: "order" as const, label: "🛒 Đơn hàng" },
+                  { key: "other" as const, label: "Khác" },
+                ]).map((p) => {
+                  const active = filter === p.key;
+                  return (
+                    <button
+                      key={p.key}
+                      type="button"
+                      onClick={() => setFilter(p.key)}
+                      className={`text-[11px] font-bold px-2.5 py-1 rounded-full transition-colors whitespace-nowrap ${
+                        active
+                          ? "bg-orange-500 text-white shadow-sm"
+                          : "bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-700"
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             <div className="max-h-[60vh] overflow-y-auto">
-              {notifications.length === 0 ? (
-                <EmptyState
-                  illustration={<IllustrationBell />}
-                  title="Chưa có thông báo"
-                  description="Khi có đơn hoàn tiền, biến động ví hoặc tin khuyến mãi mới, bạn sẽ thấy ở đây."
-                  compact
-                />
-              ) : (
-                <ul className="divide-y divide-gray-100 dark:divide-zinc-800">
-                  {notifications.map((n) => (
-                    <NotifItem
-                      key={n.id}
-                      notif={n}
-                      onClick={() => handleOpenDetail(n)}
-                      onMarkRead={() => void markRead(n.id)}
-                      onRemove={() => void remove(n.id)}
+              {(() => {
+                const filtered = filter === "all"
+                  ? notifications
+                  : notifications.filter((n) => categoryOf(n.type) === filter);
+
+                if (filtered.length === 0) {
+                  return (
+                    <EmptyState
+                      illustration={<IllustrationBell />}
+                      title={filter === "all" ? "Chưa có thông báo" : "Không có thông báo trong mục này"}
+                      description={filter === "all"
+                        ? "Khi có đơn hoàn tiền, biến động ví hoặc tin khuyến mãi mới, bạn sẽ thấy ở đây."
+                        : "Thử chọn mục khác hoặc bấm Tất cả để xem toàn bộ."}
+                      compact
                     />
-                  ))}
-                </ul>
-              )}
+                  );
+                }
+
+                const groups = groupNotifications(filtered);
+                return (
+                  <div>
+                    {groups.map((g) => (
+                      <div key={g.label}>
+                        <p className="sticky top-0 z-10 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-zinc-500 bg-gray-50/95 dark:bg-zinc-900/95 backdrop-blur-sm border-b border-gray-100 dark:border-zinc-800">
+                          {g.label}
+                        </p>
+                        <ul className="divide-y divide-gray-100 dark:divide-zinc-800">
+                          {g.notifs.map((n) => (
+                            <NotifItem
+                              key={n.id}
+                              notif={n}
+                              onClick={() => handleOpenDetail(n)}
+                              onMarkRead={() => void markRead(n.id)}
+                              onRemove={() => void remove(n.id)}
+                            />
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         )}
@@ -147,7 +251,7 @@ function NotifItem({
       onClick={onClick}
     >
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center text-base shadow-sm">
+        <div className={`flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br ${colorForType(notif.type)} flex items-center justify-center text-base shadow-sm`}>
           {icon}
         </div>
         <div className="flex-1 min-w-0">
@@ -227,7 +331,7 @@ function NotificationDetailModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header với icon to */}
-        <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 px-5 pt-5 pb-4 text-white relative">
+        <div className={`bg-gradient-to-r ${colorForType(notif.type)} px-5 pt-5 pb-4 text-white relative`}>
           <button
             type="button"
             onClick={onClose}
