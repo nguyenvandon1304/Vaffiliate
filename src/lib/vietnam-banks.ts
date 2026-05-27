@@ -58,55 +58,61 @@ export const VIETNAM_BANKS: VietnamBank[] = [
  * Map từ bank_code (mã ngắn dùng trong app, vd. "VCB", "MBB") sang BIN số 6 chữ số
  * theo chuẩn NAPAS / VietQR.io. Dùng để generate URL QR thanh toán.
  *
- * Reference: https://api.vietqr.io/v2/banks
+ * Reference: https://api.vietqr.io/v2/banks (verified với data chính thức)
+ * Update lần cuối: 2026-05
  */
 export const VIETNAM_BANK_BIN_MAP: Record<string, string> = {
-  VCB: "970436",
-  TCB: "970407",
-  VPB: "970432",
-  MBB: "970422",
-  ACB: "970416",
-  BID: "970418",
-  CTG: "970415",
-  AGR: "970405",
-  SHB: "970443",
-  STB: "970403",
-  HDB: "970437",
-  TPB: "970423",
-  MSB: "970426",
-  LPB: "970449",
-  OCB: "970448",
-  EIB: "970431",
-  SSB: "970440",
-  NAB: "970428",
-  BAB: "970409",
-  VAB: "970427",
-  SCB: "970429",
-  ABB: "970425",
-  KLB: "970452",
-  PGB: "970430",
-  VIB: "970441",
-  NVB: "970419",
-  SGB: "970400",
-  PVC: "970412",
-  BVB: "970438",
-  VRB: "970421",
-  GPB: "970408",
-  CBB: "970444",
-  OJB: "970414",
-  CAKE: "546034",
-  UBANK: "546035",
-  TNEX: "9704261",
-  CIMB: "422589",
-  SCVN: "970410",
-  HSBC: "458761",
-  SHBVN: "970424",
-  WOO: "970457",
-  UOB: "970458",
-  KBVN: "970462",
-  IBKVN: "970455",
-  PNLVN: "970439",
-  HLBVN: "970442",
+  // ─── Ngân hàng phổ biến ───
+  VCB: "970436",   // Vietcombank
+  TCB: "970407",   // Techcombank
+  VPB: "970432",   // VPBank
+  MBB: "970422",   // MB Bank
+  ACB: "970416",   // ACB
+  BID: "970418",   // BIDV
+  CTG: "970415",   // VietinBank
+  AGR: "970405",   // Agribank
+  SHB: "970443",   // SHB
+  STB: "970403",   // Sacombank
+  HDB: "970437",   // HDBank
+  TPB: "970423",   // TPBank
+  MSB: "970426",   // MSB
+  LPB: "970449",   // LPBank
+  OCB: "970448",   // OCB
+  EIB: "970431",   // Eximbank
+  SSB: "970440",   // SeABank
+  NAB: "970428",   // Nam A Bank
+  BAB: "970409",   // BacABank
+  VAB: "970427",   // VietABank
+  SCB: "970429",   // SCB
+  ABB: "970425",   // ABBANK
+  KLB: "970452",   // KienLongBank
+  PGB: "970430",   // PGBank
+  VIB: "970441",   // VIB
+  NVB: "970419",   // NCB
+  SGB: "970400",   // SaigonBank
+  PVC: "970412",   // PVcomBank
+  BVB: "970438",   // BaoVietBank
+  // ─── Liên doanh / quốc tế ───
+  VRB: "970421",   // VRB (Việt-Nga)
+  GPB: "970408",   // GPBank
+  OJB: "970414",   // MBV (former OceanBank)
+  CBB: "970444",   // CBBank
+  CIMB: "422589",  // CIMB
+  SCVN: "970410",  // Standard Chartered VN
+  HSBC: "458761",  // HSBC
+  SHBVN: "970424", // Shinhan Bank VN
+  WOO: "970457",   // Woori VN
+  UOB: "970458",   // United Overseas
+  KBVN: "970462",  // KB Kookmin (HN)
+  IBKVN: "970455", // IBK Hà Nội
+  PNLVN: "970439", // Public Bank VN (PBVN)
+  HLBVN: "970442", // Hong Leong VN
+  // ─── Ngân hàng số ───
+  CAKE: "546034",  // CAKE by VPBank
+  UBANK: "546035", // Ubank by VPBank
+  // TNEX không có trong VietQR.io API → user dùng app MSB chính thay vì TNEX,
+  // tạm dùng BIN của MSB để QR vẫn chuyển khoản về MSB (TNEX là nhánh số của MSB).
+  TNEX: "970426",  // MSB (TNEX là digital arm của MSB)
 };
 
 /**

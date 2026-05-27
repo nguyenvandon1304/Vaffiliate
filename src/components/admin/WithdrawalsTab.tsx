@@ -259,6 +259,7 @@ function QRTransferModal({ w, onClose, onApproved }: { w: WithdrawalRow; onClose
   const [copied, setCopied] = useState<string | null>(null);
 
   // Map bank_code → BIN số 6 chữ số. Inline để không phải import (tránh tăng bundle).
+  // Verified với data chính thức từ https://api.vietqr.io/v2/banks (2026-05).
   const BANK_BIN: Record<string, string> = {
     VCB: "970436", TCB: "970407", VPB: "970432", MBB: "970422", ACB: "970416",
     BID: "970418", CTG: "970415", AGR: "970405", SHB: "970443", STB: "970403",
@@ -267,7 +268,8 @@ function QRTransferModal({ w, onClose, onApproved }: { w: WithdrawalRow; onClose
     SCB: "970429", ABB: "970425", KLB: "970452", PGB: "970430", VIB: "970441",
     NVB: "970419", SGB: "970400", PVC: "970412", BVB: "970438", VRB: "970421",
     GPB: "970408", CBB: "970444", OJB: "970414", CAKE: "546034", UBANK: "546035",
-    TNEX: "9704261", CIMB: "422589", SCVN: "970410", HSBC: "458761", SHBVN: "970424",
+    TNEX: "970426", // TNEX là digital arm của MSB → dùng BIN MSB
+    CIMB: "422589", SCVN: "970410", HSBC: "458761", SHBVN: "970424",
     WOO: "970457", UOB: "970458", KBVN: "970462", IBKVN: "970455", PNLVN: "970439",
     HLBVN: "970442",
   };
