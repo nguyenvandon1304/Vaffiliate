@@ -8,7 +8,7 @@ import { warnMissingEnv } from "@/lib/env-check";
  * ÄÃ£ migrate tá»« `node:sqlite` (file local, sync API) sang `postgres` (network,
  * async). Giá»¯ nguyÃªn signature cÃ¡c hÃ m export Ä‘á»ƒ khÃ´ng pháº£i sá»­a callsite.
  *
- * YÃªu cáº§u env: DATABASE_URL (connection string Postgres cá»§a Supabase).
+ * Yêu cầu env: DATABASE_URL (connection string Postgres của Supabase).
  * Format: `postgres://postgres.<ref>:<password>@<host>:5432/postgres`
  */
 
@@ -17,14 +17,14 @@ const DATABASE_URL = process.env.DATABASE_URL || "";
 type SqlValue = string | number | boolean | null | Buffer | Date;
 
 /**
- * Convert placeholder SQLite `?` â†’ PostgreSQL `$1, $2, ...` Ä‘á»ƒ ko pháº£i rewrite
- * SQL á»Ÿ callsite. Há»— trá»£ cáº£ `?1, ?2` cá»§a SQLite (khÃ´ng reuse Ä‘Æ°á»£c â€” replace
- * nguyÃªn dáº¡ng theo thá»© tá»± xuáº¥t hiá»‡n).
+ * Convert placeholder SQLite `?` -> PostgreSQL `$1, $2, ...` để ko phải rewrite
+ * SQL ở callsite. Hỗ trợ cả `?1, ?2` của SQLite (không reuse được - replace
+ * nguyên dạng theo thứ tự xuất hiện).
  */
 function convertPlaceholders(sql: string): string {
   // TrÆ°á»›c: `?1, ?2, ?1` (SQLite reuse) â†’ Ä‘á»•i thÃ nh dáº¡ng `$1, $2, $1` (Postgres reuse Ä‘Æ°á»£c).
   let out = sql.replace(/\?(\d+)/g, (_, n) => `$${n}`);
-  // Sau: `?, ?, ?` khÃ´ng sá»‘ â†’ tÄƒng dáº§n $1, $2...
+  // Sau: `?, ?, ?` không số -> tăng dần $1, $2...
   let i = 0;
   out = out.replace(/\?/g, () => `$${++i}`);
   return out;
@@ -38,8 +38,8 @@ class DbAdapter {
   constructor(public readonly sql: postgres.Sql) {}
 
   /**
-   * Cháº¡y 1 statement â€” SELECT tráº£ máº£ng row, INSERT/UPDATE/DELETE tráº£ changes.
-   * Cho INSERT cáº§n `lastInsertRowid`, hÃ£y thÃªm `RETURNING id` vÃ o SQL rá»“i Ä‘á»c
+   * Chạy 1 statement - SELECT trả mảng row, INSERT/UPDATE/DELETE trả changes.
+   * Cho INSERT cáº§n `lastInsertRowid`, hãy thêm `RETURNING id` vÃ o SQL rá»“i Ä‘á»c
    * result.lastInsertRowid (postgres-js tráº£ vá» .count + rows máº£ng).
    */
   async run(
@@ -77,13 +77,13 @@ class DbAdapter {
     return result as unknown as Record<string, unknown>[];
   }
 
-  /** Cháº¡y SQL khÃ´ng cÃ³ params (DDL, multiple statement). */
+  /** Chạy SQL không có params (DDL, multiple statement). */
   async exec(sqlText: string): Promise<void> {
     await this.sql.unsafe(sqlText);
   }
 
   /**
-   * Transaction â€” postgres-js wrap trong `sql.begin()`. Callback nháº­n adapter
+   * Transaction - postgres-js wrap trong `sql.begin()`. Callback nhận adapter
    * má»›i wrap quanh tx connection Ä‘á»ƒ má»i query bÃªn trong cÃ¹ng transaction.
    */
   async transaction<T>(fn: (tx: DbAdapter) => Promise<T>): Promise<T> {
@@ -98,9 +98,9 @@ const globalForDb = globalThis as unknown as {
   __vaff_sql: postgres.Sql | null;
 };
 
-/** No-op Ä‘á»ƒ giá»¯ tÆ°Æ¡ng thÃ­ch â€” postgres tá»± persist sau má»—i statement. */
+/** No-op để giữ tương thích - postgres tự persist sau mỗi statement. */
 function saveDb(): void {
-  /* postgres tá»± ghi DB. */
+  /* postgres tự ghi DB. */
 }
 
 let initPromise: Promise<DbAdapter> | null = null;
@@ -122,10 +122,10 @@ async function doInit(): Promise<DbAdapter> {
 
   const sql = postgres(DATABASE_URL, {
     ssl: "require",
-    max: 10,                  // pool tá»‘i Ä‘a 10 conn â€” Ä‘á»§ cho Vercel free tier
-    idle_timeout: 20,         // giÃ¢y â€” Ä‘Ã³ng conn idle Ä‘á»ƒ giáº£i phÃ³ng slot
-    connect_timeout: 10,      // giÃ¢y â€” fail nhanh náº¿u Supabase down
-    prepare: false,           // tÆ°Æ¡ng thÃ­ch Supabase pgbouncer (transaction mode)
+    max: 10,                  // pool tối đa 10 conn - đủ cho Vercel free tier
+    idle_timeout: 20,         // giây - đóng conn idle để giải phóng slot
+    connect_timeout: 10,      // giây - fail nhanh nếu Supabase down
+    prepare: false,           // tương thích Supabase pgbouncer (transaction mode)
   });
 
   const adapter = new DbAdapter(sql);
@@ -137,8 +137,8 @@ async function doInit(): Promise<DbAdapter> {
 }
 
 /**
- * Táº¡o schema + migration nháº¹. Postgres há»— trá»£ `ADD COLUMN IF NOT EXISTS` nÃªn
- * khÃ´ng cáº§n try/catch nhÆ° SQLite.
+ * Táº¡o schema + migration nháº¹. Postgres há»— trá»£ `ADD COLUMN IF NOT EXISTS` nên
+ * không cần try/catch như SQLite.
  */
 async function initSchema(database: DbAdapter): Promise<void> {
   await database.exec(`
@@ -186,7 +186,7 @@ async function initSchema(database: DbAdapter): Promise<void> {
       store TEXT NOT NULL DEFAULT 'Shopee',
       amount BIGINT NOT NULL DEFAULT 0,
       cashback BIGINT NOT NULL DEFAULT 0,
-      status TEXT NOT NULL DEFAULT 'Chá» xÃ¡c nháº­n',
+      status TEXT NOT NULL DEFAULT 'Chờ xác nhận',
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `);
@@ -218,7 +218,7 @@ async function initSchema(database: DbAdapter): Promise<void> {
       user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       bank_account_id BIGINT NOT NULL REFERENCES bank_accounts(id) ON DELETE CASCADE,
       amount BIGINT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'Äang xá»­ lÃ½',
+      status TEXT NOT NULL DEFAULT 'Đang xử lý',
       admin_note TEXT,
       updated_at TIMESTAMPTZ,
       created_at TIMESTAMPTZ DEFAULT NOW()
@@ -346,7 +346,7 @@ async function initSchema(database: DbAdapter): Promise<void> {
     )
   `);
 
-  // Lá»‹ch sá»­ quay vÃ²ng â€” má»—i láº§n spin táº¡o 1 row. DÃ¹ng Ä‘á»ƒ check cooldown 24h.
+  // Lịch sử quay vòng - mỗi lần spin tạo 1 row. Dùng để check cooldown 24h.
   await database.exec(`
     CREATE TABLE IF NOT EXISTS spin_history (
       id BIGSERIAL PRIMARY KEY,
@@ -358,7 +358,7 @@ async function initSchema(database: DbAdapter): Promise<void> {
     )
   `);
 
-  // Wishlist â€” user paste link Shopee Ä‘á»ƒ theo dÃµi giÃ¡. App tá»± check giÃ¡ Ä‘á»‹nh ká»³
+  // Wishlist - user paste link Shopee để theo dõi giá. App tự check giá định kỳ
   // (lazy check khi user má»Ÿ trang) vÃ  notify khi giáº£m giÃ¡.
   await database.exec(`
     CREATE TABLE IF NOT EXISTS wishlist (
@@ -486,7 +486,7 @@ async function initSchema(database: DbAdapter): Promise<void> {
 
   // Fix old labels (idempotent)
   await database.run(
-    "UPDATE wallet SET label = 'Biáº¿n Ä‘á»™ng sá»‘ dÆ°' WHERE label IN ('Cong so du', 'C?ng s? du', 'Cá»™ng sá»‘ dÆ°')",
+    "UPDATE wallet SET label = 'Biến động số dư' WHERE label IN ('Cong so du', 'C?ng s? du', 'Cá»™ng sá»‘ dÆ°')",
     [],
   );
 }
@@ -563,7 +563,7 @@ function getEncKey(): Buffer {
     } catch { /* fallthrough */ }
     console.warn("[V-Affiliate] âš ï¸  APP_ENCRYPTION_KEY Ä‘á»‹nh dáº¡ng khÃ´ng há»£p lá»‡, dÃ¹ng fallback derived key.");
   }
-  // Fallback (KHÃ”NG dÃ¹ng production) â€” derive tá»« DATABASE_URL Ä‘á»ƒ má»—i env cÃ³ key khÃ¡c.
+  // Fallback (KHÔNG dùng production) - derive từ DATABASE_URL để mỗi env có key khác.
   return crypto.createHash("sha256").update(`v-affiliate:${DATABASE_URL || "no-db"}`).digest();
 }
 
@@ -628,7 +628,7 @@ function rowToUser(row: Record<string, unknown>): User {
   };
 }
 
-/** Postgres tráº£ TIMESTAMPTZ thÃ nh Date object. Convert vá» ISO string cho UI cÅ©. */
+/** Postgres trả TIMESTAMPTZ thành Date object. Convert về ISO string cho UI cũ. */
 function toIso(v: unknown): string {
   if (v instanceof Date) return v.toISOString();
   if (typeof v === "string") return v;
@@ -645,13 +645,13 @@ export async function registerUser(
   }
 
   // Chuáº©n hÃ³a username vá» lowercase khi lÆ°u â€” login sáº½ so sÃ¡nh case-insensitive
-  // Email cÅ©ng lowercase Ä‘á»ƒ khá»›p cÃ¡c flow gá»­i/xÃ¡c minh email.
+  // Email cũng lowercase để khớp các flow gửi/xác minh email.
   const normalizedUsername = username.toLowerCase();
   const normalizedEmail = email.trim().toLowerCase();
 
   const database = await getDb();
 
-  // Check trÃ¹ng username case-insensitive
+  // Check trùng username case-insensitive
   const existingUser = await database.get(
     "SELECT id FROM users WHERE LOWER(username) = LOWER(?)",
     [normalizedUsername],
@@ -677,7 +677,7 @@ export async function registerUser(
   );
   saveDb();
 
-  if (!row) return { success: false, error: "KhÃ´ng thá»ƒ táº¡o tÃ i khoáº£n" };
+  if (!row) return { success: false, error: "Không thỒ tạo tài khoản" };
   return { success: true, user: rowToUser(row) };
 }
 
@@ -697,8 +697,8 @@ export async function loginUser(
 }> {
   const database = await getDb();
 
-  // Username so sÃ¡nh "loose": cho phÃ©p nháº­p Ä‘Ãºng nguyÃªn username gá»‘c HOáº¶C
-  // chá»‰ viáº¿t hoa chá»¯ cÃ¡i Äáº¦U. VÃ­ dá»¥ user gá»‘c "nguyenvandon" thÃ¬:
+  // Username so sánh "loose": cho phÃ©p nháº­p Ä‘Ãºng nguyÃªn username gá»‘c HOáº¶C
+  // chá»‰ viáº¿t hoa chá»¯ cÃ¡i Äáº¦U. VÃ­ dá»¥ user gá»‘c "nguyenvandon" thì:
   //   - "nguyenvandon"  âœ…
   //   - "Nguyenvandon"  âœ… (capitalize chá»¯ Ä‘áº§u)
   //   - "NGUYENVANDON"  âŒ
@@ -712,7 +712,7 @@ export async function loginUser(
     [username],
   );
 
-  const generic = "TÃªn Ä‘Äƒng nháº­p hoáº·c máº­t kháº©u khÃ´ng Ä‘Ãºng";
+  const generic = "Tên đăng nhập hoặc mật khẩu không đúng";
   if (!row) {
     await verifyPassword(password, "pbkdf2$10000$00$00", null);
     return { success: false, error: generic };
@@ -722,7 +722,7 @@ export async function loginUser(
   const storedUsername = String(row.username);
   const capitalizedFirst = storedUsername.charAt(0).toUpperCase() + storedUsername.slice(1);
   if (username !== storedUsername && username !== capitalizedFirst) {
-    // Cá»‘ tÃ¬nh verify password Ä‘á»ƒ giá»¯ timing constant â€” chá»‘ng timing attack
+    // Cố tình verify password để giữ timing constant - chống timing attack
     await verifyPassword(password, "pbkdf2$10000$00$00", null);
     return { success: false, error: generic };
   }
@@ -738,7 +738,7 @@ export async function loginUser(
       await verifyPassword(password, row.password_hash as string, row.salt as string | null);
       return {
         success: false,
-        error: `TÃ i khoáº£n táº¡m khoÃ¡ do nháº­p sai nhiá»u láº§n. Thá»­ láº¡i sau ~${minutes} phÃºt.`,
+        error: `Tài khoản tạm khoá do nhập sai nhiều lần. Thử lại sau ~${minutes} phút.`,
       };
     }
     await database.run("UPDATE users SET login_failed_count = 0, login_locked_until = NULL WHERE id = ?", [userId]);
@@ -755,7 +755,7 @@ export async function loginUser(
         "UPDATE users SET login_failed_count = ?, login_locked_until = ? WHERE id = ?",
         [failed, lockedUntilIso, userId],
       );
-      return { success: false, error: "TÃ i khoáº£n táº¡m khoÃ¡ do nháº­p sai nhiá»u láº§n. Thá»­ láº¡i sau ~15 phÃºt." };
+      return { success: false, error: "Tài khoản tạm khoá do nhập sai nhiều lần. Thử lại sau ~15 phút." };
     }
     await database.run("UPDATE users SET login_failed_count = ? WHERE id = ?", [failed, userId]);
     return { success: false, error: generic };
@@ -765,16 +765,16 @@ export async function loginUser(
     return { success: false, error: "TÃ i khoáº£n Ä‘Ã£ bá»‹ khoÃ¡. Vui lÃ²ng liÃªn há»‡ há»— trá»£." };
   }
 
-  // Email chÆ°a verify: KHÃ”NG block Ä‘Äƒng nháº­p (PhÆ°Æ¡ng Ã¡n C â€” Soft Email Gate).
-  // User váº«n login Ä‘Æ°á»£c, dashboard hiá»‡n banner cáº£nh bÃ¡o. CÃ¡c API nháº¡y cáº£m
+  // Email chưa verify: KHÔNG block đăng nhập (Phương án C - Soft Email Gate).
+  // User vẫn login được, dashboard hiện banner cảnh báo. Các API nhạy cảm
   // (rÃºt tiá»n, Ä‘á»•i password, 2FA, referral bonus) sáº½ check qua requireVerified()
-  // vÃ  tráº£ 403.
+  // và trả 403.
 
   // 2FA TOTP
   if (Number(row.totp_enabled) === 1) {
     const code = meta.totpCode;
     if (!code) {
-      return { success: false, needTotp: true, error: "YÃªu cáº§u mÃ£ xÃ¡c thá»±c 2 lá»›p" };
+      return { success: false, needTotp: true, error: "Yêu cầu mã xác thực 2 lớp" };
     }
     const secretEnc = row.totp_secret as string | null;
     const secret = secretEnc ? decryptSecret(secretEnc) : null;
@@ -797,7 +797,7 @@ export async function loginUser(
           "UPDATE users SET login_failed_count = ?, login_locked_until = ? WHERE id = ?",
           [failed, lockedUntilIso, userId],
         );
-        return { success: false, needTotp: true, error: "TÃ i khoáº£n táº¡m khoÃ¡ do sai nhiá»u láº§n. Thá»­ láº¡i sau ~15 phÃºt." };
+        return { success: false, needTotp: true, error: "Tài khoản tạm khoá do sai nhiều lần. Thử lại sau ~15 phút." };
       }
       await database.run("UPDATE users SET login_failed_count = ? WHERE id = ?", [failed, userId]);
       return { success: false, needTotp: true, error: "MÃ£ xÃ¡c thá»±c 2 lá»›p hoáº·c backup code khÃ´ng Ä‘Ãºng" };
@@ -956,18 +956,18 @@ export async function changeUserPassword(
   options: { keepToken?: string } = {},
 ): Promise<{ success: boolean; error?: string }> {
   if (typeof newPassword !== "string" || newPassword.length < 6) {
-    return { success: false, error: "Máº­t kháº©u má»›i pháº£i cÃ³ Ã­t nháº¥t 6 kÃ½ tá»±" };
+    return { success: false, error: "Mật khẩu mới phải có ít nhất 6 ký tự" };
   }
   if (newPassword === currentPassword) {
-    return { success: false, error: "Máº­t kháº©u má»›i pháº£i khÃ¡c máº­t kháº©u hiá»‡n táº¡i" };
+    return { success: false, error: "Mật khẩu mới phải khác mật khẩu hiện tại" };
   }
 
   const database = await getDb();
   const row = await database.get("SELECT password_hash, salt FROM users WHERE id = ?", [userId]);
-  if (!row) return { success: false, error: "KhÃ´ng tÃ¬m tháº¥y ngÆ°á»i dÃ¹ng" };
+  if (!row) return { success: false, error: "Không tìm thấy người dùng" };
 
   const check = await verifyPassword(currentPassword, row.password_hash as string, row.salt as string | null);
-  if (!check.valid) return { success: false, error: "Máº­t kháº©u hiá»‡n táº¡i khÃ´ng Ä‘Ãºng" };
+  if (!check.valid) return { success: false, error: "Mật khẩu hiện tại không đúng" };
 
   const newHash = await hashPasswordEncoded(newPassword);
   await database.run(
@@ -988,11 +988,11 @@ export async function deleteUserAccount(
 ): Promise<{ success: boolean; error?: string }> {
   const database = await getDb();
   const row = await database.get("SELECT password_hash, salt, role FROM users WHERE id = ?", [userId]);
-  if (!row) return { success: false, error: "KhÃ´ng tÃ¬m tháº¥y ngÆ°á»i dÃ¹ng" };
-  if ((row.role as string) === "admin") return { success: false, error: "TÃ i khoáº£n admin khÃ´ng thá»ƒ tá»± xoÃ¡" };
+  if (!row) return { success: false, error: "Không tìm thấy người dùng" };
+  if ((row.role as string) === "admin") return { success: false, error: "Tài khoản admin không thỒ tự xoá" };
 
   const check = await verifyPassword(password, row.password_hash as string, row.salt as string | null);
-  if (!check.valid) return { success: false, error: "Máº­t kháº©u khÃ´ng Ä‘Ãºng" };
+  if (!check.valid) return { success: false, error: "Mật khẩu không đúng" };
 
   await database.run("DELETE FROM users WHERE id = ?", [userId]);
   return { success: true };
@@ -1029,7 +1029,7 @@ export async function verifyEmailToken(
     [tokenHash],
   );
   if (!row) return { success: false, error: "Link xÃ¡c thá»±c khÃ´ng há»£p lá»‡" };
-  if (Number(row.used) === 1) return { success: false, error: "Link Ä‘Ã£ Ä‘Æ°á»£c sá»­ dá»¥ng" };
+  if (Number(row.used) === 1) return { success: false, error: "Link đã được sử dụng" };
   if (new Date(row.expires_at as Date | string) < new Date()) {
     return { success: false, error: "Link Ä‘Ã£ háº¿t háº¡n (24h)" };
   }
@@ -1060,12 +1060,12 @@ export async function getUserByEmail(
 
 /**
  * Äá»•i email cho user CHÆ¯A verify â€” chá»‰ cho phÃ©p khi email_verified = 0.
- * DÃ¹ng khi user nháº­p sai email lÃºc Ä‘Äƒng kÃ½, muá»‘n sá»­a láº¡i.
+ * Dùng khi user nhập sai email lúc đăng ký, muốn sửa lại.
  *
- * Báº£o máº­t:
- * - YÃªu cáº§u username + password Ä‘á»ƒ xÃ¡c thá»±c owner
- * - Email má»›i pháº£i chÆ°a Ä‘Æ°á»£c dÃ¹ng bá»Ÿi user khÃ¡c
- * - KhÃ´ng cho dÃ¹ng náº¿u user Ä‘Ã£ verify (Ä‘Ã£ cÃ³ email + dÃ¹ng forgot-password / profile thay)
+ * Bảo mật:
+ * - Yêu cầu username + password để xác thực owner
+ * - Email mới phải chưa được dùng bởi user khác
+ * - Không cho dùng nếu user đã verify (đã có email + dùng forgot-password / profile thay)
  */
 export async function changeUnverifiedEmail(
   username: string,
@@ -1078,12 +1078,12 @@ export async function changeUnverifiedEmail(
     [username],
   );
   if (!row) {
-    // Verify password Ä‘á»ƒ giá»¯ timing constant
+    // Verify password để giữ timing constant
     await verifyPassword(password, "pbkdf2$10000$00$00", null);
-    return { success: false, error: "TÃªn Ä‘Äƒng nháº­p hoáº·c máº­t kháº©u khÃ´ng Ä‘Ãºng" };
+    return { success: false, error: "Tên đăng nhập hoặc mật khẩu không đúng" };
   }
   const ok = await verifyPassword(password, row.password_hash as string, null);
-  if (!ok) return { success: false, error: "TÃªn Ä‘Äƒng nháº­p hoáº·c máº­t kháº©u khÃ´ng Ä‘Ãºng" };
+  if (!ok) return { success: false, error: "Tên đăng nhập hoặc mật khẩu không đúng" };
 
   if (Number(row.email_verified) === 1) {
     return { success: false, error: "TÃ i khoáº£n Ä‘Ã£ xÃ¡c minh email. Vui lÃ²ng dÃ¹ng tÃ­nh nÄƒng cáº­p nháº­t profile Ä‘á»ƒ Ä‘á»•i email." };
@@ -1106,7 +1106,7 @@ export async function changeUnverifiedEmail(
     [normalizedEmail, userId],
   );
 
-  // VÃ´ hiá»‡u hoÃ¡ táº¥t cáº£ token verify cÅ© (Ä‘á»ƒ link cÅ© khÃ´ng dÃ¹ng Ä‘Æ°á»£c ná»¯a)
+  // Vô hiệu hoá tất cả token verify cũ (để link cũ không dùng được nữa)
   await database.run(
     "UPDATE email_verification_tokens SET used = 1 WHERE user_id = ? AND used = 0",
     [userId],
@@ -1180,7 +1180,7 @@ export interface AuditLogResult {
 
 /**
  * Filter audit logs vá»›i nhiá»u tiÃªu chÃ­ + JOIN users Ä‘á»ƒ hiá»‡n username.
- * DÃ¹ng cho UI advanced + export CSV.
+ * Dùng cho UI advanced + export CSV.
  */
 export async function searchAuditLogs(filter: AuditLogFilter): Promise<AuditLogResult> {
   const database = await getDb();
@@ -1316,9 +1316,9 @@ export async function getDashboardStats(userId: number): Promise<DashboardStats>
   const database = await getDb();
   const row = await database.get(
     `SELECT
-      COALESCE((SELECT SUM(cashback) FROM orders WHERE user_id = $1 AND status = 'ÄÃ£ hoÃ n tiá»n'), 0) AS total_cashback,
+      COALESCE((SELECT SUM(cashback) FROM orders WHERE user_id = $1 AND status = 'Đã hoàn tiền'), 0) AS total_cashback,
       COALESCE((SELECT COUNT(*) FROM orders WHERE user_id = $1), 0) AS total_orders,
-      COALESCE((SELECT COUNT(*) FROM orders WHERE user_id = $1 AND status IN ('Äang xá»­ lÃ½', 'Chá» xÃ¡c nháº­n')), 0) AS pending_orders,
+      COALESCE((SELECT COUNT(*) FROM orders WHERE user_id = $1 AND status IN ('Đang xử lý', 'Chờ xác nhận')), 0) AS pending_orders,
       COALESCE((SELECT SUM(CASE WHEN type='credit' THEN amount ELSE -amount END) FROM wallet WHERE user_id = $1), 0) AS wallet_balance,
       COALESCE((SELECT SUM(amount) FROM withdrawals WHERE user_id = $1 AND status = 'pending'), 0) AS pending_withdraw_amount,
       COALESCE((SELECT SUM(amount) FROM withdrawals WHERE user_id = $1 AND status = 'approved'), 0) AS total_withdrawn,
@@ -1346,7 +1346,7 @@ export interface LeaderboardEntry {
 
 export async function getLeaderboard(period: "month" | "all" = "all"): Promise<LeaderboardEntry[]> {
   const database = await getDb();
-  // Postgres dÃ¹ng `date_trunc('month', NOW())` thay cho SQLite `date('now', 'start of month')`.
+  // Postgres dùng `date_trunc('month', NOW())` thay cho SQLite `date('now', 'start of month')`.
   const dateFilter = period === "month" ? "AND o.created_at >= date_trunc('month', NOW())" : "";
   const rows = await database.all(`
     SELECT u.display_name, COUNT(o.id) AS total_orders, COALESCE(SUM(o.cashback), 0) AS total_cashback
@@ -1385,7 +1385,7 @@ export async function updateUserProfile(
   if (data.email !== undefined) { fields.push("email = ?"); values.push(data.email); }
   if (data.phone !== undefined) { fields.push("phone = ?"); values.push(data.phone); }
 
-  if (fields.length === 0) return { success: false, error: "KhÃ´ng cÃ³ thÃ´ng tin cáº§n cáº­p nháº­t" };
+  if (fields.length === 0) return { success: false, error: "Không có thông tin cần cập nhật" };
 
   fields.push("updated_at = NOW()");
   values.push(userId);
@@ -1422,7 +1422,7 @@ export async function addBankAccount(
   const accountNumber = (data.account_number || "").trim();
   const accountHolder = (data.account_holder || "").trim();
 
-  if (!bankCode || !bankName) return { success: false, error: "Vui lÃ²ng chá»n ngÃ¢n hÃ ng" };
+  if (!bankCode || !bankName) return { success: false, error: "Vui lòng chọn ngân hàng" };
   if (!/^\d{6,20}$/.test(accountNumber)) {
     return { success: false, error: "Sá»‘ tÃ i khoáº£n pháº£i lÃ  6â€“20 chá»¯ sá»‘" };
   }
@@ -1483,7 +1483,7 @@ export async function setWithdrawPin(
   pin: string,
 ): Promise<{ success: boolean; error?: string }> {
   if (typeof pin !== "string" || pin.length < 4 || pin.length > 6 || !/^\d+$/.test(pin)) {
-    return { success: false, error: "Máº­t kháº©u rÃºt tiá»n pháº£i lÃ  4â€“6 chá»¯ sá»‘" };
+    return { success: false, error: "Mật khẩu rút tiền phải là 4-6 chữ số" };
   }
   const database = await getDb();
   const encoded = await hashPasswordEncoded(pin);
@@ -1577,13 +1577,13 @@ export async function createWithdrawRequest(
       );
       return {
         success: false,
-        error: `Máº­t kháº©u rÃºt tiá»n bá»‹ khoÃ¡ táº¡m thá»i. Thá»­ láº¡i sau ~${minutes} phÃºt.`,
+        error: `Mật khẩu rút tiền bị khoá tạm thời. Thử lại sau ~${minutes} phút.`,
       };
     }
     if (pinResult.remaining !== undefined) {
-      return { success: false, error: `Máº­t kháº©u rÃºt tiá»n khÃ´ng Ä‘Ãºng (cÃ²n ${pinResult.remaining} láº§n thá»­)` };
+      return { success: false, error: `Mật khẩu rút tiền không đúng (còn ${pinResult.remaining} lần thử)` };
     }
-    return { success: false, error: "Máº­t kháº©u rÃºt tiá»n khÃ´ng Ä‘Ãºng" };
+    return { success: false, error: "Mật khẩu rút tiền không đúng" };
   }
 
   const bank = await database.get(
@@ -1597,7 +1597,7 @@ export async function createWithdrawRequest(
     [userId],
   );
   const balance = Number(walletRow?.balance ?? 0);
-  if (amount > balance) return { success: false, error: "Sá»‘ dÆ° khÃ´ng Ä‘á»§" };
+  if (amount > balance) return { success: false, error: "Số dư không đủ" };
 
   await database.transaction(async (tx) => {
     await tx.run(
@@ -1606,7 +1606,7 @@ export async function createWithdrawRequest(
     );
     await tx.run(
       "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
-      [userId, "RÃºt tiá»n", amount, "debit"],
+      [userId, "Rút tiền", amount, "debit"],
     );
   });
   return { success: true };
@@ -1618,7 +1618,7 @@ export async function createWithdrawRequest(
 export async function resetWallet(username: string): Promise<{ success: boolean; error?: string }> {
   const database = await getDb();
   const user = await database.get("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", [username]);
-  if (!user) return { success: false, error: "KhÃ´ng tÃ¬m tháº¥y ngÆ°á»i dÃ¹ng" };
+  if (!user) return { success: false, error: "Không tìm thấy người dùng" };
   await database.run("DELETE FROM wallet WHERE user_id = ?", [Number(user.id)]);
   return { success: true };
 }
@@ -1628,7 +1628,7 @@ export async function getWalletBalance(
 ): Promise<{ success: boolean; balance?: number; error?: string }> {
   const database = await getDb();
   const user = await database.get("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", [username]);
-  if (!user) return { success: false, error: "KhÃ´ng tÃ¬m tháº¥y ngÆ°á»i dÃ¹ng" };
+  if (!user) return { success: false, error: "Không tìm thấy người dùng" };
   const row = await database.get(
     "SELECT COALESCE(SUM(CASE WHEN type='credit' THEN amount ELSE -amount END), 0) AS balance FROM wallet WHERE user_id = ?",
     [Number(user.id)],
@@ -1639,11 +1639,11 @@ export async function getWalletBalance(
 export async function addBalance(
   username: string,
   amount: number,
-  label: string = "Biáº¿n Ä‘á»™ng sá»‘ dÆ°",
+  label: string = "Biến động số dư",
 ): Promise<{ success: boolean; error?: string }> {
   const database = await getDb();
   const user = await database.get("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", [username]);
-  if (!user) return { success: false, error: "KhÃ´ng tÃ¬m tháº¥y ngÆ°á»i dÃ¹ng" };
+  if (!user) return { success: false, error: "Không tìm thấy người dùng" };
   await database.run(
     "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
     [Number(user.id), label, amount, "credit"],
@@ -1654,18 +1654,18 @@ export async function addBalance(
 export async function subtractBalance(
   username: string,
   amount: number,
-  label: string = "Biáº¿n Ä‘á»™ng sá»‘ dÆ°",
+  label: string = "Biến động số dư",
 ): Promise<{ success: boolean; error?: string }> {
   const database = await getDb();
   const user = await database.get("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", [username]);
-  if (!user) return { success: false, error: "KhÃ´ng tÃ¬m tháº¥y ngÆ°á»i dÃ¹ng" };
+  if (!user) return { success: false, error: "Không tìm thấy người dùng" };
 
   const row = await database.get(
     "SELECT COALESCE(SUM(CASE WHEN type='credit' THEN amount ELSE -amount END), 0) AS balance FROM wallet WHERE user_id = ?",
     [Number(user.id)],
   );
   const balance = Number(row?.balance ?? 0);
-  if (amount > balance) return { success: false, error: "Sá»‘ dÆ° khÃ´ng Ä‘á»§" };
+  if (amount > balance) return { success: false, error: "Số dư không đủ" };
 
   await database.run(
     "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
@@ -1806,8 +1806,8 @@ export async function resetPassword(
     "SELECT user_id, expires_at, used FROM password_reset_tokens WHERE token = ?",
     [tokenHash],
   );
-  if (!row) return { success: false, error: "Link Ä‘áº·t láº¡i máº­t kháº©u khÃ´ng há»£p lá»‡" };
-  if (Number(row.used) === 1) return { success: false, error: "Link Ä‘Ã£ Ä‘Æ°á»£c sá»­ dá»¥ng" };
+  if (!row) return { success: false, error: "Link đặt lại mật khẩu không hợp lệ" };
+  if (Number(row.used) === 1) return { success: false, error: "Link đã được sử dụng" };
   if (new Date(row.expires_at as Date | string) < new Date()) {
     return { success: false, error: "Link Ä‘Ã£ háº¿t háº¡n (30 phÃºt)" };
   }
@@ -1916,7 +1916,7 @@ export interface FunnelData {
 }
 
 /**
- * Funnel conversion tá»« user â†’ click (link) â†’ order â†’ completed order.
+ * Funnel conversion từ user -> click (link) -> order -> completed order.
  * Äáº¿m DISTINCT user_id Ä‘á»ƒ trÃ¡nh trÃ¹ng láº·p.
  */
 export async function getFunnelData(): Promise<FunnelData> {
@@ -1926,10 +1926,10 @@ export async function getFunnelData(): Promise<FunnelData> {
       COALESCE((SELECT COUNT(*) FROM users WHERE role = 'user'), 0) AS total_users,
       COALESCE((SELECT COUNT(DISTINCT user_id) FROM affiliate_links), 0) AS users_with_link,
       COALESCE((SELECT COUNT(DISTINCT user_id) FROM orders), 0) AS users_with_order,
-      COALESCE((SELECT COUNT(DISTINCT user_id) FROM orders WHERE status = 'ÄÃ£ hoÃ n tiá»n'), 0) AS users_with_completed,
+      COALESCE((SELECT COUNT(DISTINCT user_id) FROM orders WHERE status = 'Đã hoàn tiền'), 0) AS users_with_completed,
       COALESCE((SELECT COUNT(*) FROM affiliate_links), 0) AS total_links,
       COALESCE((SELECT COUNT(*) FROM orders), 0) AS total_orders,
-      COALESCE((SELECT COUNT(*) FROM orders WHERE status = 'ÄÃ£ hoÃ n tiá»n'), 0) AS completed_orders`,
+      COALESCE((SELECT COUNT(*) FROM orders WHERE status = 'Đã hoàn tiền'), 0) AS completed_orders`,
     [],
   );
   const usersWithLink = Number(row?.users_with_link ?? 0);
@@ -1999,8 +1999,8 @@ export interface TopProduct {
 
 /**
  * Top sáº£n pháº©m bÃ¡n nhiá»u nháº¥t â€” match qua `affiliate_links` (item_id).
- * VÃ¬ `orders` khÃ´ng cÃ³ item_id trá»±c tiáº¿p, ta join qua user_id + thá»i gian gáº§n
- * nhau (náº¿u cÃ³ cáº¥u trÃºc Ä‘Ã³). Hiá»‡n táº¡i Ä‘Æ¡n giáº£n: láº¥y top theo `affiliate_links`
+ * Vì `orders` khÃ´ng cÃ³ item_id trá»±c tiáº¿p, ta join qua user_id + thá»i gian gáº§n
+ * nhau (nếu có cấu trúc đó). Hiện tại đơn giản: lấy top theo `affiliate_links`
  * cÃ³ nhiá»u click/order nháº¥t â†’ fallback láº¥y tá»« affiliate_links cÃ³ cashback > 0.
  */
 export async function getTopProducts(limit: number = 10): Promise<TopProduct[]> {
@@ -2063,7 +2063,7 @@ export async function getCohortRetention(monthsBack: number = 6): Promise<Cohort
     [String(safeMonths)],
   );
 
-  // 2) Láº¥y active months (user cÃ³ order trong thÃ¡ng nÃ o)
+  // 2) Lấy active months (user có order trong tháng nào)
   const activity = await database.all(
     `SELECT
         user_id,
@@ -2172,7 +2172,7 @@ export async function getAllUsersPaged(
 
 export interface OrderListFilter {
   search?: string;
-  status?: "ÄÃ£ hoÃ n tiá»n" | "Äang xá»­ lÃ½" | "Chá» xÃ¡c nháº­n" | "ÄÃ£ há»§y" | "all";
+  status?: "Đã hoàn tiền" | "Đang xử lý" | "Chờ xác nhận" | "Đã hủy" | "all";
   store?: string;
   fromDate?: string;
   toDate?: string;
@@ -2293,8 +2293,8 @@ export async function updateWithdrawalStatus(
     "SELECT id, user_id, amount, status FROM withdrawals WHERE id = ?",
     [withdrawalId],
   );
-  if (!row) return { success: false, error: "YÃªu cáº§u rÃºt tiá»n khÃ´ng tá»“n táº¡i" };
-  if ((row.status as string) !== "pending") return { success: false, error: "YÃªu cáº§u Ä‘Ã£ Ä‘Æ°á»£c xá»­ lÃ½" };
+  if (!row) return { success: false, error: "Yêu cầu rút tiá»n khÃ´ng tá»“n táº¡i" };
+  if ((row.status as string) !== "pending") return { success: false, error: "Yêu cầu đã được xử lý" };
 
   const note = (adminNote ?? "").toString().trim().slice(0, 500) || null;
 
@@ -2312,19 +2312,19 @@ export async function updateWithdrawalStatus(
         [userId, "HoÃ n tiá»n rÃºt bá»‹ tá»« chá»‘i", amount, "credit"],
       );
       const msg = note
-        ? `YÃªu cáº§u rÃºt ${amount.toLocaleString("vi-VN")}Ä‘ bá»‹ tá»« chá»‘i. LÃ½ do: ${note}. Sá»‘ tiá»n Ä‘Ã£ hoÃ n láº¡i vÃ­.`
-        : `YÃªu cáº§u rÃºt ${amount.toLocaleString("vi-VN")}Ä‘ bá»‹ tá»« chá»‘i. Sá»‘ tiá»n Ä‘Ã£ hoÃ n láº¡i vÃ­.`;
+        ? `Yêu cầu rút ${amount.toLocaleString("vi-VN")}Ä‘ bị từ chối. Lý do: ${note}. Sá»‘ tiá»n Ä‘Ã£ hoÃ n láº¡i vÃ­.`
+        : `Yêu cầu rút ${amount.toLocaleString("vi-VN")}Ä‘ bá»‹ tá»« chá»‘i. Sá»‘ tiá»n Ä‘Ã£ hoÃ n láº¡i vÃ­.`;
       await tx.run(
         "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
-        [userId, "RÃºt tiá»n bá»‹ tá»« chá»‘i", msg, "withdrawal"],
+        [userId, "Rút tiền bị từ chối", msg, "withdrawal"],
       );
     } else if (status === "approved") {
       await tx.run(
         "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
         [
           userId,
-          "RÃºt tiá»n Ä‘Ã£ duyá»‡t",
-          `YÃªu cáº§u rÃºt ${amount.toLocaleString("vi-VN")}Ä‘ Ä‘Ã£ Ä‘Æ°á»£c duyá»‡t vÃ  Ä‘ang chuyá»ƒn khoáº£n.`,
+          "Rút tiền đã duyệt",
+          `Yêu cầu rút ${amount.toLocaleString("vi-VN")}Ä‘ Ä‘Ã£ Ä‘Æ°á»£c duyá»‡t vÃ  Ä‘ang chuyá»ƒn khoáº£n.`,
           "withdrawal",
         ],
       );
@@ -2351,7 +2351,7 @@ export async function adminCreateOrder(
     [userId, orderCode, store, amount, cashback, status],
   );
 
-  if (status === "ÄÃ£ hoÃ n tiá»n") {
+  if (status === "Đã hoàn tiền") {
     await database.run(
       "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
       [userId, "HoÃ n tiá»n Ä‘Æ¡n hÃ ng", cashback, "credit"],
@@ -2371,13 +2371,13 @@ export async function toggleUserActive(
     "SELECT id, is_active, role FROM users WHERE id = ?",
     [userId],
   );
-  if (!user) return { success: false, error: "KhÃ´ng tÃ¬m tháº¥y ngÆ°á»i dÃ¹ng" };
+  if (!user) return { success: false, error: "Không tìm thấy người dùng" };
 
   if (currentAdminId !== undefined && Number(user.id) === currentAdminId) {
-    return { success: false, error: "Báº¡n khÃ´ng thá»ƒ khoÃ¡ chÃ­nh mÃ¬nh" };
+    return { success: false, error: "Bạn không thỒ khoá chính mình" };
   }
   if ((user.role as string) === "admin") {
-    return { success: false, error: "KhÃ´ng thá»ƒ khoÃ¡ tÃ i khoáº£n admin" };
+    return { success: false, error: "Không thỒ khoá tài khoản admin" };
   }
 
   const newStatus = Number(user.is_active) === 1 ? 0 : 1;
@@ -2401,10 +2401,10 @@ export async function setUserRole(
     "SELECT id, role, email_verified, is_active FROM users WHERE id = ?",
     [userId],
   );
-  if (!user) return { success: false, error: "KhÃ´ng tÃ¬m tháº¥y ngÆ°á»i dÃ¹ng" };
+  if (!user) return { success: false, error: "Không tìm thấy người dùng" };
 
   if (currentAdminId !== undefined && Number(user.id) === currentAdminId) {
-    return { success: false, error: "Báº¡n khÃ´ng thá»ƒ Ä‘á»•i role cá»§a chÃ­nh mÃ¬nh" };
+    return { success: false, error: "Bạn không thể đổi role của chính mình" };
   }
 
   const currentRole = (user.role as string) || "user";
@@ -2479,10 +2479,10 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
   };
 
   const statusRank: Record<string, number> = {
-    "ÄÃ£ há»§y": 0,
-    "Chá» xÃ¡c nháº­n": 1,
-    "Äang xá»­ lÃ½": 2,
-    "ÄÃ£ hoÃ n tiá»n": 3,
+    "Đã hủy": 0,
+    "Chờ xác nhận": 1,
+    "Đang xử lý": 2,
+    "Đã hoàn tiền": 3,
   };
 
   // Pre-load tier list 1 láº§n â€” tier system má»›i (Bronze/Silver/Gold/VIP).
@@ -2497,7 +2497,7 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
     if (cached !== undefined) return cached;
     const row = await tx.get(
       `SELECT
-        COALESCE((SELECT COUNT(*) FROM orders WHERE user_id = $1 AND status = 'ÄÃ£ hoÃ n tiá»n'), 0) AS orders_count,
+        COALESCE((SELECT COUNT(*) FROM orders WHERE user_id = $1 AND status = 'Đã hoàn tiền'), 0) AS orders_count,
         COALESCE((SELECT COUNT(*) FROM referrals WHERE referrer_user_id = $1 AND bonus_credited = 1), 0) AS referrals_count`,
       [userId],
     );
@@ -2522,24 +2522,24 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
     const raw = (shopeeStatus || "").trim().replace(/\s+/g, " ");
     const s = raw.toUpperCase();
     if (
-      s === "COMPLETED" || s === "HOÃ€N THÃ€NH" || s === "HOAN THANH" ||
-      s === "PAID" || s === "ÄÃƒ THANH TOÃN" || s === "DA THANH TOAN"
-    ) return "ÄÃ£ hoÃ n tiá»n";
+      s === "COMPLETED" || s === "HOìN THìNH" || s === "HOAN THANH" ||
+      s === "PAID" || s === "ĐÒ THANH TOÁN" || s === "DA THANH TOAN"
+    ) return "Đã hoàn tiền";
     if (
       s === "PENDING" || s === "PROCESSING" ||
       s === "ÄANG CHá»œ Xá»¬ LÃ" || s === "DANG CHO XU LY" ||
-      s === "ÄANG Xá»¬ LÃ" || s === "DANG XU LY" ||
+      s === "ĐANG XỬ LÝ" || s === "DANG XU LY" ||
       s === "ÄANG CHá»œ" || s === "DANG CHO"
-    ) return "Äang xá»­ lÃ½";
+    ) return "Đang xử lý";
     if (
       s === "CANCELLED" || s === "CANCELED" ||
-      s === "ÄÃƒ Há»¦Y" || s === "ÄÃƒ HUá»¶" || s === "DA HUY" ||
+      s === "ĐÒ HỦY" || s === "ĐÒ HUỶ" || s === "DA HUY" ||
       s === "INVALID" || s === "VÃ” HIá»†U" || s === "VO HIEU"
-    ) return "ÄÃ£ há»§y";
-    if (s === "UNPAID" || s === "CHÆ¯A THANH TOÃN" || s === "CHUA THANH TOAN") {
-      return "Chá» xÃ¡c nháº­n";
+    ) return "Đã hủy";
+    if (s === "UNPAID" || s === "CHƯA THANH TOÁN" || s === "CHUA THANH TOAN") {
+      return "Chờ xác nhận";
     }
-    return "Chá» xÃ¡c nháº­n";
+    return "Chờ xác nhận";
   }
 
   await database.transaction(async (tx) => {
@@ -2567,7 +2567,7 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
             [newStatus, cashback, Number(existingOrder.id)],
           );
 
-          if (newStatus === "ÄÃ£ hoÃ n tiá»n" && oldStatus !== "ÄÃ£ hoÃ n tiá»n" && cashback > 0) {
+          if (newStatus === "Đã hoàn tiền" && oldStatus !== "Đã hoàn tiền" && cashback > 0) {
             await tx.run(
               "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
               [userId, `HoÃ n tiá»n Ä‘Æ¡n ${item.orderCode}`, cashback, "credit"],
@@ -2599,13 +2599,13 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
                 "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
                 [
                   refUserId,
-                  "ðŸ¤ Báº¡n bÃ¨ Ä‘Ã£ cÃ³ Ä‘Æ¡n Ä‘áº§u tiÃªn!",
+                  "ðŸ¤ Bạn bè đã có đơn đầu tiên!",
                   `Báº¡n bÃ¨ báº¡n giá»›i thiá»‡u Ä‘Ã£ cÃ³ Ä‘Æ¡n hoÃ n tiá»n. Tiáº¿p tá»¥c má»i Ä‘á»ƒ lÃªn tier cao hÆ¡n!`,
                   "referral",
                 ],
               );
             }
-          } else if (newStatus === "ÄÃ£ há»§y" && oldStatus === "ÄÃ£ hoÃ n tiá»n" && oldCashback > 0) {
+          } else if (newStatus === "Đã hủy" && oldStatus === "Đã hoàn tiền" && oldCashback > 0) {
             await tx.run(
               "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
               [userId, `Há»§y Ä‘Æ¡n ${item.orderCode} - trá»« hoÃ n tiá»n`, oldCashback, "debit"],
@@ -2680,7 +2680,7 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
           orderCode: item.orderCode,
           itemId: item.itemId,
           status: "unmatched",
-          message: "KhÃ´ng tÃ¬m tháº¥y user táº¡o link cho sáº£n pháº©m nÃ y",
+          message: "Không tìm thấy user tạo link cho sản phẩm này",
         });
         continue;
       }
@@ -2693,7 +2693,7 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
         [userId, item.orderCode, "Shopee", item.amount, cashback, newStatus],
       );
 
-      if (newStatus === "ÄÃ£ hoÃ n tiá»n" && cashback > 0) {
+      if (newStatus === "Đã hoàn tiền" && cashback > 0) {
         await tx.run(
           "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
           [userId, `HoÃ n tiá»n Ä‘Æ¡n ${item.orderCode}`, cashback, "credit"],
@@ -2715,7 +2715,7 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
             "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
             [
               refUserId,
-              "ðŸ¤ Báº¡n bÃ¨ Ä‘Ã£ cÃ³ Ä‘Æ¡n Ä‘áº§u tiÃªn!",
+              "ðŸ¤ Bạn bè đã có đơn đầu tiên!",
               `Báº¡n bÃ¨ báº¡n giá»›i thiá»‡u Ä‘Ã£ cÃ³ Ä‘Æ¡n hoÃ n tiá»n. Tiáº¿p tá»¥c má»i Ä‘á»ƒ lÃªn tier cao hÆ¡n!`,
               "referral",
             ],
@@ -2746,12 +2746,12 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
   });
 
   // Sau transaction â†’ check tier-up cho má»i user bá»‹ áº£nh hÆ°á»Ÿng (Ä‘Ã£ import Ä‘Æ¡n).
-  // Cháº¡y ngoÃ i transaction vÃ¬ checkAndNotifyTierUp tá»± dÃ¹ng connection riÃªng.
+  // Chạy ngoài transaction vì checkAndNotifyTierUp tự dùng connection riêng.
   const affectedUsers = new Set<number>();
   for (const r of result.results) {
     if (r.userId) affectedUsers.add(r.userId);
   }
-  // Fire-and-forget â€” khÃ´ng cáº§n Ä‘á»£i Ä‘á»ƒ response import nhanh.
+  // Fire-and-forget - không cần đợi để response import nhanh.
   void (async () => {
     try {
       const { checkAndNotifyTierUp } = await import("@/lib/tier");
@@ -2796,7 +2796,7 @@ export async function getUserDetail(userId: number): Promise<UserDetail | null> 
     `SELECT
       COALESCE((SELECT SUM(CASE WHEN type='credit' THEN amount ELSE -amount END) FROM wallet WHERE user_id = $1), 0) AS balance,
       COALESCE((SELECT COUNT(*) FROM orders WHERE user_id = $1), 0) AS total_orders,
-      COALESCE((SELECT SUM(cashback) FROM orders WHERE user_id = $1 AND status = 'ÄÃ£ hoÃ n tiá»n'), 0) AS total_cashback`,
+      COALESCE((SELECT SUM(cashback) FROM orders WHERE user_id = $1 AND status = 'Đã hoàn tiền'), 0) AS total_cashback`,
     [userId],
   );
   const recentOrders = await database.all(
@@ -2841,13 +2841,13 @@ export async function adminResetUserPassword(
   currentAdminId: number,
 ): Promise<{ success: boolean; tempPassword?: string; error?: string }> {
   if (targetUserId === currentAdminId) {
-    return { success: false, error: "HÃ£y Ä‘á»•i máº­t kháº©u cá»§a chÃ­nh mÃ¬nh qua trang Báº£o máº­t" };
+    return { success: false, error: "Hãy đổi mật khẩu của chính mình qua trang Bảo mật" };
   }
   const database = await getDb();
   const user = await database.get("SELECT id, role FROM users WHERE id = ?", [targetUserId]);
-  if (!user) return { success: false, error: "KhÃ´ng tÃ¬m tháº¥y ngÆ°á»i dÃ¹ng" };
+  if (!user) return { success: false, error: "Không tìm thấy người dùng" };
   if ((user.role as string) === "admin") {
-    return { success: false, error: "KhÃ´ng thá»ƒ reset máº­t kháº©u cá»§a admin khÃ¡c" };
+    return { success: false, error: "Không thỒ reset mật khẩu của admin khác" };
   }
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const buf = crypto.randomBytes(12);
@@ -2864,7 +2864,7 @@ export async function adminResetUserPassword(
     "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
     [
       targetUserId,
-      "Máº­t kháº©u Ä‘Ã£ Ä‘Æ°á»£c Ä‘áº·t láº¡i",
+      "Mật khẩu đã được đặt lại",
       "Quáº£n trá»‹ viÃªn Ä‘Ã£ Ä‘áº·t láº¡i máº­t kháº©u cho tÃ i khoáº£n cá»§a báº¡n. Vui lÃ²ng liÃªn há»‡ admin Ä‘á»ƒ nháº­n máº­t kháº©u táº¡m vÃ  Ä‘á»•i láº¡i sau khi Ä‘Äƒng nháº­p.",
       "security",
     ],
@@ -2892,7 +2892,7 @@ export async function adminMarkEmailVerified(
     "SELECT id, email_verified FROM users WHERE id = ?",
     [targetUserId],
   );
-  if (!user) return { success: false, error: "KhÃ´ng tÃ¬m tháº¥y ngÆ°á»i dÃ¹ng" };
+  if (!user) return { success: false, error: "Không tìm thấy người dùng" };
   if (Number(user.email_verified) === 1) return { success: false, error: "Email Ä‘Ã£ Ä‘Æ°á»£c xÃ¡c minh" };
   await database.run(
     "UPDATE users SET email_verified = 1, updated_at = NOW() WHERE id = ?",
@@ -2934,7 +2934,7 @@ export async function adminUpdateOrder(
   );
   if (!existing) return { success: false, error: "ÄÆ¡n hÃ ng khÃ´ng tá»“n táº¡i" };
 
-  const allowedStatus = new Set(["ÄÃ£ hoÃ n tiá»n", "Äang xá»­ lÃ½", "Chá» xÃ¡c nháº­n", "ÄÃ£ há»§y"]);
+  const allowedStatus = new Set(["Đã hoàn tiền", "Đang xử lý", "Chờ xác nhận", "Đã hủy"]);
   if (update.status !== undefined && !allowedStatus.has(update.status)) {
     return { success: false, error: "Tráº¡ng thÃ¡i khÃ´ng há»£p lá»‡" };
   }
@@ -2961,7 +2961,7 @@ export async function adminUpdateOrder(
       [newAmount, newCashback, newStatus, newStore, orderId],
     );
 
-    if (oldStatus !== "ÄÃ£ hoÃ n tiá»n" && newStatus === "ÄÃ£ hoÃ n tiá»n" && newCashback > 0) {
+    if (oldStatus !== "Đã hoàn tiền" && newStatus === "Đã hoàn tiền" && newCashback > 0) {
       await tx.run(
         "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
         [userId, `HoÃ n tiá»n Ä‘Æ¡n ${orderCode}`, newCashback, "credit"],
@@ -2976,12 +2976,12 @@ export async function adminUpdateOrder(
           [Number(refRow.id)],
         );
       }
-    } else if (oldStatus === "ÄÃ£ hoÃ n tiá»n" && newStatus !== "ÄÃ£ hoÃ n tiá»n" && oldCashback > 0) {
+    } else if (oldStatus === "Đã hoàn tiền" && newStatus !== "Đã hoàn tiền" && oldCashback > 0) {
       await tx.run(
         "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
         [userId, `Äiá»u chá»‰nh Ä‘Æ¡n ${orderCode} - thu há»“i hoÃ n tiá»n`, oldCashback, "debit"],
       );
-    } else if (oldStatus === "ÄÃ£ hoÃ n tiá»n" && newStatus === "ÄÃ£ hoÃ n tiá»n" && newCashback !== oldCashback) {
+    } else if (oldStatus === "Đã hoàn tiền" && newStatus === "Đã hoàn tiền" && newCashback !== oldCashback) {
       const delta = newCashback - oldCashback;
       if (delta > 0) {
         await tx.run(
@@ -3021,7 +3021,7 @@ export async function adminDeleteOrder(
   if (!existing) return { success: false, error: "ÄÆ¡n hÃ ng khÃ´ng tá»“n táº¡i" };
 
   await database.transaction(async (tx) => {
-    if ((existing.status as string) === "ÄÃ£ hoÃ n tiá»n" && Number(existing.cashback) > 0) {
+    if ((existing.status as string) === "Đã hoàn tiền" && Number(existing.cashback) > 0) {
       await tx.run(
         "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
         [
@@ -3066,7 +3066,7 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   // User mua Ä‘á»§ N Ä‘Æ¡n hoÃ n tiá»n â†’ +1 lÆ°á»£t. Má»i Ä‘á»§ M báº¡n active â†’ +1 lÆ°á»£t.
   spin_enabled: "1",
   spin_orders_per_token: "10",       // 10 Ä‘Æ¡n hoÃ n tiá»n = 1 lÆ°á»£t quay
-  spin_referrals_per_token: "5",     // 5 báº¡n má»i active = 1 lÆ°á»£t quay
+  spin_referrals_per_token: "5",     // 5 bạn mời active = 1 lượt quay
   // Bai viet ghim cong dong V-Affiliate trong group Facebook -
   // user moi vao tao link cashback xong se thay preset nut "Dang vao
   // group V-Affiliate" -> 1 click mo thang bai ghim -> comment link da copy.
@@ -3219,7 +3219,7 @@ export async function getDbStats(): Promise<DbStats> {
       (SELECT COUNT(*) FROM sessions WHERE expires_at > NOW()) AS sessions_active`,
     [],
   );
-  // Postgres: láº¥y size DB qua pg_database_size (nullable náº¿u user khÃ´ng cÃ³ quyá»n).
+  // Postgres: lấy size DB qua pg_database_size (nullable nếu user không có quyền).
   let dbSize: number | null = null;
   try {
     const sizeRow = await database.get(
@@ -3410,7 +3410,7 @@ export async function cleanupExpired(
   let vacuumDone = false;
   if (options.vacuum) {
     try {
-      // Postgres VACUUM cáº§n cháº¡y outside transaction. postgres-js sáº½ exec trá»±c tiáº¿p.
+      // Postgres VACUUM cần chạy outside transaction. postgres-js sẽ exec trực tiếp.
       await database.exec("VACUUM ANALYZE");
       vacuumDone = true;
     } catch (err) {
@@ -3462,7 +3462,7 @@ export async function attachReferral(
     return { success: false, error: "KhÃ´ng tá»± giá»›i thiá»‡u chÃ­nh mÃ¬nh Ä‘Æ°á»£c" };
   }
 
-  // Postgres equivalent cá»§a INSERT OR IGNORE: ON CONFLICT DO NOTHING
+  // Postgres equivalent của INSERT OR IGNORE: ON CONFLICT DO NOTHING
   await database.run(
     "INSERT INTO referrals (referrer_user_id, referee_user_id) VALUES (?, ?) ON CONFLICT (referee_user_id) DO NOTHING",
     [referrerId, refereeUserId],
@@ -3678,7 +3678,7 @@ export async function getPendingCounts(): Promise<PendingCounts> {
     `SELECT
       COALESCE((SELECT COUNT(*) FROM withdrawals WHERE status = 'pending'), 0) AS pending_withdrawals,
       COALESCE((SELECT COUNT(*) FROM users WHERE email_verified = 0 AND is_active = 1), 0) AS unverified_users,
-      COALESCE((SELECT COUNT(*) FROM orders WHERE status = 'Äang xá»­ lÃ½' AND created_at < NOW() - INTERVAL '30 days'), 0) AS stuck_orders`,
+      COALESCE((SELECT COUNT(*) FROM orders WHERE status = 'Đang xử lý' AND created_at < NOW() - INTERVAL '30 days'), 0) AS stuck_orders`,
     [],
   );
   return {

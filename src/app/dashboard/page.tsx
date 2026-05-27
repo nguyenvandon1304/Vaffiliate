@@ -686,7 +686,7 @@ function DashboardContent() {
                         onClick={() => setLeaderboardPeriod(key)}
                         className={`px-3 py-1 text-xs font-semibold rounded-full transition-all ${
                           leaderboardPeriod === key
-                            ? "bg-white text-orange-600 shadow-sm"
+                            ? "bg-white dark:bg-gray-800 text-orange-600 dark:text-orange-400 shadow-sm"
                             : "text-gray-500 hover:text-gray-700"
                         }`}
                       >
@@ -827,7 +827,7 @@ function DashboardContent() {
         {activeTab === "orders" && (
           <section className="space-y-5">
             {/* ═══ Quy trình đơn hàng — 4 bước ═══ */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 sm:p-6">
               <div className="flex items-center gap-2 mb-5">
                 <div className="w-7 h-7 bg-orange-500 rounded-full flex items-center justify-center text-white">
                   <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -923,7 +923,7 @@ function DashboardContent() {
             </div>
 
             {/* ═══ Filter tabs + danh sách đơn ═══ */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
               {/* Header với tabs */}
               <div className="border-b border-gray-100 p-4 sm:p-5">
                 <div className="flex items-start sm:items-center justify-between gap-3 flex-col sm:flex-row mb-4">
@@ -969,8 +969,8 @@ function DashboardContent() {
 
                 {/* Cảnh báo vàng */}
                 {ordersFilter === "pending" && (
-                  <div className="mt-3 bg-amber-50 border border-amber-200 rounded-lg p-3">
-                    <p className="flex items-start gap-2 text-[11px] text-amber-700 leading-relaxed">
+                  <div className="mt-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-lg p-3">
+                    <p className="flex items-start gap-2 text-[11px] text-amber-700 dark:text-amber-300 leading-relaxed">
                       <span className="text-amber-500 shrink-0">⚠️</span>
                       <span>
                         <span className="font-bold">Chú ý:</span> Đơn chỉ ghi nhận khi bạn mua sắm trong cùng phiên. Đảm bảo
@@ -1532,7 +1532,7 @@ function WalletTab({
 
       {/* ═══ 2 Cards: Cộng + Trừ ═══ */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
               <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1540,15 +1540,15 @@ function WalletTab({
                 <polyline points="7 7 17 7 17 17" />
               </svg>
             </div>
-            <p className="text-xs text-gray-500 font-semibold">Cộng</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold">Cộng</p>
           </div>
           <p className="text-lg sm:text-xl font-bold text-emerald-600 mb-0.5">
             +{formatPrice(stats.totalCredit)}đ
           </p>
-          <p className="text-[10px] text-gray-400 leading-tight">Tổng các khoản cộng vào ví khả dụng</p>
+          <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-tight">Tổng các khoản cộng vào ví khả dụng</p>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center text-red-500">
               <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1556,21 +1556,21 @@ function WalletTab({
                 <polyline points="17 17 7 17 7 7" />
               </svg>
             </div>
-            <p className="text-xs text-gray-500 font-semibold">Trừ</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold">Trừ</p>
           </div>
           <p className="text-lg sm:text-xl font-bold text-red-500 mb-0.5">
             -{formatPrice(stats.totalDebit)}đ
           </p>
-          <p className="text-[10px] text-gray-400 leading-tight">Tổng các khoản trừ khỏi ví khả dụng</p>
+          <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-tight">Tổng các khoản trừ khỏi ví khả dụng</p>
         </div>
       </div>
 
       {/* ═══ Section Tài khoản ═══ */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className="text-lg">🏦</span>
-            <h3 className="text-sm font-bold text-gray-800">Tài khoản</h3>
+            <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100">Tài khoản</h3>
           </div>
           <button
             type="button"
@@ -1586,9 +1586,9 @@ function WalletTab({
         </div>
 
         {!hasBankAccount ? (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
+          <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-lg p-3 flex items-start gap-2">
             <span className="text-amber-500 shrink-0">⚠️</span>
-            <p className="text-xs text-amber-700 leading-relaxed flex-1">
+            <p className="text-xs text-amber-700 dark:text-amber-300 leading-relaxed flex-1">
               Bạn chưa cập nhật thông tin ngân hàng.{" "}
               <button
                 onClick={() => router.push("/dashboard?tab=wallet&view=bank")}
@@ -1599,19 +1599,19 @@ function WalletTab({
             </p>
           </div>
         ) : (
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3">
+          <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-lg p-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-white border border-blue-200 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-lg bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center shrink-0">
                 <span className="text-base">🏦</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-gray-800 truncate">{defaultBank?.bank_name}</p>
-                <p className="text-[11px] text-gray-500 font-mono">
+                <p className="text-xs font-bold text-gray-800 dark:text-gray-100 truncate">{defaultBank?.bank_name}</p>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 font-mono">
                   {defaultBank?.account_number} · {defaultBank?.account_holder}
                 </p>
               </div>
               {bankAccounts.length > 1 && (
-                <span className="text-[10px] text-blue-600 bg-blue-100 rounded-full px-2 py-0.5 shrink-0">
+                <span className="text-[10px] text-blue-600 dark:text-blue-300 bg-blue-100 dark:bg-blue-500/20 rounded-full px-2 py-0.5 shrink-0">
                   +{bankAccounts.length - 1} khác
                 </span>
               )}
@@ -1620,9 +1620,9 @@ function WalletTab({
         )}
 
         {!hasWithdrawPin && hasBankAccount && (
-          <div className="mt-2 bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
+          <div className="mt-2 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-lg p-3 flex items-start gap-2">
             <span className="text-amber-500 shrink-0">🔒</span>
-            <p className="text-xs text-amber-700 leading-relaxed flex-1">
+            <p className="text-xs text-amber-700 dark:text-amber-300 leading-relaxed flex-1">
               Chưa đặt mật khẩu rút tiền.{" "}
               <button
                 onClick={() => router.push("/dashboard?tab=wallet&view=bank")}
@@ -1638,7 +1638,7 @@ function WalletTab({
       {/* ═══ Grid 2 cột: Yêu cầu rút + Lịch sử ═══ */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* ─── Yêu cầu rút tiền hoàn ─── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
           <button
             type="button"
             onClick={() => setShowWithdrawPanel((v) => !v)}
@@ -1649,7 +1649,7 @@ function WalletTab({
                 💸
               </div>
               <div>
-                <h3 className="text-sm font-bold text-gray-800">Yêu Cầu Rút Tiền Hoàn</h3>
+                <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100">Yêu Cầu Rút Tiền Hoàn</h3>
                 <p className="text-[11px] text-gray-400">Tạo yêu cầu rút điểm về tài khoản NH</p>
               </div>
             </div>
@@ -1670,9 +1670,9 @@ function WalletTab({
 
               {/* Pre-flight check warning */}
               {!canWithdraw && (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
-                  <p className="text-xs font-bold text-amber-700 mb-1.5">⚠️ Cần Hoàn Thành Thông Tin</p>
-                  <ul className="space-y-0.5 text-[11px] text-amber-700">
+                <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-lg p-3 mb-3">
+                  <p className="text-xs font-bold text-amber-700 dark:text-amber-300 mb-1.5">⚠️ Cần Hoàn Thành Thông Tin</p>
+                  <ul className="space-y-0.5 text-[11px] text-amber-700 dark:text-amber-300">
                     <li className="flex items-center gap-1.5">
                       <span>{isVerified ? "✓" : "○"}</span>
                       <span>{isVerified ? "Đã xác minh email" : "Chưa xác minh email"}</span>
@@ -1723,7 +1723,7 @@ function WalletTab({
                         onChange={(e) => setWithdrawAmount(e.target.value)}
                         placeholder="0"
                         min={MIN_WITHDRAW}
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-base font-bold focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all pr-12"
+                        className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg text-base font-bold focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all pr-12"
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">đ</span>
                     </div>
@@ -1783,7 +1783,7 @@ function WalletTab({
               {withdrawStep === 2 && (
                 <div className="space-y-3">
                   {/* ─── Preview bill ─── */}
-                  <div className="border-2 border-orange-200 bg-gradient-to-br from-orange-50 via-amber-50 to-orange-50 rounded-xl overflow-hidden">
+                  <div className="border-2 border-orange-200 dark:border-orange-500/30 bg-gradient-to-br from-orange-50 via-amber-50 to-orange-50 dark:from-orange-500/10 dark:via-amber-500/10 dark:to-orange-500/10 rounded-xl overflow-hidden">
                     {/* Header bill */}
                     <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-2.5 text-white text-center">
                       <p className="text-[10px] font-bold uppercase tracking-widest opacity-90">Yêu cầu rút tiền</p>
@@ -1816,8 +1816,8 @@ function WalletTab({
                         <BillRow label="Phí giao dịch" value="Miễn phí" />
                         <BillRow label="Số dư sau rút" value={`${formatPrice(Math.max(0, stats.walletBalance - Number(withdrawAmount)))}đ`} />
                       </div>
-                      <div className="bg-blue-50 border border-blue-200 rounded-md p-2 mt-1">
-                        <p className="text-[10px] text-blue-700 leading-relaxed">
+                      <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-md p-2 mt-1">
+                        <p className="text-[10px] text-blue-700 dark:text-blue-300 leading-relaxed">
                           ⏱️ <span className="font-semibold">Thời gian xử lý:</span> 1-3 ngày làm việc kể từ khi admin duyệt yêu cầu.
                         </p>
                       </div>
@@ -1833,7 +1833,7 @@ function WalletTab({
                       <select
                         value={selectedBankId}
                         onChange={(e) => setSelectedBankId(e.target.value)}
-                        className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition bg-white"
+                        className="w-full px-3 py-2.5 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg text-sm focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition bg-white"
                       >
                         {bankAccounts.map((acc) => (
                           <option key={acc.id} value={acc.id}>
@@ -1857,7 +1857,7 @@ function WalletTab({
                       maxLength={6}
                       inputMode="numeric"
                       autoComplete="one-time-code"
-                      className="w-full px-3 py-3 border-2 border-gray-200 rounded-lg text-center text-lg font-mono tracking-[0.5em] focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition"
+                      className="w-full px-3 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg text-center text-lg font-mono tracking-[0.5em] focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition"
                     />
                     <p className="text-[10px] text-gray-400 mt-1 text-center">
                       Nhập mã PIN 6 chữ số đã đặt trong phần ngân hàng
@@ -1892,24 +1892,24 @@ function WalletTab({
         </div>
 
         {/* ─── Lịch sử ─── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
           <div className="px-5 pt-5 pb-3">
             <div className="flex items-center justify-between gap-2 mb-3">
-              <h3 className="text-sm font-bold text-gray-800">Lịch sử hoàn tiền</h3>
+              <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100">Lịch sử hoàn tiền</h3>
             </div>
             {/* Tabs */}
-            <div className="flex gap-1.5 p-1 bg-gray-100 rounded-lg">
+            <div className="flex gap-1.5 p-1 bg-gray-100 dark:bg-gray-700 rounded-lg">
               <button
                 type="button"
                 onClick={() => setHistoryTab("requests")}
-                className={`flex-1 text-xs font-semibold py-1.5 rounded-md transition ${historyTab === "requests" ? "bg-white text-orange-600 shadow-sm" : "text-gray-500"}`}
+                className={`flex-1 text-xs font-semibold py-1.5 rounded-md transition ${historyTab === "requests" ? "bg-white dark:bg-gray-800 text-orange-600 dark:text-orange-400 shadow-sm" : "text-gray-500"}`}
               >
                 Lịch sử yêu cầu
               </button>
               <button
                 type="button"
                 onClick={() => setHistoryTab("wallet")}
-                className={`flex-1 text-xs font-semibold py-1.5 rounded-md transition ${historyTab === "wallet" ? "bg-white text-orange-600 shadow-sm" : "text-gray-500"}`}
+                className={`flex-1 text-xs font-semibold py-1.5 rounded-md transition ${historyTab === "wallet" ? "bg-white dark:bg-gray-800 text-orange-600 dark:text-orange-400 shadow-sm" : "text-gray-500"}`}
               >
                 Biến động tích luỹ
               </button>
@@ -1986,7 +1986,7 @@ function WithdrawalRow({ w }: { w: UserWithdrawal }) {
   };
   const meta = statusMeta[w.status] ?? { label: w.status, color: "bg-gray-100 text-gray-600" };
   return (
-    <div className="border border-gray-100 rounded-lg p-3 hover:bg-gray-50/50 transition-colors">
+    <div className="border border-gray-100 dark:border-gray-700 rounded-lg p-3 hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors">
       <div className="flex items-start justify-between gap-2 mb-1">
         <div className="min-w-0">
           <p className="text-sm font-bold text-gray-800">-{w.amount.toLocaleString("vi-VN")}đ</p>
@@ -2013,10 +2013,10 @@ function WithdrawalRow({ w }: { w: UserWithdrawal }) {
 function EmptyHistory({ msg }: { msg: string }) {
   return (
     <div className="text-center py-10">
-      <div className="w-12 h-12 mx-auto mb-2 bg-gray-100 rounded-lg flex items-center justify-center text-2xl">
+      <div className="w-12 h-12 mx-auto mb-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center text-2xl">
         📭
       </div>
-      <p className="text-sm font-semibold text-gray-600 mb-0.5">Chưa có giao dịch quy đổi nào</p>
+      <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-0.5">Chưa có giao dịch quy đổi nào</p>
       <p className="text-xs text-gray-400">{msg}</p>
     </div>
   );
@@ -2029,7 +2029,7 @@ function EmptyHistory({ msg }: { msg: string }) {
 function BillRow({ label, value, highlight = false, mono = false }: { label: string; value: string; highlight?: boolean; mono?: boolean }) {
   return (
     <div className="flex items-center justify-between gap-2 text-xs">
-      <span className="text-gray-500">{label}</span>
+      <span className="text-gray-500 dark:text-gray-400">{label}</span>
       <span className={`${highlight ? "text-base font-extrabold text-orange-600" : "font-semibold text-gray-800"} ${mono ? "font-mono" : ""} text-right`}>
         {value}
       </span>
@@ -2040,7 +2040,7 @@ function BillRow({ label, value, highlight = false, mono = false }: { label: str
 function PaginationControls({ page, totalPages, onChange }: { page: number; totalPages: number; onChange: (p: number) => void }) {
   if (totalPages <= 1) return null;
   return (
-    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
       <button
         type="button"
         onClick={() => onChange(Math.max(1, page - 1))}
