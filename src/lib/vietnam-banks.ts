@@ -52,3 +52,66 @@ export const VIETNAM_BANKS: VietnamBank[] = [
   { code: "PNLVN", name: "Ngân hàng TNHH MTV Public Bank Việt Nam", shortName: "Public Bank" },
   { code: "HLBVN", name: "Ngân hàng TNHH MTV Hong Leong Việt Nam", shortName: "Hong Leong" },
 ];
+
+
+/**
+ * Map từ bank_code (mã ngắn dùng trong app, vd. "VCB", "MBB") sang BIN số 6 chữ số
+ * theo chuẩn NAPAS / VietQR.io. Dùng để generate URL QR thanh toán.
+ *
+ * Reference: https://api.vietqr.io/v2/banks
+ */
+export const VIETNAM_BANK_BIN_MAP: Record<string, string> = {
+  VCB: "970436",
+  TCB: "970407",
+  VPB: "970432",
+  MBB: "970422",
+  ACB: "970416",
+  BID: "970418",
+  CTG: "970415",
+  AGR: "970405",
+  SHB: "970443",
+  STB: "970403",
+  HDB: "970437",
+  TPB: "970423",
+  MSB: "970426",
+  LPB: "970449",
+  OCB: "970448",
+  EIB: "970431",
+  SSB: "970440",
+  NAB: "970428",
+  BAB: "970409",
+  VAB: "970427",
+  SCB: "970429",
+  ABB: "970425",
+  KLB: "970452",
+  PGB: "970430",
+  VIB: "970441",
+  NVB: "970419",
+  SGB: "970400",
+  PVC: "970412",
+  BVB: "970438",
+  VRB: "970421",
+  GPB: "970408",
+  CBB: "970444",
+  OJB: "970414",
+  CAKE: "546034",
+  UBANK: "546035",
+  TNEX: "9704261",
+  CIMB: "422589",
+  SCVN: "970410",
+  HSBC: "458761",
+  SHBVN: "970424",
+  WOO: "970457",
+  UOB: "970458",
+  KBVN: "970462",
+  IBKVN: "970455",
+  PNLVN: "970439",
+  HLBVN: "970442",
+};
+
+/**
+ * Lấy BIN cho bank code. Fallback rỗng nếu không tìm thấy.
+ */
+export function getBankBin(bankCode: string): string {
+  return VIETNAM_BANK_BIN_MAP[bankCode] || "";
+}

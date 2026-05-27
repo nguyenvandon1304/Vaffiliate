@@ -11,6 +11,7 @@ interface WithdrawalRow {
   user_id: number;
   username: string;
   display_name: string | null;
+  bank_code: string;
   bank_name: string;
   account_number: string;
   account_holder: string;
@@ -46,6 +47,7 @@ export function WithdrawalsTab() {
   const [toDate, setToDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [rejecting, setRejecting] = useState<WithdrawalRow | null>(null);
+  const [qrModal, setQrModal] = useState<WithdrawalRow | null>(null);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -170,6 +172,9 @@ export function WithdrawalsTab() {
                   <td className="px-4 py-3 text-center">
                     {(w.status === "pending" || w.status === "Đang xử lý") && (
                       <div className="flex items-center justify-center gap-1">
+                        <button onClick={() => setQrModal(w)} className="text-xs font-medium px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20" title="QR chuyển khoản nhanh">
+                          📱 QR
+                        </button>
                         <button onClick={() => handleApprove(w.id)} className="text-xs font-medium px-2.5 py-1 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-500/20">Duyệt</button>
                         <button onClick={() => setRejecting(w)} className="text-xs font-medium px-2.5 py-1 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20">Từ chối</button>
                       </div>
@@ -186,6 +191,14 @@ export function WithdrawalsTab() {
 
       {rejecting && (
         <RejectModal w={rejecting} onClose={() => setRejecting(null)} onDone={() => { setRejecting(null); reload(); }} />
+      )}
+
+      {qrModal && (
+        <QRTransferModal
+          w={qrModal}
+          onClose={() => setQrModal(null)}
+          onApproved={() => { setQrModal(null); reload(); }}
+        />
       )}
     </>
   );
@@ -229,5 +242,155 @@ function RejectModal({ w, onClose, onDone }: { w: WithdrawalRow; onClose: () => 
         </button>
       </div>
     </Modal>
+  );
+}
+
+/**
+ * Modal hiển thị QR VietQR.io để admin scan bằng app ngân hàng → app tự điền
+ * STK + tên + số tiền + nội dung. Sau khi chuyển xong, admin bấm "Đã chuyển - Duyệt"
+ * → backend update status approved + tạo notification cho user.
+ *
+ * VietQR.io endpoint (free, không cần auth):
+ *   https://img.vietqr.io/image/<bank_bin>-<account>-compact2.png?amount=X&addInfo=Y&accountName=Z
+ */
+function QRTransferModal({ w, onClose, onApproved }: { w: WithdrawalRow; onClose: () => void; onApproved: () => void }) {
+  const toast = useToast();
+  const [submitting, setSubmitting] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
+
+  // Map bank_code → BIN số 6 chữ số. Inline để không phải import (tránh tăng bundle).
+  const BANK_BIN: Record<string, string> = {
+    VCB: "970436", TCB: "970407", VPB: "970432", MBB: "970422", ACB: "970416",
+    BID: "970418", CTG: "970415", AGR: "970405", SHB: "970443", STB: "970403",
+    HDB: "970437", TPB: "970423", MSB: "970426", LPB: "970449", OCB: "970448",
+    EIB: "970431", SSB: "970440", NAB: "970428", BAB: "970409", VAB: "970427",
+    SCB: "970429", ABB: "970425", KLB: "970452", PGB: "970430", VIB: "970441",
+    NVB: "970419", SGB: "970400", PVC: "970412", BVB: "970438", VRB: "970421",
+    GPB: "970408", CBB: "970444", OJB: "970414", CAKE: "546034", UBANK: "546035",
+    TNEX: "9704261", CIMB: "422589", SCVN: "970410", HSBC: "458761", SHBVN: "970424",
+    WOO: "970457", UOB: "970458", KBVN: "970462", IBKVN: "970455", PNLVN: "970439",
+    HLBVN: "970442",
+  };
+
+  const bin = BANK_BIN[w.bank_code] || "";
+  const transferContent = `VAFF rut ${w.id} uid${w.user_id}`;
+  const qrUrl = bin
+    ? `https://img.vietqr.io/image/${bin}-${w.account_number}-compact2.png?amount=${w.amount}&addInfo=${encodeURIComponent(transferContent)}&accountName=${encodeURIComponent(w.account_holder)}`
+    : "";
+
+  const copy = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(label);
+    setTimeout(() => setCopied(null), 1500);
+  };
+
+  const handleApprove = async () => {
+    if (!confirm(`Xác nhận đã chuyển ${formatVND(w.amount)} cho ${w.username}?\n\nHệ thống sẽ:\n• Duyệt yêu cầu rút\n• Gửi notification cho user\n• Cập nhật "Tổng đã rút"`)) return;
+    setSubmitting(true);
+    const r = await fetch("/api/admin/withdrawals", {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: w.id, status: "approved" }),
+    });
+    const d = await r.json();
+    setSubmitting(false);
+    if (d.success) {
+      toast.success("✓ Đã duyệt - user sẽ nhận thông báo");
+      onApproved();
+    } else {
+      toast.error(d.error || "Lỗi");
+    }
+  };
+
+  return (
+    <Modal open={true} onClose={onClose} title="📱 Quét mã chuyển khoản nhanh">
+      <div className="space-y-4">
+        {/* User info */}
+        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 text-sm">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Đang xử lý cho</p>
+          <p className="font-bold text-gray-900 dark:text-white">@{w.username} {w.display_name && <span className="font-normal text-gray-500">· {w.display_name}</span>}</p>
+        </div>
+
+        {/* QR + thông tin */}
+        <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-4 items-start">
+          {qrUrl ? (
+            <div className="bg-white border border-gray-200 dark:border-gray-600 rounded-xl p-2 flex items-center justify-center">
+              {/* eslint-disable-next-line @next/next/no-img-element -- VietQR external CDN, dùng next/image phức tạp hơn */}
+              <img
+                src={qrUrl}
+                alt="QR chuyển khoản"
+                className="w-full max-w-[180px] aspect-square object-contain"
+              />
+            </div>
+          ) : (
+            <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl p-3 text-xs text-amber-700 dark:text-amber-300">
+              ⚠️ Bank code &quot;{w.bank_code}&quot; chưa có trong map BIN. Vui lòng chuyển khoản thủ công bằng thông tin bên cạnh.
+            </div>
+          )}
+
+          <div className="space-y-2 text-sm">
+            <InfoRow label="Ngân hàng" value={w.bank_name} />
+            <InfoRow label="Số TK" value={w.account_number} onCopy={() => copy(w.account_number, "stk")} copied={copied === "stk"} mono />
+            <InfoRow label="Chủ TK" value={w.account_holder} />
+            <InfoRow label="Số tiền" value={formatVND(w.amount)} onCopy={() => copy(String(w.amount), "amount")} copied={copied === "amount"} highlight />
+            <InfoRow label="Nội dung" value={transferContent} onCopy={() => copy(transferContent, "content")} copied={copied === "content"} mono />
+          </div>
+        </div>
+
+        {/* Hướng dẫn */}
+        <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg p-3 text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+          <p className="font-semibold mb-1">📝 Cách dùng:</p>
+          <ol className="list-decimal pl-4 space-y-0.5">
+            <li>Mở app ngân hàng trên điện thoại (Vietcombank / MB / TPBank...)</li>
+            <li>Bấm <span className="font-semibold">&quot;Quét QR&quot;</span> → quét mã trên màn hình</li>
+            <li>App sẽ tự điền sẵn STK + tên + số tiền + nội dung</li>
+            <li>Xác nhận chuyển khoản trong app</li>
+            <li>Quay lại đây bấm <span className="font-semibold text-green-600 dark:text-green-400">&quot;Đã chuyển - Duyệt&quot;</span></li>
+          </ol>
+        </div>
+
+        {/* CTA */}
+        <div className="flex justify-end gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+          <button onClick={onClose} className="text-sm font-medium px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
+            Đóng
+          </button>
+          <button
+            disabled={submitting}
+            onClick={handleApprove}
+            className="text-sm font-bold px-5 py-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 disabled:opacity-60 shadow-sm"
+          >
+            {submitting ? "Đang xử lý..." : "✓ Đã chuyển - Duyệt"}
+          </button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function InfoRow({ label, value, onCopy, copied, mono, highlight }: { label: string; value: string; onCopy?: () => void; copied?: boolean; mono?: boolean; highlight?: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0">{label}</span>
+      <div className="flex items-center gap-1.5 min-w-0 flex-1 justify-end">
+        <span className={`text-sm truncate ${mono ? "font-mono" : ""} ${highlight ? "font-extrabold text-orange-600 dark:text-orange-400" : "font-semibold text-gray-900 dark:text-white"}`}>
+          {value}
+        </span>
+        {onCopy && (
+          <button
+            type="button"
+            onClick={onCopy}
+            className={`shrink-0 w-6 h-6 rounded flex items-center justify-center transition-colors ${
+              copied ? "bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400" : "bg-gray-100 dark:bg-gray-700 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600"
+            }`}
+            title={copied ? "Đã copy" : "Sao chép"}
+          >
+            {copied ? (
+              <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+            ) : (
+              <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
+            )}
+          </button>
+        )}
+      </div>
+    </div>
   );
 }

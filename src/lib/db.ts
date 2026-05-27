@@ -2265,7 +2265,7 @@ export async function getAllWithdrawalsPaged(
   );
   const total = Number(totalRow?.c ?? 0);
   const rows = await database.all(
-    `SELECT w.*, u.username, u.display_name, b.bank_name, b.account_number, b.account_holder
+    `SELECT w.*, u.username, u.display_name, b.bank_code, b.bank_name, b.account_number, b.account_holder
      FROM withdrawals w
      LEFT JOIN users u ON w.user_id = u.id
      LEFT JOIN bank_accounts b ON w.bank_account_id = b.id
