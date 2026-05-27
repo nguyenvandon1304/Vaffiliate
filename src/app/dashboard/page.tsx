@@ -837,7 +837,7 @@ function DashboardContent() {
                   {[
                     { label: "Mua hàng", icon: "🛒", color: "bg-orange-500", line: "bg-orange-300" },
                     { label: "Ghi nhận", icon: "✓", color: "bg-amber-500", line: "bg-amber-300" },
-                    { label: "Hồi xuất", icon: "📋", color: "bg-blue-500", line: "bg-blue-300" },
+                    { label: "Đối soát", icon: "📋", color: "bg-blue-500", line: "bg-blue-300" },
                     { label: "Duyệt hoàn", icon: "💰", color: "bg-emerald-500", line: "" },
                   ].map((step, i, arr) => (
                     <div key={i} className="relative flex flex-col items-center">
