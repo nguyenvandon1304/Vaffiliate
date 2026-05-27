@@ -106,6 +106,28 @@ function formatVND(amount: number): string {
   return amount.toLocaleString("vi-VN") + "đ";
 }
 
+/**
+ * Mask số tài khoản ngân hàng — chỉ hiện 4 số cuối, các số trước thay bằng dấu •.
+ * Ví dụ: "1015166996" → "••••••6996"
+ */
+function maskAccountNumber(num: string | null | undefined): string {
+  if (!num) return "—";
+  if (num.length <= 4) return num;
+  return "•".repeat(Math.max(4, num.length - 4)) + num.slice(-4);
+}
+
+/**
+ * Mask tên chủ tài khoản — chỉ hiện chữ đầu của mỗi từ, còn lại thay bằng •.
+ * Ví dụ: "NGUYEN VAN DON" → "N••••• V•• D••"
+ */
+function maskAccountHolder(name: string | null | undefined): string {
+  if (!name) return "—";
+  return name
+    .split(/\s+/)
+    .map((word) => (word.length <= 1 ? word : word[0] + "•".repeat(Math.min(word.length - 1, 5))))
+    .join(" ");
+}
+
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
   return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
@@ -1405,6 +1427,25 @@ function WalletTab({
   const [historyPage, setHistoryPage] = useState(1);
   const PAGE_SIZE = 5;
 
+  // ─── State ẩn/hiện thông tin ngân hàng (chống shoulder surfing) ───
+  // Default ẨN. Lưu trạng thái session để không hỏi lại sau mỗi click khác.
+  const [showBankInfo, setShowBankInfo] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = sessionStorage.getItem("vaff_show_bank");
+    if (saved === "1") {
+      // queueMicrotask: tránh lint set-state-in-effect.
+      queueMicrotask(() => setShowBankInfo(true));
+    }
+  }, []);
+  const toggleShowBank = () => {
+    setShowBankInfo((v) => {
+      const next = !v;
+      try { sessionStorage.setItem("vaff_show_bank", next ? "1" : "0"); } catch { /* ignore */ }
+      return next;
+    });
+  };
+
   const isVerified = !!user?.email_verified;
   const hasBankAccount = bankAccounts.length > 0;
   const hasWithdrawPin = !!user?.has_withdraw_pin;
@@ -1607,9 +1648,33 @@ function WalletTab({
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-bold text-gray-800 dark:text-gray-100 truncate">{defaultBank?.bank_name}</p>
                 <p className="text-[11px] text-gray-500 dark:text-gray-400 font-mono">
-                  {defaultBank?.account_number} · {defaultBank?.account_holder}
+                  {showBankInfo
+                    ? `${defaultBank?.account_number} · ${defaultBank?.account_holder}`
+                    : `${maskAccountNumber(defaultBank?.account_number)} · ${maskAccountHolder(defaultBank?.account_holder)}`}
                 </p>
               </div>
+              <button
+                type="button"
+                onClick={toggleShowBank}
+                title={showBankInfo ? "Ẩn thông tin tài khoản" : "Hiện thông tin tài khoản"}
+                className="shrink-0 w-8 h-8 rounded-lg bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-orange-500 hover:border-orange-300 transition-colors"
+              >
+                {showBankInfo ? (
+                  // Eye-off icon
+                  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                    <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                    <line x1="2" x2="22" y1="2" y2="22" />
+                  </svg>
+                ) : (
+                  // Eye icon
+                  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
               {bankAccounts.length > 1 && (
                 <span className="text-[10px] text-blue-600 dark:text-blue-300 bg-blue-100 dark:bg-blue-500/20 rounded-full px-2 py-0.5 shrink-0">
                   +{bankAccounts.length - 1} khác
