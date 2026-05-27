@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CaffiliateLogo } from "@/components/icons";
+import { useConfetti } from "@/components/Confetti";
 import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { useToast } from "@/components/Toast";
+import { playWinSound, playLoseSound, playTickSound } from "@/lib/notification-sound";
 
 interface Segment {
   index: number;
@@ -34,6 +36,7 @@ function formatVND(n: number) {
 export default function SpinPage() {
   const router = useRouter();
   const toast = useToast();
+  const { fire: fireConfetti, confettiNode } = useConfetti();
   const [segments, setSegments] = useState<Segment[]>([]);
   const [status, setStatus] = useState<Status | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,6 +44,7 @@ export default function SpinPage() {
   const [rotation, setRotation] = useState(0);
   const [resultLabel, setResultLabel] = useState<string | null>(null);
   const wheelRef = useRef<HTMLDivElement | null>(null);
+  const tickIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -73,6 +77,17 @@ export default function SpinPage() {
     setSpinning(true);
     setResultLabel(null);
 
+    // Tick sound: chạy mỗi 80ms trong lúc quay (4s)
+    if (tickIntervalRef.current !== null) clearInterval(tickIntervalRef.current);
+    let tickCount = 0;
+    tickIntervalRef.current = window.setInterval(() => {
+      // Slow down ticks gradually — first 30 fast, then progressively slower
+      tickCount++;
+      if (tickCount < 30 || tickCount % 2 === 0) {
+        playTickSound();
+      }
+    }, 100);
+
     try {
       const res = await fetch("/api/spin", { method: "POST" });
       const data = await res.json();
@@ -80,6 +95,7 @@ export default function SpinPage() {
       if (!data.success) {
         toast.error(data.error || "Không thể quay");
         setSpinning(false);
+        if (tickIntervalRef.current !== null) clearInterval(tickIntervalRef.current);
         return;
       }
 
@@ -91,9 +107,16 @@ export default function SpinPage() {
 
       setTimeout(() => {
         setResultLabel(data.label);
+        if (tickIntervalRef.current !== null) {
+          clearInterval(tickIntervalRef.current);
+          tickIntervalRef.current = null;
+        }
         if (data.amount > 0) {
+          fireConfetti();
+          playWinSound();
           toast.success(`🎉 Trúng ${formatVND(data.amount)}!`);
         } else {
+          playLoseSound();
           toast.info(`${data.label}. Lượt sau may mắn hơn nhé!`);
         }
         setSpinning(false);
@@ -102,8 +125,19 @@ export default function SpinPage() {
     } catch {
       toast.error("Lỗi kết nối. Vui lòng thử lại.");
       setSpinning(false);
+      if (tickIntervalRef.current !== null) {
+        clearInterval(tickIntervalRef.current);
+        tickIntervalRef.current = null;
+      }
     }
   };
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (tickIntervalRef.current !== null) clearInterval(tickIntervalRef.current);
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -130,6 +164,7 @@ export default function SpinPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 via-pink-50/50 to-gray-50 dark:from-zinc-950 dark:via-zinc-950 dark:to-black relative overflow-hidden">
+      {confettiNode}
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute top-[-10%] right-[-5%] w-[400px] h-[400px] rounded-full bg-orange-200/30 blur-3xl dark:bg-orange-900/20" />
         <div className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] rounded-full bg-pink-200/30 blur-3xl dark:bg-pink-900/20" />

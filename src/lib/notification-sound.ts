@@ -53,3 +53,39 @@ export function playNotificationSound() {
   // Tone 2 — 1320Hz (E6) sau 0.15s — quãng 5
   playTone(ctx, 1320, 0.22, 0.15);
 }
+
+/**
+ * "Win" jackpot — 4 tone đi lên dần (C5 → E5 → G5 → C6) tạo cảm giác chiến thắng.
+ * Length ~1.2s.
+ */
+export function playWinSound() {
+  const ctx = getCtx();
+  if (!ctx) return;
+  if (ctx.state === "suspended") ctx.resume().catch(() => {});
+  playTone(ctx, 523, 0.18, 0, 0.18);    // C5
+  playTone(ctx, 659, 0.18, 0.15, 0.18); // E5
+  playTone(ctx, 784, 0.22, 0.3, 0.2);   // G5
+  playTone(ctx, 1046, 0.5, 0.5, 0.22);  // C6 — sustain longer
+}
+
+/**
+ * "Tick" ngắn — dùng khi vòng quay đang chạy, đập vào pin.
+ * Length ~0.05s. Gain thấp để không khó chịu khi gọi nhiều lần.
+ */
+export function playTickSound() {
+  const ctx = getCtx();
+  if (!ctx) return;
+  if (ctx.state === "suspended") ctx.resume().catch(() => {});
+  playTone(ctx, 1800, 0.04, 0, 0.08);
+}
+
+/**
+ * "Lose" — 1 tone giảm dần buồn nhẹ. Dùng cho miss/no win.
+ */
+export function playLoseSound() {
+  const ctx = getCtx();
+  if (!ctx) return;
+  if (ctx.state === "suspended") ctx.resume().catch(() => {});
+  playTone(ctx, 440, 0.4, 0, 0.12);
+  playTone(ctx, 330, 0.5, 0.2, 0.1);
+}
