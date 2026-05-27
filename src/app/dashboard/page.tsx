@@ -182,6 +182,9 @@ function DashboardContent() {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [stats, setStats] = useState<Stats>({ totalCashback: 0, totalOrders: 0, pendingOrders: 0, walletBalance: 0 });
   const [orders, setOrders] = useState<OrderData[]>([]);
+  // Filter cho tab "Đơn hàng": pending = Chờ xác nhận + Đang xử lý, completed = Đã hoàn tiền, cancelled = Đã hủy.
+  const [ordersFilter, setOrdersFilter] = useState<"pending" | "completed" | "cancelled">("pending");
+  const [showProcessTimeline, setShowProcessTimeline] = useState(false);
   const [walletHistory, setWalletHistory] = useState<WalletData[]>([]);
   const [bankAccounts, setBankAccounts] = useState<BankAccountData[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -815,43 +818,229 @@ function DashboardContent() {
         )}
 
         {activeTab === "orders" && (
-          <section>
-            <h2 className="text-lg font-bold text-gray-800 mb-4">Tất cả đơn hàng</h2>
-            <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-              {orders.length === 0 ? (
-                <div className="px-6 py-12 text-center">
-                  <p className="text-gray-400 text-sm">Chưa có đơn hàng nào</p>
+          <section className="space-y-5">
+            {/* ═══ Quy trình đơn hàng — 4 bước ═══ */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6">
+              <div className="flex items-center gap-2 mb-5">
+                <div className="w-7 h-7 bg-orange-500 rounded-full flex items-center justify-center text-white">
+                  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 11 12 14 22 4" />
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                  </svg>
                 </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-gray-100 bg-gray-50/50">
-                        <th className="text-left px-4 py-3 font-medium text-gray-500">Mã đơn</th>
-                        <th className="text-left px-4 py-3 font-medium text-gray-500">Cửa hàng</th>
-                        <th className="text-right px-4 py-3 font-medium text-gray-500">Giá trị</th>
-                        <th className="text-right px-4 py-3 font-medium text-gray-500">Hoàn tiền</th>
-                        <th className="text-center px-4 py-3 font-medium text-gray-500">Trạng thái</th>
-                        <th className="text-right px-4 py-3 font-medium text-gray-500">Ngày</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {orders.map((order) => (
-                        <tr key={order.id} className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors">
-                          <td className="px-4 py-3 font-mono text-xs text-gray-600">{order.order_code}</td>
-                          <td className="px-4 py-3 font-medium text-gray-800">{order.store}</td>
-                          <td className="px-4 py-3 text-right text-gray-600">{formatVND(order.amount)}</td>
-                          <td className="px-4 py-3 text-right font-semibold text-orange-500">{formatVND(order.cashback)}</td>
-                          <td className="px-4 py-3 text-center">
-                            <StatusBadge status={order.status} />
-                          </td>
-                          <td className="px-4 py-3 text-right text-gray-400 text-xs">{formatDate(order.created_at)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <h2 className="text-base sm:text-lg font-bold text-gray-800">Quy trình đơn hàng</h2>
+              </div>
+
+              {/* Steps timeline */}
+              <div className="relative">
+                <div className="grid grid-cols-4 gap-2 sm:gap-4">
+                  {[
+                    { label: "Mua hàng", icon: "🛒", color: "bg-orange-500", line: "bg-orange-300" },
+                    { label: "Ghi nhận", icon: "✓", color: "bg-amber-500", line: "bg-amber-300" },
+                    { label: "Hồi xuất", icon: "📋", color: "bg-blue-500", line: "bg-blue-300" },
+                    { label: "Duyệt hoàn", icon: "💰", color: "bg-emerald-500", line: "" },
+                  ].map((step, i, arr) => (
+                    <div key={i} className="relative flex flex-col items-center">
+                      <div className={`relative z-10 w-12 h-12 sm:w-14 sm:h-14 ${step.color} rounded-full flex items-center justify-center text-white text-xl sm:text-2xl shadow-lg`}>
+                        {step.icon}
+                      </div>
+                      {/* Connector line — đi từ giữa step này tới giữa step tiếp theo */}
+                      {i < arr.length - 1 && (
+                        <div className={`absolute top-6 sm:top-7 left-1/2 w-full h-0.5 ${step.line}`} style={{ transform: "translateX(50%)" }} />
+                      )}
+                      <p className="mt-2 text-[11px] sm:text-xs font-medium text-gray-700 text-center">{step.label}</p>
+                    </div>
+                  ))}
                 </div>
+              </div>
+
+              {/* Toggle chi tiết thời gian */}
+              <button
+                type="button"
+                onClick={() => setShowProcessTimeline((v) => !v)}
+                className="mt-5 mx-auto flex items-center gap-1 text-xs text-orange-500 hover:text-orange-600 font-medium transition-colors"
+              >
+                {showProcessTimeline ? "Ẩn" : "Xem"} thời gian chi tiết
+                <svg viewBox="0 0 24 24" className={`w-3.5 h-3.5 transition-transform ${showProcessTimeline ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+
+              {showProcessTimeline && (
+                <>
+                  {/* Cards thời gian — chỉ Shopee active */}
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <ProcessCard
+                      platform="SHOPEE"
+                      label="Ghi nhận"
+                      highlight="Hôm sau"
+                      icon="⚡"
+                      bg="bg-amber-50"
+                      border="border-amber-200"
+                      active
+                    />
+                    <ProcessCard
+                      platform="SHOPEE"
+                      label="Duyệt trong"
+                      highlight="7 - 14 ngày"
+                      icon="📋"
+                      bg="bg-emerald-50"
+                      border="border-emerald-200"
+                      active
+                    />
+                    <ProcessCard
+                      platform="LAZADA, TIKI, TIKTOK"
+                      label="Sàn khác"
+                      highlight="Coming soon"
+                      icon="🔒"
+                      bg="bg-gray-50"
+                      border="border-gray-200"
+                    />
+                    <ProcessCard
+                      platform="CAM KẾT"
+                      label="Tối đa duyệt"
+                      highlight="≤ 30 ngày"
+                      icon="✅"
+                      bg="bg-blue-50"
+                      border="border-blue-200"
+                      active
+                    />
+                  </div>
+
+                  <p className="mt-4 text-[11px] text-gray-500 leading-relaxed">
+                    Đơn hàng mua qua link V-Affiliate sẽ được tự động ghi nhận. Hãy đảm bảo bạn{" "}
+                    <span className="font-semibold text-gray-700">không bấm link khác</span> (livestream, video, quảng cáo...) hoặc chuyển sang link khác khi đang mua sắm.
+                  </p>
+                </>
               )}
+            </div>
+
+            {/* ═══ Filter tabs + danh sách đơn ═══ */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              {/* Header với tabs */}
+              <div className="border-b border-gray-100 p-4 sm:p-5">
+                <div className="flex items-start sm:items-center justify-between gap-3 flex-col sm:flex-row mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">📦</span>
+                    <div>
+                      <h2 className="text-sm font-bold text-gray-800">Trạng thái đơn hàng</h2>
+                      <p className="text-[11px] text-gray-400">Lọc nhanh theo tình trạng hoàn tiền</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tabs Chờ hoàn / Đã hoàn / Đã huỷ */}
+                {(() => {
+                  const pendingCount = orders.filter((o) => o.status === "Đang xử lý" || o.status === "Chờ xác nhận").length;
+                  const completedCount = orders.filter((o) => o.status === "Đã hoàn tiền").length;
+                  const cancelledCount = orders.filter((o) => o.status === "Đã hủy").length;
+                  const tabs = [
+                    { key: "pending" as const, label: "Chờ hoàn", count: pendingCount, activeStyle: "bg-orange-500 text-white shadow-sm shadow-orange-200" },
+                    { key: "completed" as const, label: "Đã hoàn", count: completedCount, activeStyle: "bg-emerald-500 text-white shadow-sm shadow-emerald-200" },
+                    { key: "cancelled" as const, label: "Đã huỷ", count: cancelledCount, activeStyle: "bg-red-500 text-white shadow-sm shadow-red-200" },
+                  ];
+                  return (
+                    <div className="grid grid-cols-3 gap-2">
+                      {tabs.map((t) => {
+                        const isActive = ordersFilter === t.key;
+                        return (
+                          <button
+                            key={t.key}
+                            type="button"
+                            onClick={() => setOrdersFilter(t.key)}
+                            className={`text-xs sm:text-sm font-semibold px-3 py-2 rounded-lg transition-all ${
+                              isActive ? t.activeStyle : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200"
+                            }`}
+                          >
+                            {t.label} ({t.count})
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+
+                {/* Cảnh báo vàng */}
+                {ordersFilter === "pending" && (
+                  <div className="mt-3 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                    <p className="flex items-start gap-2 text-[11px] text-amber-700 leading-relaxed">
+                      <span className="text-amber-500 shrink-0">⚠️</span>
+                      <span>
+                        <span className="font-bold">Chú ý:</span> Đơn chỉ ghi nhận khi bạn mua sắm trong cùng phiên. Đảm bảo
+                        <span className="font-semibold"> không bấm link khác</span> (livestream, video, quảng cáo...) trong app khi đang mua sắm.
+                      </span>
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Danh sách đơn theo filter */}
+              {(() => {
+                const filtered = orders.filter((o) => {
+                  if (ordersFilter === "pending") return o.status === "Đang xử lý" || o.status === "Chờ xác nhận";
+                  if (ordersFilter === "completed") return o.status === "Đã hoàn tiền";
+                  return o.status === "Đã hủy";
+                });
+
+                if (filtered.length === 0) {
+                  const emptyMsg = {
+                    pending: { icon: "📭", title: "Chưa có đơn chờ hoàn", desc: "Mua sắm qua link để đơn hàng xuất hiện ở đây." },
+                    completed: { icon: "🎉", title: "Chưa có đơn nào hoàn tất", desc: "Sau 7-14 ngày kể từ khi mua, đơn sẽ chuyển sang đây." },
+                    cancelled: { icon: "✓", title: "Không có đơn bị huỷ", desc: "Chúc bạn mua sắm thuận lợi." },
+                  }[ordersFilter];
+
+                  return (
+                    <div className="px-6 py-12 text-center">
+                      <div className="text-4xl mb-3">{emptyMsg.icon}</div>
+                      <p className="text-sm font-semibold text-gray-700 mb-1">{emptyMsg.title}</p>
+                      <p className="text-xs text-gray-400 mb-5">{emptyMsg.desc}</p>
+                      {ordersFilter === "pending" && (
+                        <button
+                          onClick={() => router.push("/dashboard/cashback")}
+                          className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-5 py-2.5 rounded-full shadow-sm shadow-orange-200 transition"
+                        >
+                          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                          </svg>
+                          Lấy link hoàn tiền ngay
+                        </button>
+                      )}
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-gray-100 bg-gray-50/50">
+                          <th className="text-left px-4 py-3 font-medium text-gray-500">Mã đơn</th>
+                          <th className="text-left px-4 py-3 font-medium text-gray-500">Cửa hàng</th>
+                          <th className="text-right px-4 py-3 font-medium text-gray-500">Giá trị</th>
+                          <th className="text-right px-4 py-3 font-medium text-gray-500">Hoàn tiền</th>
+                          <th className="text-center px-4 py-3 font-medium text-gray-500">Trạng thái</th>
+                          <th className="text-right px-4 py-3 font-medium text-gray-500">Ngày</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filtered.map((order) => (
+                          <tr key={order.id} className="border-b border-gray-50 hover:bg-orange-50/30 transition-colors">
+                            <td className="px-4 py-3 font-mono text-xs text-gray-600">{order.order_code}</td>
+                            <td className="px-4 py-3 font-medium text-gray-800">{order.store}</td>
+                            <td className="px-4 py-3 text-right text-gray-600">{formatVND(order.amount)}</td>
+                            <td className="px-4 py-3 text-right font-semibold text-orange-500">{formatVND(order.cashback)}</td>
+                            <td className="px-4 py-3 text-center">
+                              <StatusBadge status={order.status} />
+                            </td>
+                            <td className="px-4 py-3 text-right text-gray-400 text-xs">{formatDate(order.created_at)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              })()}
             </div>
           </section>
         )}
@@ -1428,11 +1617,40 @@ function StatusBadge({ status }: { status: string }) {
     "Đã hoàn tiền": "bg-green-100 text-green-700",
     "Đang xử lý": "bg-amber-100 text-amber-700",
     "Chờ xác nhận": "bg-blue-100 text-blue-700",
+    "Đã hủy": "bg-red-100 text-red-700",
   };
   return (
     <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status] ?? "bg-gray-100 text-gray-600"}`}>
       {status}
     </span>
+  );
+}
+
+/**
+ * Card thời gian quy trình — dùng trong tab Đơn Hàng để giải thích
+ * timeline ghi nhận / duyệt từng sàn TMĐT.
+ *
+ * `active = false` → render dạng mờ ("Coming soon") cho các sàn chưa hỗ trợ.
+ */
+function ProcessCard({
+  platform, label, highlight, icon, bg, border, active = false,
+}: {
+  platform: string;
+  label: string;
+  highlight: string;
+  icon: string;
+  bg: string;
+  border: string;
+  active?: boolean;
+}) {
+  return (
+    <div className={`${bg} border ${border} rounded-xl p-4 text-center ${active ? "" : "opacity-60"}`}>
+      <div className="text-xl mb-1">{icon}</div>
+      <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider mb-1">{platform}</p>
+      <p className="text-xs text-gray-700">
+        {label} <span className="font-bold text-orange-500">{highlight}</span>
+      </p>
+    </div>
   );
 }
 
