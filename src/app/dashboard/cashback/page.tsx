@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CaffiliateLogo } from "@/components/icons";
 import { ThemeToggleButton } from "@/components/ThemeToggle";
+import { trackEvent } from "@/components/Analytics";
 import {
   ClockIcon3D,
   GridIcon3D,
@@ -117,6 +118,11 @@ export default function CashbackPage() {
       }
       if (data.success && data.product) {
         setProduct(data.product);
+        // Track funnel: link created event
+        trackEvent("link_created", {
+          cashback_amount: Number(data.product.cashback || 0),
+          cashback_rate: String(data.product.cashbackRate || ""),
+        });
       } else {
         setError(data.error || "Không thể lấy thông tin sản phẩm");
       }

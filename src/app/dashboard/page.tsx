@@ -14,6 +14,7 @@ import { CommandBarTrigger } from "@/components/CommandBar";
 import { DashboardSkeleton } from "@/components/Skeleton";
 import { StreakBadge } from "@/components/StreakBadge";
 import { PullToRefresh } from "@/components/PullToRefresh";
+import { trackEvent } from "@/components/Analytics";
 import { useConfetti } from "@/components/Confetti";
 import { useOnboarding } from "@/components/OnboardingTour";
 import { EmailVerifyBanner } from "@/components/EmailVerifyBanner";
@@ -1622,6 +1623,8 @@ function WalletTab({
         setWithdrawAmount("");
         setWithdrawPin("");
         setWithdrawStep(1);
+        // Track funnel: withdrawal request
+        trackEvent("withdrawal_requested", { amount });
         // Refresh list withdrawals + dashboard
         const r = await fetch("/api/withdraw/list", { cache: "no-store" });
         const d = await r.json();

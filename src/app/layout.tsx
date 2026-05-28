@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import ChatButton from "@/components/ChatButton";
+import { Analytics } from "@/components/Analytics";
 import { ConditionalThemeToggle } from "@/components/ConditionalThemeToggle";
 import { ToastProvider } from "@/components/Toast";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
@@ -114,6 +115,7 @@ export default function RootLayout({
         </ToastProvider>
         <ChatButton />
         <PWAInstallPrompt />
+        <Analytics />
       </body>
     </html>
   );

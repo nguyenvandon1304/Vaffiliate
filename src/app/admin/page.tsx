@@ -8,6 +8,7 @@ import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { useToast } from "@/components/Toast";
 import { UsersTab } from "@/components/admin/UsersTab";
 import { AdminLiveWidgets, AdminFAB } from "@/components/admin/AdminLiveWidgets";
+import { CohortGrid } from "@/components/admin/CohortGrid";
 import { AdminSkeleton } from "@/components/Skeleton";
 import { OrdersTab } from "@/components/admin/OrdersTab";
 import { WithdrawalsTab } from "@/components/admin/WithdrawalsTab";
@@ -446,6 +447,11 @@ function OverviewSection({ stats, timeseries, tsRange, setTsRange, pendingCounts
       {/* Live widgets — KPI delta + online count + activity feed */}
       <div className="mb-6">
         <AdminLiveWidgets />
+      </div>
+
+      {/* Cohort retention chart — track user engagement over weeks */}
+      <div className="mb-6">
+        <CohortGrid />
       </div>
 
       {/* Cần xử lý — chỉ hiển thị khi có việc */}

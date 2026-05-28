@@ -21,6 +21,7 @@ import {
 } from "@/components/icons";
 import { Captcha, type CaptchaHandle } from "@/components/Captcha";
 import { useTypingPlaceholder } from "@/components/LoginHero";
+import { trackEvent, identifyUser } from "@/components/Analytics";
 
 const inputClass =
   "w-full pl-10 pr-4 py-2.5 bg-white dark:bg-zinc-950/40 border-2 border-gray-200 dark:border-zinc-700 rounded-lg text-sm text-gray-900 dark:text-zinc-100 placeholder:text-gray-300 dark:placeholder:text-zinc-600 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-500/20 outline-none transition-all";
@@ -189,6 +190,14 @@ export function LoginCard() {
       });
       const data = await res.json();
       if (data.success) {
+        // Track funnel: login success
+        if (data.user?.id) {
+          identifyUser(data.user.id);
+        }
+        trackEvent("login_complete", {
+          role: data.user?.role || "user",
+        });
+
         if (data.user?.role === "admin") {
           router.push("/admin");
         } else {
@@ -238,6 +247,15 @@ export function LoginCard() {
       });
       const data = await res.json();
       if (data.success) {
+        // Track funnel: register conversion (with referral attribution if any)
+        const refParam = typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("ref")
+          : null;
+        trackEvent("register_complete", {
+          has_referrer: !!refParam,
+          email_verify_required: !!data.needEmailVerify,
+        });
+
         if (data.needEmailVerify) {
           setMode("login");
           setInfo(data.message || "Đăng ký thành công. Vui lòng kiểm tra email để xác thực.");

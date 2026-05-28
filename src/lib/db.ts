@@ -2220,6 +2220,101 @@ export async function getRecentActivity(limit = 15): Promise<ActivityItem[]> {
   }));
 }
 
+/**
+ * Cohort retention analysis (WEEKLY) — track % user còn active sau N tuần kể từ signup.
+ * Trả mảng cohorts theo tuần đăng ký, mỗi cohort có retention[0..7].
+ *
+ * "Active" = có login trong tuần đó.
+ *
+ * Format trả:
+ *   [
+ *     { cohort: "DD/MM", size: 50, retention: [100, 60, 45, 30, 25, 20, 18, 15] },
+ *     ...
+ *   ]
+ *
+ * cohort = "DD/MM" format, retention[i] = % tuần thứ i.
+ */
+export async function getCohortRetentionWeekly(weeks = 8): Promise<Array<{
+  cohort: string;
+  size: number;
+  retention: number[];
+}>> {
+  const database = await getDb();
+  // Lấy 8 cohort tuần gần nhất, mỗi cohort có 8 tuần retention.
+  const rows = await database.all(
+    `WITH cohorts AS (
+       SELECT id, date_trunc('week', created_at) AS cohort_week
+       FROM users
+       WHERE role = 'user'
+         AND created_at >= NOW() - INTERVAL '${weeks * 7} days'
+     ),
+     cohort_sizes AS (
+       SELECT cohort_week, COUNT(*) AS size
+       FROM cohorts
+       GROUP BY cohort_week
+     ),
+     activity AS (
+       SELECT c.cohort_week, c.id AS user_id,
+              date_trunc('week', lh.created_at) AS active_week
+       FROM cohorts c
+       LEFT JOIN login_history lh ON lh.user_id = c.id
+     )
+     SELECT
+       cs.cohort_week,
+       cs.size,
+       a.active_week,
+       COUNT(DISTINCT a.user_id)::int AS active_users
+     FROM cohort_sizes cs
+     LEFT JOIN activity a ON a.cohort_week = cs.cohort_week AND a.active_week IS NOT NULL
+     GROUP BY cs.cohort_week, cs.size, a.active_week
+     ORDER BY cs.cohort_week DESC, a.active_week ASC`,
+    [],
+  );
+
+  // Group by cohort
+  const cohortMap = new Map<string, { size: number; weekActive: Map<string, number> }>();
+  for (const r of rows) {
+    const cw = r.cohort_week instanceof Date ? r.cohort_week.toISOString() : String(r.cohort_week);
+    const aw = r.active_week ? (r.active_week instanceof Date ? r.active_week.toISOString() : String(r.active_week)) : null;
+    if (!cohortMap.has(cw)) {
+      cohortMap.set(cw, { size: Number(r.size), weekActive: new Map() });
+    }
+    if (aw) {
+      cohortMap.get(cw)!.weekActive.set(aw, Number(r.active_users));
+    }
+  }
+
+  // Build result with retention array
+  const result: Array<{ cohort: string; size: number; retention: number[] }> = [];
+  for (const [cohortWeek, data] of cohortMap.entries()) {
+    const cohortDate = new Date(cohortWeek);
+    const retention: number[] = [];
+    for (let w = 0; w < weeks; w++) {
+      const weekDate = new Date(cohortDate);
+      weekDate.setDate(weekDate.getDate() + w * 7);
+      // Clamp giây-millis về 0 để khớp với date_trunc
+      weekDate.setUTCHours(0, 0, 0, 0);
+      // Nếu future week → null
+      if (weekDate.getTime() > Date.now()) {
+        retention.push(-1);
+        continue;
+      }
+      const active = data.weekActive.get(weekDate.toISOString()) || 0;
+      retention.push(Math.round((active / data.size) * 100));
+    }
+    // Format cohort label "DD/MM"
+    const day = String(cohortDate.getUTCDate()).padStart(2, "0");
+    const month = String(cohortDate.getUTCMonth() + 1).padStart(2, "0");
+    result.push({
+      cohort: `${day}/${month}`,
+      size: data.size,
+      retention,
+    });
+  }
+
+  return result.slice(0, weeks).reverse();
+}
+
 export async function getAllUsers(): Promise<Record<string, unknown>[]> {
   const database = await getDb();
   return await database.all(
