@@ -59,8 +59,8 @@ export function DashboardNavIcons() {
           <button
             key={t.key}
             onClick={() => router.push(t.href)}
-            className={`nav-bubble group relative flex items-center justify-center w-10 h-10 rounded-full transition-transform ${
-              active ? "scale-110" : "hover:scale-105"
+            className={`nav-bubble group relative inline-flex items-center justify-center transition-transform ${
+              active ? "" : "hover:-translate-y-0.5"
             }`}
             data-active={active ? "true" : "false"}
             title={t.title}

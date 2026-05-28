@@ -382,22 +382,7 @@ function DashboardContent() {
               <CaffiliateLogo />
             </button>
             <div className="hidden md:block h-6 w-px bg-gray-200" />
-            <nav className="hidden md:flex items-center gap-1 relative" aria-label="Dashboard navigation">
-              {/* Sliding active pill background — absolute, animates left+width */}
-              {(() => {
-                const tabsList = ["overview", "create-link", "orders", "wallet", "link-history", "help", "referral"] as const;
-                const ITEM_W = 44; // 40px (w-10) + 4px gap-1
-                let activeIdx = tabsList.indexOf(activeTab);
-                if (accountView) activeIdx = -1;
-                if (activeIdx < 0) return null;
-                return (
-                  <span
-                    aria-hidden
-                    className="absolute top-0 left-0 h-10 w-10 rounded-full bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-500/20 dark:to-amber-500/20 ring-1 ring-orange-200/60 dark:ring-orange-500/30 transition-transform duration-300 ease-[cubic-bezier(0.2,0.7,0.3,1)] -z-0"
-                    style={{ transform: `translateX(${activeIdx * ITEM_W}px)` }}
-                  />
-                );
-              })()}
+            <nav className="hidden md:flex items-center gap-1.5 relative" aria-label="Dashboard navigation">
               {(["overview", "create-link", "orders", "wallet", "link-history", "help", "referral"] as const).map((tab) => {
                 const isActive = activeTab === tab && !accountView;
                 return (
@@ -419,8 +404,8 @@ function DashboardContent() {
                         }
                       }
                     }}
-                    className={`nav-bubble group relative flex items-center justify-center w-10 h-10 rounded-full transition-transform ${
-                      isActive ? "scale-110" : "hover:scale-105"
+                    className={`nav-bubble group relative inline-flex items-center justify-center transition-transform ${
+                      isActive ? "" : "hover:-translate-y-0.5"
                     }`}
                     data-active={isActive ? "true" : "false"}
                     data-onboard={
@@ -446,7 +431,7 @@ function DashboardContent() {
                     {tab === "help" && <HelpIcon3D active={isActive} size={32} />}
                     {tab === "referral" && <ReferralIcon3D active={isActive} size={32} />}
                     {isActive && (
-                      <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-orange-600 whitespace-nowrap">
+                      <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-orange-600 dark:text-orange-400 whitespace-nowrap">
                         {tab === "overview" && "Tổng quan"}
                         {tab === "create-link" && "Tạo link"}
                         {tab === "orders" && "Đơn hàng"}
