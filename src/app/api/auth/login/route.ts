@@ -3,6 +3,7 @@ import { loginUser, logAudit } from "@/lib/db";
 import { sendNewDeviceAlertEmail } from "@/lib/email";
 import { notifyAdminLoginNewDevice, notifyCustom } from "@/lib/telegram";
 import { grantBadge } from "@/lib/achievements";
+import { updateLoginStreak } from "@/lib/streak";
 import { getRateLimitKey, rateLimit, rateLimitAsync } from "@/lib/rate-limit";
 import { CAPTCHA_THRESHOLD, computeFingerprint } from "@/lib/security";
 import { getClientIp, verifyTurnstile } from "@/lib/turnstile";
@@ -179,6 +180,10 @@ export async function POST(request: NextRequest) {
   // Grant badge "first_login" — idempotent. Chỉ earn lần đầu, các lần login sau no-op.
   if (result.user) {
     void grantBadge(result.user.id, "first_login");
+    // Update daily login streak (gamification + bonus VND khi đạt milestone)
+    void updateLoginStreak(result.user.id).catch((e) =>
+      console.warn("[login] streak update failed:", e),
+    );
   }
 
   // Geo lookup + login history + new country alert (Group 5 #19) — async, không block.

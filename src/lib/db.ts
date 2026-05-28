@@ -436,6 +436,32 @@ async function initSchema(database: DbAdapter): Promise<void> {
     console.warn("[migration] add country column to known_devices:", e);
   }
 
+  // ─── Daily login streak columns ───
+  // Track streak để gamification: 7 ngày liên tiếp = +1 lượt quay free.
+  try {
+    await database.exec(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS current_streak INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS longest_streak INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS last_streak_date DATE,
+        ADD COLUMN IF NOT EXISTS streak_bonus_claimed_at TIMESTAMPTZ
+    `);
+  } catch (e) {
+    console.warn("[migration] add streak columns to users:", e);
+  }
+
+  // Streak rewards log — track milestone đã thưởng để không double
+  await database.exec(`
+    CREATE TABLE IF NOT EXISTS streak_rewards (
+      id BIGSERIAL PRIMARY KEY,
+      user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      milestone INTEGER NOT NULL,
+      bonus_amount INTEGER NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE (user_id, milestone)
+    )
+  `);
+
   // ─── Login history (Group 5 #19) ───
   // Lưu mỗi lần login thành công kèm IP + country + UA → user xem map IP đã login.
   await database.exec(`

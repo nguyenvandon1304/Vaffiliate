@@ -12,6 +12,8 @@ import { WalletHero } from "@/components/WalletHero";
 import { OrderList } from "@/components/OrderCard";
 import { CommandBarTrigger } from "@/components/CommandBar";
 import { DashboardSkeleton } from "@/components/Skeleton";
+import { StreakBadge } from "@/components/StreakBadge";
+import { PullToRefresh } from "@/components/PullToRefresh";
 import { useConfetti } from "@/components/Confetti";
 import { useOnboarding } from "@/components/OnboardingTour";
 import { EmailVerifyBanner } from "@/components/EmailVerifyBanner";
@@ -363,6 +365,7 @@ function DashboardContent() {
   }
 
   return (
+    <PullToRefresh onRefresh={refreshDashboard}>
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
@@ -439,6 +442,8 @@ function DashboardContent() {
             </nav>
           </div>
           <div className="flex items-center gap-3">
+            {/* Streak badge — only when user has active streak */}
+            <StreakBadge />
             {/* Command bar trigger — Ctrl+K shortcut */}
             <CommandBarTrigger
               onClick={() => {
@@ -1198,6 +1203,7 @@ function DashboardContent() {
       {confettiNode}
       {onboardingNode}
     </div>
+    </PullToRefresh>
   );
 }
 
