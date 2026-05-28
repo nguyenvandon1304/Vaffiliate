@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Modal } from "@/components/Modal";
 import { Pagination } from "@/components/Pagination";
 import { useToast } from "@/components/Toast";
+import { ExportButton } from "@/components/admin/ExportButton";
 
 interface WithdrawalRow {
   id: number;
@@ -102,9 +103,16 @@ export function WithdrawalsTab() {
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">
           Yêu Cầu Rút Tiền ({total.toLocaleString("vi-VN")})
         </h2>
-        <button onClick={exportCsv} className="text-sm font-medium px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
-          ⬇ Export CSV
-        </button>
+        <div className="flex gap-2 flex-wrap">
+          <button onClick={exportCsv} className="text-sm font-medium px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600" title="Xuất CSV trang hiện tại">
+            ⬇ Trang
+          </button>
+          <ExportButton
+            endpoint="/api/admin/export/withdrawals"
+            filename="withdrawals.csv"
+            label="Xuất tất cả"
+          />
+        </div>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-3 mb-4 flex flex-col sm:flex-row gap-2 flex-wrap items-stretch sm:items-center">

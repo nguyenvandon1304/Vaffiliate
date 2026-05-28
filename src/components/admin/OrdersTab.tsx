@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Modal } from "@/components/Modal";
 import { Pagination } from "@/components/Pagination";
 import { useToast } from "@/components/Toast";
+import { ExportButton } from "@/components/admin/ExportButton";
 
 interface OrderRow {
   id: number;
@@ -135,10 +136,16 @@ export function OrdersTab() {
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">
           Quản Lý Đơn Hàng ({total.toLocaleString("vi-VN")})
         </h2>
-        <div className="flex gap-2">
-          <button onClick={exportCsv} className="text-sm font-medium px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
-            ⬇ Export CSV
+        <div className="flex gap-2 flex-wrap">
+          <button onClick={exportCsv} className="text-sm font-medium px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600" title="Xuất CSV trang hiện tại">
+            ⬇ Trang
           </button>
+          <ExportButton
+            endpoint="/api/admin/export/orders"
+            filename="orders.csv"
+            label="Xuất tất cả"
+            query={fromDate || toDate ? `from=${fromDate}&to=${toDate}` : undefined}
+          />
           <button onClick={() => setShowCreate(true)} className="text-sm font-medium px-3 py-1.5 rounded-lg bg-orange-500 text-white hover:bg-orange-600">
             + Tạo đơn
           </button>

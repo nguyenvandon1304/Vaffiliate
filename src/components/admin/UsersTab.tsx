@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Pagination } from "@/components/Pagination";
 import { useToast } from "@/components/Toast";
 import { UserDetailModal } from "@/components/admin/UserDetailModal";
+import { ExportButton } from "@/components/admin/ExportButton";
 
 interface UserRow {
   id: number;
@@ -43,6 +44,9 @@ export function UsersTab() {
   );
   const [loading, setLoading] = useState(false);
   const [detailUserId, setDetailUserId] = useState<number | null>(null);
+  // Bulk selection state — per-id checkbox.
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -91,13 +95,115 @@ export function UsersTab() {
     else toast.error(d.error || "Lỗi");
   };
 
+  // Bulk action handlers
+  const toggleSelect = (id: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+  const toggleSelectAll = () => {
+    if (selectedIds.size === users.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(users.map((u) => u.id)));
+    }
+  };
+  const handleBulk = async (action: "block" | "unblock" | "verify_email" | "delete") => {
+    if (selectedIds.size === 0) return;
+    const labels: Record<string, string> = {
+      block: `khoá ${selectedIds.size} user`,
+      unblock: `mở khoá ${selectedIds.size} user`,
+      verify_email: `đánh dấu verified email cho ${selectedIds.size} user`,
+      delete: `xoá (soft) ${selectedIds.size} user`,
+    };
+    if (!confirm(`Xác nhận ${labels[action]}? Không thể undo.`)) return;
+    setBulkBusy(true);
+    try {
+      const res = await fetch("/api/admin/users/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userIds: Array.from(selectedIds), action }),
+      });
+      const d = await res.json();
+      if (d.success) {
+        toast.success(`Đã áp dụng cho ${d.affected} user (skip ${d.skipped ?? 0})`);
+        setSelectedIds(new Set());
+        reload();
+      } else {
+        toast.error(d.error || "Lỗi");
+      }
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
   return (
     <>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">
           Quản Lý Người Dùng ({total.toLocaleString("vi-VN")})
         </h2>
+        <div className="flex items-center gap-2 flex-wrap">
+          <ExportButton
+            endpoint="/api/admin/export/users"
+            filename="users.csv"
+            label="Xuất CSV"
+          />
+        </div>
       </div>
+
+      {/* Bulk action bar — chỉ hiện khi có selection */}
+      {selectedIds.size > 0 && (
+        <div className="mb-4 flex items-center gap-2 flex-wrap bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/30 rounded-xl px-4 py-3">
+          <span className="text-sm font-bold text-orange-700 dark:text-orange-300">
+            Đã chọn {selectedIds.size} user
+          </span>
+          <div className="flex items-center gap-1.5 ml-auto flex-wrap">
+            <button
+              type="button"
+              onClick={() => handleBulk("verify_email")}
+              disabled={bulkBusy}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-100 dark:bg-blue-500/20 hover:bg-blue-200 dark:hover:bg-blue-500/30 text-blue-700 dark:text-blue-300 disabled:opacity-50"
+            >
+              ✅ Verify email
+            </button>
+            <button
+              type="button"
+              onClick={() => handleBulk("block")}
+              disabled={bulkBusy}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-500/20 hover:bg-amber-200 dark:hover:bg-amber-500/30 text-amber-700 dark:text-amber-300 disabled:opacity-50"
+            >
+              🔒 Khoá
+            </button>
+            <button
+              type="button"
+              onClick={() => handleBulk("unblock")}
+              disabled={bulkBusy}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 hover:bg-emerald-200 dark:hover:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 disabled:opacity-50"
+            >
+              🔓 Mở khoá
+            </button>
+            <button
+              type="button"
+              onClick={() => handleBulk("delete")}
+              disabled={bulkBusy}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-100 dark:bg-red-500/20 hover:bg-red-200 dark:hover:bg-red-500/30 text-red-700 dark:text-red-300 disabled:opacity-50"
+            >
+              🗑 Xoá
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedIds(new Set())}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg text-gray-500 hover:text-gray-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+            >
+              Bỏ chọn
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-3 mb-4 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
@@ -133,6 +239,15 @@ export function UsersTab() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                <th className="text-center px-3 py-3 w-10">
+                  <input
+                    type="checkbox"
+                    checked={users.length > 0 && selectedIds.size === users.length}
+                    onChange={toggleSelectAll}
+                    className="w-4 h-4 cursor-pointer accent-orange-500"
+                    aria-label="Chọn tất cả"
+                  />
+                </th>
                 <th className="text-left px-4 py-3 text-gray-500 dark:text-gray-400 font-medium">ID</th>
                 <th className="text-left px-4 py-3 text-gray-500 dark:text-gray-400 font-medium">Username</th>
                 <th className="text-left px-4 py-3 text-gray-500 dark:text-gray-400 font-medium">Email</th>
@@ -145,13 +260,27 @@ export function UsersTab() {
             </thead>
             <tbody>
               {loading && (
-                <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-400">Đang tải…</td></tr>
+                <tr><td colSpan={9} className="px-4 py-8 text-center text-gray-400">Đang tải…</td></tr>
               )}
               {!loading && users.length === 0 && (
-                <tr><td colSpan={8} className="px-4 py-8 text-center text-gray-400">Không có kết quả</td></tr>
+                <tr><td colSpan={9} className="px-4 py-8 text-center text-gray-400">Không có kết quả</td></tr>
               )}
               {users.map((u) => (
-                <tr key={u.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                <tr key={u.id} className={`border-b border-gray-100 dark:border-gray-700/50 transition-colors ${
+                  selectedIds.has(u.id)
+                    ? "bg-orange-50/40 dark:bg-orange-500/[0.05]"
+                    : "hover:bg-gray-50 dark:hover:bg-gray-700/30"
+                }`}>
+                  <td className="px-3 py-3 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(u.id)}
+                      onChange={() => toggleSelect(u.id)}
+                      className="w-4 h-4 cursor-pointer accent-orange-500"
+                      aria-label={`Chọn ${u.username}`}
+                      disabled={u.role === "admin"}
+                    />
+                  </td>
                   <td className="px-4 py-3 text-gray-600 dark:text-gray-300 font-mono text-xs">{u.id}</td>
                   <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">
                     <button
