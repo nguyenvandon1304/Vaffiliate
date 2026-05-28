@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { AchievementShareButton } from "@/components/AchievementShareButton";
 
 interface Tier {
   code: "bronze" | "silver" | "gold" | "vip";
@@ -255,6 +256,9 @@ interface HeroProps {
   totalCashback?: number;
   /** Wallet balance — hiện kèm "đã tiết kiệm" nếu cashback chưa có */
   walletBalance?: number;
+  /** Username + display name để share button. Optional — nếu không có thì ẩn nút. */
+  username?: string;
+  displayName?: string;
 }
 
 /**
@@ -269,7 +273,7 @@ interface HeroProps {
  *  • VIP rewards trailer (collapsible)
  *  • Bảng tier full
  */
-export function TierHeroCard({ info, tiers, totalCashback = 0, walletBalance = 0 }: HeroProps) {
+export function TierHeroCard({ info, tiers, totalCashback = 0, walletBalance = 0, username, displayName }: HeroProps) {
   const [tableOpen, setTableOpen] = useState(false);
   const [perksOpen, setPerksOpen] = useState(false);
 
@@ -339,6 +343,21 @@ export function TierHeroCard({ info, tiers, totalCashback = 0, walletBalance = 0
                 </b>{" "}
                 cùng V-Affiliate
               </p>
+            )}
+
+            {/* Share achievement button — chỉ hiện khi user có data đáng share */}
+            {username && (info.current.code !== "bronze" || lifetimeSaved >= 50000) && (
+              <div className="mt-3">
+                <AchievementShareButton
+                  type="tier"
+                  username={username}
+                  displayName={displayName}
+                  tier={info.current.name as "Bronze" | "Silver" | "Gold" | "VIP"}
+                  cashbackPercent={info.cashbackPercent}
+                  variant="secondary"
+                  className="!bg-orange-500/10 !border-orange-500/30 !text-orange-700 dark:!text-orange-400 hover:!bg-orange-500/20"
+                />
+              </div>
             )}
           </div>
         </div>

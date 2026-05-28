@@ -606,6 +606,8 @@ function DashboardContent() {
               tiers={tierList}
               totalCashback={stats.totalCashback}
               walletBalance={stats.walletBalance}
+              username={user?.username}
+              displayName={user?.display_name || user?.username}
             />
           </section>
 
