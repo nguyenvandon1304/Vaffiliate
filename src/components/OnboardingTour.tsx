@@ -38,8 +38,8 @@ const STEPS: Step[] = [
   },
   {
     emoji: "🤝",
-    title: "Mời bạn bè — nhân thưởng",
-    description: "Mỗi người bạn mời thành công, bạn lên hạng nhanh hơn. Bronze → Silver → Gold → VIP với cashback lên đến 58%.",
+    title: "Mời bạn — Tăng hạng nhanh hơn 5 lần",
+    description: "Mỗi 1 bạn mời thành công = +1 active referral. Đủ 25 bạn → lên Silver (cashback 53%). Đủ 100 bạn → VIP (58%). Cashback tăng vĩnh viễn cho MỌI đơn về sau.",
     highlight: "Giới thiệu",
     targetSelector: "[data-onboard='referral']",
   },

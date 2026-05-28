@@ -16,8 +16,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        // Cho phép landing + referral pages
-        allow: ["/", "/r/"],
+        // Cho phép landing + referral pages + leaderboard public
+        allow: ["/", "/r/", "/leaderboard"],
         disallow: [
           "/admin",
           "/admin/",
