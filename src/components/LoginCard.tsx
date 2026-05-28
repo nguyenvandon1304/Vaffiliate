@@ -20,6 +20,7 @@ import {
   CircleInfoIcon,
 } from "@/components/icons";
 import { Captcha, type CaptchaHandle } from "@/components/Captcha";
+import { useTypingPlaceholder } from "@/components/LoginHero";
 
 const inputClass =
   "w-full pl-10 pr-4 py-2.5 bg-white dark:bg-zinc-950/40 border-2 border-gray-200 dark:border-zinc-700 rounded-lg text-sm text-gray-900 dark:text-zinc-100 placeholder:text-gray-300 dark:placeholder:text-zinc-600 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-500/20 outline-none transition-all";
@@ -256,8 +257,8 @@ export function LoginCard() {
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      {/* Header: Logo + Heading */}
-      <div className="text-center mb-6">
+      {/* Header: Logo + Heading — ẩn ở desktop ≥lg vì đã có LoginHero bên trái */}
+      <div className="text-center mb-6 lg:hidden">
         <CaffiliateLogo className="flex justify-center mb-5" />
         <h1 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent leading-tight mb-2">
           Mua hàng, Hoàn Tiền Thật
@@ -267,8 +268,13 @@ export function LoginCard() {
         </p>
       </div>
 
+      {/* Desktop heading khi có 2-col layout — chỉ hiện logo nhỏ hơn */}
+      <div className="hidden lg:flex justify-center mb-4">
+        <CaffiliateLogo />
+      </div>
+
       {/* Navigation Tabs */}
-      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-8">
+      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-8 lg:hidden">
         {navTabs.map((tab) => (
           <button
             key={tab.label}
@@ -548,6 +554,13 @@ function LoginForm({
 }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  // Animated placeholder — chỉ chạy khi field trống.
+  const typedPlaceholder = useTypingPlaceholder([
+    "nguyenvana...",
+    "Tên đăng nhập của bạn...",
+    "Mua sắm để tiết kiệm...",
+  ]);
+  const placeholder = username ? "" : typedPlaceholder + (typedPlaceholder ? "│" : "Nhập tên đăng nhập");
 
   return (
     <div className="space-y-4">
@@ -564,7 +577,7 @@ function LoginForm({
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="Nhập tên đăng nhập"
+            placeholder={placeholder}
             className={inputClass}
           />
         </div>

@@ -1997,6 +1997,32 @@ export async function getAdminStats(): Promise<Record<string, unknown>> {
   };
 }
 
+/**
+ * Public stats — không cần auth. Dùng cho landing page social proof.
+ * Chỉ trả về số liệu aggregate, không lộ data nhạy cảm.
+ *
+ * Tối thiểu hoá: chỉ select fields user-facing để query nhanh + cache lâu.
+ */
+export async function getPublicStats(): Promise<{
+  totalUsers: number;
+  totalCashback: number;
+  totalOrders: number;
+}> {
+  const database = await getDb();
+  const row = await database.get(
+    `SELECT
+      COALESCE((SELECT COUNT(*) FROM users WHERE role = 'user'), 0) AS total_users,
+      COALESCE((SELECT COUNT(*) FROM orders WHERE status = 'Đã hoàn tiền'), 0) AS total_orders,
+      COALESCE((SELECT SUM(cashback) FROM orders WHERE status = 'Đã hoàn tiền'), 0) AS total_cashback`,
+    [],
+  );
+  return {
+    totalUsers: Number(row?.total_users ?? 0),
+    totalCashback: Number(row?.total_cashback ?? 0),
+    totalOrders: Number(row?.total_orders ?? 0),
+  };
+}
+
 export async function getAllUsers(): Promise<Record<string, unknown>[]> {
   const database = await getDb();
   return await database.all(

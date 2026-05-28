@@ -1,6 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { LoginCard } from "@/components/LoginCard";
+import { LoginHero } from "@/components/LoginHero";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import Footer from "@/components/Footer";
 import { getUserByToken } from "@/lib/db";
@@ -26,7 +27,7 @@ export default async function Home() {
   }
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
+    <main className="relative min-h-screen flex flex-col items-center overflow-hidden">
       {/* Background gradient */}
       <div className="fixed inset-0 -z-10 bg-gradient-to-br from-orange-50 via-amber-50/50 to-white dark:from-zinc-950 dark:via-zinc-900 dark:to-black" />
       <div className="fixed inset-0 -z-10">
@@ -34,9 +35,17 @@ export default async function Home() {
         <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-amber-100/30 blur-3xl dark:bg-amber-900/15" />
       </div>
 
-      {/* Main content */}
-      <div className="w-full px-4 py-8 sm:py-12">
-        <LoginCard />
+      {/* Main content — 2 column on desktop, single column on mobile */}
+      <div className="w-full flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
+        <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          {/* Left: Hero illustration + social proof + testimonials (desktop only) */}
+          <LoginHero />
+
+          {/* Right: Login form */}
+          <div className="w-full">
+            <LoginCard />
+          </div>
+        </div>
       </div>
 
       {/* Install Prompt */}
