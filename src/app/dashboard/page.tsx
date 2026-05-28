@@ -10,6 +10,7 @@ import { StatCard as StatCardNew } from "@/components/StatCard";
 import { EmptyState, IllustrationBox, IllustrationLink, IllustrationWallet } from "@/components/EmptyState";
 import { WalletHero } from "@/components/WalletHero";
 import { OrderList } from "@/components/OrderCard";
+import { CommandBarTrigger } from "@/components/CommandBar";
 import { useConfetti } from "@/components/Confetti";
 import { useOnboarding } from "@/components/OnboardingTour";
 import { EmailVerifyBanner } from "@/components/EmailVerifyBanner";
@@ -381,7 +382,22 @@ function DashboardContent() {
               <CaffiliateLogo />
             </button>
             <div className="hidden md:block h-6 w-px bg-gray-200" />
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-1 relative" aria-label="Dashboard navigation">
+              {/* Sliding active pill background — absolute, animates left+width */}
+              {(() => {
+                const tabsList = ["overview", "create-link", "orders", "wallet", "link-history", "help", "referral"] as const;
+                const ITEM_W = 44; // 40px (w-10) + 4px gap-1
+                let activeIdx = tabsList.indexOf(activeTab);
+                if (accountView) activeIdx = -1;
+                if (activeIdx < 0) return null;
+                return (
+                  <span
+                    aria-hidden
+                    className="absolute top-0 left-0 h-10 w-10 rounded-full bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-500/20 dark:to-amber-500/20 ring-1 ring-orange-200/60 dark:ring-orange-500/30 transition-transform duration-300 ease-[cubic-bezier(0.2,0.7,0.3,1)] -z-0"
+                    style={{ transform: `translateX(${activeIdx * ITEM_W}px)` }}
+                  />
+                );
+              })()}
               {(["overview", "create-link", "orders", "wallet", "link-history", "help", "referral"] as const).map((tab) => {
                 const isActive = activeTab === tab && !accountView;
                 return (
@@ -438,6 +454,14 @@ function DashboardContent() {
             </nav>
           </div>
           <div className="flex items-center gap-3">
+            {/* Command bar trigger — Ctrl+K shortcut */}
+            <CommandBarTrigger
+              onClick={() => {
+                // Dispatch synthetic Ctrl+K event để DashboardShell hook bắt được.
+                const evt = new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true });
+                window.dispatchEvent(evt);
+              }}
+            />
             {/* Tier pill — click để scroll xuống hero card */}
             <div className="hidden sm:block">
               <TierPill
