@@ -2023,6 +2023,140 @@ export async function getPublicStats(): Promise<{
   };
 }
 
+/**
+ * KPI delta cho admin dashboard — so sánh today vs yesterday cho 4 metrics.
+ * Trả về dict {metric: {today, yesterday, delta_pct}}.
+ */
+export async function getAdminKPIDelta(): Promise<{
+  newUsers: { today: number; yesterday: number; deltaPct: number };
+  newOrders: { today: number; yesterday: number; deltaPct: number };
+  cashback: { today: number; yesterday: number; deltaPct: number };
+  withdrawals: { today: number; yesterday: number; deltaPct: number };
+}> {
+  const database = await getDb();
+  const row = await database.get(
+    `SELECT
+      COALESCE((SELECT COUNT(*) FROM users WHERE role = 'user' AND created_at >= CURRENT_DATE), 0) AS new_users_today,
+      COALESCE((SELECT COUNT(*) FROM users WHERE role = 'user' AND created_at >= CURRENT_DATE - INTERVAL '1 day' AND created_at < CURRENT_DATE), 0) AS new_users_yesterday,
+      COALESCE((SELECT COUNT(*) FROM orders WHERE created_at >= CURRENT_DATE), 0) AS new_orders_today,
+      COALESCE((SELECT COUNT(*) FROM orders WHERE created_at >= CURRENT_DATE - INTERVAL '1 day' AND created_at < CURRENT_DATE), 0) AS new_orders_yesterday,
+      COALESCE((SELECT SUM(cashback) FROM orders WHERE status = 'Đã hoàn tiền' AND created_at >= CURRENT_DATE), 0) AS cashback_today,
+      COALESCE((SELECT SUM(cashback) FROM orders WHERE status = 'Đã hoàn tiền' AND created_at >= CURRENT_DATE - INTERVAL '1 day' AND created_at < CURRENT_DATE), 0) AS cashback_yesterday,
+      COALESCE((SELECT COUNT(*) FROM withdrawals WHERE created_at >= CURRENT_DATE), 0) AS withdrawals_today,
+      COALESCE((SELECT COUNT(*) FROM withdrawals WHERE created_at >= CURRENT_DATE - INTERVAL '1 day' AND created_at < CURRENT_DATE), 0) AS withdrawals_yesterday`,
+    [],
+  );
+
+  const calcDelta = (today: number, yesterday: number): number => {
+    if (yesterday === 0 && today === 0) return 0;
+    if (yesterday === 0) return 100;
+    return Math.round(((today - yesterday) / yesterday) * 100);
+  };
+
+  return {
+    newUsers: {
+      today: Number(row?.new_users_today ?? 0),
+      yesterday: Number(row?.new_users_yesterday ?? 0),
+      deltaPct: calcDelta(Number(row?.new_users_today ?? 0), Number(row?.new_users_yesterday ?? 0)),
+    },
+    newOrders: {
+      today: Number(row?.new_orders_today ?? 0),
+      yesterday: Number(row?.new_orders_yesterday ?? 0),
+      deltaPct: calcDelta(Number(row?.new_orders_today ?? 0), Number(row?.new_orders_yesterday ?? 0)),
+    },
+    cashback: {
+      today: Number(row?.cashback_today ?? 0),
+      yesterday: Number(row?.cashback_yesterday ?? 0),
+      deltaPct: calcDelta(Number(row?.cashback_today ?? 0), Number(row?.cashback_yesterday ?? 0)),
+    },
+    withdrawals: {
+      today: Number(row?.withdrawals_today ?? 0),
+      yesterday: Number(row?.withdrawals_yesterday ?? 0),
+      deltaPct: calcDelta(Number(row?.withdrawals_today ?? 0), Number(row?.withdrawals_yesterday ?? 0)),
+    },
+  };
+}
+
+/**
+ * Đếm số sessions đang active (heuristic: session created_at trong 15 phút gần đây
+ * + có hit DB session_token check). Không phải realtime online count chính xác,
+ * nhưng đủ tốt để hiển thị "X user đang online" cho admin.
+ */
+export async function getOnlineUsersCount(): Promise<number> {
+  const database = await getDb();
+  const row = await database.get(
+    `SELECT COUNT(DISTINCT user_id)::int AS cnt
+     FROM sessions
+     WHERE last_seen_at >= NOW() - INTERVAL '15 minutes'`,
+    [],
+  );
+  return Number(row?.cnt ?? 0);
+}
+
+/**
+ * Recent activity feed — kết hợp audit logs + signal từ orders/withdrawals
+ * thành 1 stream "X vừa làm Y" cho admin theo dõi realtime.
+ */
+export interface ActivityItem {
+  id: string;
+  type: "user_register" | "order_complete" | "withdrawal_request" | "withdrawal_approved" | "tier_up" | "audit";
+  username: string;
+  description: string;
+  amount?: number;
+  createdAt: string;
+}
+
+export async function getRecentActivity(limit = 15): Promise<ActivityItem[]> {
+  const database = await getDb();
+  // UNION 4 sources: register, order completed, withdrawal created, withdrawal approved.
+  const rows = await database.all(
+    `(
+      SELECT 'user_register' AS type, u.id::text AS source_id, u.username,
+             'đã đăng ký tài khoản' AS description, NULL::int AS amount, u.created_at
+      FROM users u WHERE u.role = 'user'
+      ORDER BY u.created_at DESC LIMIT 30
+    )
+    UNION ALL
+    (
+      SELECT 'order_complete' AS type, o.id::text AS source_id, u.username,
+             'có đơn hoàn tiền ' || o.order_code AS description,
+             o.cashback::int AS amount, o.created_at
+      FROM orders o JOIN users u ON u.id = o.user_id
+      WHERE o.status = 'Đã hoàn tiền'
+      ORDER BY o.created_at DESC LIMIT 30
+    )
+    UNION ALL
+    (
+      SELECT 'withdrawal_request' AS type, w.id::text AS source_id, u.username,
+             'gửi yêu cầu rút tiền' AS description,
+             w.amount::int AS amount, w.created_at
+      FROM withdrawals w JOIN users u ON u.id = w.user_id
+      WHERE w.status IN ('pending', 'Đang xử lý')
+      ORDER BY w.created_at DESC LIMIT 20
+    )
+    UNION ALL
+    (
+      SELECT 'withdrawal_approved' AS type, w.id::text AS source_id, u.username,
+             'rút tiền thành công' AS description,
+             w.amount::int AS amount, COALESCE(w.updated_at, w.created_at) AS created_at
+      FROM withdrawals w JOIN users u ON u.id = w.user_id
+      WHERE w.status IN ('approved', 'Đã chuyển', 'Đã duyệt')
+      ORDER BY COALESCE(w.updated_at, w.created_at) DESC LIMIT 20
+    )
+    ORDER BY created_at DESC
+    LIMIT $1`,
+    [limit],
+  );
+  return rows.map((r) => ({
+    id: `${r.type}-${r.source_id}`,
+    type: r.type as ActivityItem["type"],
+    username: String(r.username),
+    description: String(r.description),
+    amount: r.amount !== null ? Number(r.amount) : undefined,
+    createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+  }));
+}
+
 export async function getAllUsers(): Promise<Record<string, unknown>[]> {
   const database = await getDb();
   return await database.all(

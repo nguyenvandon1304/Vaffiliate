@@ -7,6 +7,7 @@ import { BrandLogo } from "@/components/icons";
 import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { useToast } from "@/components/Toast";
 import { UsersTab } from "@/components/admin/UsersTab";
+import { AdminLiveWidgets, AdminFAB } from "@/components/admin/AdminLiveWidgets";
 import { OrdersTab } from "@/components/admin/OrdersTab";
 import { WithdrawalsTab } from "@/components/admin/WithdrawalsTab";
 import { BroadcastTab } from "@/components/admin/BroadcastTab";
@@ -424,6 +425,12 @@ function AdminPageInner() {
           />
         )}
       </main>
+
+      {/* Floating action button — duyệt rút tiền nhanh */}
+      <AdminFAB
+        pendingWithdrawals={pendingCounts.pendingWithdrawals}
+        onClick={() => setTabWithStatus("withdrawals", "pending")}
+      />
     </div>
   );
 }
@@ -438,6 +445,11 @@ function OverviewSection({ stats, timeseries, tsRange, setTsRange, pendingCounts
   return (
     <>
       <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Tổng Quan Hệ Thống</h2>
+
+      {/* Live widgets — KPI delta + online count + activity feed */}
+      <div className="mb-6">
+        <AdminLiveWidgets />
+      </div>
 
       {/* Cần xử lý — chỉ hiển thị khi có việc */}
       {totalPending > 0 && (
