@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   CaffiliateLogo,
@@ -32,6 +32,16 @@ export function LoginCard() {
   const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
   const [forgotMsg, setForgotMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  // Tự động chuyển sang register mode khi user đến từ link giới thiệu (?ref=username)
+  // → user landing trên referral page → click CTA → đến / với ref → form register sẵn sàng.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("ref")) {
+      queueMicrotask(() => setMode("register"));
+    }
+  }, []);
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const captchaRef = useRef<CaptchaHandle>(null);

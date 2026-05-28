@@ -2024,6 +2024,43 @@ export async function getPublicStats(): Promise<{
 }
 
 /**
+ * Lookup minimal public user info for referral landing page.
+ * Trả null nếu user không tồn tại / không active.
+ *
+ * Chỉ expose: username, display_name, total_referrals (privacy-safe).
+ */
+export async function getReferralUserInfo(username: string): Promise<{
+  username: string;
+  displayName: string | null;
+  totalReferrals: number;
+  joinedDaysAgo: number;
+} | null> {
+  const database = await getDb();
+  const cleaned = username.toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 20);
+  if (!cleaned) return null;
+
+  const row = await database.get(
+    `SELECT u.id, u.username, u.display_name, u.created_at,
+       COALESCE((SELECT COUNT(*) FROM referrals WHERE referrer_user_id = u.id AND bonus_credited = 1), 0) AS total_refs
+     FROM users u
+     WHERE LOWER(u.username) = ? AND u.is_active = 1 AND u.role = 'user'
+     LIMIT 1`,
+    [cleaned],
+  );
+  if (!row) return null;
+
+  const createdAt = row.created_at instanceof Date ? row.created_at : new Date(String(row.created_at));
+  const joinedDaysAgo = Math.max(0, Math.floor((Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24)));
+
+  return {
+    username: String(row.username),
+    displayName: row.display_name ? String(row.display_name) : null,
+    totalReferrals: Number(row.total_refs),
+    joinedDaysAgo,
+  };
+}
+
+/**
  * KPI delta cho admin dashboard — so sánh today vs yesterday cho 4 metrics.
  * Trả về dict {metric: {today, yesterday, delta_pct}}.
  */
