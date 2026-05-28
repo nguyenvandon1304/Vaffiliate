@@ -423,6 +423,12 @@ function DashboardContent() {
                       isActive ? "scale-110" : "hover:scale-105"
                     }`}
                     data-active={isActive ? "true" : "false"}
+                    data-onboard={
+                      tab === "create-link" ? "create-link" :
+                      tab === "wallet" ? "wallet" :
+                      tab === "referral" ? "referral" :
+                      undefined
+                    }
                     title={
                       tab === "overview" ? "Tổng quan" :
                       tab === "create-link" ? "Tạo link" :
