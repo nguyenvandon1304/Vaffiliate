@@ -2184,18 +2184,6 @@ function WithdrawalRow({ w }: { w: UserWithdrawal }) {
   );
 }
 
-function EmptyHistory({ msg }: { msg: string }) {
-  return (
-    <div className="text-center py-10">
-      <div className="w-12 h-12 mx-auto mb-2 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center text-2xl">
-        📭
-      </div>
-      <p className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-0.5">Chưa có giao dịch quy đổi nào</p>
-      <p className="text-xs text-gray-400">{msg}</p>
-    </div>
-  );
-}
-
 /**
  * Một dòng trong preview bill rút tiền — label trái, value phải.
  * `highlight=true` cho dòng quan trọng (số tiền chính), `mono` cho format số tài khoản.

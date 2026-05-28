@@ -33,7 +33,7 @@ const PLATFORMS: SharePlatform[] = [
         Z
       </div>
     ),
-    buildUrl: (link, _text) => `https://zalo.me/share?u=${encodeURIComponent(link)}`,
+    buildUrl: (link, text) => `https://zalo.me/share?u=${encodeURIComponent(link)}&t=${encodeURIComponent(text)}`,
   },
   {
     name: "Messenger",
@@ -45,7 +45,12 @@ const PLATFORMS: SharePlatform[] = [
         </svg>
       </div>
     ),
-    buildUrl: (link, _text) => `https://www.facebook.com/dialog/send?app_id=140586622674265&link=${encodeURIComponent(link)}&redirect_uri=${encodeURIComponent(link)}`,
+    buildUrl: (link, text) => {
+      // Messenger share dialog không hỗ trợ pre-filled text — chỉ link.
+      // Param `text` lưu lại để API consistency, future use.
+      void text;
+      return `https://www.facebook.com/dialog/send?app_id=140586622674265&link=${encodeURIComponent(link)}&redirect_uri=${encodeURIComponent(link)}`;
+    },
   },
   {
     name: "Facebook",
