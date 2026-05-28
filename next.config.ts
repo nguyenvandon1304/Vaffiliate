@@ -89,7 +89,31 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: "1mb" },
   },
   async headers() {
+    // Headers cho social bots (Facebook, Twitter, Telegram, Zalo) khi crawl
+    // referral landing + OG images. Họ là cross-origin nên cần allow CORP.
+    const socialFriendlyHeaders = securityHeaders.map((h) => {
+      if (h.key === "Cross-Origin-Resource-Policy") {
+        return { key: h.key, value: "cross-origin" };
+      }
+      if (h.key === "Cross-Origin-Opener-Policy") {
+        // FB scraper không dùng OPENER context, nhưng để safe.
+        return { key: h.key, value: "unsafe-none" };
+      }
+      return h;
+    });
+
     return [
+      // Override cho /r/* (referral landing) + OG image endpoint — cần cross-origin
+      // để FB/Zalo/Telegram bot crawl được preview.
+      {
+        source: "/r/:path*",
+        headers: socialFriendlyHeaders,
+      },
+      {
+        source: "/api/share-image",
+        headers: socialFriendlyHeaders,
+      },
+      // Default: strict same-origin cho mọi route khác (security defense-in-depth).
       {
         source: "/:path*",
         headers: securityHeaders,
