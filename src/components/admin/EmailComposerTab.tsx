@@ -244,24 +244,32 @@ export function EmailComposerTab() {
             {/* Preview */}
             {body.trim() && (
               <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">👁️ Xem trước email</p>
-                <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50">
-                  <div className="bg-gradient-to-br from-orange-500 to-red-500 p-4 text-center">
-                    <div className="inline-flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg text-white font-extrabold text-lg">V</div>
-                    <p className="text-white text-sm font-bold mt-2">V-Affiliate</p>
-                    <p className="text-white/80 text-[11px]">Thương mại liên kết</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">👁️ Xem trước email (giống user nhận thật)</p>
+                <div
+                  className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
+                  style={{ background: "#f3f4f6", colorScheme: "light" }}
+                >
+                  <div style={{ background: "linear-gradient(135deg, #f97316, #ef4444)", padding: "16px", textAlign: "center" }}>
+                    <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 40, height: 40, background: "rgba(255,255,255,0.2)", borderRadius: 8, color: "white", fontWeight: 800, fontSize: 18 }}>V</div>
+                    <p style={{ color: "white", fontSize: 14, fontWeight: 700, margin: "8px 0 0 0" }}>V-Affiliate</p>
+                    <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 11, margin: "2px 0 0 0" }}>Thương mại liên kết</p>
                   </div>
-                  <div className="p-4 bg-white text-gray-900 text-sm">
-                    <p className="mb-3">Chào <strong>username</strong>,</p>
-                    <div className="email-preview text-gray-600 leading-relaxed" dangerouslySetInnerHTML={{ __html: body }} />
-                    <div className="text-center mt-4">
-                      <span className="inline-block bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2.5 rounded-lg text-xs font-bold">
+                  <div
+                    className="email-preview"
+                    style={{ padding: "20px 16px", background: "#ffffff", color: "#1f2937", fontSize: 14, lineHeight: 1.65 }}
+                  >
+                    <p style={{ margin: "0 0 12px 0", color: "#1f2937" }}>Chào <strong style={{ color: "#111827", fontWeight: 600 }}>username</strong>,</p>
+                    <div dangerouslySetInnerHTML={{ __html: body }} />
+                    <div style={{ textAlign: "center", marginTop: 20 }}>
+                      <span style={{ display: "inline-block", background: "linear-gradient(135deg, #f97316, #ea580c)", color: "white", padding: "10px 28px", borderRadius: 10, fontSize: 12, fontWeight: 700, letterSpacing: 0.3 }}>
                         MỞ V-AFFILIATE
                       </span>
                     </div>
                   </div>
-                  <div className="bg-gray-50 px-4 py-3 text-center border-t border-gray-200">
-                    <p className="text-[10px] text-gray-400">Bạn nhận email này vì đang là thành viên V-Affiliate · vaffiliate.vn</p>
+                  <div style={{ background: "#fafafa", padding: "12px 16px", textAlign: "center", borderTop: "1px solid #f0f0f0" }}>
+                    <p style={{ fontSize: 10, color: "#9ca3af", margin: 0 }}>
+                      Bạn nhận email này vì đang là thành viên V-Affiliate · vaffiliate.vn
+                    </p>
                   </div>
                 </div>
               </div>
@@ -354,10 +362,41 @@ export function EmailComposerTab() {
       </div>
 
       <style jsx global>{`
-        .email-preview p { margin: 0 0 12px 0; }
-        .email-preview ul, .email-preview ol { margin: 0 0 12px 0; padding-left: 20px; }
-        .email-preview li { margin-bottom: 4px; }
-        .email-preview strong { color: #111827; font-weight: 600; }
+        .email-preview {
+          color: #1f2937;
+        }
+        .email-preview p {
+          margin: 0 0 14px 0;
+          color: #374151;
+          line-height: 1.65;
+        }
+        .email-preview ul,
+        .email-preview ol {
+          margin: 0 0 14px 0;
+          padding-left: 22px;
+          color: #374151;
+        }
+        .email-preview ul {
+          list-style: disc outside;
+        }
+        .email-preview ol {
+          list-style: decimal outside;
+        }
+        .email-preview li {
+          margin-bottom: 6px;
+          padding-left: 4px;
+        }
+        .email-preview strong {
+          color: #111827;
+          font-weight: 700;
+        }
+        .email-preview a {
+          color: #ea580c;
+          text-decoration: underline;
+        }
+        .email-preview br {
+          line-height: 1.65;
+        }
       `}</style>
     </>
   );
