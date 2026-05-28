@@ -311,3 +311,66 @@ export async function sendWeeklyDigestEmail(
     `,
   });
 }
+
+/**
+ * Email broadcast — gửi email mass tới nhiều user.
+ *
+ * Render với template chuẩn V-Affiliate (header gradient, footer unsubscribe).
+ * subject + bodyHtml do admin nhập.
+ *
+ * Dùng `sendEmail` chung → tận dụng error handling + Resend rate limiting.
+ *
+ * NOTE: Resend free tier giới hạn 100 email/ngày, 3000/tháng.
+ * Caller (API route) nên throttle nếu list lớn để tránh 429.
+ */
+export async function sendBroadcastEmail(
+  to: string,
+  username: string,
+  subject: string,
+  bodyHtml: string,
+): Promise<{ success: boolean; error?: string }> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://vaffiliate.vn";
+  const dashLink = `${baseUrl}/dashboard`;
+
+  const html = `
+    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #f0f0f0; border-radius: 16px; overflow: hidden;">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse;">
+        <tr>
+          <td style="background: linear-gradient(135deg, #f97316, #ef4444); padding: 32px 24px; text-align: center;">
+            <div style="display: inline-block; width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 12px; line-height: 48px; font-size: 24px; font-weight: 800; color: white; margin-bottom: 12px;">V</div>
+            <h1 style="color: white; font-size: 20px; margin: 0; font-weight: 700;">V-Affiliate</h1>
+            <p style="color: rgba(255,255,255,0.8); font-size: 12px; margin: 4px 0 0 0;">Thương mại liên kết</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 32px 24px;">
+            <p style="color: #1f2937; font-size: 15px; margin: 0 0 16px 0;">Chào <strong>${username}</strong>,</p>
+            <div style="color: #4b5563; font-size: 14px; line-height: 1.7;">
+              ${bodyHtml}
+            </div>
+            <div style="text-align: center; margin: 28px 0 8px 0;">
+              <a href="${dashLink}" style="display: inline-block; background: linear-gradient(135deg, #f97316, #ea580c); color: white; text-decoration: none; padding: 12px 32px; border-radius: 12px; font-size: 14px; font-weight: 700;">
+                MỞ V-AFFILIATE
+              </a>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="background: #fafafa; padding: 16px 24px; text-align: center; border-top: 1px solid #f0f0f0;">
+            <p style="color: #9ca3af; font-size: 11px; margin: 0; line-height: 1.5;">
+              Bạn nhận email này vì đang là thành viên V-Affiliate.<br/>
+              <a href="${baseUrl}/dashboard/security" style="color: #ea580c; text-decoration: underline;">Cài đặt thông báo</a> ·
+              <a href="${baseUrl}" style="color: #ea580c; text-decoration: underline;">vaffiliate.vn</a>
+            </p>
+          </td>
+        </tr>
+      </table>
+    </div>
+  `;
+
+  return sendEmail({
+    to,
+    subject,
+    html,
+  });
+}

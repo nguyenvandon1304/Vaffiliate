@@ -13,6 +13,7 @@ import { AdminSkeleton } from "@/components/Skeleton";
 import { OrdersTab } from "@/components/admin/OrdersTab";
 import { WithdrawalsTab } from "@/components/admin/WithdrawalsTab";
 import { BroadcastTab } from "@/components/admin/BroadcastTab";
+import { EmailComposerTab } from "@/components/admin/EmailComposerTab";
 import { FraudTab } from "@/components/admin/FraudTab";
 import { SettingsTab } from "@/components/admin/SettingsTab";
 import { ImportHistoryTab } from "@/components/admin/ImportHistoryTab";
@@ -44,13 +45,14 @@ type Tab =
   | "import"
   | "import-history"
   | "broadcast"
+  | "email"
   | "fraud"
   | "ip-blocklist"
   | "settings";
 
 const VALID_TABS: Tab[] = [
   "overview", "analytics", "users", "orders", "withdrawals",
-  "balance", "import", "import-history", "broadcast", "fraud", "ip-blocklist", "settings",
+  "balance", "import", "import-history", "broadcast", "email", "fraud", "ip-blocklist", "settings",
 ];
 
 interface TimeseriesPoint { date: string; orders: number; cashback: number; revenue: number; }
@@ -223,6 +225,7 @@ function AdminPageInner() {
     { key: "import", label: "Import đơn", icon: "📥" },
     { key: "import-history", label: "Lịch sử import", icon: "📋" },
     { key: "broadcast", label: "Gửi thông báo", icon: "📨" },
+    { key: "email", label: "Gửi email hàng loạt", icon: "📧" },
     { key: "fraud", label: "Phát hiện gian lận", icon: "🚨" },
     { key: "ip-blocklist", label: "IP Blocklist", icon: "🚫" },
     { key: "settings", label: "Cấu hình", icon: "⚙️" },
@@ -375,6 +378,7 @@ function AdminPageInner() {
         {tab === "withdrawals" && <WithdrawalsTab />}
         {tab === "import-history" && <ImportHistoryTab />}
         {tab === "broadcast" && <BroadcastTab />}
+        {tab === "email" && <EmailComposerTab />}
         {tab === "fraud" && <FraudTab />}
         {tab === "ip-blocklist" && <IpBlocklistTab />}
         {tab === "settings" && <SettingsTab />}
