@@ -1,28 +1,32 @@
 import type { MetadataRoute } from "next";
 
 /**
- * robots.txt — chặn bot index các trang nội bộ (admin, api, các page có session).
+ * robots.txt — chặn bot index các trang nội bộ (admin, api, page nhạy cảm).
  *
- * `BASE_URL` từ env, fallback v-affiliate.vn để build OK ngay cả khi quên set.
- * Sitemap trỏ về cùng host để Google biết file sitemap ở đâu.
+ * Cho phép `/r/*` (referral landing) để bot Facebook / Zalo / Telegram
+ * crawl OG meta tags khi user paste link giới thiệu — quan trọng cho viral.
  */
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://vaffiliate-app.onrender.com";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "https://vaffiliate.vn";
 
   return {
     rules: [
       {
         userAgent: "*",
-        allow: ["/"],
+        // Cho phép landing + referral pages
+        allow: ["/", "/r/"],
         disallow: [
           "/admin",
           "/admin/",
           "/dashboard",
           "/dashboard/",
           "/api/",
+          // Reset/verify pages chứa token nhạy cảm — disallow để không lưu vào search results
           "/reset-password",
           "/verify-email",
-          "/r/",
         ],
       },
     ],

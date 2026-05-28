@@ -30,5 +30,10 @@ export async function GET() {
       label: label || "Group V-Affiliate (bài ghim)",
       platform: "facebook_post",
     },
+  }, {
+    headers: {
+      // Settings ít đổi — cache 1 giờ với SWR 2 giờ.
+      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200",
+    },
   });
 }

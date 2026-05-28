@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { Modal } from "@/components/Modal";
 import { ProgressRing } from "@/components/ProgressRing";
 import { ShareMenu } from "@/components/ShareMenu";
+import { PageSkeleton } from "@/components/Skeleton";
 import { QrCode } from "@/components/QrCode";
 import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { useToast } from "@/components/Toast";
@@ -125,11 +126,7 @@ export default function ReferralPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   return (

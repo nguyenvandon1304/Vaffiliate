@@ -11,6 +11,7 @@ import { EmptyState, IllustrationBox, IllustrationLink, IllustrationWallet } fro
 import { WalletHero } from "@/components/WalletHero";
 import { OrderList } from "@/components/OrderCard";
 import { CommandBarTrigger } from "@/components/CommandBar";
+import { DashboardSkeleton } from "@/components/Skeleton";
 import { useConfetti } from "@/components/Confetti";
 import { useOnboarding } from "@/components/OnboardingTour";
 import { EmailVerifyBanner } from "@/components/EmailVerifyBanner";
@@ -358,14 +359,7 @@ function DashboardContent() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-sm text-gray-500">Đang tải...</p>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   return (
@@ -1207,11 +1201,7 @@ function DashboardContent() {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    }>
+    <Suspense fallback={<DashboardSkeleton />}>
       <DashboardContent />
     </Suspense>
   );

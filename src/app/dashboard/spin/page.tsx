@@ -7,6 +7,7 @@ import { useConfetti } from "@/components/Confetti";
 import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { useToast } from "@/components/Toast";
 import { playWinSound, playLoseSound, playTickSound } from "@/lib/notification-sound";
+import { SpinSkeleton } from "@/components/Skeleton";
 
 interface Segment {
   index: number;
@@ -140,11 +141,7 @@ export default function SpinPage() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <SpinSkeleton />;
   }
 
   if (!status?.enabled) {

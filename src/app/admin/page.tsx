@@ -8,6 +8,7 @@ import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { useToast } from "@/components/Toast";
 import { UsersTab } from "@/components/admin/UsersTab";
 import { AdminLiveWidgets, AdminFAB } from "@/components/admin/AdminLiveWidgets";
+import { AdminSkeleton } from "@/components/Skeleton";
 import { OrdersTab } from "@/components/admin/OrdersTab";
 import { WithdrawalsTab } from "@/components/admin/WithdrawalsTab";
 import { BroadcastTab } from "@/components/admin/BroadcastTab";
@@ -65,7 +66,7 @@ function formatVND(n: number) { return (n || 0).toLocaleString("vi-VN") + "đ"; 
 
 export default function AdminPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center"><div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" /></div>}>
+    <Suspense fallback={<AdminSkeleton />}>
       <AdminPageInner />
     </Suspense>
   );
@@ -209,11 +210,7 @@ function AdminPageInner() {
     router.push("/");
   };
 
-  if (loading) return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <AdminSkeleton />;
 
   const tabs: { key: Tab; label: string; icon: string }[] = [
     { key: "overview", label: "Tổng quan", icon: "📊" },
