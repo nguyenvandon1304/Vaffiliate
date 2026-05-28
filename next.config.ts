@@ -102,21 +102,24 @@ const nextConfig: NextConfig = {
       return h;
     });
 
+    // Next.js header rules: tất cả rule match đều apply, rule sau OVERRIDE
+    // headers cùng key của rule trước. Cách an toàn: dùng `missing` matcher để
+    // exclude /r/* và /api/share-image khỏi default rule, rồi apply social headers riêng.
     return [
-      // Override cho /r/* (referral landing) + OG image endpoint — cần cross-origin
-      // để FB/Zalo/Telegram bot crawl được preview.
+      // 1. Rule chung — áp dụng cho mọi route TRỪ /r/* và /api/share-image.
+      {
+        source: "/((?!r/|api/share-image).*)",
+        headers: securityHeaders,
+      },
+      // 2. Rule cross-origin cho referral landing — để FB/Zalo/Telegram bot crawl được.
       {
         source: "/r/:path*",
         headers: socialFriendlyHeaders,
       },
+      // 3. Rule cross-origin cho OG image endpoint — bot fetch ảnh preview.
       {
         source: "/api/share-image",
         headers: socialFriendlyHeaders,
-      },
-      // Default: strict same-origin cho mọi route khác (security defense-in-depth).
-      {
-        source: "/:path*",
-        headers: securityHeaders,
       },
     ];
   },
