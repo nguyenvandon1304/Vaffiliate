@@ -1,16 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useToast } from "@/components/Toast";
+import {
+  EMAIL_TEMPLATES,
+  CATEGORY_LABELS,
+  type EmailTemplate,
+  type TemplateCategory,
+} from "@/lib/email-templates";
 
 /**
  * EmailComposerTab — admin compose & send mass email qua Resend API.
  *
- * Khác BroadcastTab (in-app notification) ở chỗ:
- * - Gửi email thật ra ngoài → reach user không online
- * - Filter chi tiết hơn (verified / active / role)
- * - Preview số lượng trước khi gửi
- * - Throttle 100ms/email phía server để không hit Resend rate limit
+ * Có thư viện 20+ template được viết sẵn (chào mừng, khuyến mãi, re-engage,
+ * tri ân, theo mùa...) — admin chọn 1 cái, có thể chỉnh sửa rồi gửi.
  */
 export function EmailComposerTab() {
   const toast = useToast();
@@ -24,6 +27,11 @@ export function EmailComposerTab() {
   const [previewing, setPreviewing] = useState(false);
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<{ sent: number; failed: number; total: number; errors?: string[] } | null>(null);
+
+  // Template library state
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<TemplateCategory | "all">("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Auto re-preview khi đổi filter
   useEffect(() => {
@@ -45,6 +53,30 @@ export function EmailComposerTab() {
     }, 200);
     return () => { cancelled = true; clearTimeout(t); };
   }, [targetRole, onlyVerified, onlyActive]);
+
+  const filteredTemplates = useMemo(() => {
+    let list = EMAIL_TEMPLATES;
+    if (activeCategory !== "all") {
+      list = list.filter((t) => t.category === activeCategory);
+    }
+    if (searchTerm.trim()) {
+      const q = searchTerm.toLowerCase();
+      list = list.filter(
+        (t) =>
+          t.name.toLowerCase().includes(q) ||
+          t.subject.toLowerCase().includes(q) ||
+          t.description.toLowerCase().includes(q),
+      );
+    }
+    return list;
+  }, [activeCategory, searchTerm]);
+
+  const applyTemplate = (tpl: EmailTemplate) => {
+    setSubject(tpl.subject);
+    setBody(tpl.body);
+    setShowTemplates(false);
+    toast.success(`Đã áp dụng template "${tpl.name}"`);
+  };
 
   const send = async () => {
     if (!subject.trim() || !body.trim()) {
@@ -90,53 +122,92 @@ export function EmailComposerTab() {
     }
   };
 
-  const insertTemplate = (key: "promo" | "remind" | "feature" | "thanks") => {
-    const templates = {
-      promo: {
-        subject: "🎉 Khuyến mãi đặc biệt — Cashback x2 cuối tuần",
-        body: "<p>Chỉ trong <strong>48 giờ tới</strong>, mọi đơn hàng Shopee qua V-Affiliate sẽ được nhân đôi cashback!</p>\n<p>Đừng bỏ lỡ cơ hội tiết kiệm tới <strong>20%</strong> cho đơn hàng yêu thích.</p>",
-      },
-      remind: {
-        subject: "💰 Bạn đang bỏ lỡ cashback hàng ngày trên V-Affiliate",
-        body: "<p>Đã lâu rồi bạn chưa quay lại V-Affiliate. Hàng ngàn user khác đang nhận cashback đều đặn mỗi ngày.</p>\n<p>Quay lại ngay để không bỏ lỡ những đơn cashback hấp dẫn từ Shopee, Lazada, Tiki...</p>",
-      },
-      feature: {
-        subject: "✨ Tính năng mới — Vòng quay may mắn",
-        body: "<p>V-Affiliate vừa ra mắt <strong>Vòng quay may mắn</strong> — quay miễn phí mỗi ngày để nhận thêm tiền vào ví!</p>\n<p>Phần thưởng từ <strong>1.000đ tới 100.000đ</strong>, càng quay càng có cơ hội trúng lớn.</p>",
-      },
-      thanks: {
-        subject: "🙏 Cảm ơn bạn đã đồng hành cùng V-Affiliate",
-        body: "<p>Cảm ơn bạn đã tin tưởng V-Affiliate trong suốt thời gian qua.</p>\n<p>Chúng tôi cam kết tiếp tục mang đến những trải nghiệm cashback tốt nhất, an toàn và minh bạch.</p>",
-      },
-    };
-    const t = templates[key];
-    setSubject(t.subject);
-    setBody(t.body);
-  };
-
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">📧 Gửi Email Hàng Loạt</h2>
-        <div className="text-xs text-gray-500 dark:text-gray-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-lg px-3 py-1.5">
-          ⚠️ Resend free: 100 email/ngày · paid: 50k/tháng
+        <div className="flex gap-2 items-center flex-wrap">
+          <button
+            onClick={() => setShowTemplates(!showTemplates)}
+            className="text-sm font-semibold px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 shadow-sm shadow-orange-500/30 transition flex items-center gap-2"
+          >
+            📚 Thư viện template ({EMAIL_TEMPLATES.length})
+          </button>
+          <div className="text-xs text-gray-500 dark:text-gray-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-lg px-3 py-1.5">
+            ⚠️ Resend free: 100/ngày · paid: 50k/tháng
+          </div>
         </div>
       </div>
+
+      {/* Template Library Panel */}
+      {showTemplates && (
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-orange-300 dark:border-orange-500/40 shadow-lg shadow-orange-500/10 mb-4 overflow-hidden">
+          <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-500/10 dark:to-red-500/10 border-b border-orange-200 dark:border-orange-500/30 px-5 py-3 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p className="text-sm font-bold text-gray-900 dark:text-white">📚 Thư viện template viết sẵn</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Chọn 1 mẫu → tự động điền subject + nội dung. Có thể chỉnh sửa trước khi gửi.</p>
+            </div>
+            <button
+              onClick={() => setShowTemplates(false)}
+              className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+            >
+              ✕ Đóng
+            </button>
+          </div>
+
+          {/* Search + category tabs */}
+          <div className="px-5 pt-4 pb-2">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="🔎 Tìm theo tên, subject, mô tả..."
+              className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500 mb-3"
+            />
+
+            <div className="flex flex-wrap gap-1.5">
+              <CategoryChip
+                active={activeCategory === "all"}
+                onClick={() => setActiveCategory("all")}
+                icon="📋"
+                label="Tất cả"
+                count={EMAIL_TEMPLATES.length}
+              />
+              {(Object.keys(CATEGORY_LABELS) as TemplateCategory[]).map((cat) => {
+                const meta = CATEGORY_LABELS[cat];
+                const count = EMAIL_TEMPLATES.filter((t) => t.category === cat).length;
+                return (
+                  <CategoryChip
+                    key={cat}
+                    active={activeCategory === cat}
+                    onClick={() => setActiveCategory(cat)}
+                    icon={meta.icon}
+                    label={meta.label}
+                    count={count}
+                  />
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Template grid */}
+          <div className="px-5 pb-5 pt-2 max-h-[480px] overflow-y-auto">
+            {filteredTemplates.length === 0 ? (
+              <p className="text-center text-sm text-gray-400 py-8">Không tìm thấy template nào</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {filteredTemplates.map((tpl) => (
+                  <TemplateCard key={tpl.id} template={tpl} onApply={() => applyTemplate(tpl)} />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
         {/* MAIN - Compose */}
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-          {/* Templates */}
-          <div className="mb-4">
-            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">📝 Template gợi ý</p>
-            <div className="flex flex-wrap gap-2">
-              <TemplateButton onClick={() => insertTemplate("promo")} icon="🎉" label="Khuyến mãi" />
-              <TemplateButton onClick={() => insertTemplate("remind")} icon="💰" label="Re-engage" />
-              <TemplateButton onClick={() => insertTemplate("feature")} icon="✨" label="Feature mới" />
-              <TemplateButton onClick={() => insertTemplate("thanks")} icon="🙏" label="Cảm ơn" />
-            </div>
-          </div>
-
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -162,7 +233,7 @@ export function EmailComposerTab() {
               <textarea
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                rows={10}
+                rows={12}
                 maxLength={10000}
                 placeholder="<p>Xin chào, V-Affiliate có ưu đãi mới...</p>"
                 className="mt-1 w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500 font-mono"
@@ -173,20 +244,24 @@ export function EmailComposerTab() {
             {/* Preview */}
             {body.trim() && (
               <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">👁️ Xem trước</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">👁️ Xem trước email</p>
                 <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50">
                   <div className="bg-gradient-to-br from-orange-500 to-red-500 p-4 text-center">
-                    <div className="inline-block w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-white font-extrabold text-lg leading-none">V</div>
+                    <div className="inline-flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg text-white font-extrabold text-lg">V</div>
                     <p className="text-white text-sm font-bold mt-2">V-Affiliate</p>
+                    <p className="text-white/80 text-[11px]">Thương mại liên kết</p>
                   </div>
                   <div className="p-4 bg-white text-gray-900 text-sm">
                     <p className="mb-3">Chào <strong>username</strong>,</p>
-                    <div className="prose-sm" dangerouslySetInnerHTML={{ __html: body }} />
+                    <div className="email-preview text-gray-600 leading-relaxed" dangerouslySetInnerHTML={{ __html: body }} />
                     <div className="text-center mt-4">
-                      <span className="inline-block bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2 rounded-lg text-xs font-bold">
+                      <span className="inline-block bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2.5 rounded-lg text-xs font-bold">
                         MỞ V-AFFILIATE
                       </span>
                     </div>
+                  </div>
+                  <div className="bg-gray-50 px-4 py-3 text-center border-t border-gray-200">
+                    <p className="text-[10px] text-gray-400">Bạn nhận email này vì đang là thành viên V-Affiliate · vaffiliate.vn</p>
                   </div>
                 </div>
               </div>
@@ -277,18 +352,74 @@ export function EmailComposerTab() {
           )}
         </div>
       </div>
+
+      <style jsx global>{`
+        .email-preview p { margin: 0 0 12px 0; }
+        .email-preview ul, .email-preview ol { margin: 0 0 12px 0; padding-left: 20px; }
+        .email-preview li { margin-bottom: 4px; }
+        .email-preview strong { color: #111827; font-weight: 600; }
+      `}</style>
     </>
   );
 }
 
-function TemplateButton({ onClick, icon, label }: { onClick: () => void; icon: string; label: string }) {
+function CategoryChip({
+  active, onClick, icon, label, count,
+}: { active: boolean; onClick: () => void; icon: string; label: string; count: number }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="text-xs font-medium px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-500/20 hover:text-orange-700 dark:hover:text-orange-400 transition"
+      className={`text-xs font-medium px-3 py-1.5 rounded-full transition flex items-center gap-1.5 ${
+        active
+          ? "bg-orange-500 text-white shadow-sm shadow-orange-500/30"
+          : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-500/20"
+      }`}
     >
-      {icon} {label}
+      <span>{icon}</span>
+      <span>{label}</span>
+      <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${active ? "bg-white/20" : "bg-gray-200 dark:bg-gray-600"}`}>
+        {count}
+      </span>
     </button>
+  );
+}
+
+function TemplateCard({ template, onApply }: { template: EmailTemplate; onApply: () => void }) {
+  const [hovered, setHovered] = useState(false);
+  const meta = CATEGORY_LABELS[template.category];
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="group bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-700 rounded-lg p-3 hover:border-orange-400 dark:hover:border-orange-500/60 hover:shadow-md transition cursor-pointer flex flex-col"
+      onClick={onApply}
+    >
+      <div className="flex items-start gap-2 mb-2">
+        <span className="text-2xl shrink-0">{template.icon}</span>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{template.name}</p>
+          <p className="text-[10px] uppercase tracking-wide text-orange-600 dark:text-orange-400 font-semibold mt-0.5">
+            {meta.icon} {meta.label}
+          </p>
+        </div>
+      </div>
+      <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 line-clamp-2">{template.description}</p>
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded p-2 mb-2 flex-1">
+        <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-0.5">Subject</p>
+        <p className="text-xs font-medium text-gray-700 dark:text-gray-200 line-clamp-2">{template.subject}</p>
+      </div>
+      <button
+        type="button"
+        className={`w-full text-xs font-semibold py-1.5 rounded-lg transition ${
+          hovered
+            ? "bg-orange-500 text-white"
+            : "bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-300"
+        }`}
+      >
+        ✨ Dùng template này
+      </button>
+    </div>
   );
 }
