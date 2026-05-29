@@ -117,18 +117,20 @@ export default function WishlistPage() {
   };
 
   const handleBuy = async (productLink: string) => {
-    // Tạo affiliate link qua /api/affiliate (đã có sẵn)
+    // Tạo affiliate link qua /api/affiliate. API đọc field `productUrl` (KHÔNG phải `url`).
     try {
       const res = await fetch("/api/affiliate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: productLink }),
+        body: JSON.stringify({ productUrl: productLink }),
       });
       const data = await res.json();
-      if (data.success && data.product?.affiliateLink) {
-        window.open(data.product.affiliateLink, "_blank", "noopener,noreferrer");
+      // Ưu tiên link affiliate chính thức (có voucher + tracking cashback).
+      const link = data?.product?.affiliateLink;
+      if (data.success && link) {
+        window.open(link, "_blank", "noopener,noreferrer");
       } else {
-        // Fallback: mở link gốc
+        // Fallback: mở link gốc (không có tracking — chỉ khi API lỗi)
         window.open(productLink, "_blank", "noopener,noreferrer");
       }
     } catch {

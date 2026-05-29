@@ -106,6 +106,9 @@ export default function ReferralPage() {
         setTier(tierRes.info);
         setAllTiers(tierRes.tiers);
       }
+    }).catch(() => {
+      // Lỗi mạng → không kẹt loading vĩnh viễn. Tắt skeleton để user thấy trang.
+    }).finally(() => {
       setLoading(false);
     });
   }, [router]);

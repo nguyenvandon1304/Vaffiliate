@@ -41,8 +41,8 @@ export async function POST(request: NextRequest) {
     try {
       const db = await getDb();
       const bank = await db.get(
-        "SELECT bank_name, account_number FROM bank_accounts WHERE id = ?",
-        [bank_account_id],
+        "SELECT bank_name, account_number FROM bank_accounts WHERE id = ? AND user_id = ?",
+        [bank_account_id, auth.user.id],
       );
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
       await notifyWithdrawRequest({

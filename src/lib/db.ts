@@ -1537,15 +1537,21 @@ export async function getLeaderboard(period: "month" | "all" = "all"): Promise<L
 export async function updateUserProfile(
   userId: number,
   data: { display_name?: string; email?: string; phone?: string },
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; emailChanged?: boolean }> {
   const database = await getDb();
 
+  let emailChanged = false;
   if (data.email) {
     const existing = await database.get("SELECT id FROM users WHERE LOWER(email) = LOWER(?) AND id != ?", [
       data.email,
       userId,
     ]);
     if (existing) return { success: false, error: "Email đã được sử dụng bởi tài khoản khác" };
+
+    // Kiểm tra email có thực sự đổi không (so với email hiện tại).
+    const cur = await database.get("SELECT email FROM users WHERE id = ?", [userId]);
+    const curEmail = (cur?.email as string | undefined)?.toLowerCase() ?? "";
+    if (data.email.toLowerCase() !== curEmail) emailChanged = true;
   }
 
   const fields: string[] = [];
@@ -1555,13 +1561,16 @@ export async function updateUserProfile(
   if (data.email !== undefined) { fields.push("email = ?"); values.push(data.email); }
   if (data.phone !== undefined) { fields.push("phone = ?"); values.push(data.phone); }
 
+  // Đổi email → bắt verify lại email mới (chống chiếm email chưa sở hữu).
+  if (emailChanged) { fields.push("email_verified = 0"); }
+
   if (fields.length === 0) return { success: false, error: "Không có thông tin cần cập nhật" };
 
   fields.push("updated_at = NOW()");
   values.push(userId);
 
   await database.run(`UPDATE users SET ${fields.join(", ")} WHERE id = ?`, values);
-  return { success: true };
+  return { success: true, emailChanged };
 }
 
 /* ─────────────── Bank accounts + withdraw PIN + withdrawals ─────────────── */

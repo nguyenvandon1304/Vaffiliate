@@ -23,5 +23,11 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: false, error: result.error }, { status: 400 });
   }
 
-  return NextResponse.json({ success: true, message: "Cập nhật thành công" });
+  return NextResponse.json({
+    success: true,
+    message: result.emailChanged
+      ? "Đã cập nhật. Email mới cần được xác minh lại — vui lòng kiểm tra hộp thư."
+      : "Cập nhật thành công",
+    emailChanged: result.emailChanged ?? false,
+  });
 }
