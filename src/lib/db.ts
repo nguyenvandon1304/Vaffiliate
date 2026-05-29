@@ -3541,14 +3541,6 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   spin_enabled: "1",
   spin_orders_per_token: "10",       // 10 đơn hoàn tiền = 1 lượt quay
   spin_referrals_per_token: "5",     // 5 bạn mời active = 1 lượt quay
-  // Bai viet ghim cong dong V-Affiliate trong group Facebook -
-  // user moi vao tao link cashback xong se thay preset nut "Dang vao
-  // group V-Affiliate" -> 1 click mo thang bai ghim -> comment link da copy.
-  // Muc dich: tang traffic group + warm-up domain vaffiliate.vn nhanh hon
-  // (FB tin domain hon khi nhieu nguoi dang vao cung 1 bai community).
-  community_share_post_url: "https://www.facebook.com/groups/1277321027865135/posts/1316717423925495",
-  community_share_post_label: "Group V-Affiliate (bai ghim)",
-  community_share_post_enabled: "1",
 };
 
 export async function getSetting(key: string): Promise<string> {

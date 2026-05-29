@@ -24,7 +24,6 @@ import {
   TikiIcon,
 } from "@/components/channel-icons";
 import Footer from "@/components/Footer";
-import { ShareTargetsPanel } from "@/components/ShareTargetsPanel";
 
 type ChannelDef = {
   name: string;
@@ -73,10 +72,6 @@ export default function CashbackPage() {
   const [showGuide, setShowGuide] = useState(false);
   const [showAllChannels, setShowAllChannels] = useState(false);
   const [copied, setCopied] = useState(false);
-  // hasCopiedOnce: đã từng copy ít nhất 1 lần với link hiện tại → mở khoá panel
-  // group V-Affiliate. Reset khi tạo link mới hoặc clear. Khác với `copied`
-  // (chỉ flash 2s cho hiệu ứng "Đã copy" trên nút).
-  const [hasCopiedOnce, setHasCopiedOnce] = useState(false);
   const [product, setProduct] = useState<ProductInfo | null>(null);
   const [error, setError] = useState("");
 
@@ -103,7 +98,6 @@ export default function CashbackPage() {
     if (!productLink.trim()) return;
     setGenerating(true);
     setCopied(false);
-    setHasCopiedOnce(false); // tạo link mới → reset trạng thái panel group
     setError("");
     setProduct(null);
 
@@ -139,7 +133,6 @@ export default function CashbackPage() {
     if (!product?.affiliateLink) return;
     navigator.clipboard.writeText(product.affiliateLink);
     setCopied(true);
-    setHasCopiedOnce(true); // sticky — chỉ reset khi tạo link mới hoặc clear
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -148,7 +141,6 @@ export default function CashbackPage() {
     setProduct(null);
     setError("");
     setCopied(false);
-    setHasCopiedOnce(false);
   };
 
   const formatPrice = (n: number) => n.toLocaleString("vi-VN");
@@ -513,12 +505,6 @@ export default function CashbackPage() {
                     </div>
                   </div>
                 </div>
-
-                {/* "Đăng vào nhóm" — workaround cho FB anti-spam:
-                    FB không auto-link domain mới ở wall cá nhân nhưng VẪN auto-link
-                    trong group. User lưu sẵn link group → bấm 1 nút mở group/page,
-                    paste link đã copy là xong. */}
-                <ShareTargetsPanel hasCopied={hasCopiedOnce} onCopyAgain={handleCopy} />
 
                 {/* CTA Buttons — Copy link + Mua ngay */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
