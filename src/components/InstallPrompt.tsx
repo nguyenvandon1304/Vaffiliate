@@ -9,24 +9,27 @@ export function InstallPrompt() {
   if (dismissed) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 p-4 sm:p-6">
-      <div className="max-w-md mx-auto bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl shadow-gray-200/80 dark:shadow-black/40 border border-gray-100 dark:border-zinc-800 p-4 flex items-start gap-3 animate-in slide-in-from-bottom-4 duration-300">
-        <div className="flex-shrink-0 w-10 h-10 bg-orange-100 dark:bg-orange-500/15 rounded-xl flex items-center justify-center">
-          <SmartphoneIcon className="text-orange-500 w-5 h-5" />
+    <div
+      className="fixed bottom-0 left-0 right-0 z-40 px-3 sm:px-6 pointer-events-none"
+      style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0) + 0.75rem)" }}
+    >
+      <div className="max-w-md mx-auto bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl shadow-gray-200/80 dark:shadow-black/40 border border-gray-100 dark:border-zinc-800 p-3 sm:p-4 flex items-center gap-2.5 sm:gap-3 animate-in slide-in-from-bottom-4 duration-300 pointer-events-auto">
+        <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 bg-orange-100 dark:bg-orange-500/15 rounded-xl flex items-center justify-center">
+          <SmartphoneIcon className="text-orange-500 w-4 h-4 sm:w-5 sm:h-5" />
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-sm font-bold text-gray-900 dark:text-zinc-100 mb-0.5">
+          <h4 className="text-[13px] sm:text-sm font-bold text-gray-900 dark:text-zinc-100 leading-tight">
             Ứng dụng di động
           </h4>
-          <p className="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">
-            Sắp ra mắt — đăng ký nhận thông báo qua Fanpage
+          <p className="text-[11px] sm:text-xs text-gray-500 dark:text-zinc-400 leading-snug truncate">
+            Sắp ra mắt — đăng ký qua Fanpage
           </p>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
           <span
             aria-disabled="true"
             title="Sắp ra mắt"
-            className="bg-orange-200 dark:bg-orange-500/20 text-orange-600 dark:text-orange-300 text-xs font-semibold px-4 py-2 rounded-lg cursor-not-allowed select-none"
+            className="bg-orange-200 dark:bg-orange-500/20 text-orange-600 dark:text-orange-300 text-[11px] sm:text-xs font-semibold px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg cursor-not-allowed select-none whitespace-nowrap"
           >
             Coming soon
           </span>

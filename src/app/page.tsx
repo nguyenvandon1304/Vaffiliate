@@ -36,7 +36,9 @@ export default async function Home() {
       </div>
 
       {/* Main content — 2 column on desktop, single column on mobile */}
-      <div className="w-full flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
+      {/* pb-* phải đủ chừa chỗ cho InstallPrompt fixed dưới đáy + Footer
+          Banner cao ~84px + container padding ~16px + footer ~56px = ~160px */}
+      <div className="w-full flex-1 flex items-center justify-center px-4 py-8 sm:py-12 pb-40 sm:pb-44 lg:pb-32">
         <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Left: Hero illustration + social proof + testimonials (desktop only) */}
           <LoginHero />
