@@ -506,51 +506,47 @@ export default function CashbackPage() {
                   </div>
                 </div>
 
-                {/* CTA Buttons — Copy link + Mua ngay */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  <button
-                    onClick={handleCopy}
-                    className={`flex items-center justify-center gap-2 text-white text-sm font-bold py-4 rounded-xl transition-all shadow-sm ${
-                      copied
-                        ? "bg-green-500"
-                        : "bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600"
-                    }`}
-                  >
-                    {copied ? (
-                      <>
-                        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                        ĐÃ COPY LINK
-                      </>
-                    ) : (
-                      <>
-                        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
-                        COPY LINK
-                      </>
-                    )}
-                  </button>
+                {/* CTA Buttons — "Mua ngay" là hành động CHÍNH (mở thẳng Shopee,
+                    voucher tự áp nếu link có). "Copy" là phụ — dành cho user PC
+                    (cần gửi link sang điện thoại để mở app) hoặc muốn chia sẻ. */}
+                <div className="flex gap-2.5">
                   {/*
                     Nút "Mua ngay" — mở link affiliate trong tab mới.
-                    Quan trọng: link đã chứa `mmp_pid=an_<SHOPEE_AFFILIATE_ID>` và
-                    `sub_id1=uid_<userId>`. Khi user mua xong và bạn export CSV từ
-                    Shopee Affiliate Center → import vào admin → hệ thống tự match
-                    sub_id để gán đơn về đúng user.
+                    Link đã chứa mmp_pid + sub_id của user → khi mua xong, export CSV
+                    từ Shopee Affiliate Center → import admin → tự match sub_id gán đơn.
                   */}
                   <a
                     href={product.affiliateLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 text-white text-sm font-bold py-4 rounded-xl transition-all shadow-sm bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700"
+                    className="flex-1 flex items-center justify-center gap-2 text-white text-base font-bold py-4 rounded-xl transition-all shadow-sm bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700"
                   >
                     <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="9" cy="21" r="1" />
                       <circle cx="20" cy="21" r="1" />
                       <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
                     </svg>
-                    MUA NGAY
+                    MUA NGAY — NHẬN HOÀN TIỀN
                     <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 opacity-80" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M7 17l9.2-9.2M17 17V7H7" />
                     </svg>
                   </a>
+                  {/* Copy phụ — icon-only, cho user PC gửi link sang điện thoại / chia sẻ */}
+                  <button
+                    onClick={handleCopy}
+                    title={copied ? "Đã copy link" : "Sao chép link (gửi sang điện thoại / chia sẻ)"}
+                    className={`shrink-0 w-14 flex items-center justify-center rounded-xl transition-all border-2 ${
+                      copied
+                        ? "bg-green-500 border-green-500 text-white"
+                        : "bg-white dark:bg-zinc-800 border-orange-300 dark:border-orange-500/40 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-500/10"
+                    }`}
+                  >
+                    {copied ? (
+                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
+                    )}
+                  </button>
                 </div>
 
                 {/* Chú ý */}
