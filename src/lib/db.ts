@@ -4344,3 +4344,106 @@ export async function createSessionForUser(
   await database.run("UPDATE users SET last_login = NOW() WHERE id = ?", [userId]);
   return token;
 }
+
+
+/* ─────────────── Admin: Spin (vòng quay) management ─────────────── */
+
+export interface SpinAdminStats {
+  totalSpins: number;
+  totalPaidOut: number;        // tổng tiền đã chi cho user qua vòng quay
+  spinsToday: number;
+  paidToday: number;
+  uniquePlayers: number;       // số user đã từng quay
+  segmentBreakdown: Array<{ segmentIndex: number; label: string; count: number; totalAmount: number }>;
+  recentWins: Array<{
+    id: number;
+    username: string;
+    display_name: string | null;
+    reward_amount: number;
+    reward_label: string;
+    spun_at: string;
+  }>;
+  topWinners: Array<{
+    username: string;
+    display_name: string | null;
+    total_won: number;
+    spin_count: number;
+  }>;
+}
+
+/**
+ * Thống kê vòng quay cho admin — tổng chi, breakdown theo segment, top winner.
+ * Quan trọng để track chi phí promotion (spin chi tiền thật vào ví user).
+ */
+export async function getSpinAdminStats(): Promise<SpinAdminStats> {
+  const database = await getDb();
+
+  const overview = await database.get(
+    `SELECT
+      COALESCE(COUNT(*), 0) AS total_spins,
+      COALESCE(SUM(reward_amount), 0) AS total_paid,
+      COALESCE(COUNT(*) FILTER (WHERE spun_at >= CURRENT_DATE), 0) AS spins_today,
+      COALESCE(SUM(reward_amount) FILTER (WHERE spun_at >= CURRENT_DATE), 0) AS paid_today,
+      COALESCE(COUNT(DISTINCT user_id), 0) AS unique_players
+     FROM spin_history`,
+    [],
+  );
+
+  const segments = await database.all(
+    `SELECT segment_index, reward_label,
+            COUNT(*) AS cnt, COALESCE(SUM(reward_amount), 0) AS total_amount
+     FROM spin_history
+     GROUP BY segment_index, reward_label
+     ORDER BY segment_index ASC`,
+    [],
+  );
+
+  const recent = await database.all(
+    `SELECT s.id, u.username, u.display_name, s.reward_amount, s.reward_label, s.spun_at
+     FROM spin_history s
+     JOIN users u ON s.user_id = u.id
+     ORDER BY s.spun_at DESC
+     LIMIT 30`,
+    [],
+  );
+
+  const top = await database.all(
+    `SELECT u.username, u.display_name,
+            COALESCE(SUM(s.reward_amount), 0) AS total_won,
+            COUNT(*) AS spin_count
+     FROM spin_history s
+     JOIN users u ON s.user_id = u.id
+     GROUP BY u.id, u.username, u.display_name
+     ORDER BY total_won DESC
+     LIMIT 10`,
+    [],
+  );
+
+  return {
+    totalSpins: Number(overview?.total_spins ?? 0),
+    totalPaidOut: Number(overview?.total_paid ?? 0),
+    spinsToday: Number(overview?.spins_today ?? 0),
+    paidToday: Number(overview?.paid_today ?? 0),
+    uniquePlayers: Number(overview?.unique_players ?? 0),
+    segmentBreakdown: segments.map((r) => ({
+      segmentIndex: Number(r.segment_index),
+      label: String(r.reward_label),
+      count: Number(r.cnt),
+      totalAmount: Number(r.total_amount),
+    })),
+    recentWins: recent.map((r) => ({
+      id: Number(r.id),
+      username: String(r.username),
+      display_name: (r.display_name as string | null) ?? null,
+      reward_amount: Number(r.reward_amount),
+      reward_label: String(r.reward_label),
+      spun_at: toIso(r.spun_at),
+    })),
+    topWinners: top.map((r) => ({
+      username: String(r.username),
+      display_name: (r.display_name as string | null) ?? null,
+      total_won: Number(r.total_won),
+      spin_count: Number(r.spin_count),
+    })),
+  };
+}
