@@ -22,6 +22,7 @@ import {
 import { Captcha, type CaptchaHandle } from "@/components/Captcha";
 import { useTypingPlaceholder } from "@/components/LoginHero";
 import { trackEvent, identifyUser } from "@/components/Analytics";
+import { GoogleSignInButton, AuthDivider } from "@/components/GoogleSignInButton";
 
 const inputClass =
   "w-full pl-10 pr-4 py-2.5 bg-white dark:bg-zinc-950/40 border-2 border-gray-200 dark:border-zinc-700 rounded-lg text-sm text-gray-900 dark:text-zinc-100 placeholder:text-gray-300 dark:placeholder:text-zinc-600 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-500/20 outline-none transition-all";
@@ -34,15 +35,6 @@ export function LoginCard() {
   const [forgotMsg, setForgotMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // Tự động chuyển sang register mode khi user đến từ link giới thiệu (?ref=username)
-  // → user landing trên referral page → click CTA → đến / với ref → form register sẵn sàng.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("ref")) {
-      queueMicrotask(() => setMode("register"));
-    }
-  }, []);
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const captchaRef = useRef<CaptchaHandle>(null);
@@ -62,6 +54,35 @@ export function LoginCard() {
   const [totpRequired, setTotpRequired] = useState(false);
   const [pendingCreds, setPendingCreds] = useState<{ username: string; password: string } | null>(null);
   const [totpCode, setTotpCode] = useState("");
+
+  // Tự động chuyển sang register mode khi user đến từ link giới thiệu (?ref=username)
+  // → user landing trên referral page → click CTA → đến / với ref → form register sẵn sàng.
+  // Cũng xử lý ?error=google_* khi callback OAuth fail → hiện thông báo lỗi tiếng Việt.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("ref")) {
+      queueMicrotask(() => setMode("register"));
+    }
+    const errParam = params.get("error");
+    if (errParam) {
+      const messages: Record<string, string> = {
+        google_not_configured: "Đăng nhập Google chưa được kích hoạt. Vui lòng dùng email/mật khẩu.",
+        google_email_unverified: "Email Google của bạn chưa được xác thực. Vui lòng dùng email/mật khẩu.",
+        google_invalid_state: "Phiên đăng nhập Google đã hết hạn. Vui lòng thử lại.",
+        google_missing_params: "Dữ liệu trả về từ Google không hợp lệ. Vui lòng thử lại.",
+        google_exchange_failed: "Không thể xác thực với Google. Vui lòng thử lại sau.",
+        google_access_denied: "Bạn đã từ chối đăng nhập với Google.",
+        account_blocked: "Tài khoản của bạn đã bị tạm khóa. Vui lòng liên hệ hỗ trợ.",
+      };
+      const msg = messages[errParam] || `Lỗi đăng nhập: ${errParam}`;
+      queueMicrotask(() => setError(msg));
+      // Xoá query param để khi reload không hiện lại
+      const url = new URL(window.location.href);
+      url.searchParams.delete("error");
+      window.history.replaceState({}, "", url.pathname + url.search);
+    }
+  }, []);
 
   const resetCaptcha = () => {
     captchaRef.current?.reset();
@@ -316,22 +337,48 @@ export function LoginCard() {
 
       {/* Auth Card */}
       <div className="max-w-lg mx-auto bg-white dark:bg-zinc-900 rounded-2xl shadow-lg shadow-gray-200/60 dark:shadow-black/40 border border-gray-100 dark:border-zinc-800 overflow-hidden">
-        {/* Card Header */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-3">
-          <button
-            onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); setForgotMsg(""); }}
-            className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 transition-colors"
-          >
-            <ArrowLeftIcon className="w-4 h-4" />
-            <span>Quay lại</span>
-          </button>
-          <button
-            onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); setForgotMsg(""); }}
-            className="flex items-center gap-1.5 text-sm font-semibold text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
-          >
-            {mode === "forgot" ? "Đăng nhập" : mode === "login" ? "Đăng ký bằng V-Affiliate" : "Đăng nhập"}
-          </button>
-        </div>
+        {/* Card Header — segmented toggle Login / Register cho rõ ràng */}
+        {mode !== "forgot" ? (
+          <div className="px-6 pt-5 pb-3">
+            <div className="flex bg-gray-100 dark:bg-zinc-800 rounded-xl p-1 gap-1">
+              <button
+                onClick={() => { setMode("login"); setError(""); setForgotMsg(""); }}
+                className={`flex-1 text-sm font-semibold py-2 rounded-lg transition-all ${
+                  mode === "login"
+                    ? "bg-white dark:bg-zinc-900 text-orange-600 shadow-sm"
+                    : "text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200"
+                }`}
+              >
+                Đăng nhập
+              </button>
+              <button
+                onClick={() => { setMode("register"); setError(""); setForgotMsg(""); }}
+                className={`flex-1 text-sm font-semibold py-2 rounded-lg transition-all ${
+                  mode === "register"
+                    ? "bg-white dark:bg-zinc-900 text-orange-600 shadow-sm"
+                    : "text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200"
+                }`}
+              >
+                Đăng ký miễn phí
+              </button>
+            </div>
+            {mode === "register" && (
+              <p className="text-xs text-center text-gray-500 dark:text-zinc-400 mt-2.5">
+                ✨ Tạo tài khoản trong 30 giây — không tốn phí
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center justify-between px-6 pt-5 pb-3">
+            <button
+              onClick={() => { setMode("login"); setError(""); setForgotMsg(""); }}
+              className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 transition-colors"
+            >
+              <ArrowLeftIcon className="w-4 h-4" />
+              <span>Quay lại đăng nhập</span>
+            </button>
+          </div>
+        )}
 
         {/* Form */}
         <div className="px-6 pb-5 pt-2">
@@ -592,6 +639,10 @@ function LoginForm({
 
   return (
     <div className="space-y-4">
+      {/* Google sign-in — 1 click, không cần nhập gì */}
+      <GoogleSignInButton mode="login" />
+      <AuthDivider label="hoặc đăng nhập với mật khẩu" />
+
       {/* Username */}
       <div>
         <label className="block text-sm font-medium text-gray-600 dark:text-zinc-300 mb-1.5">
@@ -812,6 +863,10 @@ function RegisterForm({
 
   return (
     <div className="space-y-4">
+      {/* Google sign-up — 1 click, không cần nhập form */}
+      <GoogleSignInButton mode="register" />
+      <AuthDivider label="hoặc đăng ký bằng email" />
+
       {formError && (
         <div className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg text-sm text-red-600 dark:text-red-400 font-medium">
           {formError}

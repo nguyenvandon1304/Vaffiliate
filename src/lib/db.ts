@@ -493,6 +493,42 @@ async function initSchema(database: DbAdapter): Promise<void> {
   await database.exec("CREATE INDEX IF NOT EXISTS idx_ip_blocklist_ip ON ip_blocklist(ip)");
   await database.exec("CREATE INDEX IF NOT EXISTS idx_ip_blocklist_until ON ip_blocklist(blocked_until)");
 
+  // ─── OAuth (Google sign-in) ───
+  // Cho phép user đăng nhập 1-click bằng Gmail. password_hash có thể để rỗng cho user
+  // OAuth-only (chỉ login qua Google). avatar_url để hiển thị ảnh từ Google.
+  // auth_provider = 'local' | 'google' | 'mixed' (vừa local vừa Google).
+  try {
+    await database.exec(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS avatar_url TEXT,
+        ADD COLUMN IF NOT EXISTS auth_provider TEXT DEFAULT 'local'
+    `);
+  } catch (e) {
+    console.warn("[migration] add oauth columns to users:", e);
+  }
+  // Cho phép password_hash rỗng (user OAuth-only) — cũ là NOT NULL.
+  try {
+    await database.exec("ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL");
+  } catch (e) {
+    console.warn("[migration] drop NOT NULL on password_hash:", e);
+  }
+
+  await database.exec(`
+    CREATE TABLE IF NOT EXISTS oauth_accounts (
+      id BIGSERIAL PRIMARY KEY,
+      user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      provider TEXT NOT NULL,
+      provider_user_id TEXT NOT NULL,
+      email TEXT,
+      name TEXT,
+      avatar_url TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE (provider, provider_user_id)
+    )
+  `);
+  await database.exec("CREATE INDEX IF NOT EXISTS idx_oauth_accounts_user ON oauth_accounts(user_id)");
+
   // Seed default admin
   const adminExists = await database.get("SELECT id FROM users WHERE username = 'admin'", []);
   if (!adminExists) {
@@ -4176,4 +4212,143 @@ export async function getUserWithdrawals(userId: number, limit = 50): Promise<Us
     created_at: toIso(r.created_at),
     updated_at: r.updated_at ? toIso(r.updated_at) : null,
   }));
+}
+
+
+/* ─────────────── OAuth (Google sign-in) ─────────────── */
+
+/**
+ * Tìm user theo Google sub trong oauth_accounts. Nếu không có → match theo email.
+ * Nếu match được email (user đã đăng ký = local) → tự động link tài khoản,
+ * dấu auth_provider = 'mixed' để user có thể login cả 2 cách.
+ *
+ * Nếu không có user nào → tạo mới với password rỗng (OAuth-only).
+ *
+ * Username được sinh từ phần local của email Gmail. Nếu trùng thì thêm hậu tố random.
+ *
+ * Returns user + isNew flag để caller biết hiển thị toast "Chào mừng bạn mới".
+ */
+export async function findOrCreateUserByGoogle(profile: {
+  sub: string;
+  email: string;
+  email_verified: boolean;
+  name: string;
+  picture?: string;
+}, opts: { ip?: string; userAgent?: string; baseUsername?: string } = {}): Promise<{ user: User; isNew: boolean }> {
+  const database = await getDb();
+  const email = profile.email.trim().toLowerCase();
+
+  // 1. Đã có oauth_accounts entry?
+  const existingOauth = await database.get(
+    "SELECT user_id FROM oauth_accounts WHERE provider = 'google' AND provider_user_id = ?",
+    [profile.sub],
+  );
+  if (existingOauth) {
+    const userRow = await database.get(
+      "SELECT id, username, email, display_name, phone, withdraw_pin_hash, role, email_verified, created_at, last_login, is_active FROM users WHERE id = ?",
+      [Number(existingOauth.user_id)],
+    );
+    if (userRow) {
+      // Update avatar + last login
+      if (profile.picture) {
+        await database.run(
+          "UPDATE users SET avatar_url = ?, updated_at = NOW() WHERE id = ?",
+          [profile.picture, Number(userRow.id)],
+        );
+      }
+      await database.run(
+        "UPDATE oauth_accounts SET email = ?, name = ?, avatar_url = ?, updated_at = NOW() WHERE provider = 'google' AND provider_user_id = ?",
+        [email, profile.name, profile.picture ?? null, profile.sub],
+      );
+      return { user: rowToUser(userRow), isNew: false };
+    }
+  }
+
+  // 2. Chưa link, kiểm tra theo email — nếu đã có user local → auto link
+  const existingByEmail = await database.get(
+    "SELECT id, username, email, display_name, phone, withdraw_pin_hash, role, email_verified, created_at, last_login, is_active, auth_provider FROM users WHERE LOWER(email) = LOWER(?)",
+    [email],
+  );
+  if (existingByEmail) {
+    const userId = Number(existingByEmail.id);
+    await database.run(
+      `INSERT INTO oauth_accounts (user_id, provider, provider_user_id, email, name, avatar_url)
+       VALUES (?, 'google', ?, ?, ?, ?)
+       ON CONFLICT (provider, provider_user_id) DO UPDATE SET email = EXCLUDED.email, name = EXCLUDED.name, avatar_url = EXCLUDED.avatar_url, updated_at = NOW()`,
+      [userId, profile.sub, email, profile.name, profile.picture ?? null],
+    );
+    // Đánh dấu provider = 'mixed' nếu user trước đó là 'local'
+    const newProvider = existingByEmail.auth_provider === "google" ? "google" : "mixed";
+    await database.run(
+      "UPDATE users SET auth_provider = ?, email_verified = 1, avatar_url = COALESCE(?, avatar_url), updated_at = NOW() WHERE id = ?",
+      [newProvider, profile.picture ?? null, userId],
+    );
+    return { user: rowToUser(existingByEmail), isNew: false };
+  }
+
+  // 3. Tạo user mới
+  let baseUsername = (opts.baseUsername ?? "").toLowerCase();
+  if (!baseUsername) {
+    // Sinh từ email local part
+    const local = email.split("@")[0];
+    baseUsername = local.replace(/[^a-z0-9]/g, "_").replace(/_{2,}/g, "_").replace(/^_+|_+$/g, "");
+    if (baseUsername.length < 3) baseUsername = `user_${baseUsername}`;
+    if (baseUsername.length > 16) baseUsername = baseUsername.slice(0, 16);
+  }
+
+  let username = baseUsername;
+  let attempts = 0;
+  // Loop tìm username chưa trùng (max 10 attempts)
+  while (attempts < 10) {
+    const dup = await database.get(
+      "SELECT id FROM users WHERE LOWER(username) = LOWER(?)",
+      [username],
+    );
+    if (!dup) break;
+    const suffix = crypto.randomBytes(2).toString("hex"); // 4 hex chars
+    username = `${baseUsername.slice(0, 15)}_${suffix}`.slice(0, 20);
+    attempts++;
+  }
+
+  await database.run(
+    `INSERT INTO users (username, email, password_hash, salt, display_name, email_verified, auth_provider, avatar_url)
+     VALUES (?, ?, NULL, '', ?, 1, 'google', ?)`,
+    [username, email, profile.name || username, profile.picture ?? null],
+  );
+
+  const newUserRow = await database.get(
+    "SELECT id, username, email, display_name, phone, withdraw_pin_hash, role, email_verified, created_at, last_login, is_active FROM users WHERE LOWER(email) = LOWER(?)",
+    [email],
+  );
+  if (!newUserRow) throw new Error("Failed to create user from Google profile");
+  const userId = Number(newUserRow.id);
+
+  await database.run(
+    "INSERT INTO oauth_accounts (user_id, provider, provider_user_id, email, name, avatar_url) VALUES (?, 'google', ?, ?, ?, ?)",
+    [userId, profile.sub, email, profile.name, profile.picture ?? null],
+  );
+
+  void opts; // ip/userAgent dùng ở caller (audit log + login_history)
+
+  saveDb();
+  return { user: rowToUser(newUserRow), isNew: true };
+}
+
+/**
+ * Tạo session mới cho user (bypass password). Dùng cho OAuth callback sau khi
+ * đã verify danh tính qua Google. Trả về token để caller set cookie.
+ */
+export async function createSessionForUser(
+  userId: number,
+  meta: { ip?: string | null; userAgent?: string | null } = {},
+): Promise<string> {
+  const database = await getDb();
+  const token = generateToken();
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  await database.run(
+    "INSERT INTO sessions (user_id, token, expires_at, last_seen_at, ip, user_agent) VALUES (?, ?, ?, NOW(), ?, ?)",
+    [userId, token, expiresAt, meta.ip ?? null, meta.userAgent ?? null],
+  );
+  await database.run("UPDATE users SET last_login = NOW() WHERE id = ?", [userId]);
+  return token;
 }
