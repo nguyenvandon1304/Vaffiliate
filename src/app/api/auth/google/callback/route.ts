@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { exchangeCodeForProfile, isGoogleConfigured, verifyState } from "@/lib/oauth-google";
 import { findOrCreateUserByGoogle, createSessionForUser, logAudit } from "@/lib/db";
 import { getClientIp } from "@/lib/turnstile";
+import { notifyNewUser } from "@/lib/telegram";
 
 /**
  * GET /api/auth/google/callback?code=xxx&state=yyy
@@ -75,6 +76,15 @@ export async function GET(request: NextRequest) {
       userAgent,
       detail: `email=${user.email}`,
     });
+
+    // Telegram alert cho admin khi có user mới đăng ký qua Google.
+    // Fire-and-forget — không block redirect. Skip nếu Telegram chưa setup.
+    if (isNew) {
+      void notifyNewUser({
+        username: `${user.username} (Google)`,
+        email: user.email,
+      });
+    }
 
     // Quyết định redirect: nếu admin → /admin, còn lại theo `next`
     const finalNext = user.role === "admin" ? "/admin" : next;
