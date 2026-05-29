@@ -1,8 +1,13 @@
 import type { MetadataRoute } from "next";
 
 /**
- * Sitemap — chỉ public pages có thể index Google.
- * Dashboard / admin / API đã exclude trong robots.ts.
+ * Sitemap — chỉ liệt kê các trang public muốn Google index.
+ *
+ * KHÔNG đưa /reset-password, /verify-email vào — chúng chỉ truy cập qua link token,
+ * disallow trong robots.txt → nếu list trong sitemap sẽ gây mâu thuẫn và
+ * Search Console báo "Trang có lệnh chuyển hướng" / "Đã thu thập — chưa lập chỉ mục".
+ *
+ * Dashboard / admin / api: đã disallow trong robots.txt, không liệt kê ở đây.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl =
@@ -23,18 +28,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "hourly",
       priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/reset-password`,
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/verify-email`,
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.3,
     },
   ];
 }
