@@ -716,15 +716,15 @@ function VoucherExampleImage() {
   return (
     <div className="mt-3 bg-orange-50 border border-orange-200 rounded-lg p-3">
       <p className="text-[11px] font-bold text-orange-700 mb-1.5">
-        🎁 Voucher 22% trông như thế này (tuỳ sản phẩm mới có):
+        🎁 Khi thanh toán, voucher 22% sẽ hiện như thế này để bạn chọn:
       </p>
       {imgOk && (
         <div className="rounded-lg overflow-hidden border border-orange-200 mb-2 bg-white">
           {/* eslint-disable-next-line @next/next/no-img-element -- ảnh tĩnh minh hoạ, dùng next/image không cần thiết */}
           <img
             src="/images/voucher-22-example.png"
-            alt="Ví dụ voucher giảm 22% Social Media trên Shopee"
-            className="w-full max-w-[320px] mx-auto block"
+            alt="Màn hình Chọn Shopee Voucher hiển thị voucher giảm 22% Social Media"
+            className="w-full max-w-[360px] mx-auto block"
             loading="lazy"
             onError={() => setImgOk(false)}
           />
@@ -733,8 +733,8 @@ function VoucherExampleImage() {
       <p className="text-[11px] text-orange-700 leading-relaxed">
         ⚠️ <b>Không phải sản phẩm nào cũng có voucher này.</b> Shopee chỉ tặng voucher 20-22%
         cho một số sản phẩm đang chạy chiến dịch (tuỳ thời điểm + còn ngân sách).
-        Nếu sản phẩm bạn mua có → voucher tự hiện ở bước thanh toán để chọn.
-        Nếu không có → bạn vẫn nhận hoàn tiền về ví đầy đủ.
+        Vào mục <b>&quot;Chọn Shopee Voucher&quot;</b> lúc thanh toán — nếu có thì chọn để giảm thêm,
+        nếu không có thì bạn vẫn nhận hoàn tiền về ví đầy đủ.
       </p>
     </div>
   );
