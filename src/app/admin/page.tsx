@@ -122,6 +122,7 @@ function AdminPageInner() {
   const [balAmount, setBalAmount] = useState("");
   const [balType, setBalType] = useState<"credit" | "debit">("credit");
   const [balLabel, setBalLabel] = useState("");
+  const [balBusy, setBalBusy] = useState(false);
 
   // Import state
   const [importRaw, setImportRaw] = useState("");
@@ -199,13 +200,30 @@ function AdminPageInner() {
 
   const handleBalance = async () => {
     if (!balUser || !balAmount) { toast.error("Nhập username và số tiền"); return; }
-    const res = await fetch("/api/admin/balance", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: balUser, amount: Number(balAmount), type: balType, label: balLabel || undefined }),
-    });
-    const d = await res.json();
-    if (d.success) { toast.success(d.message); setBalAmount(""); reloadStats(); }
-    else toast.error(d.error || "Lỗi");
+    const amountNum = Number(balAmount);
+    if (!Number.isFinite(amountNum) || amountNum <= 0) {
+      toast.error("Số tiền phải là số dương"); return;
+    }
+    const verb = balType === "credit" ? "CỘNG" : "TRỪ";
+    if (!confirm(
+      `Xác nhận ${verb} ${amountNum.toLocaleString("vi-VN")}đ ${balType === "credit" ? "vào" : "khỏi"} ví của "${balUser}"?\n\n` +
+      `${balLabel ? `Ghi chú: ${balLabel}\n\n` : ""}` +
+      `Thao tác này thay đổi số dư thật của user và sẽ gửi thông báo cho họ.`
+    )) return;
+    setBalBusy(true);
+    try {
+      const res = await fetch("/api/admin/balance", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: balUser, amount: amountNum, type: balType, label: balLabel || undefined }),
+      });
+      const d = await res.json();
+      if (d.success) { toast.success(d.message); setBalAmount(""); setBalLabel(""); reloadStats(); }
+      else toast.error(d.error || "Lỗi");
+    } catch {
+      toast.error("Lỗi kết nối. Vui lòng thử lại.");
+    } finally {
+      setBalBusy(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -407,8 +425,8 @@ function AdminPageInner() {
                   <label className="block text-sm text-gray-500 dark:text-gray-400 mb-1">Ghi chú (tuỳ chọn)</label>
                   <input value={balLabel} onChange={e => setBalLabel(e.target.value)} placeholder="VD: Thưởng tháng 5" className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 outline-none focus:border-orange-500" />
                 </div>
-                <button onClick={handleBalance} className="w-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors">
-                  Xác nhận
+                <button onClick={handleBalance} disabled={balBusy} className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold py-2.5 rounded-lg transition-colors">
+                  {balBusy ? "Đang xử lý..." : "Xác nhận"}
                 </button>
               </div>
             </div>

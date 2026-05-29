@@ -56,11 +56,17 @@ export function UsersTab() {
     if (search.trim()) params.set("search", search.trim());
     if (role !== "all") params.set("role", role);
     if (status !== "all") params.set("status", status);
-    const res = await fetch(`/api/admin/users?${params}`);
-    const d = await res.json();
-    if (d.success) { setUsers(d.users); setTotal(d.total); }
-    setLoading(false);
-  }, [page, search, role, status]);
+    try {
+      const res = await fetch(`/api/admin/users?${params}`);
+      const d = await res.json();
+      if (d.success) { setUsers(d.users); setTotal(d.total); }
+      else toast.error(d.error || "Không tải được danh sách user");
+    } catch {
+      toast.error("Lỗi kết nối khi tải user. Thử lại.");
+    } finally {
+      setLoading(false);
+    }
+  }, [page, search, role, status, toast]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch theo filter
@@ -73,7 +79,9 @@ export function UsersTab() {
     setPage(1);
   }, [search, role, status]);
 
-  const handleToggle = async (userId: number) => {
+  const handleToggle = async (userId: number, isActive: number, username: string) => {
+    const action = isActive ? "khoá" : "mở khoá";
+    if (!confirm(`Xác nhận ${action} tài khoản "${username}"?`)) return;
     const res = await fetch("/api/admin/users", {
       method: "PATCH", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId }),
@@ -319,7 +327,7 @@ export function UsersTab() {
                       {u.role !== "admin" ? (
                         <>
                           <button
-                            onClick={() => handleToggle(u.id)}
+                            onClick={() => handleToggle(u.id, u.is_active, u.username)}
                             className={`text-xs font-medium px-2.5 py-1 rounded-lg transition-colors ${
                               u.is_active
                                 ? "bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20"

@@ -72,10 +72,16 @@ export function OrdersTab() {
     if (status !== "all") params.set("status", status);
     if (fromDate) params.set("from", fromDate);
     if (toDate) params.set("to", toDate);
-    const r = await fetch(`/api/admin/orders?${params}`);
-    const d = await r.json();
-    if (d.success) { setRows(d.orders); setTotal(d.total); }
-    setLoading(false);
+    try {
+      const r = await fetch(`/api/admin/orders?${params}`);
+      const d = await r.json();
+      if (d.success) { setRows(d.orders); setTotal(d.total); }
+      else toast.error(d.error || "Không tải được danh sách đơn");
+    } catch {
+      toast.error("Lỗi kết nối khi tải đơn hàng. Thử lại.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

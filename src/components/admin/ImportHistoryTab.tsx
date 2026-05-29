@@ -24,19 +24,27 @@ function formatDate(s: string) {
 export function ImportHistoryTab() {
   const [rows, setRows] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetch("/api/admin/import-history?limit=100")
       .then((r) => r.json())
       .then((d) => {
         if (d.success) setRows(d.history);
-        setLoading(false);
-      });
+        else setError(d.error || "Không tải được lịch sử import");
+      })
+      .catch(() => setError("Lỗi kết nối khi tải lịch sử import"))
+      .finally(() => setLoading(false));
   }, []);
 
   return (
     <>
       <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Lịch Sử Import</h2>
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg text-sm text-red-600 dark:text-red-400">
+          {error}
+        </div>
+      )}
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">

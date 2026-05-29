@@ -57,11 +57,17 @@ export function WithdrawalsTab() {
     if (status !== "all") params.set("status", status);
     if (fromDate) params.set("from", fromDate);
     if (toDate) params.set("to", toDate);
-    const r = await fetch(`/api/admin/withdrawals?${params}`);
-    const d = await r.json();
-    if (d.success) { setRows(d.withdrawals); setTotal(d.total); }
-    setLoading(false);
-  }, [page, search, status, fromDate, toDate]);
+    try {
+      const r = await fetch(`/api/admin/withdrawals?${params}`);
+      const d = await r.json();
+      if (d.success) { setRows(d.withdrawals); setTotal(d.total); }
+      else toast.error(d.error || "Không tải được danh sách rút tiền");
+    } catch {
+      toast.error("Lỗi kết nối khi tải yêu cầu rút. Thử lại.");
+    } finally {
+      setLoading(false);
+    }
+  }, [page, search, status, fromDate, toDate, toast]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch theo filter

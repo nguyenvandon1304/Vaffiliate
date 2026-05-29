@@ -45,6 +45,17 @@ export async function POST(request: NextRequest) {
   if (!userId || !orderCode || !amount) {
     return NextResponse.json({ success: false, error: "Thiếu thông tin" }, { status: 400 });
   }
+  // Validate số tiền dương + status hợp lệ.
+  const VALID_STATUS = ["Đã hoàn tiền", "Đang xử lý", "Chờ xác nhận", "Đã hủy"];
+  if (!Number.isFinite(Number(amount)) || Number(amount) <= 0) {
+    return NextResponse.json({ success: false, error: "Giá trị đơn phải là số dương" }, { status: 400 });
+  }
+  if (cashback !== undefined && (!Number.isFinite(Number(cashback)) || Number(cashback) < 0)) {
+    return NextResponse.json({ success: false, error: "Cashback phải là số không âm" }, { status: 400 });
+  }
+  if (status && !VALID_STATUS.includes(status)) {
+    return NextResponse.json({ success: false, error: "Trạng thái không hợp lệ" }, { status: 400 });
+  }
 
   const result = await adminCreateOrder(userId, orderCode, store || "Shopee", amount, cashback || 0, status || "Chờ xác nhận");
   if (result.success) {
