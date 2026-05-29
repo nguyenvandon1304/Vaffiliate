@@ -641,6 +641,10 @@ export default function CashbackPage() {
                     <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5">
                       <p className="text-[11px] text-amber-700">⚡ Voucher cần đơn tối thiểu (22%: từ 150k · 20%: từ 50k). Mua đủ đơn để áp được nhé.</p>
                     </div>
+
+                    {/* Ảnh minh hoạ voucher 22% + giải thích tuỳ sản phẩm.
+                        Tự ẩn nếu file ảnh chưa được upload (onError) → không vỡ layout. */}
+                    <VoucherExampleImage />
                   </div>
                 </div>
 
@@ -694,6 +698,44 @@ export default function CashbackPage() {
         </p>
       </main>
       <Footer />
+    </div>
+  );
+}
+
+
+/**
+ * Ảnh minh hoạ voucher 22% "Social Media" trên app Shopee + giải thích tuỳ sản phẩm.
+ * Đặt trong section hướng dẫn collapse (bước 3) — ẩn mặc định, ai mở mới thấy.
+ *
+ * Tự ẩn ảnh nếu file chưa được upload (onError) → không vỡ layout.
+ * Upload ảnh vào: public/images/voucher-22-example.png
+ */
+function VoucherExampleImage() {
+  const [imgOk, setImgOk] = useState(true);
+
+  return (
+    <div className="mt-3 bg-orange-50 border border-orange-200 rounded-lg p-3">
+      <p className="text-[11px] font-bold text-orange-700 mb-1.5">
+        🎁 Voucher 22% trông như thế này (tuỳ sản phẩm mới có):
+      </p>
+      {imgOk && (
+        <div className="rounded-lg overflow-hidden border border-orange-200 mb-2 bg-white">
+          {/* eslint-disable-next-line @next/next/no-img-element -- ảnh tĩnh minh hoạ, dùng next/image không cần thiết */}
+          <img
+            src="/images/voucher-22-example.png"
+            alt="Ví dụ voucher giảm 22% Social Media trên Shopee"
+            className="w-full max-w-[320px] mx-auto block"
+            loading="lazy"
+            onError={() => setImgOk(false)}
+          />
+        </div>
+      )}
+      <p className="text-[11px] text-orange-700 leading-relaxed">
+        ⚠️ <b>Không phải sản phẩm nào cũng có voucher này.</b> Shopee chỉ tặng voucher 20-22%
+        cho một số sản phẩm đang chạy chiến dịch (tuỳ thời điểm + còn ngân sách).
+        Nếu sản phẩm bạn mua có → voucher tự hiện ở bước thanh toán để chọn.
+        Nếu không có → bạn vẫn nhận hoàn tiền về ví đầy đủ.
+      </p>
     </div>
   );
 }
