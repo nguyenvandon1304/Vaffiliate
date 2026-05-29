@@ -494,6 +494,7 @@ export default function CashbackPage() {
                         Mẹo: Săn thêm voucher Shopee khi thanh toán
                       </p>
                       <ul className="text-xs text-amber-700 dark:text-amber-200/90 space-y-1 leading-relaxed">
+                        <li>• <b>Nên mua trên app Shopee ở điện thoại</b> — voucher Social Media / Facebook chỉ hiện đầy đủ trong app, mua trên máy tính thường không thấy mã.</li>
                         <li>• Sau khi bấm <b>Mua ngay</b>, vào mục <b>&quot;Shopee Voucher&quot;</b> ở trang thanh toán.</li>
                         <li>• Nếu có voucher <b>Social Media (22%)</b> hoặc <b>Facebook (20%)</b> → chọn để giảm thêm.</li>
                         <li>• Nếu không thấy → dùng <b>voucher có sẵn trong tài khoản</b> của bạn cũng được.</li>
@@ -501,6 +502,9 @@ export default function CashbackPage() {
                       </ul>
                       <p className="text-[11px] text-amber-600/80 dark:text-amber-300/70 mt-2">
                         💡 Voucher cần đơn tối thiểu (22%: từ 150k · 20%: từ 50k). Mua đủ đơn để áp được nhé.
+                      </p>
+                      <p className="text-[11px] font-semibold text-amber-700 dark:text-amber-300 mt-1.5">
+                        📱 Đang dùng máy tính? Bấm nút copy bên cạnh &quot;Mua ngay&quot; để gửi link sang điện thoại rồi mở bằng app Shopee.
                       </p>
                     </div>
                   </div>
