@@ -569,8 +569,8 @@ export default function CashbackPage() {
             {/* Header */}
             <div className="flex items-center gap-2 text-sm px-6 pt-5 sm:px-8">
               <span className="text-orange-500 text-base">✨</span>
-              <span className="text-gray-600">Cách săn thêm</span>
-              <span className="font-bold text-gray-800">voucher 20-25%</span>
+              <span className="text-gray-600">Hướng dẫn nhận thêm</span>
+              <span className="font-bold text-gray-800">voucher 20-22%</span>
               <span className="text-gray-600">từ Shopee</span>
             </div>
 
@@ -585,22 +585,23 @@ export default function CashbackPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-base">🎁</span>
-                    <h3 className="text-sm font-bold text-gray-800">Voucher social từ Shopee là gì?</h3>
+                    <h3 className="text-sm font-bold text-gray-800">Voucher Shopee là gì?</h3>
                   </div>
                   <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-3 ml-6">
                     <p className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
                       <span className="text-orange-500 shrink-0">💰</span>
                       <span>
-                        Khi bạn comment link sản phẩm vào <span className="font-bold">bài viết ghim trong group V-Affiliate</span>,
-                        Shopee có thể tặng thêm <span className="font-bold text-orange-600">voucher giảm 20-25%</span> trên giá sản phẩm.
-                        Voucher xuất hiện <span className="font-semibold">ngẫu nhiên</span> tuỳ shop có chạy chiến dịch hay không.
+                        Khi bạn mua qua link V-Affiliate, Shopee có thể tặng thêm
+                        <span className="font-bold text-orange-600"> voucher giảm 20-22%</span> trên giá sản phẩm
+                        (voucher <span className="font-semibold">Social Media / Facebook</span>).
+                        Voucher xuất hiện <span className="font-semibold">ngẫu nhiên</span> tuỳ shop có chạy chiến dịch và còn ngân sách hay không.
                       </span>
                     </p>
                   </div>
                   <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 ml-6">
                     <p className="text-xs text-gray-700">
                       <span className="text-emerald-600 font-bold">✓ Yên tâm:</span> Dù có voucher hay không,
-                      <span className="font-bold"> tiền hoàn 50% vẫn về ví đầy đủ</span> như đã cam kết.
+                      <span className="font-bold"> tiền hoàn {product?.cashbackRate ?? 50}% vẫn về ví đầy đủ</span> như đã cam kết.
                     </p>
                   </div>
                 </div>
@@ -611,34 +612,34 @@ export default function CashbackPage() {
 
                   <div className="relative pl-10 pb-6 border-l-2 border-orange-200 ml-3">
                     <div className="absolute left-[-13px] top-0 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm shadow-orange-200">1</div>
-                    <h4 className="text-sm font-bold text-gray-800 mb-1">Tạo link và bấm COPY LINK</h4>
+                    <h4 className="text-sm font-bold text-gray-800 mb-1">Tạo link hoàn tiền</h4>
                     <p className="text-xs text-gray-500 leading-relaxed">
                       Dán link sản phẩm Shopee vào ô phía trên → bấm <span className="font-semibold">Lấy Link</span>.
-                      Sau khi hệ thống tạo xong, bấm <span className="font-semibold text-orange-600">COPY LINK</span> để lưu vào clipboard.
+                      Hệ thống tạo link affiliate chính thức gắn mã hoàn tiền của bạn.
                     </p>
                   </div>
 
                   <div className="relative pl-10 pb-6 border-l-2 border-orange-200 ml-3">
                     <div className="absolute left-[-13px] top-0 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm shadow-orange-200">2</div>
-                    <h4 className="text-sm font-bold text-gray-800 mb-1">Mở bài viết ghim group V-Affiliate</h4>
+                    <h4 className="text-sm font-bold text-gray-800 mb-1">Bấm MUA NGAY trên điện thoại</h4>
                     <p className="text-xs text-gray-500 leading-relaxed mb-2">
-                      Bấm nút <span className="font-semibold text-orange-600">📌 Group V-Affiliate (bài ghim)</span> màu cam đã sáng lên.
-                      Tab mới sẽ tự động mở thẳng vào bài viết.
+                      Bấm nút <span className="font-semibold text-rose-600">MUA NGAY</span> → mở thẳng app Shopee.
+                      Nên dùng <span className="font-semibold">điện thoại có app Shopee</span> để voucher hiển thị đầy đủ.
                     </p>
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5">
-                      <p className="text-[11px] text-blue-700">📘 Group đã đăng ký affiliate với Shopee → comment vào đây mới được nhận voucher social.</p>
+                      <p className="text-[11px] text-blue-700">📱 Đang dùng máy tính? Bấm nút copy bên cạnh &quot;Mua ngay&quot; để gửi link sang điện thoại rồi mở bằng app Shopee.</p>
                     </div>
                   </div>
 
                   <div className="relative pl-10 pb-1 ml-3">
                     <div className="absolute left-[-13px] top-0 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm shadow-orange-200">3</div>
-                    <h4 className="text-sm font-bold text-gray-800 mb-1">Comment link và quay lại bấm mua</h4>
+                    <h4 className="text-sm font-bold text-gray-800 mb-1">Chọn voucher khi thanh toán</h4>
                     <p className="text-xs text-gray-500 leading-relaxed mb-2">
-                      Trong bài viết ghim → kéo xuống ô bình luận → <span className="font-semibold">paste link</span> đã copy → đăng comment.
-                      Sau đó bấm vào chính link vừa comment để mở Shopee và mua hàng.
+                      Ở trang thanh toán Shopee, mở mục <span className="font-semibold">&quot;Shopee Voucher&quot;</span>.
+                      Nếu có voucher Social Media (22%) / Facebook (20%) → chọn để giảm thêm. Nếu không có, dùng voucher sẵn trong tài khoản bạn cũng được.
                     </p>
                     <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5">
-                      <p className="text-[11px] text-amber-700">⚡ Nếu shop đang chạy chiến dịch social, voucher 20-25% sẽ tự động áp vào đơn hàng của bạn.</p>
+                      <p className="text-[11px] text-amber-700">⚡ Voucher cần đơn tối thiểu (22%: từ 150k · 20%: từ 50k). Mua đủ đơn để áp được nhé.</p>
                     </div>
                   </div>
                 </div>
@@ -646,10 +647,9 @@ export default function CashbackPage() {
                 {/* Mẹo thêm */}
                 <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
                   <p className="text-xs text-gray-700 leading-relaxed">
-                    <span className="text-purple-600 font-bold">💡 Mẹo thêm: Tăng tỉ lệ trúng voucher</span><br />
-                    Comment <span className="font-bold">nhiều sản phẩm khác nhau</span> trong cùng phiên mua sắm — voucher social
-                    không apply cho mọi shop, càng nhiều link càng tăng cơ hội ít nhất 1 sản phẩm trúng voucher.
-                    Mỗi link là 1 lần hệ thống Shopee xét chiến dịch social bonus.
+                    <span className="text-purple-600 font-bold">💡 Mẹo thêm: Mua đủ đơn tối thiểu</span><br />
+                    Voucher có điều kiện đơn tối thiểu. Gộp nhiều món vào cùng 1 đơn để đạt mức tối thiểu —
+                    vừa đủ điều kiện áp voucher, vừa tiết kiệm phí ship. Cashback vẫn tính trên tổng giá trị đơn.
                   </p>
                 </div>
               </div>
@@ -665,7 +665,7 @@ export default function CashbackPage() {
               onClick={() => setShowGuide(!showGuide)}
               className="w-full flex items-center justify-center gap-2 py-3 border-t border-gray-100 text-sm font-medium text-orange-500 hover:text-orange-600 hover:bg-orange-50/30 transition-colors"
             >
-              {showGuide ? "Thu gọn" : "Xem hướng dẫn săn voucher đầy đủ"}
+              {showGuide ? "Thu gọn" : "Xem hướng dẫn nhận voucher đầy đủ"}
               <svg
                 viewBox="0 0 24 24"
                 className={`w-4 h-4 transition-transform duration-300 ${showGuide ? "rotate-180" : "animate-bounce"}`}
