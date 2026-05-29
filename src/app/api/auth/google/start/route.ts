@@ -25,7 +25,11 @@ export async function GET(request: NextRequest) {
   // Whitelist: chỉ cho redirect về path nội bộ, không phải URL ngoài.
   const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${url.protocol}//${url.host}`;
+  // QUAN TRỌNG: Render proxy → request.url = http://localhost:10000.
+  // Phải dùng env hoặc forwarded headers để có domain public thật.
+  const proto = request.headers.get("x-forwarded-proto") || "https";
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "vaffiliate.vn";
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${proto}://${host}`;
   const state = signState({ next: safeNext, ref });
 
   const authorizeUrl = buildAuthorizeUrl({ baseUrl, state });
