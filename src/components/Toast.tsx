@@ -252,14 +252,18 @@ function Toast({ item, onDismiss }: { item: ToastItem; onDismiss: () => void }) 
 export function useToast(): ToastContextValue {
   const ctx = useContext(ToastContext);
   if (!ctx) {
-    // Fallback an toàn — nếu chưa có provider thì log ra console thay vì crash.
+    // Fallback an toàn — nếu lỡ dùng ngoài Provider thì no-op thay vì crash.
+    // Chỉ log warning 1 lần ở dev để dev biết đã quên wrap Provider; production im lặng.
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[Toast] useToast() được gọi ngoài <ToastProvider> — toast sẽ không hiển thị.");
+    }
     const noop = (id: number) => id;
     return {
-      push: (_, m) => { console.log("[toast]", m); return 0; },
-      success: (m) => { console.log("[toast.success]", m); return 0; },
-      error: (m) => { console.error("[toast.error]", m); return 0; },
-      info: (m) => { console.log("[toast.info]", m); return 0; },
-      warn: (m) => { console.warn("[toast.warn]", m); return 0; },
+      push: () => 0,
+      success: () => 0,
+      error: () => 0,
+      info: () => 0,
+      warn: () => 0,
       dismiss: noop,
     };
   }
