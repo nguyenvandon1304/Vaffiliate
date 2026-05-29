@@ -708,7 +708,7 @@ export default function CashbackPage() {
  * Đặt trong section hướng dẫn collapse (bước 3) — ẩn mặc định, ai mở mới thấy.
  *
  * Tự ẩn ảnh nếu file chưa được upload (onError) → không vỡ layout.
- * Upload ảnh vào: public/images/voucher-22-example.png
+ * File ảnh: public/images/voucher-22-example.jpg
  */
 function VoucherExampleImage() {
   const [imgOk, setImgOk] = useState(true);
@@ -722,7 +722,7 @@ function VoucherExampleImage() {
         <div className="rounded-lg overflow-hidden border border-orange-200 mb-2 bg-white">
           {/* eslint-disable-next-line @next/next/no-img-element -- ảnh tĩnh minh hoạ, dùng next/image không cần thiết */}
           <img
-            src="/images/voucher-22-example.png"
+            src="/images/voucher-22-example.jpg"
             alt="Màn hình Chọn Shopee Voucher hiển thị voucher giảm 22% Social Media"
             className="w-full max-w-[360px] mx-auto block"
             loading="lazy"
