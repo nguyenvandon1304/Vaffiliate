@@ -4545,3 +4545,159 @@ export async function getReferralChildren(referrerId: number): Promise<ReferralN
     invited_count: Number(r.invited_count),
   }));
 }
+
+
+/* ─────────────── Admin: Đối soát tài chính (finance reconciliation) ─────────────── */
+
+export interface FinanceReconciliation {
+  // Tổng quan ví (nguồn sự thật)
+  totalCredit: number;          // tổng tiền vào ví (mọi credit)
+  totalDebit: number;           // tổng tiền ra ví (mọi debit)
+  netWalletBalance: number;     // credit - debit = tổng tiền đang nợ user
+  // Phân loại tiền VÀO ví
+  creditCashback: number;       // hoàn tiền đơn hàng
+  creditSpin: number;           // vòng quay
+  creditStreak: number;         // thưởng streak
+  creditRefund: number;         // hoàn tiền rút bị từ chối
+  creditAdmin: number;          // admin cộng tay
+  creditOther: number;          // còn lại
+  // Phân loại tiền RA ví
+  debitWithdraw: number;        // rút tiền
+  debitReversal: number;        // thu hồi/hủy đơn
+  debitAdmin: number;           // admin trừ tay
+  debitOther: number;
+  // Đối soát rút tiền (cross-check)
+  withdrawApprovedTotal: number;  // tổng đã duyệt rút (từ bảng withdrawals)
+  withdrawPendingTotal: number;   // tổng đang chờ duyệt
+  withdrawRejectedTotal: number;  // tổng đã từ chối
+  // Cờ cảnh báo lệch
+  checks: Array<{ label: string; ok: boolean; detail: string }>;
+}
+
+/**
+ * Đối soát toàn bộ dòng tiền hệ thống. Dùng để admin kiểm tra:
+ *  - Tổng tiền vào/ra ví có khớp các nguồn không
+ *  - Số dư ví tổng = tiền đang nợ user
+ *  - Phát hiện bất thường (vd debit rút tiền không khớp bảng withdrawals)
+ *
+ * Tất cả tính bằng SQL aggregate, không load row → nhanh kể cả DB lớn.
+ */
+export async function getFinanceReconciliation(): Promise<FinanceReconciliation> {
+  const database = await getDb();
+
+  // 1. Tổng credit/debit theo type (nguồn sự thật)
+  const totals = await database.get(
+    `SELECT
+      COALESCE(SUM(amount) FILTER (WHERE type = 'credit'), 0) AS total_credit,
+      COALESCE(SUM(amount) FILTER (WHERE type = 'debit'), 0) AS total_debit
+     FROM wallet`,
+    [],
+  );
+
+  // 2. Phân loại credit theo label (dùng LIKE pattern khớp với label khi insert)
+  const credits = await database.get(
+    `SELECT
+      COALESCE(SUM(amount) FILTER (WHERE label LIKE 'Hoàn tiền đơn%'), 0) AS cashback,
+      COALESCE(SUM(amount) FILTER (WHERE label LIKE 'Vòng quay%'), 0) AS spin,
+      COALESCE(SUM(amount) FILTER (WHERE label LIKE 'Thưởng streak%'), 0) AS streak,
+      COALESCE(SUM(amount) FILTER (WHERE label LIKE 'Hoàn tiền rút%'), 0) AS refund
+     FROM wallet WHERE type = 'credit'`,
+    [],
+  );
+
+  // 3. Phân loại debit theo label
+  const debits = await database.get(
+    `SELECT
+      COALESCE(SUM(amount) FILTER (WHERE label = 'Rút tiền'), 0) AS withdraw,
+      COALESCE(SUM(amount) FILTER (WHERE label LIKE '%thu hồi%' OR label LIKE '%trừ hoàn tiền%' OR label LIKE 'Điều chỉnh đơn%' OR label LIKE 'Hủy đơn%'), 0) AS reversal
+     FROM wallet WHERE type = 'debit'`,
+    [],
+  );
+
+  // 4. Đối soát bảng withdrawals theo status
+  const wd = await database.get(
+    `SELECT
+      COALESCE(SUM(amount) FILTER (WHERE status IN ('approved', 'Đã chuyển', 'Đã duyệt')), 0) AS approved,
+      COALESCE(SUM(amount) FILTER (WHERE status IN ('pending', 'Đang xử lý')), 0) AS pending,
+      COALESCE(SUM(amount) FILTER (WHERE status IN ('rejected', 'Đã hủy', 'Đã huỷ')), 0) AS rejected
+     FROM withdrawals`,
+    [],
+  );
+
+  const totalCredit = Number(totals?.total_credit ?? 0);
+  const totalDebit = Number(totals?.total_debit ?? 0);
+  const creditCashback = Number(credits?.cashback ?? 0);
+  const creditSpin = Number(credits?.spin ?? 0);
+  const creditStreak = Number(credits?.streak ?? 0);
+  const creditRefund = Number(credits?.refund ?? 0);
+  const creditKnown = creditCashback + creditSpin + creditStreak + creditRefund;
+
+  const debitWithdraw = Number(debits?.withdraw ?? 0);
+  const debitReversal = Number(debits?.reversal ?? 0);
+  const debitKnown = debitWithdraw + debitReversal;
+
+  const withdrawApprovedTotal = Number(wd?.approved ?? 0);
+  const withdrawPendingTotal = Number(wd?.pending ?? 0);
+  const withdrawRejectedTotal = Number(wd?.rejected ?? 0);
+
+  // creditAdmin + creditOther = phần credit không khớp category nào.
+  // Admin cộng tay có label tự do → gộp vào "admin/khác".
+  const creditAdminOther = totalCredit - creditKnown;
+  const debitAdminOther = totalDebit - debitKnown;
+
+  // ─── Cross-checks ───
+  const checks: Array<{ label: string; ok: boolean; detail: string }> = [];
+
+  // Check 1: debit "Rút tiền" trong ví ≈ (approved + pending) trong bảng withdrawals.
+  // Vì rút bị từ chối đã được hoàn (credit refund) → debit "Rút tiền" gồm cả rejected,
+  // nhưng refund credit bù lại. Net withdraw thực = debitWithdraw - creditRefund.
+  const netWithdraw = debitWithdraw - creditRefund;
+  const expectedNetWithdraw = withdrawApprovedTotal + withdrawPendingTotal;
+  const withdrawDiff = Math.abs(netWithdraw - expectedNetWithdraw);
+  checks.push({
+    label: "Đối soát rút tiền",
+    ok: withdrawDiff < 1000, // cho phép lệch < 1k do làm tròn
+    detail: withdrawDiff < 1000
+      ? `Khớp: ví trừ ${netWithdraw.toLocaleString("vi-VN")}đ ≈ chờ+duyệt ${expectedNetWithdraw.toLocaleString("vi-VN")}đ`
+      : `LỆCH ${withdrawDiff.toLocaleString("vi-VN")}đ: ví trừ rút ${netWithdraw.toLocaleString("vi-VN")}đ vs bảng rút ${expectedNetWithdraw.toLocaleString("vi-VN")}đ`,
+  });
+
+  // Check 2: số dư ví không được âm tổng thể
+  const netBalance = totalCredit - totalDebit;
+  checks.push({
+    label: "Số dư ví tổng",
+    ok: netBalance >= 0,
+    detail: netBalance >= 0
+      ? `OK: ${netBalance.toLocaleString("vi-VN")}đ đang nợ user`
+      : `BẤT THƯỜNG: số dư tổng âm ${netBalance.toLocaleString("vi-VN")}đ`,
+  });
+
+  // Check 3: credit phân loại không vượt tổng credit
+  checks.push({
+    label: "Phân loại tiền vào",
+    ok: creditAdminOther >= -1000,
+    detail: creditAdminOther >= 0
+      ? `Admin/khác: ${creditAdminOther.toLocaleString("vi-VN")}đ`
+      : `BẤT THƯỜNG: phân loại vượt tổng ${creditAdminOther.toLocaleString("vi-VN")}đ`,
+  });
+
+  return {
+    totalCredit,
+    totalDebit,
+    netWalletBalance: netBalance,
+    creditCashback,
+    creditSpin,
+    creditStreak,
+    creditRefund,
+    creditAdmin: Math.max(0, creditAdminOther),
+    creditOther: 0,
+    debitWithdraw,
+    debitReversal,
+    debitAdmin: Math.max(0, debitAdminOther),
+    debitOther: 0,
+    withdrawApprovedTotal,
+    withdrawPendingTotal,
+    withdrawRejectedTotal,
+    checks,
+  };
+}
