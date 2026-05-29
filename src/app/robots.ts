@@ -31,6 +31,7 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
-    host: baseUrl,
+    // Bỏ `host` vì Googlebot không hỗ trợ directive này → bị bỏ qua kèm warning
+    // ở Search Console. Yandex hỗ trợ nhưng V-Affiliate target VN nên không cần.
   };
 }
