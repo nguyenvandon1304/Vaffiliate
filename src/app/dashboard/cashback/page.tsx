@@ -464,11 +464,9 @@ export default function CashbackPage() {
                 <div className="border border-gray-200 rounded-xl p-4 mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-xs text-gray-400">Link hoàn tiền:</p>
-                    {product.hasVoucher && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-orange-600 bg-orange-100 dark:bg-orange-500/15 dark:text-orange-400 px-2 py-0.5 rounded-full">
-                        🎁 Có voucher giảm thêm
-                      </span>
-                    )}
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-green-600 bg-green-100 dark:bg-green-500/15 dark:text-green-400 px-2 py-0.5 rounded-full">
+                      ✓ Link chính thức
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <input
@@ -490,6 +488,29 @@ export default function CashbackPage() {
                         <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
                       )}
                     </button>
+                  </div>
+                </div>
+
+                {/* Hộp hướng dẫn voucher — hiển thị cố định, giải thích cả 2 trường hợp
+                    (có/không có voucher) vì API không cho biết chắc link nào có voucher.
+                    Tránh hứa cứng, chỉ hướng dẫn user tự kiểm tra ở bước thanh toán. */}
+                <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl p-4 mb-4">
+                  <div className="flex items-start gap-2.5">
+                    <span className="text-lg shrink-0">🎁</span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-amber-800 dark:text-amber-300 mb-1.5">
+                        Mẹo: Săn thêm voucher Shopee khi thanh toán
+                      </p>
+                      <ul className="text-xs text-amber-700 dark:text-amber-200/90 space-y-1 leading-relaxed">
+                        <li>• Sau khi bấm <b>Mua ngay</b>, vào mục <b>&quot;Shopee Voucher&quot;</b> ở trang thanh toán.</li>
+                        <li>• Nếu có voucher <b>Social Media (22%)</b> hoặc <b>Facebook (20%)</b> → chọn để giảm thêm.</li>
+                        <li>• Nếu không thấy → dùng <b>voucher có sẵn trong tài khoản</b> của bạn cũng được.</li>
+                        <li>• <b>Hoàn tiền {product.cashbackRate ?? 50}% vẫn về ví</b> dù có hay không có voucher.</li>
+                      </ul>
+                      <p className="text-[11px] text-amber-600/80 dark:text-amber-300/70 mt-2">
+                        💡 Voucher cần đơn tối thiểu (22%: từ 150k · 20%: từ 50k). Mua đủ đơn để áp được nhé.
+                      </p>
+                    </div>
                   </div>
                 </div>
 
