@@ -57,6 +57,8 @@ interface ProductInfo {
   tierCode?: string;
   tierName?: string;
   affiliateLink: string;
+  shortLink?: string;   // link rút gọn đẹp (goaffiliate.online/XXX) để share
+  hasVoucher?: boolean; // true nếu link có nhúng voucher Social Media
   productUrl?: string;
   shopId?: string;
   itemId?: string;
@@ -460,7 +462,14 @@ export default function CashbackPage() {
                       - Group / Page: FB auto-link bình thường → khuyến nghị
                         user share vào group bằng nút "Đăng vào nhóm" bên dưới. */}
                 <div className="border border-gray-200 rounded-xl p-4 mb-4">
-                  <p className="text-xs text-gray-400 mb-2">Link hoàn tiền:</p>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs text-gray-400">Link hoàn tiền:</p>
+                    {product.hasVoucher && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-orange-600 bg-orange-100 dark:bg-orange-500/15 dark:text-orange-400 px-2 py-0.5 rounded-full">
+                        🎁 Có voucher giảm thêm
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2">
                     <input
                       type="text"

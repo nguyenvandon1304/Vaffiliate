@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getUserByToken, getDb, createNotification, getCashbackRateForUser, calcCashback } from "@/lib/db";
 import { grantBadge } from "@/lib/achievements";
 
-const GOAFFILIATE_CHECK_COMMISSION_URL = "https://goaffiliate.online/api/check-commission";
+const GOAFFILIATE_CHECK_COMMISSION_URL = "https://www.goaffiliate.online/api/check-commission";
+const GOAFFILIATE_GET_LINK_URL = "https://www.goaffiliate.online/api/get-link";
 const BROWSER_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 const SHOPEE_AFFILIATE_ID = process.env.SHOPEE_AFFILIATE_ID || "17330180328";
 const GOAFFILIATE_API_KEY = process.env.GOAFFILIATE_API_KEY || "";
@@ -101,7 +102,62 @@ async function fetchProductInfo(productUrl: string): Promise<GoAffProductInfo | 
   }
 }
 
-// ═══ Tạo Shopee affiliate link với tracking ID + user sub_id ═══
+// ═══ Gọi GoAffiliate /api/get-link — chuyển link Shopee → link affiliate CHÍNH THỨC ═══
+// Endpoint này trả về `shopeeLink` dùng `s.shopee.vn/an_redir` (deep link Shopee thật)
+// → voucher "Mạng Xã Hội" gắn theo sản phẩm sẽ TỰ ĐỘNG được nhúng + lưu vào tài khoản
+// user khi họ bấm link. Khác hẳn link ghép tay (không có voucher).
+//
+// subId = `uid_<userId>` để tracking cashback đúng user trong báo cáo affiliate.
+interface GoAffLinkResult {
+  affiliateLink: string;   // link rút gọn đẹp (goaffiliate.online/XXX)
+  shopeeLink: string;      // deep link Shopee chính thức (s.shopee.vn/an_redir...)
+  originalLink: string;
+}
+
+async function fetchAffiliateLink(productUrl: string, userId?: number): Promise<GoAffLinkResult | null> {
+  if (!GOAFFILIATE_API_KEY) {
+    console.warn("[GoAffiliate] GOAFFILIATE_API_KEY chưa set — skip get-link");
+    return null;
+  }
+
+  try {
+    const res = await fetch(GOAFFILIATE_GET_LINK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": GOAFFILIATE_API_KEY,
+        "Accept": "application/json",
+      },
+      body: JSON.stringify({
+        originalLink: productUrl,
+        subId: userId ? `uid_${userId}` : undefined,
+      }),
+    });
+
+    if (!res.ok) {
+      console.error(`[GoAffiliate] get-link ${res.status}: ${await res.text().catch(() => "")}`);
+      return null;
+    }
+
+    const json = await res.json();
+    const d = json?.data;
+    if (json?.success && d?.shopeeLink) {
+      return {
+        affiliateLink: String(d.affiliateLink ?? ""),
+        shopeeLink: String(d.shopeeLink),
+        originalLink: String(d.originalLink ?? productUrl),
+      };
+    }
+    return null;
+  } catch (e) {
+    console.error("[GoAffiliate] get-link error:", e);
+    return null;
+  }
+}
+
+// ═══ Tạo Shopee affiliate link với tracking ID + user sub_id (FALLBACK) ═══
+// Chỉ dùng khi /api/get-link fail. Link này KHÔNG có voucher Social Media,
+// nhưng vẫn track được cashback qua sub_id.
 function buildAffiliateLink(shopId: string, itemId: string, userId?: number): string {
   const params = new URLSearchParams({
     mmp_pid: `an_${SHOPEE_AFFILIATE_ID}`,
@@ -151,11 +207,20 @@ export async function POST(request: NextRequest) {
     // Tạo clean product URL
     const cleanProductUrl = `https://shopee.vn/product-i.${ids.shopId}.${ids.itemId}`;
 
-    // Lấy thông tin sản phẩm từ GoAffiliate
-    const info = await fetchProductInfo(cleanProductUrl);
+    // Lấy thông tin sản phẩm từ GoAffiliate (giá, hoa hồng) + link affiliate có voucher.
+    // Gọi song song 2 endpoint để giảm thời gian chờ.
+    const [info, linkResult] = await Promise.all([
+      fetchProductInfo(cleanProductUrl),
+      fetchAffiliateLink(cleanProductUrl, user?.id),
+    ]);
 
-    // Tạo affiliate link trực tiếp với Shopee Affiliate ID + user tracking
-    const affiliateLink = buildAffiliateLink(ids.shopId, ids.itemId, user?.id);
+    // Ưu tiên link CHÍNH THỨC từ get-link (có nhúng voucher Social Media).
+    // Nếu get-link fail → fallback link ghép tay (vẫn track cashback, nhưng không voucher).
+    const affiliateLink = linkResult?.shopeeLink || buildAffiliateLink(ids.shopId, ids.itemId, user?.id);
+    // Link rút gọn đẹp để hiển thị/share (nếu có).
+    const shortLink = linkResult?.affiliateLink || affiliateLink;
+    // Cờ cho UI biết link này có voucher hay không (link get-link mới có).
+    const hasVoucher = !!linkResult?.shopeeLink;
 
     // Cashback rate theo tier user (Bronze 50% / Silver 53% / Gold 55% / VIP 58%).
     // Nếu chưa login thì dùng tier Bronze (50%) làm fallback.
@@ -183,6 +248,8 @@ export async function POST(request: NextRequest) {
       tierCode,
       tierName,
       affiliateLink,
+      shortLink,    // link rút gọn đẹp để share (goaffiliate.online/XXX)
+      hasVoucher,   // true nếu link có nhúng voucher Social Media
       productUrl: cleanProductUrl,
       shopId: ids.shopId,
       itemId: ids.itemId,
