@@ -20,6 +20,7 @@ import { ImportHistoryTab } from "@/components/admin/ImportHistoryTab";
 import { AnalyticsTab } from "@/components/admin/AnalyticsTab";
 import { IpBlocklistTab } from "@/components/admin/IpBlocklistTab";
 import { SpinTab } from "@/components/admin/SpinTab";
+import { ReferralsTab } from "@/components/admin/ReferralsTab";
 import { playNotificationSound } from "@/lib/notification-sound";
 
 interface AdminStats {
@@ -44,6 +45,7 @@ type Tab =
   | "withdrawals"
   | "balance"
   | "spin"
+  | "referrals"
   | "import"
   | "import-history"
   | "broadcast"
@@ -54,7 +56,7 @@ type Tab =
 
 const VALID_TABS: Tab[] = [
   "overview", "analytics", "users", "orders", "withdrawals",
-  "balance", "spin", "import", "import-history", "broadcast", "email", "fraud", "ip-blocklist", "settings",
+  "balance", "spin", "referrals", "import", "import-history", "broadcast", "email", "fraud", "ip-blocklist", "settings",
 ];
 
 interface TimeseriesPoint { date: string; orders: number; cashback: number; revenue: number; }
@@ -243,6 +245,7 @@ function AdminPageInner() {
     { key: "withdrawals", label: "Rút tiền", icon: "💸" },
     { key: "balance", label: "Nạp/Trừ tiền", icon: "💰" },
     { key: "spin", label: "Vòng quay", icon: "🎰" },
+    { key: "referrals", label: "Mạng lưới giới thiệu", icon: "🌳" },
     { key: "import", label: "Import đơn", icon: "📥" },
     { key: "import-history", label: "Lịch sử import", icon: "📋" },
     { key: "broadcast", label: "Gửi thông báo", icon: "📨" },
@@ -403,6 +406,7 @@ function AdminPageInner() {
         {tab === "fraud" && <FraudTab />}
         {tab === "ip-blocklist" && <IpBlocklistTab />}
         {tab === "spin" && <SpinTab />}
+        {tab === "referrals" && <ReferralsTab />}
         {tab === "settings" && <SettingsTab />}
 
         {tab === "balance" && (

@@ -4447,3 +4447,101 @@ export async function getSpinAdminStats(): Promise<SpinAdminStats> {
     })),
   };
 }
+
+
+/* ─────────────── Admin: Referral tree / network ─────────────── */
+
+export interface ReferralAdminOverview {
+  totalReferrals: number;        // tổng quan hệ giới thiệu
+  activeReferrals: number;       // đã bonus_credited (referee có ≥1 đơn hoàn tiền)
+  totalReferrers: number;        // số user đã mời được ít nhất 1 người
+  conversionRate: number;        // % active / total
+  topReferrers: Array<{
+    userId: number;
+    username: string;
+    display_name: string | null;
+    total_invited: number;       // tổng đã mời
+    active_invited: number;      // đã active (có đơn)
+  }>;
+}
+
+/**
+ * Tổng quan mạng lưới giới thiệu cho admin.
+ * Top referrers = ai mời được nhiều bạn nhất (sắp theo active trước, rồi total).
+ */
+export async function getReferralAdminOverview(): Promise<ReferralAdminOverview> {
+  const database = await getDb();
+
+  const overview = await database.get(
+    `SELECT
+      COALESCE(COUNT(*), 0) AS total_referrals,
+      COALESCE(COUNT(*) FILTER (WHERE bonus_credited = 1), 0) AS active_referrals,
+      COALESCE(COUNT(DISTINCT referrer_user_id), 0) AS total_referrers
+     FROM referrals`,
+    [],
+  );
+
+  const top = await database.all(
+    `SELECT u.id AS user_id, u.username, u.display_name,
+            COUNT(r.id) AS total_invited,
+            COUNT(r.id) FILTER (WHERE r.bonus_credited = 1) AS active_invited
+     FROM referrals r
+     JOIN users u ON r.referrer_user_id = u.id
+     GROUP BY u.id, u.username, u.display_name
+     ORDER BY active_invited DESC, total_invited DESC
+     LIMIT 20`,
+    [],
+  );
+
+  const total = Number(overview?.total_referrals ?? 0);
+  const active = Number(overview?.active_referrals ?? 0);
+
+  return {
+    totalReferrals: total,
+    activeReferrals: active,
+    totalReferrers: Number(overview?.total_referrers ?? 0),
+    conversionRate: total > 0 ? Math.round((active / total) * 1000) / 10 : 0,
+    topReferrers: top.map((r) => ({
+      userId: Number(r.user_id),
+      username: String(r.username),
+      display_name: (r.display_name as string | null) ?? null,
+      total_invited: Number(r.total_invited),
+      active_invited: Number(r.active_invited),
+    })),
+  };
+}
+
+export interface ReferralNode {
+  userId: number;
+  username: string;
+  display_name: string | null;
+  bonus_credited: number;
+  created_at: string;
+  invited_count: number;   // số người mà node này đã mời (để biết có thể drill tiếp)
+}
+
+/**
+ * Lấy danh sách người được mời TRỰC TIẾP bởi 1 user (1 cấp).
+ * Mỗi node kèm invited_count → frontend biết node nào có thể mở rộng tiếp.
+ */
+export async function getReferralChildren(referrerId: number): Promise<ReferralNode[]> {
+  const database = await getDb();
+  const rows = await database.all(
+    `SELECT u.id AS user_id, u.username, u.display_name,
+            r.bonus_credited, r.created_at,
+            COALESCE((SELECT COUNT(*) FROM referrals WHERE referrer_user_id = u.id), 0) AS invited_count
+     FROM referrals r
+     JOIN users u ON r.referee_user_id = u.id
+     WHERE r.referrer_user_id = ?
+     ORDER BY r.created_at DESC`,
+    [referrerId],
+  );
+  return rows.map((r) => ({
+    userId: Number(r.user_id),
+    username: String(r.username),
+    display_name: (r.display_name as string | null) ?? null,
+    bonus_credited: Number(r.bonus_credited),
+    created_at: toIso(r.created_at),
+    invited_count: Number(r.invited_count),
+  }));
+}
