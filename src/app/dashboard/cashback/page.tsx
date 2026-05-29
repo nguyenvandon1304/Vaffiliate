@@ -652,6 +652,16 @@ export default function CashbackPage() {
                     vừa đủ điều kiện áp voucher, vừa tiết kiệm phí ship. Cashback vẫn tính trên tổng giá trị đơn.
                   </p>
                 </div>
+
+                {/* So sánh mã — giúp khách chọn voucher tối ưu */}
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <p className="text-xs font-bold text-blue-700 mb-2">💰 Chọn mã nào lợi hơn?</p>
+                  <ul className="text-xs text-gray-700 leading-relaxed space-y-1 list-none">
+                    <li>• Đơn <span className="font-semibold">dưới 500k</span> → chọn mã <span className="font-bold text-orange-600">22%</span> (giảm nhiều hơn)</li>
+                    <li>• Đơn <span className="font-semibold">từ 500k trở lên</span> → chọn mã <span className="font-bold text-orange-600">20%</span> (trần giảm cao tới 250k)</li>
+                    <li>• Mua nhiều món? <span className="font-semibold">Gộp chung 1 đơn</span> để đạt mốc cao, dùng mã 20% sẽ lợi hơn.</li>
+                  </ul>
+                </div>
               </div>
 
               {/* Fade overlay + arrow khi chưa mở rộng */}
