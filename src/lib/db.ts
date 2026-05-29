@@ -1325,6 +1325,7 @@ export interface DashboardStats {
   totalCashback: number;
   totalOrders: number;
   pendingOrders: number;
+  pendingCashback: number;        // Tổng cashback các đơn đang chờ (chưa về ví)
   walletBalance: number;
   pendingWithdrawAmount: number;  // Tổng tiền các yêu cầu rút đang pending
   totalWithdrawn: number;          // Tổng đã rút thành công (approved)
@@ -1381,6 +1382,7 @@ export async function getDashboardStats(userId: number): Promise<DashboardStats>
       COALESCE((SELECT SUM(cashback) FROM orders WHERE user_id = $1 AND status = 'Đã hoàn tiền'), 0) AS total_cashback,
       COALESCE((SELECT COUNT(*) FROM orders WHERE user_id = $1), 0) AS total_orders,
       COALESCE((SELECT COUNT(*) FROM orders WHERE user_id = $1 AND status IN ('Đang xử lý', 'Chờ xác nhận')), 0) AS pending_orders,
+      COALESCE((SELECT SUM(cashback) FROM orders WHERE user_id = $1 AND status IN ('Đang xử lý', 'Chờ xác nhận')), 0) AS pending_cashback,
       COALESCE((SELECT SUM(CASE WHEN type='credit' THEN amount ELSE -amount END) FROM wallet WHERE user_id = $1), 0) AS wallet_balance,
       COALESCE((SELECT SUM(amount) FROM withdrawals WHERE user_id = $1 AND status IN ('pending', 'Đang xử lý')), 0) AS pending_withdraw_amount,
       COALESCE((SELECT SUM(amount) FROM withdrawals WHERE user_id = $1 AND status IN ('approved', 'Đã chuyển', 'Đã duyệt')), 0) AS total_withdrawn,
@@ -1392,6 +1394,7 @@ export async function getDashboardStats(userId: number): Promise<DashboardStats>
     totalCashback: Number(row?.total_cashback ?? 0),
     totalOrders: Number(row?.total_orders ?? 0),
     pendingOrders: Number(row?.pending_orders ?? 0),
+    pendingCashback: Number(row?.pending_cashback ?? 0),
     walletBalance: Number(row?.wallet_balance ?? 0),
     pendingWithdrawAmount: Number(row?.pending_withdraw_amount ?? 0),
     totalWithdrawn: Number(row?.total_withdrawn ?? 0),

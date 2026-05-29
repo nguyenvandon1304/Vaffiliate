@@ -73,6 +73,7 @@ interface Stats {
   totalCashback: number;
   totalOrders: number;
   pendingOrders: number;
+  pendingCashback: number;
   walletBalance: number;
   pendingWithdrawAmount: number;
   totalWithdrawn: number;
@@ -249,7 +250,7 @@ function DashboardContent() {
 
   const [user, setUser] = useState<UserInfo | null>(null);
   const [stats, setStats] = useState<Stats>({
-    totalCashback: 0, totalOrders: 0, pendingOrders: 0, walletBalance: 0,
+    totalCashback: 0, totalOrders: 0, pendingOrders: 0, pendingCashback: 0, walletBalance: 0,
     pendingWithdrawAmount: 0, totalWithdrawn: 0, totalCredit: 0, totalDebit: 0,
   });
   const [orders, setOrders] = useState<OrderData[]>([]);
@@ -602,6 +603,27 @@ function DashboardContent() {
             ariaLabel={`Số dư ví: ${formatVND(stats.walletBalance)}`}
           />
         </div>
+
+        {/* Banner cashback đang chờ — chỉ hiện khi có đơn pending có cashback.
+            Giúp user hiểu tiền đang chờ Shopee duyệt, CHƯA vào ví rút được → tránh hoang mang. */}
+        {stats.pendingCashback > 0 && (
+          <button
+            type="button"
+            onClick={() => goToTab("orders")}
+            className="w-full text-left mb-6 flex items-start gap-3 rounded-xl border border-amber-200 dark:border-amber-500/30 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-500/10 dark:to-yellow-500/10 p-4 hover:shadow-md transition-all"
+          >
+            <span className="text-2xl shrink-0">⏳</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
+                {formatVND(stats.pendingCashback)} cashback đang chờ Shopee duyệt
+              </p>
+              <p className="text-xs text-amber-700 dark:text-amber-200/80 mt-0.5 leading-relaxed">
+                Từ {stats.pendingOrders} đơn hàng. Tiền sẽ tự động về ví sau khi Shopee xác nhận (thường 7-15 ngày, sau thời gian đổi trả). Bạn chưa rút được khoản này.
+              </p>
+            </div>
+            <span className="text-amber-600 dark:text-amber-400 shrink-0 mt-1">→</span>
+          </button>
+        )}
 
         {activeTab === "overview" && (
           <>
