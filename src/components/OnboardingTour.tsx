@@ -46,13 +46,13 @@ const STEPS: Step[] = [
   {
     emoji: "🎰",
     title: "Vòng quay may mắn",
-    description: "Mỗi 10 đơn cashback hoặc mời 5 bạn = 1 lượt quay miễn phí. Cơ hội nhận tiền thưởng đến 50.000đ mỗi lượt!",
+    description: "Cứ mỗi 10 đơn đã hoàn tiền hoặc mời được 5 bạn là bạn kiếm thêm 1 lượt quay. Cơ hội nhận tiền thưởng đến 50.000đ mỗi lượt!",
     highlight: "Vòng quay",
   },
   {
     emoji: "🎉",
     title: "Sẵn sàng rồi!",
-    description: "Hoàn tất hướng dẫn — bạn vừa nhận được +1 lượt quay miễn phí làm phần thưởng. Bắt đầu tiết kiệm ngay nào!",
+    description: "Hoàn tất hướng dẫn! Hãy tạo link mua sắm và mời bạn bè để kiếm lượt quay cùng cashback. Bắt đầu tiết kiệm ngay nào!",
   },
 ];
 
