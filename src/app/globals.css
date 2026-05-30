@@ -525,13 +525,15 @@
     overflow-x: hidden;
   }
   body {
-    /* Background tone với app — ko thấy viền trắng quanh notch */
-    background-color: #f97316;
+    /* Background tone với status bar (themeColor). Trước đây là cam đậm (#f97316)
+     * gây dải cam gắt ở vùng notch/status bar khi cài PWA — lệch hẳn với nền
+     * sáng của trang. Đổi về trắng cho khớp themeColor light → liền mạch. */
+    background-color: #ffffff;
     /* Prevent over-scroll bounce reveal background */
     overscroll-behavior-y: none;
   }
   :where(.dark) body {
-    background-color: #0b0b0c;
+    background-color: #09090b;
   }
 }
 
