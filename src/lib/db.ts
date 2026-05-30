@@ -2358,6 +2358,91 @@ export async function getRecentActivity(limit = 15): Promise<ActivityItem[]> {
   }));
 }
 
+
+/**
+ * Trust stats — số liệu tổng hợp ĐÃ XÁC THỰC để hiển thị tín hiệu tin cậy cho user.
+ * Tất cả là dữ liệu THẬT từ DB; không bịa. Caller tự quyết hiển thị hay ẩn nếu = 0.
+ *
+ * - completedOrders: số đơn đã hoàn tiền (toàn hệ thống).
+ * - totalCashbackPaid: tổng cashback đã trả về ví user.
+ * - totalWithdrawn: tổng tiền đã rút thành công (đã chuyển cho user).
+ * - withdrawalsApproved: số lượt rút thành công.
+ */
+export async function getPublicTrustStats(): Promise<{
+  completedOrders: number;
+  totalCashbackPaid: number;
+  totalWithdrawn: number;
+  withdrawalsApproved: number;
+}> {
+  const database = await getDb();
+  const row = await database.get(
+    `SELECT
+      COALESCE((SELECT COUNT(*) FROM orders WHERE status = 'Đã hoàn tiền'), 0) AS completed_orders,
+      COALESCE((SELECT SUM(cashback) FROM orders WHERE status = 'Đã hoàn tiền'), 0) AS total_cashback_paid,
+      COALESCE((SELECT SUM(amount) FROM withdrawals WHERE status IN ('approved', 'Đã chuyển', 'Đã duyệt')), 0) AS total_withdrawn,
+      COALESCE((SELECT COUNT(*) FROM withdrawals WHERE status IN ('approved', 'Đã chuyển', 'Đã duyệt')), 0) AS withdrawals_approved`,
+    [],
+  );
+  return {
+    completedOrders: Number(row?.completed_orders ?? 0),
+    totalCashbackPaid: Number(row?.total_cashback_paid ?? 0),
+    totalWithdrawn: Number(row?.total_withdrawn ?? 0),
+    withdrawalsApproved: Number(row?.withdrawals_approved ?? 0),
+  };
+}
+
+export interface PublicActivityItem {
+  id: string;
+  type: "order_complete" | "withdrawal_approved";
+  /** Tên đã ẩn danh: vd "ng****on". */
+  maskedName: string;
+  amount: number;
+  createdAt: string;
+}
+
+/**
+ * Public activity feed — CHỈ các tín hiệu tích cực, ẩn danh, dùng để tạo niềm tin.
+ * Tên user được mask (che giữa). Chỉ lấy đơn đã hoàn tiền + rút thành công.
+ * Trả mảng RỖNG nếu chưa có dữ liệu thật — caller không hiển thị gì (không bịa).
+ */
+export async function getPublicActivityFeed(limit = 8): Promise<PublicActivityItem[]> {
+  const database = await getDb();
+  const rows = await database.all(
+    `(
+      SELECT 'order_complete' AS type, o.id::text AS source_id, u.username,
+             o.cashback::int AS amount, o.created_at
+      FROM orders o JOIN users u ON u.id = o.user_id
+      WHERE o.status = 'Đã hoàn tiền' AND o.cashback > 0
+      ORDER BY o.created_at DESC LIMIT 20
+    )
+    UNION ALL
+    (
+      SELECT 'withdrawal_approved' AS type, w.id::text AS source_id, u.username,
+             w.amount::int AS amount, COALESCE(w.updated_at, w.created_at) AS created_at
+      FROM withdrawals w JOIN users u ON u.id = w.user_id
+      WHERE w.status IN ('approved', 'Đã chuyển', 'Đã duyệt') AND w.amount > 0
+      ORDER BY COALESCE(w.updated_at, w.created_at) DESC LIMIT 20
+    )
+    ORDER BY created_at DESC
+    LIMIT $1`,
+    [limit],
+  );
+
+  const maskName = (raw: unknown): string => {
+    const name = String(raw);
+    if (name.length <= 3) return name.charAt(0) + "**";
+    return name.slice(0, 2) + "****" + name.slice(-2);
+  };
+
+  return rows.map((r) => ({
+    id: `${r.type}-${r.source_id}`,
+    type: r.type as PublicActivityItem["type"],
+    maskedName: maskName(r.username),
+    amount: Number(r.amount),
+    createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+  }));
+}
+
 /**
  * Cohort retention analysis (WEEKLY) — track % user còn active sau N tuần kể từ signup.
  * Trả mảng cohorts theo tuần đăng ký, mỗi cohort có retention[0..7].

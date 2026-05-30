@@ -10,6 +10,7 @@ import { StatCard as StatCardNew } from "@/components/StatCard";
 import { EmptyState, IllustrationBox, IllustrationLink, IllustrationWallet } from "@/components/EmptyState";
 import { WalletHero } from "@/components/WalletHero";
 import { GettingStarted } from "@/components/GettingStarted";
+import { TrustSignals } from "@/components/TrustSignals";
 import { OrderList } from "@/components/OrderCard";
 import { CommandBarTrigger } from "@/components/CommandBar";
 import { DashboardSkeleton } from "@/components/Skeleton";
@@ -943,6 +944,9 @@ function DashboardContent() {
               </div>
             </div>
           </div>
+
+          {/* Tín hiệu tin cậy — cam kết thật + feed hoạt động thật (ẩn danh) */}
+          <TrustSignals />
           </>
         )}
 
