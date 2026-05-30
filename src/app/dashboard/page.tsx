@@ -642,31 +642,31 @@ function DashboardContent() {
 
           {/* Welcome Banner — thay cho phần "Bảng Xếp Hạng" cũ.
               Nội dung: lời chào + nhắc tỷ lệ 50% hoàn + 2 CTA (tạo link / mời bạn bè). */}
-          <section className="mb-6 relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 shadow-md shadow-orange-500/15">
-            {/* Decorative shapes */}
-            <div className="pointer-events-none absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10" />
-            <div className="pointer-events-none absolute -bottom-12 right-24 w-24 h-24 rounded-full bg-white/[0.07]" />
-            <div className="pointer-events-none absolute top-1/2 right-8 text-white/25 text-xl">★</div>
+          <section className="mb-6 relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-50 to-amber-50 dark:from-gray-800 dark:to-gray-800 border border-orange-100 dark:border-gray-700 shadow-sm">
+            {/* Decorative shapes — chỉ là chấm phá màu cam thật mờ, không gắt */}
+            <div className="pointer-events-none absolute -top-10 -right-10 w-40 h-40 rounded-full bg-orange-200/30 dark:bg-orange-500/10" />
+            <div className="pointer-events-none absolute -bottom-12 right-24 w-24 h-24 rounded-full bg-amber-200/30 dark:bg-amber-500/10" />
+            <div className="pointer-events-none absolute top-1/2 right-8 text-orange-300/50 dark:text-orange-500/30 text-xl">★</div>
 
             <div className="relative p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center gap-5">
-              {/* Avatar circle */}
-              <div className="flex-shrink-0 w-14 h-14 rounded-full bg-white/25 backdrop-blur-sm border border-white/40 flex items-center justify-center text-white text-2xl font-black">
+              {/* Avatar circle — điểm nhấn cam duy nhất trên nền sáng */}
+              <div className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white text-2xl font-black shadow-sm">
                 {(user?.display_name || user?.username || "U").charAt(0).toUpperCase()}
               </div>
 
-              <div className="flex-1 min-w-0 text-white">
-                <h2 className="text-xl sm:text-2xl font-black">
+              <div className="flex-1 min-w-0">
+                <h2 className="text-xl sm:text-2xl font-black text-gray-800 dark:text-gray-100">
                   Xin chào, {user?.display_name || user?.username || "bạn"}!
                 </h2>
-                <p className="text-sm text-white/90 mt-1 leading-relaxed">
-                  V-Affiliate <b>hoàn 50% hoa hồng</b> cho mọi đơn mua sắm qua link của bạn.
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 leading-relaxed">
+                  V-Affiliate <b className="text-orange-600 dark:text-orange-400">hoàn 50% hoa hồng</b> cho mọi đơn mua sắm qua link của bạn.
                   Lấy link → mua sắm → tiền về ví tự động.
                 </p>
 
                 <div className="mt-4 flex flex-wrap items-center gap-2">
                   <button
                     onClick={() => router.push("/dashboard/cashback")}
-                    className="inline-flex items-center gap-2 bg-white hover:bg-orange-50 text-orange-600 text-xs sm:text-sm font-bold px-4 py-2 rounded-lg shadow-md transition-all hover:scale-105"
+                    className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-lg shadow-sm transition-all hover:scale-105"
                   >
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
@@ -676,7 +676,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/referral")}
-                    className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm hover:bg-white/25 border border-white/30 text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                    className="inline-flex items-center gap-2 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
                   >
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -688,7 +688,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/spin")}
-                    className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-500 hover:from-yellow-500 hover:via-orange-500 hover:to-pink-600 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-lg shadow-md shadow-pink-500/40 transition-all hover:scale-105"
+                    className="inline-flex items-center gap-2 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
                     title="Vòng quay may mắn — đổi lượt từ đơn hàng & mời bạn"
                   >
                     <span className="text-base">🎰</span>
@@ -696,7 +696,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/wishlist")}
-                    className="inline-flex items-center gap-2 bg-gradient-to-r from-rose-400 to-fuchsia-500 hover:from-rose-500 hover:to-fuchsia-600 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-lg shadow-md shadow-rose-500/40 transition-all hover:scale-105"
+                    className="inline-flex items-center gap-2 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
                     title="Wishlist — theo dõi giá Shopee"
                   >
                     <span className="text-base">❤️</span>
@@ -704,7 +704,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/help")}
-                    className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm hover:bg-white/25 border border-white/30 text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                    className="inline-flex items-center gap-2 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
                   >
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />

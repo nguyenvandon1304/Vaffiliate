@@ -60,7 +60,7 @@ function VerifyEmailContent() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-          <div className="bg-gradient-to-r from-orange-500 to-red-500 px-6 py-4">
+          <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-4">
             <h1 className="text-white text-lg font-bold">Xác thực email</h1>
             <p className="text-white/80 text-xs mt-1">Hoàn tất đăng ký bằng cách xác thực địa chỉ email</p>
           </div>
