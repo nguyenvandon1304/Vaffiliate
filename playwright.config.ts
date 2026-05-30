@@ -51,6 +51,11 @@ export default defineConfig({
       dependencies: ["user-setup"],
       use: { ...devices["Desktop Chrome"], storageState: "e2e/.auth/user.json" },
     },
+    {
+      name: "money",
+      testMatch: /withdraw-flow\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"] },
+    },
   ],
   webServer: {
     command: "npm run dev",
