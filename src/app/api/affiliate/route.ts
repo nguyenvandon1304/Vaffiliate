@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserByToken, getDb, createNotification, getCashbackRateForUser, calcCashback } from "@/lib/db";
 import { grantBadge } from "@/lib/achievements";
+import { rateLimitAsync } from "@/lib/rate-limit";
 
 const GOAFFILIATE_CHECK_COMMISSION_URL = "https://www.goaffiliate.online/api/check-commission";
 const GOAFFILIATE_GET_LINK_URL = "https://www.goaffiliate.online/api/get-link";
@@ -179,6 +180,17 @@ export async function POST(request: NextRequest) {
     const user = token ? await getUserByToken(token) : null;
     if (!user) {
       return NextResponse.json({ success: false, error: "Vui lòng đăng nhập để tạo link hoàn tiền", needLogin: true }, { status: 401 });
+    }
+
+    // Rate-limit theo user — mỗi lần gọi kích hoạt tới 3 fetch ngoài (resolve
+    // short-link + product info + get-link) → chống spam/cost-amplification.
+    // 30 link / 5 phút là thoải mái cho user thật, chặn được script lạm dụng.
+    const rl = await rateLimitAsync(`affiliate:user:${user.id}`, { max: 30, windowMs: 5 * 60 * 1000 });
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { success: false, error: `Bạn tạo link hơi nhanh. Vui lòng đợi ${rl.retryAfterSec}s rồi thử lại.` },
+        { status: 429, headers: { "Retry-After": String(rl.retryAfterSec) } },
+      );
     }
 
     if (!productUrl || typeof productUrl !== "string") {

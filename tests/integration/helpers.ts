@@ -83,3 +83,22 @@ export async function markVerified(userId: number): Promise<void> {
   const db = await getDb();
   await db.run("UPDATE users SET email_verified = 1 WHERE id = ?", [userId]);
 }
+
+/** Lấy status của 1 đơn theo order_code (null nếu không có). */
+export async function orderStatus(orderCode: string): Promise<string | null> {
+  const db = await getDb();
+  const row = await db.get("SELECT status FROM orders WHERE order_code = ?", [orderCode]);
+  return row ? String(row.status) : null;
+}
+
+/** Lấy withdrawal pending mới nhất của user (id + status). */
+export async function latestWithdrawal(
+  userId: number,
+): Promise<{ id: number; status: string; amount: number } | null> {
+  const db = await getDb();
+  const row = await db.get(
+    "SELECT id, status, amount FROM withdrawals WHERE user_id = ? ORDER BY id DESC LIMIT 1",
+    [userId],
+  );
+  return row ? { id: Number(row.id), status: String(row.status), amount: Number(row.amount) } : null;
+}

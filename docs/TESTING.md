@@ -21,6 +21,7 @@ Các lệnh con (chạy lẻ khi cần):
 | `npm run test` | Vitest watch mode (dev) |
 | `npm run test:ci` | Vitest chạy 1 lần (unit, CI) |
 | `npm run test:integration` | Integration test với DB dev (cần `.env.local`) |
+| `npm run test:e2e` | E2E Playwright (tự khởi động dev server) |
 | `npm run build` | Next.js production build |
 | `npm run check` | lint + typecheck + build (không test) |
 
@@ -77,10 +78,22 @@ powershell -ExecutionPolicy Bypass -File scripts/smoke-test.ps1
 Ping 13 endpoint trên site live, xác nhận trả đúng mã (200/401). Chạy sau khi
 deploy để chắc chắn production còn sống.
 
+## E2E test (Playwright)
+
+```bash
+npm run test:e2e
+```
+
+- Test trong `e2e/`, chạy trên Chromium (đã `npx playwright install chromium`).
+- Tự khởi động dev server (`reuseExistingServer: true` nếu đã chạy).
+- Phủ smoke quan trọng: trang chủ load, form đăng nhập/đăng ký, đăng nhập sai
+  không vào được dashboard, auth gating (`/dashboard` redirect, API 401/200).
+- Cố ý KHÔNG test flow phụ thuộc API ngoài (Shopee/GoAffiliate) hay email thật
+  để tránh flaky. Selector dùng placeholder cho ổn định.
+
 ## Việc nên làm tiếp (chưa làm)
 
-- E2E test (Playwright) cho hành trình người dùng đầy đủ trên trình duyệt:
-  đăng ký → tạo link → mua → admin import đơn → rút tiền → admin duyệt.
-- Integration test cho import CSV (`importOrders`) và duyệt/từ chối rút tiền
-  (`updateWithdrawalStatus`) — hiện mới phủ tạo yêu cầu rút.
-- Rate-limit cho `/api/affiliate`, allowlist host cho resolve short-link.
+- E2E sâu hơn: hành trình đăng nhập thật (cần seed user + bypass captcha ở môi
+  trường test) → tạo link → admin import → rút tiền → admin duyệt.
+- Allowlist host cho resolve short-link (`/api/affiliate`) chống SSRF.
+- Giới hạn số kết nối SSE / user.

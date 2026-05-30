@@ -53,3 +53,10 @@ temp/
 *.db-shm
 *.db-wal
 *.backup.db
+
+# Test artifacts (Playwright / Vitest)
+test-results/
+playwright-report/
+.playwright/
+blob-report/
+coverage/
