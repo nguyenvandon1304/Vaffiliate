@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface StreakInfo {
   currentStreak: number;
@@ -20,6 +21,10 @@ const BONUSES = [2_000, 3_000, 5_000, 10_000, 20_000];
 export function StreakBadge() {
   const [info, setInfo] = useState<StreakInfo | null>(null);
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- portal chỉ render sau khi mount (client)
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,6 +37,14 @@ export function StreakBadge() {
       .catch(() => { /* silent */ });
     return () => { cancelled = true; };
   }, []);
+
+  // Khoá scroll nền khi modal mở.
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
 
   if (!info || info.currentStreak === 0) return null;
 
@@ -57,27 +70,24 @@ export function StreakBadge() {
         </span>
       </button>
 
-      {open && (
+      {mounted && open && createPortal(
         <div
-          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-md sm:p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-150"
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full sm:max-w-md max-h-[88vh] sm:max-h-[90vh] flex flex-col bg-white dark:bg-zinc-900 rounded-t-3xl sm:rounded-2xl shadow-2xl border border-gray-200/70 dark:border-zinc-700 overflow-hidden animate-in slide-in-from-bottom-4 sm:zoom-in-95 fade-in duration-200"
-            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+            className="w-full max-w-sm max-h-[85vh] flex flex-col bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-gray-200/70 dark:border-zinc-700 overflow-hidden animate-in zoom-in-95 fade-in duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header gradient cam-vàng */}
-            <div className="shrink-0 bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 px-6 pt-5 pb-7 text-white relative overflow-hidden">
-              {/* Grab handle — chỉ mobile (bottom-sheet) */}
-              <div className="sm:hidden mx-auto mb-3 w-10 h-1 rounded-full bg-white/40" />
+            {/* Header gradient cam-vàng — gọn, cân đối */}
+            <div className="shrink-0 bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 px-5 pt-5 pb-5 text-white relative overflow-hidden">
               <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-yellow-300/30 blur-2xl pointer-events-none" />
               <div className="absolute -bottom-12 -left-8 w-32 h-32 rounded-full bg-orange-300/20 blur-2xl pointer-events-none" />
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Đóng"
-                className="absolute top-3 right-3 z-20 w-10 h-10 rounded-full bg-white/25 hover:bg-white/45 active:bg-white/60 flex items-center justify-center transition-colors cursor-pointer touch-manipulation"
+                className="absolute top-3 right-3 z-20 w-9 h-9 rounded-full bg-white/25 hover:bg-white/45 active:bg-white/60 flex items-center justify-center transition-colors cursor-pointer touch-manipulation"
               >
                 <svg viewBox="0 0 24 24" className="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18" />
@@ -85,36 +95,36 @@ export function StreakBadge() {
                 </svg>
               </button>
 
-              <p className="text-[11px] uppercase tracking-widest opacity-85 font-bold mb-4">
+              <p className="text-[10px] uppercase tracking-widest opacity-85 font-bold mb-3">
                 Daily Login Streak
               </p>
 
-              {/* Streak count — căn giữa theo trục dọc, ngọn lửa + số cân đối */}
-              <div className="flex items-center gap-4">
-                <span className="text-6xl leading-none drop-shadow-lg shrink-0">{intensity.slice(0, 2)}</span>
+              {/* Streak count — ngọn lửa + số căn giữa cân đối */}
+              <div className="flex items-center gap-3">
+                <span className="text-5xl leading-none drop-shadow-lg shrink-0">{intensity.slice(0, 2)}</span>
                 <div className="leading-none">
                   <div className="flex items-end gap-1.5">
-                    <span className="text-6xl font-black tabular-nums leading-none drop-shadow-md">
+                    <span className="text-5xl font-black tabular-nums leading-none drop-shadow-md">
                       {info.currentStreak}
                     </span>
-                    <span className="text-lg font-bold opacity-90 mb-1">ngày</span>
+                    <span className="text-base font-bold opacity-90 mb-1">ngày</span>
                   </div>
-                  <p className="text-sm font-semibold opacity-90 mt-1.5">liên tiếp 🎯</p>
+                  <p className="text-xs font-semibold opacity-90 mt-1">liên tiếp 🎯</p>
                 </div>
               </div>
 
               {info.longestStreak > info.currentStreak && (
-                <div className="mt-4 inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1 text-[11px] font-semibold">
+                <div className="mt-3 inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1 text-[11px] font-semibold">
                   <span>🏆</span>
-                  Kỷ lục cao nhất: <b>{info.longestStreak}</b> ngày
+                  Kỷ lục: <b>{info.longestStreak}</b> ngày
                 </div>
               )}
             </div>
 
-            {/* Body */}
-            <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4">
+            {/* Body — cuộn được nếu dài */}
+            <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3">
               {info.nextMilestone ? (
-                <div className="rounded-xl bg-orange-50/70 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 p-4">
+                <div className="rounded-xl bg-orange-50/70 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 p-3">
                   <div className="flex items-center justify-between text-xs mb-2">
                     <span className="text-gray-600 dark:text-zinc-300">
                       Tới mốc{" "}
@@ -160,49 +170,37 @@ export function StreakBadge() {
                 <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-zinc-500 font-bold mb-2">
                   Bảng phần thưởng
                 </p>
-                <ul className="space-y-2">
+                <ul className="space-y-1.5">
                   {MILESTONES.map((day, i) => {
                     const reached = info.currentStreak >= day;
                     const isNext = info.nextMilestone === day;
                     return (
                       <li
                         key={day}
-                        className={`flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl ${
+                        className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg ${
                           reached
                             ? "bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30"
                             : isNext
-                            ? "bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/30 ring-2 ring-orange-200/60 dark:ring-orange-500/20"
+                            ? "bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/30 ring-1 ring-orange-200/60 dark:ring-orange-500/20"
                             : "bg-gray-50 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-700"
                         }`}
                       >
-                        <div className="flex items-center gap-2.5">
-                          <span className={`w-8 h-8 rounded-full flex items-center justify-center text-base shrink-0 ${
-                            reached
-                              ? "bg-emerald-500/15"
-                              : isNext
-                              ? "bg-orange-500/15"
-                              : "bg-gray-200/60 dark:bg-zinc-700/60"
-                          }`}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-base shrink-0">
                             {reached ? "✅" : isNext ? "🔥" : "🔒"}
                           </span>
-                          <div className="leading-tight">
-                            <span className={`block text-sm font-bold ${
-                              reached
-                                ? "text-emerald-700 dark:text-emerald-400"
-                                : isNext
-                                ? "text-orange-700 dark:text-orange-400"
-                                : "text-gray-500 dark:text-zinc-500"
-                            }`}>
-                              {day} ngày
-                            </span>
-                            {(reached || isNext) && (
-                              <span className={`text-[10px] font-semibold ${
-                                reached ? "text-emerald-500 dark:text-emerald-500" : "text-orange-500"
-                              }`}>
-                                {reached ? "Đã đạt" : "Tiếp theo"}
-                              </span>
-                            )}
-                          </div>
+                          <span className={`text-sm font-bold ${
+                            reached
+                              ? "text-emerald-700 dark:text-emerald-400"
+                              : isNext
+                              ? "text-orange-700 dark:text-orange-400"
+                              : "text-gray-500 dark:text-zinc-500"
+                          }`}>
+                            {day} ngày
+                          </span>
+                          {isNext && (
+                            <span className="text-[10px] font-semibold text-orange-500">· Tiếp theo</span>
+                          )}
                         </div>
                         <span className={`text-sm font-black tabular-nums ${
                           reached
@@ -227,7 +225,8 @@ export function StreakBadge() {
               </p>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
