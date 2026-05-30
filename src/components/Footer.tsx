@@ -7,46 +7,46 @@ export default function Footer() {
     <footer className="mt-auto">
       {/* Cộng Đồng Section */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 mb-8">
-        <div className="bg-gradient-to-r from-orange-500 to-amber-500 dark:from-orange-600 dark:to-amber-600 rounded-2xl p-5 text-white">
+        <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/40 dark:via-zinc-900 dark:to-amber-950/30 border border-orange-100 dark:border-orange-500/25 rounded-2xl p-5 text-gray-800 dark:text-gray-100">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-500 rounded-full flex items-center justify-center text-white shadow-sm">
               <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
             </div>
             <div>
-              <h3 className="font-bold text-base">Cộng Đồng V-Affiliate</h3>
-              <p className="text-white/80 text-xs">Kết nối, chia sẻ và cùng nhau phát triển</p>
+              <h3 className="font-bold text-base text-gray-800 dark:text-gray-100">Cộng Đồng V-Affiliate</h3>
+              <p className="text-gray-500 dark:text-gray-400 text-xs">Kết nối, chia sẻ và cùng nhau phát triển</p>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <a href="https://www.facebook.com/groups/1277321027865135" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-white/10 hover:bg-white/20 rounded-xl p-3 transition-colors">
+            <a href="https://www.facebook.com/groups/1277321027865135" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-white dark:bg-white/[0.06] hover:bg-orange-50 dark:hover:bg-white/10 border border-orange-100 dark:border-white/10 rounded-xl p-3 transition-colors">
               <div className="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center shrink-0">
                 <svg viewBox="0 0 24 24" className="w-4 h-4 text-white" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm">Nhóm Facebook</p>
-                <p className="text-white/70 text-[11px]">Hỗ trợ, chia sẻ kinh nghiệm</p>
+                <p className="font-semibold text-sm text-gray-800 dark:text-gray-100">Nhóm Facebook</p>
+                <p className="text-gray-500 dark:text-gray-400 text-[11px]">Hỗ trợ, chia sẻ kinh nghiệm</p>
               </div>
-              <svg viewBox="0 0 24 24" className="w-4 h-4 text-white/50 shrink-0" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+              <svg viewBox="0 0 24 24" className="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
             </a>
-            <a href="https://zalo.me/g/kw4grzxrzqzgrbwyys6f" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-white/10 hover:bg-white/20 rounded-xl p-3 transition-colors">
+            <a href="https://zalo.me/g/kw4grzxrzqzgrbwyys6f" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-white dark:bg-white/[0.06] hover:bg-orange-50 dark:hover:bg-white/10 border border-orange-100 dark:border-white/10 rounded-xl p-3 transition-colors">
               <div className="w-9 h-9 bg-blue-500 rounded-full flex items-center justify-center shrink-0">
                 <span className="text-white text-xs font-bold">Z</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm">Nhóm Zalo</p>
-                <p className="text-white/70 text-[11px]">Hỗ trợ nhanh qua Zalo</p>
+                <p className="font-semibold text-sm text-gray-800 dark:text-gray-100">Nhóm Zalo</p>
+                <p className="text-gray-500 dark:text-gray-400 text-[11px]">Hỗ trợ nhanh qua Zalo</p>
               </div>
-              <svg viewBox="0 0 24 24" className="w-4 h-4 text-white/50 shrink-0" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+              <svg viewBox="0 0 24 24" className="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
             </a>
-            <a href="https://www.facebook.com/profile.php?id=61590342930888" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-white/10 hover:bg-white/20 rounded-xl p-3 transition-colors">
+            <a href="https://www.facebook.com/profile.php?id=61590342930888" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-white dark:bg-white/[0.06] hover:bg-orange-50 dark:hover:bg-white/10 border border-orange-100 dark:border-white/10 rounded-xl p-3 transition-colors">
               <div className="w-9 h-9 bg-orange-500 rounded-full flex items-center justify-center shrink-0">
                 <svg viewBox="0 0 24 24" className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" /><path d="M18 14h-8" /><path d="M15 18h-5" /><path d="M10 6h8v4h-8V6Z" /></svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm">Fanpage Chính Thức</p>
-                <p className="text-white/70 text-[11px]">Tin tức, khuyến mãi mới nhất</p>
+                <p className="font-semibold text-sm text-gray-800 dark:text-gray-100">Fanpage Chính Thức</p>
+                <p className="text-gray-500 dark:text-gray-400 text-[11px]">Tin tức, khuyến mãi mới nhất</p>
               </div>
-              <svg viewBox="0 0 24 24" className="w-4 h-4 text-white/50 shrink-0" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+              <svg viewBox="0 0 24 24" className="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
             </a>
           </div>
         </div>

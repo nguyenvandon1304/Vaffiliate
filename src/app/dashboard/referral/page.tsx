@@ -152,13 +152,13 @@ export default function ReferralPage() {
           <span className="text-gray-700 dark:text-zinc-200 font-semibold">Giới Thiệu</span>
         </nav>
 
-        {/* Hero — gradient cam (đã dịu để bớt chói, đồng bộ banner dashboard) */}
-        <section className="relative bg-gradient-to-br from-orange-500 to-amber-500 rounded-3xl shadow-md shadow-orange-500/15 p-6 sm:p-8 overflow-hidden">
+        {/* Hero — nền kem sáng dịu (đồng bộ banner dashboard & ví) */}
+        <section className="relative bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/40 dark:via-zinc-900 dark:to-amber-950/30 border border-orange-100 dark:border-orange-500/25 rounded-3xl shadow-sm dark:shadow-lg dark:shadow-orange-950/30 p-6 sm:p-8 overflow-hidden">
           {/* Decorative blobs */}
-          <div className="pointer-events-none absolute -top-20 -right-20 w-56 h-56 rounded-full bg-yellow-300/20 blur-3xl animate-tier-float" />
-          <div className="pointer-events-none absolute -bottom-16 -left-12 w-44 h-44 rounded-full bg-rose-400/15 blur-3xl" />
-          <div className="pointer-events-none absolute top-12 left-8 text-white/25 text-2xl">★</div>
-          <div className="pointer-events-none absolute bottom-8 right-16 text-white/25 text-lg">✦</div>
+          <div className="pointer-events-none absolute -top-20 -right-20 w-56 h-56 rounded-full bg-orange-200/40 dark:bg-orange-500/15 blur-3xl animate-tier-float" />
+          <div className="pointer-events-none absolute -bottom-16 -left-12 w-44 h-44 rounded-full bg-amber-200/40 dark:bg-amber-500/10 blur-3xl" />
+          <div className="pointer-events-none absolute top-12 left-8 text-orange-300/50 dark:text-orange-400/30 text-2xl">★</div>
+          <div className="pointer-events-none absolute bottom-8 right-16 text-amber-300/50 dark:text-amber-400/30 text-lg">✦</div>
 
           <div className="relative">
             <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
@@ -168,22 +168,22 @@ export default function ReferralPage() {
                   percent={Math.min(100, ((rate?.activeReferrals ?? 0) / (rate?.milestone ?? 50)) * 100)}
                   size={140}
                   strokeWidth={10}
-                  trackClass="text-white"
-                  bgClass="text-white/20"
+                  trackClass="text-orange-500"
+                  bgClass="text-orange-500/15"
                 >
-                  <div className="text-center text-white">
+                  <div className="text-center text-gray-800 dark:text-gray-100">
                     <p className="text-3xl font-black tabular-nums leading-none">{rate?.activeReferrals ?? 0}</p>
-                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-80 mt-1">/{rate?.milestone ?? 50}</p>
-                    <p className="text-[10px] font-semibold opacity-90 mt-0.5">bạn active</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mt-1">/{rate?.milestone ?? 50}</p>
+                    <p className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 mt-0.5">bạn active</p>
                   </div>
                 </ProgressRing>
               </div>
 
               {/* Right: title + bonus + pills */}
-              <div className="flex-1 min-w-0 text-center sm:text-left text-white">
-                <p className="text-[11px] font-bold tracking-[0.2em] text-white/90 uppercase">Tổng thưởng đã nhận</p>
+              <div className="flex-1 min-w-0 text-center sm:text-left">
+                <p className="text-[11px] font-bold tracking-[0.2em] text-orange-600 dark:text-orange-400 uppercase">Tổng thưởng đã nhận</p>
                 <div className="flex items-center justify-center sm:justify-start gap-2 mt-1">
-                  <span className="text-4xl sm:text-5xl font-black tabular-nums drop-shadow-md">
+                  <span className="text-4xl sm:text-5xl font-black tabular-nums text-gray-900 dark:text-white">
                     {(stats?.totalBonus ?? 0).toLocaleString("vi-VN")}
                   </span>
                   <span className="text-2xl sm:text-3xl">💰</span>
@@ -200,8 +200,8 @@ export default function ReferralPage() {
 
             {/* Recent referrals avatar carousel */}
             {stats && stats.recent.length > 0 && (
-              <div className="mt-5 pt-5 border-t border-white/20 flex items-center justify-center gap-3 flex-wrap">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-white/80">
+              <div className="mt-5 pt-5 border-t border-orange-200/60 dark:border-white/10 flex items-center justify-center gap-3 flex-wrap">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                   Bạn bè đã tham gia:
                 </p>
                 <div className="flex items-center -space-x-2">
@@ -212,13 +212,13 @@ export default function ReferralPage() {
                       <div
                         key={r.id}
                         title={`${name}${r.bonus_credited ? " · Đã active ✓" : " · Chờ kích hoạt"}`}
-                        className={`relative w-9 h-9 rounded-full border-2 border-white shadow-md flex items-center justify-center text-sm font-black text-white ${
-                          r.bonus_credited ? "bg-gradient-to-br from-emerald-400 to-emerald-600" : "bg-gradient-to-br from-white/30 to-white/20 backdrop-blur"
+                        className={`relative w-9 h-9 rounded-full border-2 border-white dark:border-zinc-800 shadow-md flex items-center justify-center text-sm font-black text-white ${
+                          r.bonus_credited ? "bg-gradient-to-br from-emerald-400 to-emerald-600" : "bg-gradient-to-br from-orange-400 to-amber-500"
                         }`}
                       >
                         {initial}
                         {r.bonus_credited === 1 && (
-                          <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-[7px]">
+                          <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-zinc-800 flex items-center justify-center text-[7px]">
                             ✓
                           </span>
                         )}
@@ -226,7 +226,7 @@ export default function ReferralPage() {
                     );
                   })}
                   {stats.recent.length > 5 && (
-                    <div className="relative w-9 h-9 rounded-full border-2 border-white bg-white/20 backdrop-blur shadow-md flex items-center justify-center text-[11px] font-black text-white">
+                    <div className="relative w-9 h-9 rounded-full border-2 border-white dark:border-zinc-800 bg-orange-100 dark:bg-orange-500/20 shadow-md flex items-center justify-center text-[11px] font-black text-orange-600 dark:text-orange-300">
                       +{stats.recent.length - 5}
                     </div>
                   )}
@@ -235,8 +235,8 @@ export default function ReferralPage() {
             )}
 
             {/* Link box */}
-            <div className="mt-5 bg-white rounded-full px-5 py-3 flex items-center justify-center shadow-md">
-              <code className="text-xs sm:text-sm font-mono text-gray-700 truncate">
+            <div className="mt-5 bg-white dark:bg-zinc-800 border border-orange-100 dark:border-white/10 rounded-full px-5 py-3 flex items-center justify-center shadow-sm">
+              <code className="text-xs sm:text-sm font-mono text-gray-700 dark:text-gray-200 truncate">
                 {refLink || "—"}
               </code>
             </div>
@@ -245,7 +245,7 @@ export default function ReferralPage() {
             <div className="mt-4 flex items-center justify-center gap-3 flex-wrap">
               <button
                 onClick={copyLink}
-                className="flex items-center gap-2 bg-white hover:bg-orange-50 text-orange-600 text-sm font-bold px-6 py-2.5 rounded-xl shadow-md transition-all hover:scale-105"
+                className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-6 py-2.5 rounded-xl shadow-sm transition-all hover:scale-105"
               >
                 <CopyIcon className="w-4 h-4" />
                 <span>Sao Chép</span>
@@ -253,7 +253,7 @@ export default function ReferralPage() {
               <ShareMenu
                 url={refLink || ""}
                 text="Tham gia V-Affiliate cùng mình — hoàn 50% hoa hồng cho mỗi đơn Shopee. Mua sắm thông minh hơn!"
-                buttonClass="flex items-center gap-2 bg-white hover:bg-orange-50 text-orange-600 text-sm font-bold px-6 py-2.5 rounded-xl shadow-md transition-all hover:scale-105"
+                buttonClass="flex items-center gap-2 bg-white dark:bg-zinc-800 hover:bg-orange-50 dark:hover:bg-white/10 border border-orange-200 dark:border-white/10 text-orange-600 dark:text-orange-300 text-sm font-bold px-6 py-2.5 rounded-xl shadow-sm transition-all hover:scale-105"
               >
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="18" cy="5" r="3" />
@@ -266,7 +266,7 @@ export default function ReferralPage() {
               </ShareMenu>
               <button
                 onClick={() => setShowQr(true)}
-                className="flex items-center gap-2 bg-white hover:bg-orange-50 text-orange-600 text-sm font-bold px-6 py-2.5 rounded-xl shadow-md transition-all hover:scale-105"
+                className="flex items-center gap-2 bg-white dark:bg-zinc-800 hover:bg-orange-50 dark:hover:bg-white/10 border border-orange-200 dark:border-white/10 text-orange-600 dark:text-orange-300 text-sm font-bold px-6 py-2.5 rounded-xl shadow-sm transition-all hover:scale-105"
               >
                 <QrIcon className="w-4 h-4" />
                 <span>Mã QR</span>
@@ -557,7 +557,7 @@ export default function ReferralPage() {
 
 function Pill({ icon, label }: { icon: string; label: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-semibold px-3 py-1 rounded-full">
+    <span className="inline-flex items-center gap-1.5 bg-white/80 dark:bg-white/[0.08] border border-orange-200 dark:border-white/15 text-gray-700 dark:text-gray-200 text-xs font-semibold px-3 py-1 rounded-full">
       <span>{icon}</span>
       <span>{label}</span>
     </span>
