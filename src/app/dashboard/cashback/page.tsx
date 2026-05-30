@@ -499,11 +499,11 @@ export default function CashbackPage() {
           {/* ── Hướng Dẫn Sử Dụng ── */}
           <div className="lg:col-span-3 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             {/* Header */}
-            <div className="flex items-center gap-2 text-sm px-6 pt-5 sm:px-8">
-              <span className="text-orange-500 text-base">✨</span>
-              <span className="text-gray-600">Hướng dẫn nhận thêm</span>
-              <span className="font-bold text-gray-800">voucher 20-22%</span>
-              <span className="text-gray-600">từ Shopee</span>
+            <div className="flex items-start gap-2 text-sm px-6 pt-5 sm:px-8">
+              <span className="text-orange-500 text-base shrink-0 leading-relaxed">✨</span>
+              <p className="text-gray-600 leading-relaxed">
+                Hướng dẫn nhận thêm <span className="font-bold text-gray-800">voucher 20-22%</span> từ Shopee
+              </p>
             </div>
 
             {/* Content with max-height + fade */}
