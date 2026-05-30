@@ -306,17 +306,17 @@ export function OnboardingTour({ onComplete }: { onComplete?: () => void }) {
               </div>
             )}
 
-            {/* Reward badge — show on last step */}
+            {/* Tip badge — show on last step (không hứa tặng lượt, chỉ gợi ý cách kiếm) */}
             {isLast && (
               <div className="mt-3 mx-auto max-w-xs rounded-xl border border-amber-300/70 dark:border-amber-500/30 bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-500/[0.08] dark:to-yellow-500/[0.06] p-3 text-center">
                 <p className="text-[11px] font-bold uppercase tracking-widest text-amber-700 dark:text-amber-300">
-                  Phần thưởng
+                  Mẹo
                 </p>
                 <p className="mt-1 text-sm font-black text-gray-800 dark:text-zinc-100">
-                  🎁 +1 lượt vòng quay may mắn
+                  🎰 Mua đơn & mời bạn để mở khoá lượt quay
                 </p>
                 <p className="text-[10px] text-gray-500 dark:text-zinc-400 mt-0.5">
-                  Quay ngay sau khi hoàn tất tour!
+                  10 đơn hoàn tiền hoặc 5 bạn mời = 1 lượt quay
                 </p>
               </div>
             )}
@@ -360,7 +360,7 @@ export function OnboardingTour({ onComplete }: { onComplete?: () => void }) {
                     : "flex-1 bg-orange-500 hover:bg-orange-600"
               }`}
             >
-              {isLast ? "🎁 Nhận thưởng — Hoàn tất!" : isFirst ? "Bắt đầu khám phá →" : "Tiếp theo →"}
+              {isLast ? "Bắt đầu ngay! →" : isFirst ? "Bắt đầu khám phá →" : "Tiếp theo →"}
             </button>
           </div>
         </div>
