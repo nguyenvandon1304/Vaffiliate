@@ -679,7 +679,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/referral")}
-                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-gray-50 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 hover:scale-105 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-all"
                   >
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -691,7 +691,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/spin")}
-                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-gray-50 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 hover:scale-105 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-all"
                     title="Vòng quay may mắn — đổi lượt từ đơn hàng & mời bạn"
                   >
                     <span className="text-base">🎰</span>
@@ -699,7 +699,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/wishlist")}
-                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-gray-50 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 hover:scale-105 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-all"
                     title="Wishlist — theo dõi giá Shopee"
                   >
                     <span className="text-base">❤️</span>
@@ -707,7 +707,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/help")}
-                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-gray-50 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 hover:scale-105 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-all"
                   >
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />
