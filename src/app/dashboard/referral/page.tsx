@@ -183,7 +183,7 @@ export default function ReferralPage() {
               <div className="flex-1 min-w-0 text-center sm:text-left">
                 <p className="text-[11px] font-bold tracking-[0.2em] text-orange-600 dark:text-orange-400 uppercase">Tổng thưởng đã nhận</p>
                 <div className="flex items-center justify-center sm:justify-start gap-2 mt-1">
-                  <span className="text-4xl sm:text-5xl font-black tabular-nums text-gray-900 dark:text-white">
+                  <span className="text-4xl sm:text-5xl font-black tabular-nums bg-gradient-to-br from-orange-600 to-amber-500 dark:from-orange-300 dark:to-amber-200 bg-clip-text text-transparent">
                     {(stats?.totalBonus ?? 0).toLocaleString("vi-VN")}
                   </span>
                   <span className="text-2xl sm:text-3xl">💰</span>
