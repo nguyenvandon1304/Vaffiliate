@@ -148,7 +148,17 @@ export async function rateLimitAsync(
     return rateLimitMemory(key, max, windowMs);
   }
 
-  const limiter = getUpstashLimiter(max, windowMs);
+  // Lấy limiter trong try/catch: new Redis()/new Ratelimit() có thể THROW đồng bộ
+  // nếu URL/token Upstash sai định dạng (vd thiếu https://). Không được để crash
+  // request → fail open về in-memory.
+  let limiter: Ratelimit | null;
+  try {
+    limiter = getUpstashLimiter(max, windowMs);
+  } catch (err) {
+    console.error("[rate-limit] Upstash init error, fallback to memory:", err);
+    globalForRL.__rl_upstash_unavailable_until = Date.now() + UPSTASH_DOWN_BACKOFF_MS;
+    return rateLimitMemory(key, max, windowMs);
+  }
   if (!limiter) {
     // Không có credential → in-memory
     return rateLimitMemory(key, max, windowMs);
