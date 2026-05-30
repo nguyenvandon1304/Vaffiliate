@@ -67,13 +67,14 @@ export function StreakBadge() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header gradient cam-vàng */}
-            <div className="bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 p-6 text-white relative overflow-hidden">
+            <div className="bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 px-6 pt-6 pb-7 text-white relative overflow-hidden">
               <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-yellow-300/30 blur-2xl pointer-events-none" />
+              <div className="absolute -bottom-12 -left-8 w-32 h-32 rounded-full bg-orange-300/20 blur-2xl pointer-events-none" />
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Đóng"
-                className="absolute top-2.5 right-2.5 z-20 w-11 h-11 rounded-full bg-white/25 hover:bg-white/45 active:bg-white/60 flex items-center justify-center transition-colors cursor-pointer touch-manipulation"
+                className="absolute top-3 right-3 z-20 w-10 h-10 rounded-full bg-white/25 hover:bg-white/45 active:bg-white/60 flex items-center justify-center transition-colors cursor-pointer touch-manipulation"
               >
                 <svg viewBox="0 0 24 24" className="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18" />
@@ -81,32 +82,39 @@ export function StreakBadge() {
                 </svg>
               </button>
 
-              <p className="text-[11px] uppercase tracking-widest opacity-85 font-bold mb-1">
+              <p className="text-[11px] uppercase tracking-widest opacity-85 font-bold mb-4">
                 Daily Login Streak
               </p>
-              <div className="flex items-baseline gap-2">
-                <span className="text-6xl">{intensity}</span>
-                <div>
-                  <p className="text-5xl font-black tabular-nums leading-none drop-shadow-md">
-                    {info.currentStreak}
-                  </p>
-                  <p className="text-sm font-bold opacity-90">ngày liên tiếp</p>
+
+              {/* Streak count — căn giữa theo trục dọc, ngọn lửa + số cân đối */}
+              <div className="flex items-center gap-4">
+                <span className="text-6xl leading-none drop-shadow-lg shrink-0">{intensity.slice(0, 2)}</span>
+                <div className="leading-none">
+                  <div className="flex items-end gap-1.5">
+                    <span className="text-6xl font-black tabular-nums leading-none drop-shadow-md">
+                      {info.currentStreak}
+                    </span>
+                    <span className="text-lg font-bold opacity-90 mb-1">ngày</span>
+                  </div>
+                  <p className="text-sm font-semibold opacity-90 mt-1.5">liên tiếp 🎯</p>
                 </div>
               </div>
+
               {info.longestStreak > info.currentStreak && (
-                <p className="text-[11px] opacity-85 mt-2">
+                <div className="mt-4 inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1 text-[11px] font-semibold">
+                  <span>🏆</span>
                   Kỷ lục cao nhất: <b>{info.longestStreak}</b> ngày
-                </p>
+                </div>
               )}
             </div>
 
             {/* Body */}
             <div className="p-5 space-y-4">
               {info.nextMilestone ? (
-                <div>
+                <div className="rounded-xl bg-orange-50/70 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 p-4">
                   <div className="flex items-center justify-between text-xs mb-2">
-                    <span className="text-gray-500 dark:text-zinc-400">
-                      Tới mốc tiếp theo:{" "}
+                    <span className="text-gray-600 dark:text-zinc-300">
+                      Tới mốc{" "}
                       <b className="text-orange-600 dark:text-orange-400">
                         {info.nextMilestone} ngày
                       </b>
@@ -119,19 +127,19 @@ export function StreakBadge() {
                       ngày
                     </span>
                   </div>
-                  <div className="h-2 rounded-full bg-gray-100 dark:bg-zinc-800 overflow-hidden">
+                  <div className="h-2.5 rounded-full bg-white dark:bg-zinc-800 overflow-hidden shadow-inner">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-orange-500 to-amber-500 transition-all duration-700"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-zinc-400 mt-2">
-                    Phần thưởng kế tiếp:{" "}
+                  <div className="flex items-center gap-1.5 mt-2.5 text-xs">
+                    <span>🎁</span>
+                    <span className="text-gray-600 dark:text-zinc-300">Phần thưởng kế tiếp:</span>
                     <b className="text-emerald-600 dark:text-emerald-400">
                       +{info.nextBonus.toLocaleString("vi-VN")}đ
-                    </b>{" "}
-                    vào ví
-                  </p>
+                    </b>
+                  </div>
                 </div>
               ) : (
                 <div className="rounded-xl bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/20 px-4 py-3 text-center">
@@ -149,39 +157,56 @@ export function StreakBadge() {
                 <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-zinc-500 font-bold mb-2">
                   Bảng phần thưởng
                 </p>
-                <ul className="space-y-1.5">
+                <ul className="space-y-2">
                   {MILESTONES.map((day, i) => {
                     const reached = info.currentStreak >= day;
                     const isNext = info.nextMilestone === day;
                     return (
                       <li
                         key={day}
-                        className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg ${
+                        className={`flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl ${
                           reached
                             ? "bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30"
                             : isNext
-                            ? "bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/30"
+                            ? "bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/30 ring-2 ring-orange-200/60 dark:ring-orange-500/20"
                             : "bg-gray-50 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-700"
                         }`}
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="text-base">
+                        <div className="flex items-center gap-2.5">
+                          <span className={`w-8 h-8 rounded-full flex items-center justify-center text-base shrink-0 ${
+                            reached
+                              ? "bg-emerald-500/15"
+                              : isNext
+                              ? "bg-orange-500/15"
+                              : "bg-gray-200/60 dark:bg-zinc-700/60"
+                          }`}>
                             {reached ? "✅" : isNext ? "🔥" : "🔒"}
                           </span>
-                          <span className={`text-sm font-bold ${
-                            reached
-                              ? "text-emerald-700 dark:text-emerald-400"
-                              : isNext
-                              ? "text-orange-700 dark:text-orange-400"
-                              : "text-gray-500 dark:text-zinc-500"
-                          }`}>
-                            {day} ngày
-                          </span>
+                          <div className="leading-tight">
+                            <span className={`block text-sm font-bold ${
+                              reached
+                                ? "text-emerald-700 dark:text-emerald-400"
+                                : isNext
+                                ? "text-orange-700 dark:text-orange-400"
+                                : "text-gray-500 dark:text-zinc-500"
+                            }`}>
+                              {day} ngày
+                            </span>
+                            {(reached || isNext) && (
+                              <span className={`text-[10px] font-semibold ${
+                                reached ? "text-emerald-500 dark:text-emerald-500" : "text-orange-500"
+                              }`}>
+                                {reached ? "Đã đạt" : "Tiếp theo"}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <span className={`text-xs font-bold tabular-nums ${
+                        <span className={`text-sm font-black tabular-nums ${
                           reached
                             ? "text-emerald-600 dark:text-emerald-400"
-                            : "text-gray-600 dark:text-zinc-400"
+                            : isNext
+                            ? "text-orange-600 dark:text-orange-400"
+                            : "text-gray-500 dark:text-zinc-400"
                         }`}>
                           +{BONUSES[i].toLocaleString("vi-VN")}đ
                         </span>
