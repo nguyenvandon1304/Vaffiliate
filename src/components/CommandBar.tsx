@@ -109,7 +109,7 @@ export function CommandBar({ open, onClose }: Props) {
       },
       {
         id: "nav-spin", group: "Điều hướng", icon: "🎰",
-        label: "Vòng quay may mắn", description: "Quay 1 lần/ngày",
+        label: "Vòng quay may mắn", description: "Đổi lượt từ đơn hàng & mời bạn",
         href: "/dashboard/spin", keywords: "spin vong quay luck",
       },
       {

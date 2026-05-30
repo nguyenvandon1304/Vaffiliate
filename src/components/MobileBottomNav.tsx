@@ -64,7 +64,7 @@ interface MoreItem {
 
 const MORE_ITEMS: MoreItem[] = [
   { key: "link-history", label: "Lịch sử link", href: "/dashboard?tab=link-history", emoji: "🕒", desc: "Xem các link đã tạo" },
-  { key: "spin", label: "Vòng quay may mắn", href: "/dashboard/spin", emoji: "🎰", desc: "Quay 1 lần/ngày, trúng thưởng vào ví" },
+  { key: "spin", label: "Vòng quay may mắn", href: "/dashboard/spin", emoji: "🎰", desc: "Mua hàng & mời bạn để nhận lượt quay" },
   { key: "wishlist", label: "Wishlist", href: "/dashboard/wishlist", emoji: "❤️", desc: "Theo dõi giá Shopee, báo khi giảm" },
   { key: "referral", label: "Giới thiệu bạn bè", href: "/dashboard/referral", emoji: "👥", desc: "Mời bạn để nâng tier" },
   { key: "help", label: "Hướng dẫn sử dụng", href: "/dashboard/help", emoji: "💡", desc: "FAQ và 5 bước cơ bản" },

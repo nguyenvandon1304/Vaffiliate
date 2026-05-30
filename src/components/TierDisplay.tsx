@@ -111,12 +111,12 @@ const TIER_THEME: Record<string, TierTheme> = {
   },
 };
 
-/** VIP perks list — hiển thị thêm cho tier ≥ silver. */
+/** Quyền lợi khi lên hạng — chỉ liệt kê những gì hệ thống THẬT có. */
 const VIP_PERKS = [
-  { icon: "💸", label: "Cashback cao hơn cho mọi đơn" },
-  { icon: "🎰", label: "Lượt quay vòng quay may mắn x2" },
-  { icon: "⚡", label: "Hỗ trợ ưu tiên 24/7" },
-  { icon: "🎁", label: "Quà tặng sinh nhật & sự kiện đặc biệt" },
+  { icon: "💸", label: "Cashback cao hơn cho mọi đơn — áp dụng vĩnh viễn" },
+  { icon: "🎰", label: "Càng nhiều đơn & bạn mời, càng nhiều lượt quay" },
+  { icon: "🏆", label: "Huy hiệu hạng hiển thị trên hồ sơ & bảng xếp hạng" },
+  { icon: "💎", label: "Lên hạng tự động, không cần đăng ký gì thêm" },
 ];
 
 /** Hook fetch tier info + cache 60s qua sessionStorage. */

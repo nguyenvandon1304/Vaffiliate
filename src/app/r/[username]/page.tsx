@@ -190,10 +190,10 @@ export default async function ReferralLanding({ params }: Ctx) {
           <div className="rounded-2xl bg-white/70 dark:bg-zinc-900/60 backdrop-blur-md border border-violet-200/50 dark:border-violet-500/20 p-4">
             <div className="text-2xl mb-2">🎁</div>
             <p className="text-sm font-bold text-gray-800 dark:text-zinc-100 mb-1">
-              Voucher độc quyền
+              Có thể kèm voucher
             </p>
             <p className="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">
-              Comment vào group nhận voucher 20-25% từ social media của Shopee.
+              Nhiều sản phẩm còn được Shopee tặng thêm voucher giảm tới 22% khi mua qua link.
             </p>
           </div>
         </div>

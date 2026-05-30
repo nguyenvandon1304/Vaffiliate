@@ -688,7 +688,7 @@ function DashboardContent() {
                   <button
                     onClick={() => router.push("/dashboard/spin")}
                     className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-500 hover:from-yellow-500 hover:via-orange-500 hover:to-pink-600 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-lg shadow-md shadow-pink-500/40 transition-all hover:scale-105"
-                    title="Vòng quay may mắn — quay 1 lần/ngày"
+                    title="Vòng quay may mắn — đổi lượt từ đơn hàng & mời bạn"
                   >
                     <span className="text-base">🎰</span>
                     Vòng quay

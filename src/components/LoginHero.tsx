@@ -23,24 +23,21 @@ const TESTIMONIALS: Testimonial[] = [
     role: "Sinh viên · Hà Nội",
     avatar: "🌸",
     rating: 5,
-    quote: "Mua đồ Shopee qua link V-Affiliate, tháng nào cũng có thêm 100-200k vào ví. Sinh viên mà — tiết kiệm được đồng nào hay đồng đó!",
-    earned: 1250000,
+    quote: "Mình mua đồ Shopee thường xuyên, giờ qua V-Affiliate là có hoàn tiền về ví. Sinh viên mà — tiết kiệm được đồng nào hay đồng đó!",
   },
   {
     name: "Anh Tuấn",
     role: "Văn phòng · TP.HCM",
     avatar: "👨‍💻",
     rating: 5,
-    quote: "Trước đây mua đồ thẳng Shopee, giờ chỉ mất 30s tạo link là có hoàn tiền. Vợ ngồi shopping mệt nghỉ, tháng vừa rồi rút được 850k!",
-    earned: 850000,
+    quote: "Trước mua thẳng Shopee, giờ chỉ mất 30 giây tạo link là có hoàn tiền. Thao tác đơn giản, tiền về ví rõ ràng minh bạch.",
   },
   {
     name: "Chị Hương",
     role: "Mẹ bỉm · Đà Nẵng",
     avatar: "🤱",
     rating: 5,
-    quote: "App dùng dễ, hoàn tiền nhanh, có cả thông báo khi shop giảm giá. Mua đồ cho bé cũng được hoàn — quá hời!",
-    earned: 2100000,
+    quote: "App dùng dễ, hoàn tiền minh bạch, lại có thông báo khi shop giảm giá. Mua đồ cho bé cũng được hoàn — rất đáng dùng!",
   },
 ];
 
