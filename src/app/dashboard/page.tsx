@@ -1160,7 +1160,7 @@ function DashboardContent() {
                       illustration: <IllustrationBox />,
                       title: "Chưa có đơn chờ hoàn tiền",
                       description: "Khi bạn mua hàng qua link V-Affiliate, đơn sẽ xuất hiện ở đây với trạng thái đang xử lý.",
-                      tip: "Mẹo: Đơn đầu tiên thường mang về 50.000–200.000đ vào ví. Tạo link Shopee đầu tiên để bắt đầu tiết kiệm.",
+                      tip: "Mẹo: Cashback mỗi đơn = phần trăm hoa hồng shop trả (tuỳ sản phẩm). Mua đơn giá trị cao hoặc gom nhiều món sẽ hoàn về nhiều hơn. Tạo link đầu tiên để bắt đầu nhé!",
                       showCta: true,
                     },
                     completed: {
