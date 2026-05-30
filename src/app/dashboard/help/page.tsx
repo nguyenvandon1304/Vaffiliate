@@ -105,7 +105,7 @@ export default function HelpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50/40 via-gray-50 to-gray-50 dark:from-zinc-950 dark:via-zinc-950 dark:to-black">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 via-gray-50 to-gray-50 dark:from-zinc-950 dark:via-zinc-950 dark:to-black">
       <DashboardHeader />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-24 md:pb-8 space-y-8">

@@ -131,7 +131,7 @@ export default function ReferralPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50/30 via-gray-50 to-gray-50 dark:from-zinc-950 dark:via-zinc-950 dark:to-black relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 via-gray-50 to-gray-50 dark:from-zinc-950 dark:via-zinc-950 dark:to-black relative overflow-hidden">
       {/* Background decoration — vòng tròn mờ kiểu mockup */}
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute top-10 left-1/4 w-32 h-32 rounded-full border-2 border-orange-200/40 dark:border-orange-900/20" />

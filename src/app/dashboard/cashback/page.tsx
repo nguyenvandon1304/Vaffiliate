@@ -136,7 +136,7 @@ export default function CashbackPage() {
   const formatPrice = (n: number) => n.toLocaleString("vi-VN");
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50/40 via-gray-50 to-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 via-gray-50 to-gray-50">
       {/* Header đầy đủ — đồng bộ với trang chính /dashboard */}
       <DashboardHeader />
 
@@ -150,8 +150,8 @@ export default function CashbackPage() {
 
         {/* Hero Title */}
         <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-800 mb-2">
-            Công Cụ <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-400">Hoàn Tiền</span>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-2">
+            Công Cụ <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-600 dark:from-orange-400 dark:to-amber-400">Hoàn Tiền</span>
           </h1>
           <p className="text-sm text-gray-500 max-w-md">
             Chọn sàn thương mại điện tử và dán link sản phẩm để lấy link mua sắm hoàn{" "}
