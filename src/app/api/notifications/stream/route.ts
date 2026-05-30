@@ -26,11 +26,28 @@ import { getUnreadCount, getUserNotifications } from "@/lib/db";
 const POLL_INTERVAL_MS = 5000;       // 5s — đủ realtime, không quá tốn DB
 const KEEPALIVE_INTERVAL_MS = 25000; // 25s — gửi comment để giữ connection (nginx mặc định timeout 30s)
 const MAX_DURATION_MS = 5 * 60 * 1000; // 5 phút — tự đóng để tránh leak conn nếu client crash
+const MAX_CONNECTIONS_PER_USER = 5;  // chống 1 user mở quá nhiều tab/script làm cạn tài nguyên
+
+// Đếm số kết nối SSE đang mở theo user (in-process; Render free chạy 1 instance).
+// Dùng globalThis để không bị reset khi Hot Reload trong dev.
+const globalForSse = globalThis as unknown as { __sse_conns?: Map<number, number> };
+const sseConns = globalForSse.__sse_conns ?? new Map<number, number>();
+globalForSse.__sse_conns = sseConns;
 
 export async function GET(request: NextRequest) {
   const auth = await requireUser(request);
   if (!auth.user) return auth.response;
   const userId = auth.user.id;
+
+  // Giới hạn số kết nối đồng thời / user → chống cạn kiệt connection pool / CPU.
+  const current = sseConns.get(userId) ?? 0;
+  if (current >= MAX_CONNECTIONS_PER_USER) {
+    return new Response(
+      JSON.stringify({ success: false, error: "Quá nhiều kết nối realtime. Đóng bớt tab rồi thử lại." }),
+      { status: 429, headers: { "Content-Type": "application/json", "Retry-After": "30" } },
+    );
+  }
+  sseConns.set(userId, current + 1);
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -115,6 +132,10 @@ export async function GET(request: NextRequest) {
       function cleanup() {
         if (closed) return;
         closed = true;
+        // Giảm bộ đếm kết nối của user (không âm).
+        const c = sseConns.get(userId) ?? 1;
+        if (c <= 1) sseConns.delete(userId);
+        else sseConns.set(userId, c - 1);
         clearInterval(pollId);
         clearInterval(keepId);
         clearTimeout(closeId);

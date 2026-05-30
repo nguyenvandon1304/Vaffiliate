@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getUserByToken, getDb, createNotification, getCashbackRateForUser, calcCashback } from "@/lib/db";
 import { grantBadge } from "@/lib/achievements";
 import { rateLimitAsync } from "@/lib/rate-limit";
+import { isShopeeHost, isShopeeShortHost } from "@/lib/shopee-url";
 
 const GOAFFILIATE_CHECK_COMMISSION_URL = "https://www.goaffiliate.online/api/check-commission";
 const GOAFFILIATE_GET_LINK_URL = "https://www.goaffiliate.online/api/get-link";
@@ -24,26 +25,33 @@ function extractShopeeIds(url: string): { shopId: string; itemId: string } | nul
   return null;
 }
 
+// ═══ Host allowlist — chống SSRF (dùng helper chung @/lib/shopee-url) ═══
+// Chỉ chấp nhận đúng các hostname Shopee (không dùng .includes() vì path/query
+// có thể chứa "shopee.vn" để lừa qua, vd https://attacker.com/?x=shopee.vn).
+
 // ═══ Resolve short URL → full URL ═══
+// An toàn SSRF: KHÔNG follow redirect tự động (redirect: manual) + validate host
+// của Location trả về cũng phải là Shopee + có timeout. Tránh short-link 30x sang
+// địa chỉ nội bộ (169.254.169.254, localhost...).
 async function resolveShortUrl(url: string): Promise<string> {
-  if (!url.includes("s.shopee.vn") && !url.includes("shope.ee") && !url.includes("shp.ee")) return url;
+  if (!isShopeeShortHost(url)) return url;
   try {
     const res = await fetch(url, {
-      method: "HEAD",
-      redirect: "follow",
+      method: "GET",
+      redirect: "manual",
       headers: { "User-Agent": BROWSER_UA },
+      signal: AbortSignal.timeout(8000),
     });
-    return res.url || url;
-  } catch {
-    try {
-      const res = await fetch(url, {
-        redirect: "manual",
-        headers: { "User-Agent": BROWSER_UA },
-      });
-      return res.headers.get("location") || url;
-    } catch {
-      return url;
+    const location = res.headers.get("location");
+    if (location) {
+      // Location có thể là URL tương đối → resolve theo base Shopee.
+      const abs = location.startsWith("http") ? location : new URL(location, url).toString();
+      // Chỉ chấp nhận nếu redirect tới đúng host Shopee.
+      return isShopeeHost(abs) ? abs : url;
     }
+    return url;
+  } catch {
+    return url;
   }
 }
 
@@ -197,13 +205,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Vui lòng nhập link sản phẩm" }, { status: 400 });
     }
 
-    if (!productUrl.includes("shopee.vn") && !productUrl.includes("shope.ee") && !productUrl.includes("shp.ee")) {
+    // Validate host nghiêm ngặt (chống SSRF) thay vì .includes().
+    if (!isShopeeHost(productUrl)) {
       return NextResponse.json({ success: false, error: "Chỉ hỗ trợ link từ Shopee" }, { status: 400 });
     }
 
-    // Resolve short URL nếu cần
+    // Resolve short URL nếu cần (đã có guard host + no-follow + timeout bên trong).
     let resolvedUrl = productUrl.trim();
-    if (resolvedUrl.includes("s.shopee.vn") || resolvedUrl.includes("shope.ee") || resolvedUrl.includes("shp.ee")) {
+    if (isShopeeShortHost(resolvedUrl)) {
       resolvedUrl = await resolveShortUrl(resolvedUrl);
     }
 

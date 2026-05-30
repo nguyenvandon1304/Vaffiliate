@@ -101,7 +101,7 @@ npm run test:e2e
 
 ## Việc nên làm tiếp (chưa làm)
 
-- E2E sâu hơn: hành trình đăng nhập thật (cần seed user + bypass captcha ở môi
-  trường test) → tạo link → admin import → rút tiền → admin duyệt.
-- Allowlist host cho resolve short-link (`/api/affiliate`) chống SSRF.
-- Giới hạn số kết nối SSE / user.
+- E2E sâu hơn cho các thao tác chi tiết trong tab admin (sửa đơn, gửi email
+  hàng loạt, vòng quay) — hiện được phủ ở mức integration + load-không-lỗi.
+- Tích hợp ngoài (Shopee/GoAffiliate, Resend, Telegram): kiểm thủ công, không
+  tự động hoá (phụ thuộc bên thứ ba → dễ flaky).
