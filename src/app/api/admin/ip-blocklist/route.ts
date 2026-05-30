@@ -1,7 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
+import { getDb, logAudit } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { blockIp, unblockIp } from "@/lib/geo";
+import { getClientIp } from "@/lib/turnstile";
+
+/** Validate IPv4 hoặc IPv6 cơ bản — chống ghi rác vào blocklist. */
+function isValidIp(ip: string): boolean {
+  if (ip.length > 45) return false;
+  const ipv4 = /^(\d{1,3}\.){3}\d{1,3}$/;
+  if (ipv4.test(ip)) {
+    return ip.split(".").every((o) => Number(o) >= 0 && Number(o) <= 255);
+  }
+  // IPv6: chấp nhận hex + dấu hai chấm (kiểm tra cơ bản, không quá nghiêm).
+  return /^[0-9a-fA-F:]+$/.test(ip) && ip.includes(":");
+}
 
 /**
  * GET /api/admin/ip-blocklist
@@ -32,14 +44,24 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json().catch(() => ({}));
   const ip = String(body.ip ?? "").trim();
-  const reason = String(body.reason ?? "Manual block by admin");
+  const reason = String(body.reason ?? "Manual block by admin").slice(0, 200);
   const hours = Math.min(Math.max(Number(body.hours ?? 24), 1), 720); // max 30 ngày
 
   if (!ip) {
     return NextResponse.json({ success: false, error: "Thiếu IP" }, { status: 400 });
   }
+  if (!isValidIp(ip)) {
+    return NextResponse.json({ success: false, error: "Địa chỉ IP không hợp lệ" }, { status: 400 });
+  }
 
   await blockIp(ip, reason, hours);
+  await logAudit("admin.ip.block", {
+    userId: auth.user.id,
+    target: `ip=${ip}`,
+    ip: getClientIp(request.headers),
+    userAgent: request.headers.get("user-agent"),
+    detail: `reason=${reason}, hours=${hours}`,
+  });
   return NextResponse.json({ success: true, message: `Đã block IP ${ip} trong ${hours}h` });
 }
 
@@ -56,7 +78,16 @@ export async function DELETE(request: NextRequest) {
   if (!ip) {
     return NextResponse.json({ success: false, error: "Thiếu IP" }, { status: 400 });
   }
+  if (!isValidIp(ip)) {
+    return NextResponse.json({ success: false, error: "Địa chỉ IP không hợp lệ" }, { status: 400 });
+  }
 
   await unblockIp(ip);
+  await logAudit("admin.ip.unblock", {
+    userId: auth.user.id,
+    target: `ip=${ip}`,
+    ip: getClientIp(request.headers),
+    userAgent: request.headers.get("user-agent"),
+  });
   return NextResponse.json({ success: true, message: `Đã unblock IP ${ip}` });
 }

@@ -24,8 +24,12 @@ interface Column<T> {
 function escapeField(v: unknown): string {
   if (v === null || v === undefined) return "";
   let s = String(v);
-  // Excel datetime: nếu là ISO date, convert sang format Vietnam
-  // Nếu cần custom format hơn, dùng `format` callback ở column level.
+  // CSV formula injection guard: nếu field bắt đầu bằng = + - @ (hoặc tab/CR) thì
+  // Excel/Sheets có thể thực thi như công thức (=HYPERLINK, =cmd...). Prefix dấu
+  // nháy đơn để vô hiệu hoá — dữ liệu hiển thị nguyên vẹn nhưng không bị thực thi.
+  if (/^[=+\-@\t\r]/.test(s)) {
+    s = "'" + s;
+  }
   // Escape khi có comma, quote, newline.
   if (s.includes(",") || s.includes('"') || s.includes("\n") || s.includes("\r")) {
     s = '"' + s.replace(/"/g, '""') + '"';

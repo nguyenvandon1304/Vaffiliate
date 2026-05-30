@@ -66,7 +66,10 @@ function buildCsv(rows: ReturnType<typeof Object>[]): string {
   const headers = ["id", "created_at", "user_id", "username", "action", "target", "ip", "user_agent", "detail"];
   const escape = (v: unknown): string => {
     if (v === null || v === undefined) return "";
-    const s = String(v).replace(/"/g, '""');
+    let s = String(v);
+    // CSV formula injection guard — vô hiệu hoá field bắt đầu bằng = + - @ tab CR.
+    if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+    s = s.replace(/"/g, '""');
     return `"${s}"`;
   };
   const lines = [headers.join(",")];

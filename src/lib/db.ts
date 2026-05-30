@@ -3173,6 +3173,7 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
         // "Đã hoàn tiền" rank=3 → nếu để trong guard sẽ thành dead code (không bao giờ chạy)
         // → cashback đã hoàn KHÔNG bị thu hồi → mất tiền. Tách ra để thu hồi đúng.
         if (newStatus === "Đã hủy" && oldStatus === "Đã hoàn tiền") {
+          await tx.run("SELECT pg_advisory_xact_lock(?, ?)", [WALLET_LOCK_NAMESPACE, userId]);
           await tx.run(
             "UPDATE orders SET status = ? WHERE id = ?",
             [newStatus, Number(existingOrder.id)],
