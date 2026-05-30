@@ -1634,6 +1634,25 @@ export async function deleteBankAccount(
   );
   if (!row) return { success: false, error: "Tài khoản ngân hàng không tồn tại" };
 
+  // Chặn xóa nếu còn yêu cầu rút ĐANG CHỜ gắn với bank này — tránh CASCADE
+  // xóa luôn withdrawal pending → mất dấu vết tiền debit trong ví.
+  const pendingWd = await database.get(
+    "SELECT id FROM withdrawals WHERE bank_account_id = ? AND status IN ('pending', 'Đang xử lý') LIMIT 1",
+    [bankId],
+  );
+  if (pendingWd) {
+    return { success: false, error: "Không thể xoá: tài khoản này đang có yêu cầu rút tiền chờ xử lý." };
+  }
+
+  // Chặn xóa nếu có lịch sử rút đã duyệt — giữ để đối soát tài chính không lệch.
+  const historyWd = await database.get(
+    "SELECT id FROM withdrawals WHERE bank_account_id = ? LIMIT 1",
+    [bankId],
+  );
+  if (historyWd) {
+    return { success: false, error: "Không thể xoá: tài khoản này đã có lịch sử rút tiền. Bạn có thể thêm tài khoản mới và đặt làm mặc định." };
+  }
+
   await database.run("DELETE FROM bank_accounts WHERE id = ? AND user_id = ?", [bankId, userId]);
   return { success: true };
 }
@@ -2784,11 +2803,19 @@ export async function updateWithdrawalStatus(
 
   const note = (adminNote ?? "").toString().trim().slice(0, 500) || null;
 
+  let alreadyProcessed = false;
   await database.transaction(async (tx) => {
-    await tx.run(
-      "UPDATE withdrawals SET status = ?, admin_note = ?, updated_at = NOW() WHERE id = ?",
+    // UPDATE có điều kiện status pending + kiểm changes → chống double-process
+    // khi 2 admin bấm duyệt/từ chối cùng lúc (race). Chỉ 1 request UPDATE được
+    // (changes=1), request thứ 2 thấy changes=0 → bỏ qua, KHÔNG hoàn tiền lần 2.
+    const upd = await tx.run(
+      "UPDATE withdrawals SET status = ?, admin_note = ?, updated_at = NOW() WHERE id = ? AND status IN ('pending', 'Đang xử lý')",
       [status, note, withdrawalId],
     );
+    if (upd.changes === 0) {
+      alreadyProcessed = true;
+      return;
+    }
 
     const userId = Number(row.user_id);
     const amount = Number(row.amount);
@@ -2817,6 +2844,9 @@ export async function updateWithdrawalStatus(
     }
   });
 
+  if (alreadyProcessed) {
+    return { success: false, error: "Yêu cầu đã được xử lý bởi thao tác khác" };
+  }
   return { success: true };
 }
 
@@ -3041,10 +3071,44 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
         const oldStatus = existingOrder.status as string;
         const oldRank = statusRank[oldStatus] ?? 1;
         const newRank = statusRank[newStatus] ?? 1;
+        const userId = Number(existingOrder.user_id);
+        const oldCashback = Number(existingOrder.cashback);
+
+        // ─── Trường hợp HỦY đơn đã hoàn tiền (downgrade) ───
+        // Xử lý RIÊNG trước guard newRank>oldRank, vì "Đã hủy" rank=0 luôn nhỏ hơn
+        // "Đã hoàn tiền" rank=3 → nếu để trong guard sẽ thành dead code (không bao giờ chạy)
+        // → cashback đã hoàn KHÔNG bị thu hồi → mất tiền. Tách ra để thu hồi đúng.
+        if (newStatus === "Đã hủy" && oldStatus === "Đã hoàn tiền") {
+          await tx.run(
+            "UPDATE orders SET status = ? WHERE id = ?",
+            [newStatus, Number(existingOrder.id)],
+          );
+          if (oldCashback > 0) {
+            await tx.run(
+              "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
+              [userId, `Hủy đơn ${item.orderCode} - trừ hoàn tiền`, oldCashback, "debit"],
+            );
+            await tx.run(
+              "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
+              [
+                userId,
+                "💔 Đơn hàng đã bị huỷ",
+                `Đơn ${item.orderCode} đã bị huỷ — số tiền hoàn ${oldCashback.toLocaleString("vi-VN")}đ đã được trừ khỏi ví. Đừng buồn, bạn vẫn có thể đặt đơn mới qua link V-Affiliate để tiếp tục nhận hoàn tiền nhé!`,
+                "order",
+              ],
+            );
+          }
+          result.updated++;
+          result.results.push({
+            orderCode: item.orderCode,
+            itemId: item.itemId,
+            status: "updated",
+            message: `Hủy đơn: ${oldStatus} → ${newStatus} (thu hồi ${oldCashback.toLocaleString("vi-VN")}đ)`,
+          });
+          continue;
+        }
 
         if (newRank > oldRank) {
-          const userId = Number(existingOrder.user_id);
-          const oldCashback = Number(existingOrder.cashback);
           const ratePercent = await getRate(tx, userId);
           const cashback = Math.round((item.commission * ratePercent) / 100);
 
@@ -3091,20 +3155,6 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
                 ],
               );
             }
-          } else if (newStatus === "Đã hủy" && oldStatus === "Đã hoàn tiền" && oldCashback > 0) {
-            await tx.run(
-              "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
-              [userId, `Hủy đơn ${item.orderCode} - trừ hoàn tiền`, oldCashback, "debit"],
-            );
-            await tx.run(
-              "INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)",
-              [
-                userId,
-                "💔 Đơn hàng đã bị huỷ",
-                `Đơn ${item.orderCode} đã bị huỷ — số tiền hoàn ${oldCashback.toLocaleString("vi-VN")}đ đã được trừ khỏi ví. Đừng buồn, bạn vẫn có thể đặt đơn mới qua link V-Affiliate để tiếp tục nhận hoàn tiền nhé!`,
-                "order",
-              ],
-            );
           }
 
           result.updated++;
