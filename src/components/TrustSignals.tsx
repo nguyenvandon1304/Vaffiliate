@@ -65,7 +65,7 @@ export function TrustSignals() {
   const hasPaidStats = stats && (stats.totalWithdrawn > 0 || stats.totalCashbackPaid > 0);
 
   return (
-    <section className="mb-6 rounded-2xl border border-gray-100 bg-white p-5 sm:p-6">
+    <section className="vfa-card mb-6 p-5 sm:p-6">
       <div className="flex items-center gap-2 mb-4">
         <span className="text-xl">🛡️</span>
         <h2 className="text-base font-bold text-gray-800 dark:text-gray-100">An tâm cùng V-Affiliate</h2>

@@ -733,7 +733,7 @@ function DashboardContent() {
             {/* Cột chính (3/5) — Đơn hàng + Đối tác */}
             <div className="lg:col-span-3 space-y-4 sm:space-y-6">
               {/* Đơn Hàng Gần Đây */}
-              <div className="bg-white rounded-xl border border-gray-100 p-5">
+              <div className="vfa-card p-5">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">📦</span>
@@ -795,7 +795,7 @@ function DashboardContent() {
               </div>
 
               {/* Đối Tác Hoàn Tiền */}
-              <div className="bg-white rounded-xl border border-gray-100 p-5">
+              <div className="vfa-card p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-xl">🤝</span>
                   <h2 className="text-base font-bold text-gray-800">Đối Tác Hoàn Tiền</h2>
@@ -834,7 +834,7 @@ function DashboardContent() {
 
             {/* Cột phụ (2/5) — Bảng xếp hạng (rộng hơn so với trước) */}
             <div className="lg:col-span-2">
-              <div className="bg-white rounded-xl border border-gray-100 p-5 h-full flex flex-col">
+              <div className="vfa-card p-5 h-full flex flex-col">
                 <div className="flex items-center justify-between gap-2 mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">🏆</span>
@@ -953,7 +953,7 @@ function DashboardContent() {
         {activeTab === "link-history" && (
           <section>
             <h2 className="text-lg font-bold text-gray-800 mb-4">Lịch sử tạo link</h2>
-            <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+            <div className="vfa-card overflow-hidden">
               {linkHistory.length === 0 ? (
                 <EmptyState
                   illustration={<IllustrationLink />}
@@ -1007,7 +1007,7 @@ function DashboardContent() {
         {activeTab === "orders" && (
           <section className="space-y-5">
             {/* ═══ Quy trình đơn hàng — 4 bước ═══ */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6">
+            <div className="vfa-card p-5 sm:p-6">
               <div className="flex items-center gap-2 mb-5">
                 <div className="w-7 h-7 bg-orange-500 rounded-full flex items-center justify-center text-white">
                   <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1103,7 +1103,7 @@ function DashboardContent() {
             </div>
 
             {/* ═══ Filter tabs + danh sách đơn ═══ */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="vfa-card overflow-hidden">
               {/* Header với tabs */}
               <div className="border-b border-gray-100 p-4 sm:p-5">
                 <div className="flex items-start sm:items-center justify-between gap-3 flex-col sm:flex-row mb-4">
@@ -1303,7 +1303,7 @@ function ProfileSection({ user, onProfileUpdated, onBack }: { user: UserInfo; on
         </svg>
         Quay lại
       </button>
-      <div className="bg-white rounded-xl border border-gray-100 p-6">
+      <div className="vfa-card p-6">
         <h2 className="text-lg font-bold text-gray-800 mb-5 flex items-center gap-2">
           <svg viewBox="0 0 24 24" className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
@@ -1405,7 +1405,7 @@ function BankSection({ user, bankAccounts, onBankUpdated, onProfileUpdated, onBa
         </svg>
         Quay lại
       </button>
-      <div className="bg-white rounded-xl border border-gray-100 p-6">
+      <div className="vfa-card p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
             <svg viewBox="0 0 24 24" className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1514,7 +1514,7 @@ function WithdrawPinSection({ hasPin, onPinUpdated }: { hasPin: boolean; onPinUp
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-6 mt-4">
+    <div className="vfa-card p-6 mt-4">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
           <svg viewBox="0 0 24 24" className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1766,7 +1766,7 @@ function WalletTab({
       </div>
 
       {/* ═══ Section Tài khoản ═══ */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+      <div className="vfa-card p-5">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className="text-lg">🏦</span>
@@ -1862,7 +1862,7 @@ function WalletTab({
       {/* ═══ Grid 2 cột: Yêu cầu rút + Lịch sử ═══ */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* ─── Yêu cầu rút tiền hoàn ─── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="vfa-card overflow-hidden">
           <button
             type="button"
             onClick={() => setShowWithdrawPanel((v) => !v)}
@@ -2128,7 +2128,7 @@ function WalletTab({
         </div>
 
         {/* ─── Lịch sử ─── */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="vfa-card overflow-hidden">
           <div className="px-5 pt-5 pb-3">
             <div className="flex items-center justify-between gap-2 mb-3">
               <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100">Lịch sử hoàn tiền</h3>

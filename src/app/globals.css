@@ -587,3 +587,48 @@
 :where(.dark) .text-money-negative { color: rgb(251 113 133); /* rose-400 */ }
 .text-money-pending { color: rgb(217 119 6); /* amber-600 */ }
 :where(.dark) .text-money-pending { color: rgb(252 211 77); /* amber-300 */ }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+ * DESIGN SYSTEM — Component classes thống nhất (Phần 3)
+ *
+ * Mục tiêu: 1 ngôn ngữ thiết kế nhất quán cho toàn app.
+ *   - Card: cùng 1 radius (rounded-2xl), cùng 1 border + shadow, có dark mode.
+ *   - Button: 1 nút primary (cam đặc) + 1 nút secondary (viền) chuẩn.
+ *   - Màu nhấn: cam→hổ phách (orange-500 → amber-500).
+ *
+ * Quy tắc vàng: nền luôn dịu, chỉ dồn màu mạnh vào CTA + số tiền.
+ * Dùng @apply để vẫn tận dụng được Tailwind utilities.
+ * ═══════════════════════════════════════════════════════════════════ */
+@layer components {
+  /* ── Card chuẩn — surface chính của mọi section ── */
+  .vfa-card {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm;
+  }
+  /* Card có tương tác (click được) — nhấc nhẹ khi hover */
+  .vfa-card-interactive {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm transition-all
+           hover:-translate-y-0.5 hover:shadow-md cursor-pointer;
+  }
+
+  /* ── Buttons ── */
+  /* Primary CTA — cam đặc, dùng cho hành động chính duy nhất mỗi khối */
+  .vfa-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600
+           text-white font-bold rounded-lg px-4 py-2 shadow-sm transition-all
+           hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed
+           disabled:hover:scale-100;
+  }
+  /* Secondary — nền trắng / viền, dùng cho hành động phụ */
+  .vfa-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 bg-white dark:bg-white/[0.06]
+           hover:bg-gray-50 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10
+           text-gray-700 dark:text-gray-200 font-semibold rounded-lg px-4 py-2
+           transition-colors;
+  }
+
+  /* ── Section heading chuẩn (icon + tiêu đề) ── */
+  .vfa-section-title {
+    @apply text-base font-bold text-gray-800 dark:text-gray-100;
+  }
+}
