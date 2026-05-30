@@ -64,9 +64,9 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
 
 <p>Để bắt đầu nhận cashback, bạn chỉ cần 3 bước siêu đơn giản:</p>
 <ul>
-  <li><strong>Bước 1:</strong> Tìm sản phẩm muốn mua trên Shopee/Lazada/Tiki như bình thường.</li>
+  <li><strong>Bước 1:</strong> Tìm sản phẩm muốn mua trên Shopee như bình thường.</li>
   <li><strong>Bước 2:</strong> Dán link sản phẩm vào V-Affiliate để tạo link hoàn tiền.</li>
-  <li><strong>Bước 3:</strong> Mua qua link đó — cashback tự động vào ví, có thể rút về ngân hàng.</li>
+  <li><strong>Bước 3:</strong> Bấm "Mua ngay" để mua qua link đó — sau khi đơn được duyệt, cashback tự động vào ví và rút về ngân hàng được.</li>
 </ul>
 
 <p>Nếu có bất kỳ câu hỏi nào, bạn cứ trả lời email này nhé — đội ngũ V-Affiliate luôn sẵn sàng hỗ trợ trong vòng 24 giờ.</p>
@@ -79,14 +79,14 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
     icon: "🎁",
     name: "Khuyến khích đơn đầu tiên",
     description: "Gửi cho user đã đăng ký nhưng chưa có đơn nào",
-    subject: "🎁 Tặng bạn 1 lượt quay miễn phí khi tạo đơn đầu",
+    subject: "🎁 Tạo đơn cashback đầu tiên — nhận ngay 1 lượt quay",
     body: `<p>Chúng mình thấy bạn đã tham gia V-Affiliate được vài ngày rồi — cảm ơn bạn đã tin tưởng!</p>
 
-<p>Để cảm ơn bạn, V-Affiliate gửi tặng <strong>1 lượt quay vòng quay may mắn miễn phí</strong> ngay khi bạn hoàn thành đơn cashback đầu tiên. Phần thưởng từ <strong>1.000đ đến 100.000đ</strong> sẽ vào thẳng ví của bạn.</p>
+<p>Để khuyến khích bạn bắt đầu, V-Affiliate có <strong>vòng quay may mắn</strong>: cứ mỗi 10 đơn cashback hoặc mời 5 bạn là bạn nhận thêm 1 lượt quay, phần thưởng tới <strong>50.000đ</strong> vào thẳng ví.</p>
 
-<p>Bạn chỉ cần mua sắm như bình thường trên Shopee/Lazada/Tiki, nhưng đi qua link V-Affiliate. Đơn đầu tiên thường hoàn về ví trong vòng <strong>3-7 ngày</strong> sau khi shop xác nhận.</p>
+<p>Bạn chỉ cần mua sắm như bình thường trên Shopee, nhưng đi qua link V-Affiliate. Cashback thường về ví trong <strong>7-15 ngày</strong> sau khi Shopee xác nhận đơn (sau thời gian đổi trả).</p>
 
-<p>Bắt đầu ngay hôm nay nhé — hàng nghìn user khác đang nhận cashback đều đặn mỗi tuần đấy! 💪</p>`,
+<p>Bắt đầu ngay hôm nay nhé — mỗi đơn mua qua link là một khoản tiết kiệm về ví bạn! 💪</p>`,
   },
 
   // ============ PROMO ============
@@ -101,7 +101,7 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
 
 <p style="font-size: 18px; text-align: center; background: #fff7ed; padding: 16px; border-radius: 12px; margin: 16px 0;">
   <strong>🔥 NHÂN ĐÔI CASHBACK</strong><br/>
-  <span style="font-size: 14px; color: #9a3412;">Áp dụng cho mọi đơn Shopee · Lazada · Tiki</span>
+  <span style="font-size: 14px; color: #9a3412;">Áp dụng cho mọi đơn Shopee mua qua V-Affiliate</span>
 </p>
 
 <p>Đây là cơ hội tốt nhất trong tháng để bạn:</p>
@@ -147,18 +147,17 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
 <p>Khi đạt Silver, bạn sẽ nhận được:</p>
 <ul>
   <li><strong>+3% cashback</strong> trên mọi đơn (53% thay vì 50% mặc định) — vĩnh viễn</li>
-  <li><strong>Ưu tiên duyệt rút tiền</strong> trong vòng 4 giờ làm việc</li>
   <li><strong>Huy hiệu Silver</strong> hiện trên profile và bảng xếp hạng</li>
-  <li>Tham gia <strong>vòng quay riêng dành cho Silver+</strong> với phần thưởng cao hơn</li>
+  <li>Mỗi đơn & mỗi bạn mời tiếp tục tích lũy để lên Gold (55%) và VIP (58%)</li>
 </ul>
 
-<p>Cách lên Silver:</p>
+<p>Cách lên Silver — đạt 1 trong 2 điều kiện:</p>
 <ul>
-  <li>Tổng cashback tích luỹ ≥ <strong>500.000đ</strong>, hoặc</li>
-  <li>Mời được <strong>25 active referral</strong> (có đơn đầu tiên)</li>
+  <li>Có <strong>50 đơn đã hoàn tiền</strong>, hoặc</li>
+  <li>Mời được <strong>25 bạn</strong> có đơn cashback đầu tiên</li>
 </ul>
 
-<p>Ráng chốt thêm vài đơn nữa thôi là bạn lên hạng rồi đó. Mình tin bạn làm được! 🚀</p>`,
+<p>Ráng chốt thêm vài đơn hoặc mời thêm bạn là bạn lên hạng rồi đó. Mình tin bạn làm được! 🚀</p>`,
   },
 
   // ============ RE-ENGAGE ============
@@ -171,11 +170,11 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
     subject: "Bạn ổn không? V-Affiliate nhớ bạn ❤️",
     body: `<p>Đã <strong>1 tuần rồi</strong> bạn chưa ghé V-Affiliate. Mình hơi lo — không biết có phải app mình đang thiếu sót gì không, hay đơn giản là bạn đang bận?</p>
 
-<p>Trong tuần qua, có một vài điều mới xảy ra mà bạn có thể quan tâm:</p>
+<p>Trong lúc bạn vắng mặt, V-Affiliate vẫn đều đặn hoàn tiền cho cộng đồng mỗi ngày. Một vài điều bạn có thể quan tâm:</p>
 <ul>
-  <li>🎰 Hơn <strong>3.000 user</strong> đã quay vòng quay may mắn và trúng tiền vào ví</li>
-  <li>💰 Tổng cashback toàn cộng đồng đã hoàn về ví user: <strong>50+ triệu đồng</strong></li>
-  <li>🏆 Bảng xếp hạng tuần đã có người chiếm vị trí #1 — bạn có muốn tham gia không?</li>
+  <li>🎰 Vòng quay may mắn — mua hàng & mời bạn để nhận lượt quay, trúng tiền vào ví</li>
+  <li>💰 Mỗi đơn Shopee mua qua link là một khoản hoàn tiền về ví bạn</li>
+  <li>🏆 Bảng xếp hạng tuần đang chờ bạn — biết đâu bạn lọt top?</li>
 </ul>
 
 <p>Nếu có vấn đề gì với tài khoản, hoặc bạn cần hỗ trợ, hãy <strong>trả lời thẳng email này</strong> — mình sẽ hỗ trợ ngay nhé.</p>
@@ -226,20 +225,22 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
     icon: "🎰",
     name: "Vòng quay may mắn",
     description: "Giới thiệu tính năng spin",
-    subject: "🎰 Vòng quay may mắn — quay miễn phí mỗi ngày!",
-    body: `<p>V-Affiliate vừa ra mắt <strong>Vòng Quay May Mắn</strong> — và mỗi user đều được quay <strong>miễn phí 1 lượt mỗi ngày</strong>!</p>
+    subject: "🎰 Vòng quay may mắn — mua hàng & mời bạn để nhận lượt quay!",
+    body: `<p>V-Affiliate có <strong>Vòng Quay May Mắn</strong> — cách vui để nhận thêm tiền vào ví khi bạn dùng app!</p>
 
-<p>Phần thưởng đa dạng vào thẳng ví của bạn:</p>
+<p>Cách nhận lượt quay:</p>
 <ul>
-  <li>💰 Tiền mặt từ <strong>1.000đ đến 100.000đ</strong></li>
-  <li>🎫 Voucher giảm giá Shopee/Lazada</li>
-  <li>⭐ Điểm bonus tiến lên rank cao hơn</li>
-  <li>🎁 Phần thưởng đặc biệt cho user Silver+</li>
+  <li>🛍️ Cứ mỗi <strong>10 đơn đã hoàn tiền</strong> → +1 lượt quay</li>
+  <li>👥 Cứ mỗi <strong>5 bạn mời</strong> có đơn đầu tiên → +1 lượt quay</li>
 </ul>
 
-<p>Càng đăng nhập đều, bạn càng có nhiều lượt quay miễn phí. Chuỗi 7 ngày liên tiếp được tặng <strong>thêm 1 lượt quay vàng</strong> với phần thưởng x3!</p>
+<p>Phần thưởng mỗi lượt quay vào thẳng ví:</p>
+<ul>
+  <li>💰 Tiền mặt từ <strong>1.000đ đến 50.000đ</strong></li>
+  <li>🎁 Cơ hội trúng jackpot 50.000đ (xác suất 5%)</li>
+</ul>
 
-<p>Quay ngay hôm nay để xem hôm nay là ngày may mắn của bạn không nhé! 🍀</p>`,
+<p>Càng mua sắm và mời bạn nhiều, bạn càng có nhiều lượt quay. Vào V-Affiliate kiểm tra số lượt quay của bạn ngay nhé! 🍀</p>`,
   },
   {
     id: "feature-referral",
@@ -247,24 +248,24 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
     icon: "👥",
     name: "Mời bạn bè kiếm cashback",
     description: "Push referral feature",
-    subject: "👥 Mời 1 bạn = 50.000đ vào ví ngay",
-    body: `<p>Bạn có biết V-Affiliate có chương trình <strong>"Mời bạn bè - Nhận cashback"</strong> rất hấp dẫn không?</p>
+    subject: "👥 Mời bạn bè — cùng lên hạng, cashback cao hơn vĩnh viễn",
+    body: `<p>Bạn có biết V-Affiliate có chương trình <strong>"Mời bạn bè"</strong> giúp bạn tăng tỷ lệ hoàn tiền không?</p>
 
-<p>Cách hoạt động siêu đơn giản:</p>
+<p>Cách hoạt động:</p>
 <ul>
-  <li>Bạn mời bạn bè đăng ký V-Affiliate qua link giới thiệu cá nhân</li>
-  <li>Khi bạn đó hoàn thành <strong>đơn cashback đầu tiên</strong>, bạn nhận <strong>50.000đ vào ví</strong></li>
-  <li>Không giới hạn số lượng — mời 10 bạn = nhận 500.000đ</li>
-  <li>Cộng dồn cả đời — kể cả bạn bè bạn mua sau 1 năm vẫn tính</li>
+  <li>Mời bạn bè đăng ký V-Affiliate qua link giới thiệu cá nhân của bạn</li>
+  <li>Khi bạn đó có <strong>đơn cashback đầu tiên</strong>, được tính là 1 lượt mời thành công</li>
+  <li>Đủ <strong>25 bạn</strong> → lên 🥈 Silver (53%) · <strong>50 bạn</strong> → 🥇 Gold (55%) · <strong>100 bạn</strong> → 💎 VIP (58%)</li>
+  <li>Tỷ lệ cashback tăng <strong>áp dụng vĩnh viễn cho MỌI đơn</strong> về sau</li>
 </ul>
 
-<p>Link giới thiệu cá nhân của bạn nằm trong <strong>Dashboard → Referral</strong>. Chia sẻ qua Zalo, Messenger, Facebook, hoặc copy link gửi trực tiếp đều được.</p>
+<p>Link giới thiệu cá nhân nằm trong <strong>Dashboard → Giới thiệu bạn bè</strong>. Chia sẻ qua Zalo, Messenger, Facebook đều được.</p>
 
 <p style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 12px 16px; border-radius: 8px;">
-  💡 <strong>Mẹo:</strong> Chia sẻ trong group sinh viên, group mom & baby, group văn phòng — đối tượng hay mua sắm online → tỷ lệ chuyển đổi rất cao.
+  💡 <strong>Mẹo:</strong> Chia sẻ trong group sinh viên, mom & baby, văn phòng — nhóm hay mua sắm online → dễ có đơn đầu tiên hơn.
 </p>
 
-<p>Đây là cách kiếm cashback "thụ động" tốt nhất trên V-Affiliate. Chúc bạn mời được nhiều bạn bè cùng tiết kiệm! 🤝</p>`,
+<p>Càng nhiều bạn cùng dùng, hạng của bạn càng cao và cashback càng nhiều. Cùng tiết kiệm nào! 🤝</p>`,
   },
   {
     id: "feature-leaderboard",
@@ -275,15 +276,14 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
     subject: "🏆 Top 10 user kiếm cashback nhiều nhất tuần này",
     body: `<p>V-Affiliate vừa cập nhật <strong>Bảng Xếp Hạng Tuần</strong> — và bạn có thể tham gia ngay không cần đăng ký gì thêm!</p>
 
-<p>Top 10 user kiếm cashback nhiều nhất mỗi tuần sẽ nhận:</p>
+<p>Top 10 user kiếm cashback nhiều nhất mỗi tuần sẽ được:</p>
 <ul>
-  <li>🥇 <strong>Top 1:</strong> 200.000đ + huy hiệu vàng vĩnh viễn</li>
-  <li>🥈 <strong>Top 2-3:</strong> 100.000đ + huy hiệu bạc</li>
-  <li>🥉 <strong>Top 4-10:</strong> 50.000đ + huy hiệu đồng</li>
-  <li>🏅 Tất cả top 10 được <strong>fast-track lên rank cao hơn</strong></li>
+  <li>🥇 <strong>Vinh danh công khai</strong> trên bảng xếp hạng cho cả cộng đồng thấy</li>
+  <li>🏅 <strong>Huy hiệu thành tích</strong> hiển thị trên hồ sơ của bạn</li>
+  <li>⭐ Vị trí top thường đi kèm nhiều đơn → nhanh lên hạng cao hơn (cashback tăng)</li>
 </ul>
 
-<p>Bảng xếp hạng reset mỗi <strong>Chủ Nhật 23:59</strong>. Càng nhiều đơn tuần này, cơ hội vào top càng cao.</p>
+<p>Bảng xếp hạng cập nhật liên tục. Càng nhiều đơn, vị trí của bạn càng cao.</p>
 
 <p>Vào xem vị trí của bạn ngay nhé — bạn có thể đang ở top 50 mà không biết đấy! 📊</p>`,
   },
@@ -303,11 +303,11 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
   <li><strong>Mua nhiều món cùng 1 đơn.</strong> Phí ship chia đều ra → tỷ lệ tiết kiệm tổng thể cao hơn.</li>
   <li><strong>Săn flash sale đúng khung giờ vàng (12h, 21h).</strong> Đây là lúc Shopee tung deal mạnh nhất.</li>
   <li><strong>Thêm vào wishlist + bật notification.</strong> V-Affiliate sẽ báo bạn khi sản phẩm giảm giá.</li>
-  <li><strong>Đăng nhập mỗi ngày.</strong> Vừa giữ chuỗi streak (thưởng thêm tiền mỗi 7/14/30 ngày), vừa quay miễn phí.</li>
+  <li><strong>Đăng nhập mỗi ngày.</strong> Giữ chuỗi streak để nhận thưởng tiền mỗi mốc 7/14/30/60/90 ngày.</li>
 </ol>
 
 <p style="background: #fff7ed; border-left: 4px solid #fb923c; padding: 12px 16px; border-radius: 8px;">
-  📊 <strong>Thống kê thực tế:</strong> User áp dụng cả 5 mẹo này nhận trung bình <strong>800.000đ cashback/tháng</strong>, gấp 4 lần user thường.
+  📊 <strong>Lưu ý:</strong> Cashback mỗi đơn = phần trăm hoa hồng shop trả (tuỳ sản phẩm). Mua đơn giá trị cao hoặc gom nhiều món sẽ hoàn về nhiều hơn.
 </p>
 
 <p>Hy vọng những mẹo này hữu ích cho bạn. Chúc bạn có một tháng tiết kiệm thật đỉnh! 💪</p>`,
@@ -463,11 +463,11 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
     subject: "🛍️ Black Friday — săn deal khủng + cashback x2",
     body: `<p>Bạn ơi, mùa <strong>Black Friday</strong> đã chính thức bắt đầu — và đây là dịp <strong>tiết kiệm lớn nhất trong năm</strong>!</p>
 
-<p>Trong tuần này, V-Affiliate dành tặng riêng bạn:</p>
+<p>Đây là thời điểm <strong>tiết kiệm lớn nhất trong năm</strong> — mua qua link V-Affiliate để vừa hưởng giá sale, vừa được hoàn tiền về ví:</p>
 <ul>
-  <li>🔥 <strong>Cashback x2</strong> trên tất cả đơn Shopee/Lazada/Tiki</li>
-  <li>🎁 <strong>Tặng thêm 20.000đ</strong> cho đơn đầu tiên ≥ 500.000đ</li>
-  <li>🎰 <strong>+3 lượt quay</strong> miễn phí mỗi ngày trong tuần Black Friday</li>
+  <li>🔥 Hoàn tiền trên <strong>mọi đơn Shopee</strong> mua qua link</li>
+  <li>🎁 Nhiều sản phẩm còn kèm <strong>voucher Shopee giảm thêm tới 22%</strong> ở bước thanh toán</li>
+  <li>🎰 Càng nhiều đơn, càng nhiều lượt quay may mắn</li>
 </ul>
 
 <p>Đây là thời điểm vàng để mua những món bạn đã thèm muốn cả năm:</p>

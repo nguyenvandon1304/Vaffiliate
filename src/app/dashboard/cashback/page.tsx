@@ -557,7 +557,7 @@ export default function CashbackPage() {
           </div>
 
           <p className="text-center text-xs text-gray-400 mt-3">
-            Hệ thống tự động phát hiện và tối ưu hóa hoa hồng tốt nhất cho bạn.
+            Mỗi đơn mua qua link đều được hoàn tiền minh bạch về ví của bạn.
           </p>
         </div>
 
@@ -694,7 +694,7 @@ export default function CashbackPage() {
 
         {/* Footer */}
         <p className="text-center text-xs text-gray-400 pb-4">
-          Mọi thông tin tổng hợp và tài liệu mua hàng tốt nhất cho bạn.
+          V-Affiliate — mua sắm Shopee thông minh, hoàn tiền về ví.
         </p>
       </main>
       <Footer />
