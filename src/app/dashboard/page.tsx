@@ -1003,7 +1003,7 @@ function DashboardContent() {
         {activeTab === "orders" && (
           <section className="space-y-5">
             {/* ═══ Quy trình đơn hàng — 4 bước ═══ */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 sm:p-6">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6">
               <div className="flex items-center gap-2 mb-5">
                 <div className="w-7 h-7 bg-orange-500 rounded-full flex items-center justify-center text-white">
                   <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1099,7 +1099,7 @@ function DashboardContent() {
             </div>
 
             {/* ═══ Filter tabs + danh sách đơn ═══ */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
               {/* Header với tabs */}
               <div className="border-b border-gray-100 p-4 sm:p-5">
                 <div className="flex items-start sm:items-center justify-between gap-3 flex-col sm:flex-row mb-4">
@@ -1728,7 +1728,7 @@ function WalletTab({
 
       {/* ═══ 2 Cards: Cộng + Trừ ═══ */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
               <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1744,7 +1744,7 @@ function WalletTab({
           <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-tight">Tổng các khoản cộng vào ví khả dụng</p>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm p-4">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center text-red-500">
               <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1762,7 +1762,7 @@ function WalletTab({
       </div>
 
       {/* ═══ Section Tài khoản ═══ */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className="text-lg">🏦</span>
@@ -1858,7 +1858,7 @@ function WalletTab({
       {/* ═══ Grid 2 cột: Yêu cầu rút + Lịch sử ═══ */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* ─── Yêu cầu rút tiền hoàn ─── */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <button
             type="button"
             onClick={() => setShowWithdrawPanel((v) => !v)}
@@ -2124,7 +2124,7 @@ function WalletTab({
         </div>
 
         {/* ─── Lịch sử ─── */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-5 pt-5 pb-3">
             <div className="flex items-center justify-between gap-2 mb-3">
               <h3 className="text-sm font-bold text-gray-800 dark:text-gray-100">Lịch sử hoàn tiền</h3>
