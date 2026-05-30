@@ -7,6 +7,7 @@ import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { TwoFactorSection } from "@/components/TwoFactorSection";
 import { LoginHistorySection } from "@/components/LoginHistorySection";
 import { EmailVerifyBanner } from "@/components/EmailVerifyBanner";
+import { SkeletonBox } from "@/components/Skeleton";
 
 interface SessionItem {
   id: number;
@@ -298,7 +299,18 @@ export default function SecurityPage() {
           </div>
 
           {loading ? (
-            <p className="text-sm text-gray-400 dark:text-zinc-500">Đang tải...</p>
+            <ul className="space-y-2">
+              {[1, 2].map((i) => (
+                <li key={i} className="flex items-start justify-between gap-3 p-3 rounded-lg border border-gray-100 dark:border-zinc-800">
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <SkeletonBox className="w-2/3 h-4" />
+                    <SkeletonBox className="w-1/3 h-3" />
+                    <SkeletonBox className="w-1/2 h-3" />
+                  </div>
+                  <SkeletonBox className="w-20 h-7 rounded-lg shrink-0" />
+                </li>
+              ))}
+            </ul>
           ) : sessions.length === 0 ? (
             <p className="text-sm text-gray-400 dark:text-zinc-500">Không có phiên nào.</p>
           ) : (

@@ -128,7 +128,7 @@ export function GettingStarted({ totalOrders, completedOrders, totalWithdrawn }:
                 {isCurrent && step.cta && (
                   <button
                     onClick={() => router.push(step.cta!.href)}
-                    className="mt-3 inline-flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow-sm transition-all hover:scale-105"
+                    className="tap-target mt-3 inline-flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow-sm transition-all hover:scale-105"
                   >
                     {step.cta.label}
                     <span>→</span>

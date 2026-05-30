@@ -669,7 +669,7 @@ function DashboardContent() {
                 <div className="mt-4 flex flex-wrap items-center gap-2">
                   <button
                     onClick={() => router.push("/dashboard/cashback")}
-                    className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-lg shadow-sm transition-all hover:scale-105"
+                    className="tap-target inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-lg shadow-sm transition-all hover:scale-105"
                   >
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
@@ -679,7 +679,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/referral")}
-                    className="inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-gray-50 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-gray-50 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
                   >
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -691,7 +691,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/spin")}
-                    className="inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-gray-50 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-gray-50 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
                     title="Vòng quay may mắn — đổi lượt từ đơn hàng & mời bạn"
                   >
                     <span className="text-base">🎰</span>
@@ -699,7 +699,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/wishlist")}
-                    className="inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-gray-50 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-gray-50 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
                     title="Wishlist — theo dõi giá Shopee"
                   >
                     <span className="text-base">❤️</span>
@@ -707,7 +707,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/help")}
-                    className="inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-gray-50 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-gray-50 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
                   >
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />
@@ -771,7 +771,7 @@ function DashboardContent() {
                     </p>
                     <button
                       onClick={() => router.push("/dashboard/cashback")}
-                      className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-colors flex items-center gap-2"
+                      className="tap-target bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-colors flex items-center gap-2"
                     >
                       <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
