@@ -1,0 +1,21 @@
+#!/bin/sh
+# Pre-commit hook — chạy các kiểm tra NHANH trước mỗi commit để chặn lỗi tại máy.
+# Cố ý KHÔNG chạy build/test (chậm) ở đây — CI lo phần đó. Mục tiêu: bắt lỗi
+# lint + type ngay lập tức.
+#
+# Kích hoạt 1 lần: git config core.hooksPath .githooks
+# Bỏ qua tạm thời (không khuyến khích): git commit --no-verify
+
+echo "[pre-commit] Running lint + typecheck..."
+
+npm run lint || {
+  echo "[pre-commit] ✗ Lint failed. Sửa lỗi rồi commit lại (hoặc --no-verify để bỏ qua)."
+  exit 1
+}
+
+npm run typecheck || {
+  echo "[pre-commit] ✗ Typecheck failed. Sửa lỗi rồi commit lại (hoặc --no-verify để bỏ qua)."
+  exit 1
+}
+
+echo "[pre-commit] ✓ OK"
