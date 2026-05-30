@@ -632,3 +632,12 @@
     @apply text-base font-bold text-gray-800 dark:text-gray-100;
   }
 }
+
+/* Dark mode cho component classes — vì app dùng cơ chế CSS override theo class
+ * (.bg-white v.v.), mà .vfa-card áp bg-white qua @apply nên KHÔNG khớp override
+ * đó → phải khai báo màu dark riêng cho .vfa-*. Dùng đúng tông card chuẩn. */
+:where(.dark) .vfa-card,
+:where(.dark) .vfa-card-interactive {
+  background-color: #18181b;
+  border-color: #1f1f23;
+}
