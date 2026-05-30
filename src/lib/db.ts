@@ -1900,10 +1900,16 @@ export async function addBalance(
   const database = await getDb();
   const user = await database.get("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", [username]);
   if (!user) return { success: false, error: "Không tìm thấy người dùng" };
-  await database.run(
-    "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
-    [Number(user.id), label, amount, "credit"],
-  );
+  const userId = Number(user.id);
+  // Advisory lock theo user để credit không đan xen với các thao tác ví khác
+  // (rút tiền / trừ tiền) đang đọc-rồi-ghi số dư.
+  await database.transaction(async (tx) => {
+    await tx.run("SELECT pg_advisory_xact_lock(?, ?)", [WALLET_LOCK_NAMESPACE, userId]);
+    await tx.run(
+      "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
+      [userId, label, amount, "credit"],
+    );
+  });
   return { success: true };
 }
 
@@ -2927,18 +2933,37 @@ export async function adminCreateOrder(
   const user = await database.get("SELECT id FROM users WHERE id = ?", [userId]);
   if (!user) return { success: false, error: "User không tồn tại" };
 
-  await database.run(
-    "INSERT INTO orders (user_id, order_code, store, amount, cashback, status) VALUES (?, ?, ?, ?, ?, ?)",
-    [userId, orderCode, store, amount, cashback, status],
-  );
-
-  if (status === "Đã hoàn tiền") {
-    await database.run(
-      "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
-      [userId, "Hoàn tiền đơn hàng", cashback, "credit"],
+  // Order insert + wallet credit + mark referee active PHẢI cùng 1 transaction,
+  // kèm advisory lock ví — tránh trường hợp insert order xong nhưng credit lỗi
+  // (đơn hoàn tiền mà không cộng tiền, hoặc ngược lại).
+  await database.transaction(async (tx) => {
+    await tx.run("SELECT pg_advisory_xact_lock(?, ?)", [WALLET_LOCK_NAMESPACE, userId]);
+    await tx.run(
+      "INSERT INTO orders (user_id, order_code, store, amount, cashback, status) VALUES (?, ?, ?, ?, ?, ?)",
+      [userId, orderCode, store, amount, cashback, status],
     );
-    await markRefereeActive(userId);
-  }
+
+    if (status === "Đã hoàn tiền") {
+      if (cashback > 0) {
+        await tx.run(
+          "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
+          [userId, "Hoàn tiền đơn hàng", cashback, "credit"],
+        );
+      }
+      // Mark referee active inline (markRefereeActive dùng connection riêng nên
+      // không chạy chung tx được — copy logic vào đây để đảm bảo atomic).
+      const refRow = await tx.get(
+        "SELECT id, bonus_credited FROM referrals WHERE referee_user_id = ?",
+        [userId],
+      );
+      if (refRow && Number(refRow.bonus_credited) === 0) {
+        await tx.run(
+          "UPDATE referrals SET bonus_credited = 1, bonus_credited_at = NOW() WHERE id = ?",
+          [Number(refRow.id)],
+        );
+      }
+    }
+  });
 
   return { success: true };
 }
@@ -3099,6 +3124,10 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
   }
   function invalidateRate(userId: number) { rateCache.delete(userId); }
 
+  // Gom các trường hợp clawback đẩy số dư âm (đơn bị huỷ sau khi đã rút cashback)
+  // → alert admin sau khi commit (W6). Không chặn import.
+  const negativeBalanceAlerts: { userId: number; orderCode: string; balance: number }[] = [];
+
   function mapStatus(shopeeStatus: string): string {
     const raw = (shopeeStatus || "").trim().replace(/\s+/g, " ");
     const s = raw.toUpperCase();
@@ -3162,6 +3191,17 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
                 "order",
               ],
             );
+            // W6: nếu clawback đẩy số dư xuống âm → user đã rút phần cashback này
+            // trước khi đơn bị huỷ. Debit đầy đủ là đúng kế toán (user nợ hệ thống),
+            // nhưng admin cần biết để xử lý. Gom vào set để alert sau khi commit.
+            const balRow = await tx.get(
+              "SELECT COALESCE(SUM(CASE WHEN type='credit' THEN amount ELSE -amount END), 0) AS balance FROM wallet WHERE user_id = ?",
+              [userId],
+            );
+            const balAfter = Number(balRow?.balance ?? 0);
+            if (balAfter < 0) {
+              negativeBalanceAlerts.push({ userId, orderCode: item.orderCode, balance: balAfter });
+            }
           }
           result.updated++;
           result.results.push({
@@ -3364,6 +3404,25 @@ export async function importOrders(items: ImportOrderItem[]): Promise<ImportResu
     }
   })();
 
+  // W6: alert admin nếu có user bị âm ví do clawback (đã rút cashback trước khi
+  // đơn bị huỷ). Fire-and-forget — không chặn response.
+  if (negativeBalanceAlerts.length > 0) {
+    void (async () => {
+      try {
+        const { notifyCustom } = await import("@/lib/telegram");
+        for (const a of negativeBalanceAlerts) {
+          await notifyCustom(
+            "⚠️ Số dư ví bị âm sau huỷ đơn",
+            `User ID: ${a.userId}\nĐơn: ${a.orderCode}\nSố dư hiện tại: ${a.balance.toLocaleString("vi-VN")}đ\n` +
+            `→ User đã rút cashback trước khi đơn bị huỷ. Cần theo dõi / thu hồi.`,
+          );
+        }
+      } catch (e) {
+        console.warn("[importOrders] negative balance alert failed:", e);
+      }
+    })();
+  }
+
   return result;
 }
 
@@ -3557,6 +3616,7 @@ export async function adminUpdateOrder(
   const orderCode = existing.order_code as string;
 
   await database.transaction(async (tx) => {
+    await tx.run("SELECT pg_advisory_xact_lock(?, ?)", [WALLET_LOCK_NAMESPACE, userId]);
     await tx.run(
       "UPDATE orders SET amount = ?, cashback = ?, status = ?, store = ? WHERE id = ?",
       [newAmount, newCashback, newStatus, newStore, orderId],
@@ -3623,6 +3683,7 @@ export async function adminDeleteOrder(
 
   await database.transaction(async (tx) => {
     if ((existing.status as string) === "Đã hoàn tiền" && Number(existing.cashback) > 0) {
+      await tx.run("SELECT pg_advisory_xact_lock(?, ?)", [WALLET_LOCK_NAMESPACE, Number(existing.user_id)]);
       await tx.run(
         "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
         [
