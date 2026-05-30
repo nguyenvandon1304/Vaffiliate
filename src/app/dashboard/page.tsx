@@ -11,6 +11,7 @@ import { EmptyState, IllustrationBox, IllustrationLink, IllustrationWallet } fro
 import { WalletHero } from "@/components/WalletHero";
 import { GettingStarted } from "@/components/GettingStarted";
 import { TrustSignals } from "@/components/TrustSignals";
+import { JourneyStrip } from "@/components/JourneyStrip";
 import { OrderList } from "@/components/OrderCard";
 import { CommandBarTrigger } from "@/components/CommandBar";
 import { DashboardSkeleton } from "@/components/Skeleton";
@@ -720,13 +721,16 @@ function DashboardContent() {
             </div>
           </section>
 
-          {/* Hành trình ngày đầu — chỉ hiện khi user chưa rút tiền lần nào (người mới / chưa hoàn tất 1 vòng) */}
-          {stats.totalWithdrawn === 0 && (
+          {/* Hành trình ngày đầu — cho user mới chưa có đơn hoàn tiền nào */}
+          {stats.completedOrders === 0 ? (
             <GettingStarted
               totalOrders={stats.totalOrders}
               completedOrders={stats.completedOrders}
               totalWithdrawn={stats.totalWithdrawn}
             />
+          ) : (
+            /* Hành trình thăng hạng — cho user đã bắt đầu kiếm tiền: nối streak → tier → spin */
+            <JourneyStrip tierInfo={tierInfo} />
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
