@@ -19,7 +19,8 @@ Các lệnh con (chạy lẻ khi cần):
 | `npm run lint` | ESLint — bắt lỗi style + một số bug tĩnh |
 | `npm run typecheck` | TypeScript — bắt lỗi kiểu/null/cú pháp |
 | `npm run test` | Vitest watch mode (dev) |
-| `npm run test:ci` | Vitest chạy 1 lần (CI) |
+| `npm run test:ci` | Vitest chạy 1 lần (unit, CI) |
+| `npm run test:integration` | Integration test với DB dev (cần `.env.local`) |
 | `npm run build` | Next.js production build |
 | `npm run check` | lint + typecheck + build (không test) |
 
@@ -32,9 +33,22 @@ Các lệnh con (chạy lẻ khi cần):
   (regression). Ví dụ: `csv.test.ts` khoá lại lỗ hổng CSV injection,
   `totp.test.ts` khoá cửa sổ TOTP ±1.
 
-Lưu ý: các flow cần DB thật (rút tiền, import đơn, session...) **không** test ở
-đây vì `.env.local` đang trỏ vào DB production. Muốn test các flow đó cần DB
-riêng cho test (xem "Việc nên làm tiếp").
+## Integration test (chạy với DB thật — dev)
+
+- Nằm trong `tests/integration/`, chạy bằng `npm run test:integration`.
+- Test các flow cần DB: đăng ký/đăng nhập, đổi mật khẩu, **rút tiền** (rule cần
+  ≥1 đơn hoàn tiền, check số dư/PIN, không cho âm ví), admin cộng/trừ tiền.
+- Bao gồm regression cho lỗ hổng chiếm tài khoản (C1): `changeUnverifiedEmail`
+  phải từ chối mật khẩu sai.
+
+**An toàn — chỉ chạy trên DB dev:**
+- `tests/integration/setup.ts` nạp `.env.local` (đang trỏ DB dev) + set
+  `INTEGRATION_DB=1`.
+- `assertSafeTestDb()` **chặn cứng** nếu `DATABASE_URL` trỏ vào project
+  production (`PROD_DB_REF`) → throw ngay, không tạo/xoá data khách thật.
+- Mỗi test tạo user tên duy nhất rồi tự xoá (`afterAll` → `DELETE` cascade).
+- **Không** nằm trong `npm run verify` / CI (vì CI không có DB). Chạy thủ công
+  ở local khi cần.
 
 ## CI (GitHub Actions)
 
@@ -65,7 +79,8 @@ deploy để chắc chắn production còn sống.
 
 ## Việc nên làm tiếp (chưa làm)
 
-- Tách DB test riêng (Supabase project khác hoặc Postgres docker) → cho phép
-  test integration các flow tiền/auth thật sự.
-- E2E test (Playwright) cho hành trình người dùng: đăng ký → tạo link → rút tiền.
+- E2E test (Playwright) cho hành trình người dùng đầy đủ trên trình duyệt:
+  đăng ký → tạo link → mua → admin import đơn → rút tiền → admin duyệt.
+- Integration test cho import CSV (`importOrders`) và duyệt/từ chối rút tiền
+  (`updateWithdrawalStatus`) — hiện mới phủ tạo yêu cầu rút.
 - Rate-limit cho `/api/affiliate`, allowlist host cho resolve short-link.

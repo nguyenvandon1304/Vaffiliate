@@ -12,7 +12,10 @@ import { fileURLToPath } from "node:url";
 export default defineConfig({
   test: {
     environment: "node",
+    // Unit test mặc định: CHỈ logic thuần, KHÔNG đụng DB.
+    // Integration test (tests/integration) chạy riêng qua `npm run test:integration`.
     include: ["tests/**/*.test.ts"],
+    exclude: ["tests/integration/**", "node_modules/**"],
     globals: true,
   },
   resolve: {
