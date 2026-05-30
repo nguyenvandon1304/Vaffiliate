@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
+import { getRateLimitBackend } from "@/lib/rate-limit";
 
 /**
  * GET /api/health — endpoint nhẹ cho monitoring (cron-job.org, UptimeRobot, Render health check).
@@ -32,6 +33,7 @@ export async function GET() {
     {
       status,
       db: dbHealthy,
+      rateLimit: getRateLimitBackend(),
       latencyMs,
       timestamp: new Date().toISOString(),
       uptime: process.uptime ? Math.round(process.uptime()) : null,
