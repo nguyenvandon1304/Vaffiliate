@@ -49,15 +49,15 @@ export function WalletHero({ balance, pendingWithdraw, totalWithdrawn, totalCash
   const lifetimeSaved = totalCashback > 0 ? totalCashback : totalWithdrawn;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl shadow-xl shadow-orange-500/30 dark:shadow-orange-900/40 animate-tier-card-in">
+    <div className="relative overflow-hidden rounded-3xl shadow-md shadow-orange-500/15 dark:shadow-orange-900/30 animate-tier-card-in">
       {/* ═══ Background mesh gradient ═══ */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600" />
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-amber-500" />
       {/* Top-right glow orb */}
-      <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-yellow-300/40 blur-3xl animate-tier-float" />
+      <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-yellow-300/25 blur-3xl animate-tier-float" />
       {/* Bottom-left glow orb */}
-      <div className="absolute -bottom-20 -left-10 w-48 h-48 rounded-full bg-rose-400/30 blur-3xl" />
+      <div className="absolute -bottom-20 -left-10 w-48 h-48 rounded-full bg-rose-400/20 blur-3xl" />
       {/* Soft inner highlight */}
-      <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/15 to-transparent" />
+      <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent" />
 
       {/* Subtle stripe pattern */}
       <div

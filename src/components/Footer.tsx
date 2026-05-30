@@ -7,7 +7,7 @@ export default function Footer() {
     <footer className="mt-auto">
       {/* Cộng Đồng Section */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 mb-8">
-        <div className="bg-gradient-to-r from-orange-400 to-red-400 dark:from-orange-500 dark:to-red-500 rounded-2xl p-5 text-white">
+        <div className="bg-gradient-to-r from-orange-500 to-amber-500 dark:from-orange-600 dark:to-amber-600 rounded-2xl p-5 text-white">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
               <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>

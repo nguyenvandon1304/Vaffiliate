@@ -180,7 +180,7 @@ export default function SpinPage() {
         </div>
 
         {/* Token counter — nổi bật giữa */}
-        <div className="bg-gradient-to-r from-orange-500 via-pink-500 to-fuchsia-500 rounded-3xl p-5 shadow-xl shadow-orange-500/30 text-white">
+        <div className="bg-gradient-to-r from-orange-500 to-pink-500 rounded-3xl p-5 shadow-md shadow-orange-500/15 text-white">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-xs uppercase tracking-wider opacity-80 mb-1">Lượt quay đang có</div>

@@ -642,11 +642,11 @@ function DashboardContent() {
 
           {/* Welcome Banner — thay cho phần "Bảng Xếp Hạng" cũ.
               Nội dung: lời chào + nhắc tỷ lệ 50% hoàn + 2 CTA (tạo link / mời bạn bè). */}
-          <section className="mb-6 relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-400 via-orange-500 to-amber-500 shadow-lg shadow-orange-500/20">
+          <section className="mb-6 relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 shadow-md shadow-orange-500/15">
             {/* Decorative shapes */}
-            <div className="pointer-events-none absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/15" />
-            <div className="pointer-events-none absolute -bottom-12 right-24 w-24 h-24 rounded-full bg-white/10" />
-            <div className="pointer-events-none absolute top-1/2 right-8 text-white/30 text-xl">★</div>
+            <div className="pointer-events-none absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10" />
+            <div className="pointer-events-none absolute -bottom-12 right-24 w-24 h-24 rounded-full bg-white/[0.07]" />
+            <div className="pointer-events-none absolute top-1/2 right-8 text-white/25 text-xl">★</div>
 
             <div className="relative p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center gap-5">
               {/* Avatar circle */}

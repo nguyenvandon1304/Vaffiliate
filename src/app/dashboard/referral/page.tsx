@@ -152,13 +152,13 @@ export default function ReferralPage() {
           <span className="text-gray-700 dark:text-zinc-200 font-semibold">Giới Thiệu</span>
         </nav>
 
-        {/* Hero — gradient cam */}
-        <section className="relative bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 rounded-3xl shadow-xl shadow-orange-500/30 p-6 sm:p-8 overflow-hidden">
+        {/* Hero — gradient cam (đã dịu để bớt chói, đồng bộ banner dashboard) */}
+        <section className="relative bg-gradient-to-br from-orange-500 to-amber-500 rounded-3xl shadow-md shadow-orange-500/15 p-6 sm:p-8 overflow-hidden">
           {/* Decorative blobs */}
-          <div className="pointer-events-none absolute -top-20 -right-20 w-56 h-56 rounded-full bg-yellow-300/30 blur-3xl animate-tier-float" />
-          <div className="pointer-events-none absolute -bottom-16 -left-12 w-44 h-44 rounded-full bg-rose-400/25 blur-3xl" />
-          <div className="pointer-events-none absolute top-12 left-8 text-white/30 text-2xl">★</div>
-          <div className="pointer-events-none absolute bottom-8 right-16 text-white/30 text-lg">✦</div>
+          <div className="pointer-events-none absolute -top-20 -right-20 w-56 h-56 rounded-full bg-yellow-300/20 blur-3xl animate-tier-float" />
+          <div className="pointer-events-none absolute -bottom-16 -left-12 w-44 h-44 rounded-full bg-rose-400/15 blur-3xl" />
+          <div className="pointer-events-none absolute top-12 left-8 text-white/25 text-2xl">★</div>
+          <div className="pointer-events-none absolute bottom-8 right-16 text-white/25 text-lg">✦</div>
 
           <div className="relative">
             <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
