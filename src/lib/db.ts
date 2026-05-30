@@ -555,8 +555,7 @@ async function initSchema(database: DbAdapter): Promise<void> {
 
 /* ─────────────── Crypto helpers ─────────────── */
 
-const PBKDF2_ITERATIONS = 600_000;
-const PBKDF2_KEYLEN = 64;
+const PBKDF2_ITERATIONS = 600_000;const PBKDF2_KEYLEN = 64;
 const PBKDF2_DIGEST = "sha512";
 
 function pbkdf2Async(password: string, salt: string, iterations: number): Promise<Buffer> {
@@ -1136,7 +1135,7 @@ export async function changeUnverifiedEmail(
 ): Promise<{ success: boolean; error?: string; userId?: number }> {
   const database = await getDb();
   const row = await database.get(
-    "SELECT id, password_hash, email_verified FROM users WHERE LOWER(username) = LOWER(?)",
+    "SELECT id, password_hash, salt, email_verified FROM users WHERE LOWER(username) = LOWER(?)",
     [username],
   );
   if (!row) {
@@ -1144,8 +1143,8 @@ export async function changeUnverifiedEmail(
     await verifyPassword(password, "pbkdf2$10000$00$00", null);
     return { success: false, error: "Tên đăng nhập hoặc mật khẩu không đúng" };
   }
-  const ok = await verifyPassword(password, row.password_hash as string, null);
-  if (!ok) return { success: false, error: "Tên đăng nhập hoặc mật khẩu không đúng" };
+  const check = await verifyPassword(password, row.password_hash as string, row.salt as string | null);
+  if (!check.valid) return { success: false, error: "Tên đăng nhập hoặc mật khẩu không đúng" };
 
   if (Number(row.email_verified) === 1) {
     return { success: false, error: "Tài khoản đã xác minh email. Vui lòng dùng tính năng cập nhật profile để đổi email." };
@@ -1753,6 +1752,12 @@ export async function verifyWithdrawPin(
   return { valid: false, remaining: MAX_ATTEMPTS - failed };
 }
 
+/**
+ * Namespace cho pg_advisory_xact_lock liên quan tới ví — đảm bảo các thao tác
+ * đọc-rồi-ghi số dư của cùng 1 user được serialize, chống race âm ví.
+ */
+const WALLET_LOCK_NAMESPACE = 4201;
+
 export async function createWithdrawRequest(
   userId: number,
   bankAccountId: number,
@@ -1808,14 +1813,21 @@ export async function createWithdrawRequest(
     };
   }
 
-  const walletRow = await database.get(
-    "SELECT COALESCE(SUM(CASE WHEN type='credit' THEN amount ELSE -amount END), 0) AS balance FROM wallet WHERE user_id = ?",
-    [userId],
-  );
-  const balance = Number(walletRow?.balance ?? 0);
-  if (amount > balance) return { success: false, error: "Số dư không đủ" };
-
+  // Đọc số dư + check + ghi debit PHẢI nằm chung 1 transaction, kèm advisory lock
+  // theo user_id để serialize các request rút tiền đồng thời. Nếu không, 2 request
+  // song song đều đọc thấy đủ số dư rồi cùng insert debit → âm ví / rút vượt (mất
+  // tiền thật khi cả 2 được duyệt). pg_advisory_xact_lock tự nhả khi tx kết thúc.
+  let insufficient = false;
   await database.transaction(async (tx) => {
+    await tx.run("SELECT pg_advisory_xact_lock(?, ?)", [WALLET_LOCK_NAMESPACE, userId]);
+
+    const walletRow = await tx.get(
+      "SELECT COALESCE(SUM(CASE WHEN type='credit' THEN amount ELSE -amount END), 0) AS balance FROM wallet WHERE user_id = ?",
+      [userId],
+    );
+    const balance = Number(walletRow?.balance ?? 0);
+    if (amount > balance) { insufficient = true; return; }
+
     await tx.run(
       "INSERT INTO withdrawals (user_id, bank_account_id, amount) VALUES (?, ?, ?)",
       [userId, bankAccountId, amount],
@@ -1825,6 +1837,7 @@ export async function createWithdrawRequest(
       [userId, "Rút tiền", amount, "debit"],
     );
   });
+  if (insufficient) return { success: false, error: "Số dư không đủ" };
   return { success: true };
 }
 
@@ -1875,18 +1888,25 @@ export async function subtractBalance(
   const database = await getDb();
   const user = await database.get("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", [username]);
   if (!user) return { success: false, error: "Không tìm thấy người dùng" };
+  const userId = Number(user.id);
 
-  const row = await database.get(
-    "SELECT COALESCE(SUM(CASE WHEN type='credit' THEN amount ELSE -amount END), 0) AS balance FROM wallet WHERE user_id = ?",
-    [Number(user.id)],
-  );
-  const balance = Number(row?.balance ?? 0);
-  if (amount > balance) return { success: false, error: "Số dư không đủ" };
-
-  await database.run(
-    "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
-    [Number(user.id), label, amount, "debit"],
-  );
+  // Đọc số dư + ghi debit trong cùng transaction + advisory lock theo user để
+  // tránh race (admin trừ tiền song song với rút tiền của user → âm ví).
+  let insufficient = false;
+  await database.transaction(async (tx) => {
+    await tx.run("SELECT pg_advisory_xact_lock(?, ?)", [WALLET_LOCK_NAMESPACE, userId]);
+    const row = await tx.get(
+      "SELECT COALESCE(SUM(CASE WHEN type='credit' THEN amount ELSE -amount END), 0) AS balance FROM wallet WHERE user_id = ?",
+      [userId],
+    );
+    const balance = Number(row?.balance ?? 0);
+    if (amount > balance) { insufficient = true; return; }
+    await tx.run(
+      "INSERT INTO wallet (user_id, label, amount, type) VALUES (?, ?, ?, ?)",
+      [userId, label, amount, "debit"],
+    );
+  });
+  if (insufficient) return { success: false, error: "Số dư không đủ" };
   return { success: true };
 }
 

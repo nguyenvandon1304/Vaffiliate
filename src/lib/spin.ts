@@ -23,6 +23,9 @@
 import crypto from "crypto";
 import { getDb, getSetting } from "@/lib/db";
 
+/** Namespace cho pg_advisory_xact_lock — serialize các lần quay của cùng user. */
+const SPIN_LOCK_NAMESPACE = 4202;
+
 export interface SpinSegment {
   index: number;
   amount: number;
@@ -155,6 +158,12 @@ export async function performSpin(userId: number): Promise<SpinResult> {
   const db = await getDb();
 
   return await db.transaction(async (tx) => {
+    // Advisory lock theo user_id — serialize các lần quay đồng thời của cùng user.
+    // READ COMMITTED + connection pool khiến 2 request song song có thể cùng đọc
+    // available=1 rồi cùng insert spin_history → quay 2 lần với 1 lượt (farm thưởng).
+    // Lock tự nhả khi transaction kết thúc.
+    await tx.run("SELECT pg_advisory_xact_lock(?, ?)", [SPIN_LOCK_NAMESPACE, userId]);
+
     // Re-check availability TRONG transaction để chống race.
     const row = await tx.get(
       `SELECT
