@@ -60,3 +60,6 @@ playwright-report/
 .playwright/
 blob-report/
 coverage/
+
+# Playwright auth state (chứa session cookie — không commit)
+e2e/.auth/

@@ -35,8 +35,8 @@ test.describe("landing + auth UI", () => {
 
 test.describe("auth gating", () => {
   test("truy cập /dashboard khi chưa đăng nhập → không ở lại dashboard", async ({ page }) => {
-    await page.goto("/dashboard");
-    await page.waitForLoadState("networkidle");
+    await page.goto("/dashboard", { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(1500);
     expect(page.url()).not.toContain("/dashboard");
   });
 

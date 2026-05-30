@@ -5,11 +5,13 @@ import { defineConfig, devices } from "@playwright/test";
  *
  * Chạy: npm run test:e2e
  *  - Tự khởi động `npm run dev` (DB dev qua .env.local) nếu chưa chạy.
- *  - Test trong thư mục `e2e/`.
- *  - Chỉ Chromium (đủ cho smoke; thêm browser khác nếu cần).
+ *  - 3 project:
+ *    - "setup": đăng nhập admin 1 lần → lưu storageState (e2e/.auth/admin.json)
+ *    - "admin": các test cần đăng nhập admin (dùng lại storageState)
+ *    - "public": test không đăng nhập (landing, auth gating)
  *
- * E2E cố ý CHỈ test các flow không phụ thuộc API ngoài (Shopee/GoAffiliate) và
- * không cần email thật — tập trung vào UI load + auth gating + điều hướng.
+ * Lưu ý: KHÔNG dùng waitForLoadState("networkidle") vì trang admin có SSE
+ * (/api/notifications/stream) giữ kết nối mở → networkidle không bao giờ xảy ra.
  */
 export default defineConfig({
   testDir: "./e2e",
@@ -18,14 +20,25 @@ export default defineConfig({
   retries: 0,
   workers: 1,
   reporter: [["list"]],
-  timeout: 30_000,
+  timeout: 45_000,
   use: {
     baseURL: "http://localhost:3000",
     trace: "on-first-retry",
     headless: true,
   },
   projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    { name: "setup", testMatch: /auth\.setup\.ts/ },
+    {
+      name: "public",
+      testMatch: /smoke\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "admin",
+      testMatch: /admin-tabs\.spec\.ts/,
+      dependencies: ["setup"],
+      use: { ...devices["Desktop Chrome"], storageState: "e2e/.auth/admin.json" },
+    },
   ],
   webServer: {
     command: "npm run dev",
