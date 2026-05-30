@@ -1324,6 +1324,7 @@ export interface WalletEntry {
 export interface DashboardStats {
   totalCashback: number;
   totalOrders: number;
+  completedOrders: number;        // Số đơn ĐÃ HOÀN TIỀN — dùng để mở khoá rút tiền
   pendingOrders: number;
   pendingCashback: number;        // Tổng cashback các đơn đang chờ (chưa về ví)
   walletBalance: number;
@@ -1381,6 +1382,7 @@ export async function getDashboardStats(userId: number): Promise<DashboardStats>
     `SELECT
       COALESCE((SELECT SUM(cashback) FROM orders WHERE user_id = $1 AND status = 'Đã hoàn tiền'), 0) AS total_cashback,
       COALESCE((SELECT COUNT(*) FROM orders WHERE user_id = $1), 0) AS total_orders,
+      COALESCE((SELECT COUNT(*) FROM orders WHERE user_id = $1 AND status = 'Đã hoàn tiền'), 0) AS completed_orders,
       COALESCE((SELECT COUNT(*) FROM orders WHERE user_id = $1 AND status IN ('Đang xử lý', 'Chờ xác nhận')), 0) AS pending_orders,
       COALESCE((SELECT SUM(cashback) FROM orders WHERE user_id = $1 AND status IN ('Đang xử lý', 'Chờ xác nhận')), 0) AS pending_cashback,
       COALESCE((SELECT SUM(CASE WHEN type='credit' THEN amount ELSE -amount END) FROM wallet WHERE user_id = $1), 0) AS wallet_balance,
@@ -1393,6 +1395,7 @@ export async function getDashboardStats(userId: number): Promise<DashboardStats>
   return {
     totalCashback: Number(row?.total_cashback ?? 0),
     totalOrders: Number(row?.total_orders ?? 0),
+    completedOrders: Number(row?.completed_orders ?? 0),
     pendingOrders: Number(row?.pending_orders ?? 0),
     pendingCashback: Number(row?.pending_cashback ?? 0),
     walletBalance: Number(row?.wallet_balance ?? 0),
@@ -1789,6 +1792,21 @@ export async function createWithdrawRequest(
     [bankAccountId, userId],
   );
   if (!bank) return { success: false, error: "Tài khoản ngân hàng không hợp lệ" };
+
+  // Chống "rút khô" quỹ thưởng: user phải có ≥1 đơn ĐÃ HOÀN TIỀN thật mới được rút.
+  // Tránh trường hợp gom tiền thưởng chào mừng / streak / vòng quay / giới thiệu rồi
+  // rút sạch mà chưa từng mua đơn nào — bảo vệ ngân sách hệ thống.
+  const completedRow = await database.get(
+    "SELECT COUNT(*) AS c FROM orders WHERE user_id = ? AND status = 'Đã hoàn tiền'",
+    [userId],
+  );
+  if (Number(completedRow?.c ?? 0) === 0) {
+    return {
+      success: false,
+      error:
+        "Bạn cần ít nhất 1 đơn đã hoàn tiền trước khi rút. Hãy mua sắm qua link V-Affiliate để mở khoá rút tiền — số dư thưởng vẫn được giữ nguyên trong ví nhé! 💚",
+    };
+  }
 
   const walletRow = await database.get(
     "SELECT COALESCE(SUM(CASE WHEN type='credit' THEN amount ELSE -amount END), 0) AS balance FROM wallet WHERE user_id = ?",

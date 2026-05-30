@@ -318,16 +318,16 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
     icon: "🔥",
     name: "Giải thích chuỗi streak",
     description: "Hướng dẫn streak login mỗi ngày",
-    subject: "🔥 Đăng nhập 7 ngày liên tiếp = nhận 5.000đ miễn phí",
+    subject: "🔥 Đăng nhập 7 ngày liên tiếp = nhận 2.000đ miễn phí",
     body: `<p>Bạn có biết V-Affiliate thưởng tiền cho user <strong>chỉ vì… đăng nhập</strong> không?</p>
 
 <p>Cơ chế <strong>chuỗi streak</strong> hoạt động như sau:</p>
 <ul>
-  <li>🔥 <strong>7 ngày:</strong> +5.000đ vào ví</li>
-  <li>🔥🔥 <strong>14 ngày:</strong> +10.000đ vào ví</li>
-  <li>🔥🔥🔥 <strong>30 ngày:</strong> +25.000đ vào ví + huy hiệu "Người Bền Bỉ"</li>
-  <li>🔥🔥🔥🔥 <strong>60 ngày:</strong> +50.000đ vào ví</li>
-  <li>👑 <strong>90 ngày:</strong> +100.000đ vào ví + đặc quyền VIP</li>
+  <li>🔥 <strong>7 ngày:</strong> +2.000đ vào ví</li>
+  <li>🔥🔥 <strong>14 ngày:</strong> +3.000đ vào ví</li>
+  <li>🔥🔥🔥 <strong>30 ngày:</strong> +5.000đ vào ví + huy hiệu "Người Bền Bỉ"</li>
+  <li>🔥🔥🔥🔥 <strong>60 ngày:</strong> +10.000đ vào ví</li>
+  <li>👑 <strong>90 ngày:</strong> +20.000đ vào ví + đặc quyền VIP</li>
 </ul>
 
 <p>Bạn không cần phải mua gì — chỉ cần mở app/web mỗi ngày là chuỗi tự tăng. Tiền tự cộng vào ví khi đạt mốc.</p>
@@ -336,7 +336,7 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
   ⚠️ <strong>Quan trọng:</strong> Bỏ 1 ngày là chuỗi bị reset về 0. Bạn nên bookmark V-Affiliate trên trình duyệt để không quên nhé!
 </p>
 
-<p>Bắt đầu chuỗi của bạn ngay hôm nay — đến cuối tháng đã có 25.000đ ngon lành rồi đó! 💎</p>`,
+<p>Bắt đầu chuỗi của bạn ngay hôm nay — giữ đều mỗi ngày là quà cứ thế về ví! 💎</p>`,
   },
 
   // ============ THANKS ============

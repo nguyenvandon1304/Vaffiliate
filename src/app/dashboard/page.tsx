@@ -72,6 +72,7 @@ interface WalletData {
 interface Stats {
   totalCashback: number;
   totalOrders: number;
+  completedOrders: number;
   pendingOrders: number;
   pendingCashback: number;
   walletBalance: number;
@@ -250,7 +251,7 @@ function DashboardContent() {
 
   const [user, setUser] = useState<UserInfo | null>(null);
   const [stats, setStats] = useState<Stats>({
-    totalCashback: 0, totalOrders: 0, pendingOrders: 0, pendingCashback: 0, walletBalance: 0,
+    totalCashback: 0, totalOrders: 0, completedOrders: 0, pendingOrders: 0, pendingCashback: 0, walletBalance: 0,
     pendingWithdrawAmount: 0, totalWithdrawn: 0, totalCredit: 0, totalDebit: 0,
   });
   const [orders, setOrders] = useState<OrderData[]>([]);
@@ -1584,7 +1585,9 @@ function WalletTab({
   const isVerified = !!user?.email_verified;
   const hasBankAccount = bankAccounts.length > 0;
   const hasWithdrawPin = !!user?.has_withdraw_pin;
-  const canWithdraw = isVerified && hasBankAccount && hasWithdrawPin;
+  // Phải có ≥1 đơn đã hoàn tiền thật mới mở khoá rút — chặn rút khô quỹ thưởng.
+  const hasCompletedOrder = stats.completedOrders > 0;
+  const canWithdraw = isVerified && hasBankAccount && hasWithdrawPin && hasCompletedOrder;
 
   // Lấy default bank để hiển thị + auto select trong wizard
   const defaultBank = bankAccounts.find((b) => b.is_default === 1) ?? bankAccounts[0] ?? null;
@@ -1621,6 +1624,7 @@ function WalletTab({
       if (!isVerified) setWithdrawErr("Vui lòng xác minh email trước khi rút tiền.");
       else if (!hasBankAccount) setWithdrawErr("Bạn cần thêm tài khoản ngân hàng.");
       else if (!hasWithdrawPin) setWithdrawErr("Bạn cần đặt mật khẩu rút tiền.");
+      else if (!hasCompletedOrder) setWithdrawErr("Cần ít nhất 1 đơn đã hoàn tiền để mở khoá rút. Mua sắm qua link V-Affiliate để bắt đầu nhé!");
       return;
     }
     setWithdrawStep(2);
@@ -1865,13 +1869,25 @@ function WalletTab({
                       <span>{hasWithdrawPin ? "✓" : "○"}</span>
                       <span>{hasWithdrawPin ? "Đã đặt mật khẩu rút tiền" : "Chưa có mật khẩu rút tiền"}</span>
                     </li>
+                    <li className="flex items-center gap-1.5">
+                      <span>{hasCompletedOrder ? "✓" : "○"}</span>
+                      <span>{hasCompletedOrder ? "Đã có đơn hoàn tiền đầu tiên" : "Chưa có đơn hoàn tiền nào"}</span>
+                    </li>
                   </ul>
+                  {!hasCompletedOrder && (
+                    <p className="mt-2 text-[11px] text-amber-700/90 dark:text-amber-300/80 leading-relaxed">
+                      💚 Số dư thưởng của bạn vẫn được giữ nguyên trong ví. Chỉ cần <strong>1 đơn mua qua link V-Affiliate</strong> là mở khoá rút tiền — rồi rút bao nhiêu tuỳ bạn nhé!
+                    </p>
+                  )}
                   <button
                     type="button"
-                    onClick={() => router.push(isVerified ? "/dashboard?tab=wallet&view=bank" : "/dashboard?tab=wallet&view=profile")}
+                    onClick={() => {
+                      if (!hasCompletedOrder && isVerified && hasBankAccount && hasWithdrawPin) router.push("/dashboard/cashback");
+                      else router.push(isVerified ? "/dashboard?tab=wallet&view=bank" : "/dashboard?tab=wallet&view=profile");
+                    }}
                     className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-md transition"
                   >
-                    🔧 Cập nhật hồ sơ
+                    {!hasCompletedOrder && isVerified && hasBankAccount && hasWithdrawPin ? "🛍 Tạo link mua sắm" : "🔧 Cập nhật hồ sơ"}
                   </button>
                 </div>
               )}

@@ -8,11 +8,11 @@
  *   - Bỏ 1 ngày: streak reset về 1
  *
  * Reward milestones (đơn vị: VND credit vào ví):
- *   - 7 ngày: +5.000đ
- *   - 14 ngày: +10.000đ
- *   - 30 ngày: +25.000đ
- *   - 60 ngày: +50.000đ
- *   - 90 ngày: +100.000đ
+ *   - 7 ngày: +2.000đ
+ *   - 14 ngày: +3.000đ
+ *   - 30 ngày: +5.000đ
+ *   - 60 ngày: +10.000đ
+ *   - 90 ngày: +20.000đ
  *
  * Idempotent: streak_rewards table có UNIQUE(user_id, milestone) — không double reward.
  */
@@ -33,11 +33,11 @@ export interface StreakInfo {
 }
 
 const MILESTONES: { day: number; bonus: number }[] = [
-  { day: 7, bonus: 5_000 },
-  { day: 14, bonus: 10_000 },
-  { day: 30, bonus: 25_000 },
-  { day: 60, bonus: 50_000 },
-  { day: 90, bonus: 100_000 },
+  { day: 7, bonus: 2_000 },
+  { day: 14, bonus: 3_000 },
+  { day: 30, bonus: 5_000 },
+  { day: 60, bonus: 10_000 },
+  { day: 90, bonus: 20_000 },
 ];
 
 /** Get next milestone for current streak. */

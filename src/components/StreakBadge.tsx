@@ -11,7 +11,7 @@ interface StreakInfo {
 }
 
 const MILESTONES = [7, 14, 30, 60, 90];
-const BONUSES = [5_000, 10_000, 25_000, 50_000, 100_000];
+const BONUSES = [2_000, 3_000, 5_000, 10_000, 20_000];
 
 /**
  * Streak badge — hiển thị trong dashboard với pulse fire emoji + progress.
@@ -68,13 +68,14 @@ export function StreakBadge() {
           >
             {/* Header gradient cam-vàng */}
             <div className="bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 p-6 text-white relative overflow-hidden">
-              <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-yellow-300/30 blur-2xl" />
+              <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-yellow-300/30 blur-2xl pointer-events-none" />
               <button
+                type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Đóng"
-                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+                className="absolute top-2.5 right-2.5 z-20 w-11 h-11 rounded-full bg-white/25 hover:bg-white/45 active:bg-white/60 flex items-center justify-center transition-colors cursor-pointer touch-manipulation"
               >
-                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg viewBox="0 0 24 24" className="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
@@ -192,6 +193,9 @@ export function StreakBadge() {
 
               <p className="text-[11px] text-gray-500 dark:text-zinc-400 text-center leading-relaxed">
                 💡 Đăng nhập <b>mỗi ngày</b> để giữ streak. Bỏ 1 ngày → reset về 0.
+              </p>
+              <p className="text-[11px] text-amber-600 dark:text-amber-400/90 text-center leading-relaxed bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg px-3 py-2">
+                🎁 Thưởng streak là quà động viên, cộng thẳng vào ví. Để rút về ngân hàng, bạn chỉ cần có <b>1 đơn hoàn tiền</b> mua qua link V-Affiliate — mở khoá rút là rút thoải mái nhé!
               </p>
             </div>
           </div>

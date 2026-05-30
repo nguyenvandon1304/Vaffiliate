@@ -2,18 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CaffiliateLogo } from "@/components/icons";
-import { ThemeToggleButton } from "@/components/ThemeToggle";
+import { DashboardHeader } from "@/components/DashboardHeader";
 import { trackEvent } from "@/components/Analytics";
-import {
-  ClockIcon3D,
-  GridIcon3D,
-  HelpIcon3D,
-  LinkIcon3D,
-  OrdersIcon3D,
-  ReferralIcon3D,
-  WalletIcon3D,
-} from "@/components/nav-icons-3d";
 import {
   DienMayXanhIcon,
   LazadaIcon,
@@ -147,66 +137,8 @@ export default function CashbackPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50/40 via-gray-50 to-gray-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/60 sticky top-0 z-30">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="cursor-pointer"
-              title="Về trang chủ"
-            >
-              <CaffiliateLogo />
-            </button>
-            <div className="hidden md:block h-6 w-px bg-gray-200" />
-            <nav className="hidden md:flex items-center gap-1">
-              {([
-                { key: "overview" as const, label: "Tổng quan", Icon: GridIcon3D, href: "/dashboard" },
-                { key: "create-link" as const, label: "Tạo link", Icon: LinkIcon3D, href: "/dashboard/cashback" },
-                { key: "orders" as const, label: "Đơn hàng", Icon: OrdersIcon3D, href: "/dashboard?tab=orders" },
-                { key: "wallet" as const, label: "Ví tiền", Icon: WalletIcon3D, href: "/dashboard?tab=wallet" },
-                { key: "link-history" as const, label: "Lịch sử link", Icon: ClockIcon3D, href: "/dashboard?tab=link-history" },
-                { key: "help" as const, label: "Hướng dẫn", Icon: HelpIcon3D, href: "/dashboard/help" },
-                { key: "referral" as const, label: "Giới thiệu", Icon: ReferralIcon3D, href: "/dashboard/referral" },
-              ]).map((item) => {
-                const isActive = item.key === "create-link";
-                const Icon = item.Icon;
-                return (
-                  <button
-                    key={item.key}
-                    onClick={() => {
-                      if (item.key === "create-link") return;
-                      router.push(item.href);
-                    }}
-                    className={`nav-bubble group relative flex items-center justify-center w-10 h-10 rounded-full transition-transform ${
-                      isActive ? "scale-110" : "hover:scale-105"
-                    }`}
-                    data-active={isActive ? "true" : "false"}
-                    title={item.label}
-                  >
-                    <Icon active={isActive} size={32} />
-                    {isActive && (
-                      <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-orange-600 whitespace-nowrap">
-                        {item.label}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggleButton />
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-orange-500 font-medium transition-colors"
-            >
-              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
-              Dashboard
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* Header đầy đủ — đồng bộ với trang chính /dashboard */}
+      <DashboardHeader />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 pb-24 md:pb-8">
         {/* Breadcrumb */}

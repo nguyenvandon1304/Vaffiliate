@@ -1,11 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { CaffiliateLogo } from "@/components/icons";
 import { Modal } from "@/components/Modal";
-import { DashboardNavIcons } from "@/components/DashboardNavIcons";
-import { ThemeToggleButton } from "@/components/ThemeToggle";
+import { DashboardHeader } from "@/components/DashboardHeader";
 import { useToast } from "@/components/Toast";
 
 interface Step {
@@ -69,7 +66,7 @@ const FAQS: FAQ[] = [
   },
   {
     q: "Tại sao tôi không rút được tiền?",
-    a: "Cần đủ 3 điều kiện: (1) Đã thêm tài khoản ngân hàng trong Tài chính; (2) Đã đặt mật khẩu rút tiền 4-6 chữ số; (3) Số dư ví đủ mức tối thiểu (mặc định 50.000đ). Lưu ý: tiền ở mục \"Đang chờ duyệt\" CHƯA rút được — chỉ rút được phần đã vào Ví. Mật khẩu rút tiền khác mật khẩu đăng nhập, nhập sai 5 lần sẽ khoá 15 phút để bảo vệ bạn.",
+    a: "Cần đủ 4 điều kiện: (1) Đã thêm tài khoản ngân hàng trong Tài chính; (2) Đã đặt mật khẩu rút tiền 4-6 chữ số; (3) Có ít nhất 1 đơn đã hoàn tiền (mua sắm thật qua link V-Affiliate) để mở khoá rút — tiền thưởng chào mừng, streak, vòng quay vẫn được giữ nguyên trong ví; (4) Số dư ví đủ mức tối thiểu (mặc định 50.000đ). Lưu ý: tiền ở mục \"Đang chờ duyệt\" CHƯA rút được — chỉ rút được phần đã vào Ví. Mật khẩu rút tiền khác mật khẩu đăng nhập, nhập sai 5 lần sẽ khoá 15 phút để bảo vệ bạn.",
   },
   {
     q: "Lỡ quên mật khẩu / nhập sai nhiều lần thì sao?",
@@ -90,7 +87,6 @@ const FAQS: FAQ[] = [
 ];
 
 export default function HelpPage() {
-  const router = useRouter();
   const toast = useToast();
   const [openFAQ, setOpenFAQ] = useState<number | null>(0);
   const [showContact, setShowContact] = useState(false);
@@ -110,26 +106,7 @@ export default function HelpPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50/40 via-gray-50 to-gray-50 dark:from-zinc-950 dark:via-zinc-950 dark:to-black">
-      <header className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-gray-200/60 dark:border-zinc-800 sticky top-0 z-30">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
-          <button onClick={() => router.push("/dashboard")} className="cursor-pointer shrink-0" title="Về trang chủ">
-            <CaffiliateLogo />
-          </button>
-          <div className="flex-1 flex justify-center">
-            <DashboardNavIcons />
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <ThemeToggleButton />
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="hidden md:flex items-center gap-1.5 text-sm text-gray-500 hover:text-orange-500 dark:text-zinc-400 font-medium transition-colors"
-            >
-              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
-              Dashboard
-            </button>
-          </div>
-        </div>
-      </header>
+      <DashboardHeader />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-24 md:pb-8 space-y-8">
         <div>

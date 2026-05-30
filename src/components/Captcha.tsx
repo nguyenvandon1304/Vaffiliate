@@ -36,7 +36,11 @@ export interface CaptchaProps {
 
 export function Captcha({ onVerify, onToken, action, ref, className }: CaptchaProps) {
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-  if (siteKey) {
+  // Cho phép tắt Turnstile ở local dev (widget Cloudflare không load được trên
+  // localhost) → fallback về captcha SVG tự sinh. Bật bằng cách set
+  // NEXT_PUBLIC_DISABLE_TURNSTILE=1 trong .env.local.
+  const disabled = process.env.NEXT_PUBLIC_DISABLE_TURNSTILE === "1";
+  if (siteKey && !disabled) {
     return (
       <TurnstileCaptcha
         siteKey={siteKey}

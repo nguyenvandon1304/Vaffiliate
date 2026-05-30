@@ -2,15 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CaffiliateLogo } from "@/components/icons";
-import { DashboardNavIcons } from "@/components/DashboardNavIcons";
+import { DashboardHeader } from "@/components/DashboardHeader";
 import { EmptyState } from "@/components/EmptyState";
 import { Modal } from "@/components/Modal";
 import { ProgressRing } from "@/components/ProgressRing";
 import { ShareMenu } from "@/components/ShareMenu";
 import { PageSkeleton } from "@/components/Skeleton";
 import { QrCode } from "@/components/QrCode";
-import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { useToast } from "@/components/Toast";
 
 interface Stats {
@@ -141,26 +139,7 @@ export default function ReferralPage() {
         <div className="absolute top-20 right-1/3 text-2xl text-orange-200/40 dark:text-orange-900/20">★</div>
       </div>
 
-      <header className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-gray-200/60 dark:border-zinc-800 sticky top-0 z-30">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
-          <button onClick={() => router.push("/dashboard")} className="cursor-pointer shrink-0" title="Về trang chủ">
-            <CaffiliateLogo />
-          </button>
-          <div className="flex-1 flex justify-center">
-            <DashboardNavIcons />
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <ThemeToggleButton />
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="hidden md:flex items-center gap-1.5 text-sm text-gray-500 hover:text-orange-500 dark:text-zinc-400 font-medium transition-colors"
-            >
-              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
-              Dashboard
-            </button>
-          </div>
-        </div>
-      </header>
+      <DashboardHeader />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 pb-24 md:pb-6 space-y-6">
         {/* Breadcrumb */}
