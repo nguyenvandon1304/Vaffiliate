@@ -22,66 +22,70 @@ const STEPS: Step[] = [
     num: 1,
     title: "Đăng ký tài khoản",
     icon: "📧",
-    body: "Bấm Đăng ký → nhập tên đăng nhập, email và mật khẩu. Sau đó mở email vừa nhập để bấm vào nút xác thực (link gửi đến hộp thư). Nếu không thấy mail trong 1-2 phút, kiểm tra hộp Spam/Quảng cáo. Xác thực xong là đăng nhập được ngay.",
+    body: "Bấm Đăng ký → nhập tên đăng nhập, email và mật khẩu. Hoặc nhanh hơn: bấm \"Tiếp tục với Google\" để đăng nhập 1 chạm bằng Gmail. Nếu đăng ký bằng email, mở hộp thư bấm nút xác thực (kiểm tra cả mục Spam/Quảng cáo nếu chưa thấy sau 1-2 phút). Xong là dùng được ngay!",
   },
   {
     num: 2,
-    title: "Lấy link hoàn tiền cho sản phẩm",
+    title: "Tạo link hoàn tiền cho sản phẩm",
     icon: "🔗",
-    body: "Bạn thấy món đồ thích trên Shopee? Copy đường link sản phẩm đó (ở app Shopee bấm Chia sẻ → Sao chép link, hoặc trên web copy thanh địa chỉ). Vào Công cụ hoàn tiền của V-Affiliate → dán link → bấm Lấy Link. Bạn sẽ có 1 link mới riêng của mình — mua qua link này sẽ được hoàn tiền.",
+    body: "Thấy món đồ ưng ý trên Shopee? Ở app Shopee bấm Chia sẻ → Sao chép link (hoặc copy link trên web). Vào \"Tạo link\" của V-Affiliate → dán link → bấm Lấy Link. Trong vài giây bạn có ngay link hoàn tiền riêng + thấy luôn số tiền sẽ được hoàn về ví.",
   },
   {
     num: 3,
-    title: "Mua hàng qua link mới",
+    title: "Bấm MUA NGAY để mua",
     icon: "🛍",
-    body: "Bấm nút Mua Ngay (hoặc copy link mới rồi dán vào bài viết từ Facebook rồi nhấn vào mua sẽ được nhận voucher từ 20% đến 25% từ mạng xã hội). Mua hàng và thanh toán bình thường như mọi khi. Lưu ý quan trọng: SAU khi bấm link của V-Affiliate, đừng mở thêm Shopee từ chỗ khác (Google, Messenger, app...) vì sẽ mất quyền hoàn tiền của đơn đó.",
+    body: "Bấm nút MUA NGAY → mở thẳng app Shopee, mua và thanh toán như bình thường. Mẹo: ở bước thanh toán, mở mục \"Shopee Voucher\" — nếu sản phẩm có voucher Social Media (giảm tới 22%) thì chọn để giảm thêm. Nên mua trên app điện thoại để thấy voucher đầy đủ. ⚠️ Quan trọng: sau khi bấm link V-Affiliate, đừng mở lại Shopee từ chỗ khác (Google, Messenger...) kẻo mất quyền hoàn tiền của đơn đó.",
   },
   {
     num: 4,
-    title: "Chờ đơn được duyệt + nhận tiền",
+    title: "Chờ đơn duyệt → tiền về ví",
     icon: "⏳",
-    body: "Đơn vừa đặt sẽ ở trạng thái 'Đang xử lý'. Khi bạn nhận hàng và không trả lại, sau khoảng 1-90 ngày (tuỳ chính sách Shopee), đơn chuyển sang 'Đã hoàn tiền' và 50% hoa hồng tự động cộng vào Ví của bạn trên V-Affiliate.",
+    body: "Đơn vừa đặt sẽ hiện ở mục \"Đang chờ duyệt\" — đây là cashback đang chờ Shopee xác nhận, CHƯA rút được. Khi bạn nhận hàng và không trả lại (thường 7-15 ngày, tối đa 90 ngày tuỳ Shopee), đơn chuyển sang \"Đã hoàn tiền\" và tiền tự động cộng vào Ví — lúc này mới rút được.",
   },
   {
     num: 5,
-    title: "Rút tiền về tài khoản ngân hàng",
+    title: "Rút tiền về ngân hàng",
     icon: "💸",
-    body: "Vào Tài chính → Thêm tài khoản ngân hàng (chỉ làm 1 lần đầu) → đặt mật khẩu rút tiền 4-6 chữ số. Khi ví đủ số dư tối thiểu, bấm Rút tiền → nhập số tiền + mật khẩu rút → đợi 1-2 ngày làm việc → tiền chuyển về tài khoản ngân hàng của bạn.",
+    body: "Vào Tài chính → Thêm tài khoản ngân hàng (chỉ làm 1 lần) → đặt mật khẩu rút tiền 4-6 chữ số. Khi ví đủ số dư tối thiểu, bấm Rút tiền → nhập số tiền + mật khẩu rút → admin duyệt và chuyển khoản, tiền về tài khoản của bạn trong 1-2 ngày làm việc. Hoàn toàn miễn phí!",
   },
 ];
 
 const FAQS: FAQ[] = [
   {
     q: "Tôi được hoàn lại bao nhiêu tiền?",
-    a: "Mỗi đơn hàng bạn được nhận 50% số hoa hồng mà Shopee trả. Số hoa hồng tuỳ shop và sản phẩm (thường 1-15% giá trị đơn). Khi bạn mời được 50 người bạn cùng mua hàng qua link, tỷ lệ hoàn tiền của bạn tự động tăng lên 55%.",
+    a: "Bạn nhận lại phần lớn hoa hồng mà Shopee trả cho mỗi đơn — bắt đầu từ 50% (hạng Bronze). Càng mua nhiều hoặc mời nhiều bạn, hạng càng cao và cashback càng tăng: 🥈 Silver 53% · 🥇 Gold 55% · 💎 VIP 58%, áp dụng vĩnh viễn cho MỌI đơn về sau. Hoa hồng tuỳ shop & sản phẩm (thường 1-15% giá trị đơn), một số đơn còn kèm voucher Shopee giảm thêm tới 22%.",
   },
   {
     q: "Bao lâu tiền mới về ví?",
-    a: "Thường 7-15 ngày sau khi bạn nhận hàng và xác nhận trên Shopee. Một số đơn có thể lâu hơn (đến 90 ngày) nếu bạn yêu cầu đổi/trả hàng. Bạn có thể xem trạng thái đơn trong tab Đơn hàng.",
+    a: "Thường 7-15 ngày sau khi bạn nhận hàng và Shopee xác nhận đơn. Một số đơn có thể lâu hơn (đến 90 ngày) nếu có đổi/trả. Trong lúc chờ, cashback hiện ở mục \"Đang chờ duyệt\" trên Dashboard — khi Shopee duyệt xong, tiền tự động chuyển vào Ví và bạn rút được ngay.",
   },
   {
     q: "Tôi đã mua hàng rồi mà không thấy đơn nào trên V-Affiliate?",
-    a: "Có 4 lý do phổ biến: (1) Sau khi bấm link của V-Affiliate, bạn lại mở Shopee từ chỗ khác (Google search, Messenger...) → bị mất quyền hoàn tiền; (2) Trình duyệt chặn cookie; (3) Đơn bị huỷ hoặc trả hàng; (4) Shop đó không tham gia chương trình affiliate. Hãy thử mua đơn khác và làm đúng theo hướng dẫn.",
+    a: "Đơn KHÔNG xuất hiện ngay sau khi mua — V-Affiliate cần đối soát dữ liệu từ Shopee (thường 1-3 ngày) rồi đơn mới hiện ở mục \"Đang chờ duyệt\". Nếu sau đó vẫn không thấy, có thể do: (1) Sau khi bấm link V-Affiliate bạn lại mở Shopee từ chỗ khác (Google, Messenger...) → mất tracking; (2) Trình duyệt chặn cookie; (3) Đơn bị huỷ/trả hàng; (4) Shop không tham gia affiliate. Hãy thử đơn mới và làm đúng hướng dẫn nhé.",
+  },
+  {
+    q: "Voucher giảm 22% là gì? Đơn nào cũng có không?",
+    a: "Một số sản phẩm khi mua qua link V-Affiliate sẽ được Shopee tặng thêm voucher \"Social Media\" giảm tới 22%. Voucher này tuỳ sản phẩm + tuỳ thời điểm (Shopee quyết định), KHÔNG phải đơn nào cũng có. Cách dùng: bấm MUA NGAY → vào app Shopee → ở bước thanh toán mở mục \"Shopee Voucher\" → nếu có thì chọn. Quan trọng: dù có voucher hay không, bạn LUÔN nhận hoàn tiền về ví.",
   },
   {
     q: "Tại sao tôi không rút được tiền?",
-    a: "Cần làm đủ 3 bước: (1) Thêm tài khoản ngân hàng trong Tài chính; (2) Đặt mật khẩu rút tiền 4-6 chữ số; (3) Số tiền trong ví phải đủ tối thiểu (50.000đ mặc định). Mật khẩu rút tiền khác mật khẩu đăng nhập — nếu nhập sai 5 lần sẽ bị khoá 15 phút.",
+    a: "Cần đủ 3 điều kiện: (1) Đã thêm tài khoản ngân hàng trong Tài chính; (2) Đã đặt mật khẩu rút tiền 4-6 chữ số; (3) Số dư ví đủ mức tối thiểu (mặc định 50.000đ). Lưu ý: tiền ở mục \"Đang chờ duyệt\" CHƯA rút được — chỉ rút được phần đã vào Ví. Mật khẩu rút tiền khác mật khẩu đăng nhập, nhập sai 5 lần sẽ khoá 15 phút để bảo vệ bạn.",
   },
   {
     q: "Lỡ quên mật khẩu / nhập sai nhiều lần thì sao?",
-    a: "Quên mật khẩu: bấm Quên mật khẩu ở trang đăng nhập → nhập email → mở email để đặt mật khẩu mới. Nhập sai 10 lần liên tiếp: tài khoản tự khoá 15 phút để chống bị hack — đợi 15 phút rồi thử lại.",
+    a: "Quên mật khẩu: bấm \"Quên mật khẩu\" ở trang đăng nhập → nhập email → mở hộp thư đặt mật khẩu mới. Nhập sai 10 lần liên tiếp: tài khoản tự khoá 15 phút chống hack — cứ đợi 15 phút rồi thử lại. Đăng nhập bằng Google thì không lo quên mật khẩu nhé!",
   },
   {
     q: "Bảo vệ tài khoản tốt nhất bằng cách nào?",
-    a: "Bật Xác thực 2 lớp (2FA). Vào Bảo mật → Bật 2FA → cài app Google Authenticator → quét mã QR. Sau khi bật, mỗi lần đăng nhập sẽ cần thêm 6 chữ số từ app — kẻ gian biết mật khẩu cũng không vào được. Khuyên dùng nếu ví có nhiều tiền.",
+    a: "Bật Xác thực 2 lớp (2FA): vào Bảo mật → Bật 2FA → cài app Google Authenticator → quét mã QR. Sau khi bật, mỗi lần đăng nhập cần thêm 6 chữ số từ app — kẻ gian biết mật khẩu cũng không vào được. Rất nên bật khi ví có nhiều tiền.",
   },
   {
     q: "Mời bạn bè được lợi gì?",
-    a: "Vào Giới thiệu bạn bè → copy link cá nhân → gửi cho bạn bè qua Zalo/Facebook/SMS. Khi đủ 50 người bạn đăng ký qua link và mỗi người có ít nhất 1 đơn hoàn tiền, tỷ lệ cashback của bạn tự động tăng từ 50% lên 55% — áp dụng vĩnh viễn cho mọi đơn về sau.",
+    a: "Vào \"Giới thiệu bạn bè\" → copy link cá nhân → gửi qua Zalo/Facebook/SMS. Mỗi người bạn mời đăng ký và có đơn đầu tiên sẽ giúp bạn tiến gần hơn tới hạng cao: đủ 25 bạn active → lên 🥈 Silver (53%), 50 bạn → 🥇 Gold (55%), 100 bạn → 💎 VIP (58%). Cashback tăng áp dụng vĩnh viễn cho mọi đơn — mời càng nhiều, lời càng lớn!",
   },
   {
-    q: "Tôi có cần phải làm gì sau khi đặt đơn không?",
-    a: "Không cần làm gì cả. V-Affiliate sẽ tự nhận thông báo từ Shopee và cập nhật đơn hàng cho bạn. Bạn chỉ cần kiểm tra tab Đơn hàng để theo dõi tiến độ. Khi đơn được duyệt, tiền tự cộng vào ví.",
+    q: "Tôi có cần làm gì sau khi đặt đơn không?",
+    a: "Không cần làm gì cả! V-Affiliate tự đối soát với Shopee và cập nhật đơn cho bạn. Bạn chỉ cần thỉnh thoảng ghé tab Đơn hàng để theo dõi. Khi đơn được duyệt, tiền tự cộng vào ví và bạn nhận được thông báo ngay. Ngồi chờ tiền về thôi! 💰",
   },
 ];
 
