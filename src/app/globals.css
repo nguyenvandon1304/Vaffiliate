@@ -612,12 +612,27 @@
   }
 
   /* ── Buttons ── */
-  /* Primary CTA — cam đặc, dùng cho hành động chính duy nhất mỗi khối */
+  /* Primary CTA — cam đặc, dùng cho hành động chính duy nhất mỗi khối.
+   * Có chiều sâu 3D: bóng đáy + lún khi nhấn (cảm giác phím vật lý). */
   .vfa-btn-primary {
     @apply inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600
-           text-white font-bold rounded-lg px-4 py-2 shadow-sm transition-all
-           hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed
-           disabled:hover:scale-100 touch-manipulation;
+           text-white font-bold rounded-lg px-4 py-2
+           disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation;
+    position: relative;
+    transition: transform 120ms cubic-bezier(0.2, 0.7, 0.3, 1), box-shadow 120ms ease, background-color 150ms ease;
+    box-shadow: 0 4px 0 -1px rgba(154, 52, 18, 0.45), 0 6px 14px -4px rgba(234, 88, 12, 0.45);
+  }
+  .vfa-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 0 -1px rgba(154, 52, 18, 0.5), 0 9px 18px -5px rgba(234, 88, 12, 0.55);
+  }
+  .vfa-btn-primary:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 -1px rgba(154, 52, 18, 0.5), 0 2px 6px -3px rgba(234, 88, 12, 0.5);
+  }
+  .vfa-btn-primary:disabled {
+    transform: none;
+    box-shadow: 0 2px 0 -1px rgba(154, 52, 18, 0.25);
   }
   /* Secondary — nền trắng / viền, dùng cho hành động phụ */
   .vfa-btn-secondary {
@@ -646,4 +661,84 @@
 :where(.dark) .vfa-card-interactive {
   background-color: #18181b;
   border-color: #1f1f23;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+ * HIỆU ỨNG 3D — tạo cảm giác app "xịn", chiều sâu vật lý.
+ * Nguyên tắc: biên độ nhỏ, mượt, tôn trọng prefers-reduced-motion.
+ * ═══════════════════════════════════════════════════════════════════ */
+
+/* 1) Tilt card — transition mượt khi rời chuột (về phẳng). */
+.tilt-3d {
+  transition: transform 350ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* 2) Nút có chiều sâu — bóng đáy + lún khi nhấn (cảm giác phím vật lý). */
+.btn-3d {
+  position: relative;
+  transition: transform 120ms cubic-bezier(0.2, 0.7, 0.3, 1),
+              box-shadow 120ms ease;
+  box-shadow: 0 4px 0 -1px rgba(0, 0, 0, 0.18), 0 6px 14px -4px rgba(234, 88, 12, 0.45);
+  transform: translateY(0);
+}
+.btn-3d:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 0 -1px rgba(0, 0, 0, 0.2), 0 9px 18px -5px rgba(234, 88, 12, 0.55);
+}
+.btn-3d:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 -1px rgba(0, 0, 0, 0.2), 0 2px 6px -3px rgba(234, 88, 12, 0.5);
+}
+
+/* 3) Coin flip 3D — đồng xu / huy hiệu lật quanh trục Y. */
+@keyframes coin-flip {
+  0%   { transform: perspective(400px) rotateY(0deg); }
+  100% { transform: perspective(400px) rotateY(360deg); }
+}
+.coin-3d {
+  animation: coin-flip 3.5s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  transform-style: preserve-3d;
+  backface-visibility: visible;
+}
+/* Chỉ flip khi hover (cho icon tĩnh) */
+.coin-3d-hover {
+  transform-style: preserve-3d;
+  transition: transform 600ms cubic-bezier(0.45, 0.05, 0.55, 0.95);
+}
+.group:hover .coin-3d-hover,
+.coin-3d-hover:hover {
+  transform: perspective(400px) rotateY(360deg);
+}
+
+/* 4) Parallax orb — quầng sáng trôi chậm tạo lớp chiều sâu khi cuộn/hover. */
+@keyframes orb-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(6px, -10px, 0) scale(1.05); }
+}
+.orb-parallax {
+  animation: orb-drift 9s ease-in-out infinite;
+  will-change: transform;
+}
+.orb-parallax-slow {
+  animation: orb-drift 14s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* 5) Số tiền nổi — text có chiều sâu nhẹ qua text-shadow layered (chỉ light). */
+.text-3d-amount {
+  text-shadow: 0 1px 0 rgba(234, 88, 12, 0.15), 0 2px 4px rgba(234, 88, 12, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tilt-3d,
+  .btn-3d,
+  .coin-3d,
+  .coin-3d-hover,
+  .orb-parallax,
+  .orb-parallax-slow {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Tilt3D } from "@/components/Tilt3D";
 
 interface WalletHeroProps {
   /** Số dư khả dụng (đ). */
@@ -49,13 +50,14 @@ export function WalletHero({ balance, pendingWithdraw, totalWithdrawn, totalCash
   const lifetimeSaved = totalCashback > 0 ? totalCashback : totalWithdrawn;
 
   return (
+    <Tilt3D max={6} lift={5} glare className="rounded-3xl">
     <div className="relative overflow-hidden rounded-3xl border border-orange-100 dark:border-orange-500/25 shadow-sm dark:shadow-lg dark:shadow-orange-950/30 animate-tier-card-in">
       {/* ═══ Background — nền kem sáng (light) / tối pha cam ấm (dark) ═══ */}
       <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/40 dark:via-zinc-900 dark:to-amber-950/30" />
       {/* Top-right glow orb */}
-      <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-orange-200/40 dark:bg-orange-500/15 blur-3xl animate-tier-float" />
+      <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-orange-200/40 dark:bg-orange-500/15 blur-3xl orb-parallax" />
       {/* Bottom-left glow orb */}
-      <div className="absolute -bottom-20 -left-10 w-48 h-48 rounded-full bg-amber-200/40 dark:bg-amber-500/10 blur-3xl" />
+      <div className="absolute -bottom-20 -left-10 w-48 h-48 rounded-full bg-amber-200/40 dark:bg-amber-500/10 blur-3xl orb-parallax-slow" />
       {/* Soft inner highlight */}
       <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/40 dark:from-white/[0.03] to-transparent" />
 
@@ -139,5 +141,6 @@ export function WalletHero({ balance, pendingWithdraw, totalWithdrawn, totalCash
         </div>
       </div>
     </div>
+    </Tilt3D>
   );
 }

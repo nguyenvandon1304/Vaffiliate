@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { UserTierInfo } from "@/lib/tier";
+import { Tilt3D } from "@/components/Tilt3D";
 
 interface StreakInfo {
   currentStreak: number;
@@ -63,7 +64,8 @@ export function JourneyStrip({ tierInfo }: JourneyStripProps) {
     : 0;
 
   return (
-    <section className="vfa-card mb-6 p-5 sm:p-6 overflow-hidden">
+    <Tilt3D max={4} lift={3} className="mb-6">
+    <section className="vfa-card p-5 sm:p-6 overflow-hidden">
       {/* Header + mạch tóm tắt */}
       <div className="flex items-center gap-2 mb-1">
         <span className="text-xl">🚀</span>
@@ -126,6 +128,7 @@ export function JourneyStrip({ tierInfo }: JourneyStripProps) {
         />
       </div>
     </section>
+    </Tilt3D>
   );
 }
 
@@ -151,11 +154,9 @@ function JourneyNode({ emoji, ring, title, big, sub, progress, onClick }: NodePr
         clickable ? "cursor-pointer group" : ""
       }`}
     >
-      {/* Icon ring */}
+      {/* Icon ring — lật 3D như đồng xu khi hover */}
       <div
-        className={`relative z-10 w-[68px] h-[68px] rounded-full bg-gradient-to-br ${ring} flex items-center justify-center text-3xl text-white shadow-sm ${
-          clickable ? "transition-transform group-hover:scale-105" : ""
-        }`}
+        className={`relative z-10 w-[68px] h-[68px] rounded-full bg-gradient-to-br ${ring} flex items-center justify-center text-3xl text-white shadow-sm coin-3d-hover`}
       >
         {emoji}
       </div>

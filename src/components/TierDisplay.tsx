@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AchievementShareButton } from "@/components/AchievementShareButton";
+import { Tilt3D } from "@/components/Tilt3D";
 
 interface Tier {
   code: "bronze" | "silver" | "gold" | "vip";
@@ -233,12 +234,12 @@ export function TierPill({ info, onClick }: { info: TierInfo | null; onClick?: (
 /** Medal icon: gradient ring + glow + tilt. */
 function MedalIcon({ theme }: { theme: TierTheme }) {
   return (
-    <div className="relative shrink-0">
+    <div className="relative shrink-0 group/medal">
       <div
         className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br ${theme.medalRing} p-[3px] animate-medal-glow`}
       >
         <div className={`relative w-full h-full rounded-[14px] ${theme.medalBg} flex items-center justify-center text-3xl sm:text-4xl overflow-hidden`}>
-          <span className="animate-medal-tilt drop-shadow-md">{theme.medalIcon}</span>
+          <span className="drop-shadow-md transition-transform duration-700 [transform-style:preserve-3d] group-hover/medal:[transform:perspective(400px)_rotateY(360deg)]">{theme.medalIcon}</span>
           {/* Inner shimmer accross medal */}
           <span className="pointer-events-none absolute inset-0 -translate-x-full animate-progress-shimmer">
             <span className={`block w-1/2 h-full bg-gradient-to-r ${theme.shimmerColor} skew-x-12`} />
@@ -304,6 +305,7 @@ export function TierHeroCard({ info, tiers, totalCashback = 0, walletBalance = 0
   const lifetimeSaved = totalCashback > 0 ? totalCashback : walletBalance;
 
   return (
+    <Tilt3D max={5} lift={4} glare className="rounded-3xl">
     <div
       className={`relative overflow-hidden rounded-3xl border border-gray-200/70 dark:border-zinc-700/60 bg-gradient-to-br ${theme.cardBg} backdrop-blur-xl p-5 sm:p-6 shadow-xl shadow-black/5 dark:shadow-black/30 animate-tier-card-in`}
     >
@@ -581,5 +583,6 @@ export function TierHeroCard({ info, tiers, totalCashback = 0, walletBalance = 0
         )}
       </div>
     </div>
+    </Tilt3D>
   );
 }
