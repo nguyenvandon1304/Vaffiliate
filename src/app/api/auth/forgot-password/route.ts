@@ -41,17 +41,18 @@ export async function POST(request: NextRequest) {
 
     const result = await createPasswordResetToken(email);
 
-    if (!result.success) {
-      return NextResponse.json({ success: true, message: "Nếu email tồn tại, chúng tôi đã gửi link đặt lại mật khẩu." });
+    // Thông điệp PHẢI giống hệt nhau cho mọi trường hợp (email tồn tại / không tồn tại
+    // / gửi mail lỗi) → chống account enumeration. Lỗi gửi mail chỉ log phía server.
+    const GENERIC = "Nếu email tồn tại trong hệ thống, chúng tôi đã gửi link đặt lại mật khẩu. Vui lòng kiểm tra hộp thư (cả mục Spam).";
+
+    if (result.success) {
+      const emailResult = await sendPasswordResetEmail(email, result.username!, result.token!);
+      if (!emailResult.success) {
+        console.error("[ForgotPassword] gửi email thất bại:", emailResult.error);
+      }
     }
 
-    const emailResult = await sendPasswordResetEmail(email, result.username!, result.token!);
-
-    if (!emailResult.success) {
-      return NextResponse.json({ success: false, error: emailResult.error }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true, message: "Chúng tôi đã gửi link đặt lại mật khẩu vào email của bạn." });
+    return NextResponse.json({ success: true, message: GENERIC });
   } catch (err) {
     console.error("[ForgotPassword] Error:", err);
     return NextResponse.json({ success: false, error: "Lỗi hệ thống. Vui lòng thử lại sau." }, { status: 500 });

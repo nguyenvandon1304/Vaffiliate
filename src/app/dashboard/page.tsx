@@ -1243,9 +1243,13 @@ function ProfileSection({ user, onProfileUpdated, onBack }: { user: UserInfo; on
   const [displayName, setDisplayName] = useState(user.display_name || "");
   const [email, setEmail] = useState(user.email || "");
   const [phone, setPhone] = useState(user.phone || "");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [profileMsg, setProfileMsg] = useState("");
   const [profileErr, setProfileErr] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Email đổi là thao tác nhạy cảm → cần nhập mật khẩu hiện tại để xác nhận.
+  const emailChanged = email.trim().toLowerCase() !== (user.email || "").toLowerCase();
 
   const handleProfileSave = async () => {
     setSaving(true);
@@ -1255,11 +1259,17 @@ function ProfileSection({ user, onProfileUpdated, onBack }: { user: UserInfo; on
       const res = await fetch("/api/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ display_name: displayName, email, phone: phone || undefined }),
+        body: JSON.stringify({
+          display_name: displayName,
+          email,
+          phone: phone || undefined,
+          ...(emailChanged ? { current_password: currentPassword } : {}),
+        }),
       });
       const data = await res.json();
       if (data.success) {
         setProfileMsg("Cập nhật thành công!");
+        setCurrentPassword("");
         onProfileUpdated();
       } else {
         setProfileErr(data.error || "Cập nhật thất bại");
@@ -1304,6 +1314,22 @@ function ProfileSection({ user, onProfileUpdated, onBack }: { user: UserInfo; on
             <label className="block text-sm font-medium text-gray-600 mb-1">Số điện thoại</label>
             <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Nhập số điện thoại" className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all" />
           </div>
+          {emailChanged && (
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Mật khẩu hiện tại <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Nhập mật khẩu để xác nhận đổi email"
+                autoComplete="current-password"
+                className="w-full px-4 py-2.5 border-2 border-amber-200 rounded-lg text-sm focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all"
+              />
+              <p className="text-[11px] text-amber-600 mt-1">🔒 Đổi email cần xác nhận mật khẩu để bảo vệ tài khoản.</p>
+            </div>
+          )}
           {profileMsg && <p className="text-sm text-green-600 font-medium">{profileMsg}</p>}
           {profileErr && <p className="text-sm text-red-500 font-medium">{profileErr}</p>}
           <button onClick={handleProfileSave} disabled={saving} className="w-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors disabled:opacity-50">

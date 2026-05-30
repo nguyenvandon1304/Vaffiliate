@@ -882,7 +882,7 @@ export async function loginUser(
 
   await database.run(
     "INSERT INTO sessions (user_id, token, expires_at, last_seen_at, ip, user_agent) VALUES (?, ?, ?, NOW(), ?, ?)",
-    [userId, token, expiresAt, meta.ip ?? null, meta.userAgent ?? null],
+    [userId, hashToken(token), expiresAt, meta.ip ?? null, meta.userAgent ?? null],
   );
   await database.run("UPDATE users SET last_login = NOW() WHERE id = ?", [userId]);
 
@@ -924,16 +924,17 @@ export async function getUserByToken(
   meta: { ip?: string; userAgent?: string } = {},
 ): Promise<User | null> {
   const database = await getDb();
+  const tokenHash = hashToken(token);
 
   const session = await database.get(
     "SELECT id, user_id, expires_at, created_at FROM sessions WHERE token = ?",
-    [token],
+    [tokenHash],
   );
   if (!session) return null;
 
   const now = Date.now();
   if (new Date(session.expires_at as Date | string).getTime() < now) {
-    await database.run("DELETE FROM sessions WHERE token = ?", [token]);
+    await database.run("DELETE FROM sessions WHERE token = ?", [tokenHash]);
     return null;
   }
 
@@ -959,7 +960,7 @@ export async function getUserByToken(
 
 export async function deleteSession(token: string): Promise<void> {
   const database = await getDb();
-  await database.run("DELETE FROM sessions WHERE token = ?", [token]);
+  await database.run("DELETE FROM sessions WHERE token = ?", [hashToken(token)]);
 }
 
 /* ─────────────── Sessions / account ─────────────── */
@@ -976,6 +977,7 @@ export interface SessionInfo {
 
 export async function listUserSessions(userId: number, currentToken?: string): Promise<SessionInfo[]> {
   const database = await getDb();
+  const currentHash = currentToken ? hashToken(currentToken) : undefined;
   const rows = await database.all(
     "SELECT id, token, ip, user_agent, created_at, last_seen_at, expires_at FROM sessions WHERE user_id = ? AND expires_at > NOW() ORDER BY last_seen_at DESC, created_at DESC",
     [userId],
@@ -987,13 +989,13 @@ export async function listUserSessions(userId: number, currentToken?: string): P
     created_at: toIso(r.created_at),
     last_seen_at: r.last_seen_at ? toIso(r.last_seen_at) : null,
     expires_at: toIso(r.expires_at),
-    is_current: !!currentToken && r.token === currentToken,
+    is_current: !!currentHash && r.token === currentHash,
   }));
 }
 
 export async function deleteOtherSessions(userId: number, keepToken: string): Promise<void> {
   const database = await getDb();
-  await database.run("DELETE FROM sessions WHERE user_id = ? AND token != ?", [userId, keepToken]);
+  await database.run("DELETE FROM sessions WHERE user_id = ? AND token != ?", [userId, hashToken(keepToken)]);
 }
 
 export async function deleteSessionById(
@@ -1036,7 +1038,7 @@ export async function changeUserPassword(
     [newHash, "", userId],
   );
   if (options.keepToken) {
-    await database.run("DELETE FROM sessions WHERE user_id = ? AND token != ?", [userId, options.keepToken]);
+    await database.run("DELETE FROM sessions WHERE user_id = ? AND token != ?", [userId, hashToken(options.keepToken)]);
   } else {
     await database.run("DELETE FROM sessions WHERE user_id = ?", [userId]);
   }
@@ -1536,6 +1538,19 @@ export async function getLeaderboard(period: "month" | "all" = "all"): Promise<L
   }));
 }
 
+/**
+ * Xác minh mật khẩu hiện tại của user — dùng cho step-up (đổi email, thao tác
+ * nhạy cảm). Trả về true nếu đúng. Lazy-rehash legacy hash nếu cần.
+ */
+export async function verifyUserPassword(userId: number, password: string): Promise<boolean> {
+  if (typeof password !== "string" || password.length === 0) return false;
+  const database = await getDb();
+  const row = await database.get("SELECT password_hash, salt FROM users WHERE id = ?", [userId]);
+  if (!row) return false;
+  const check = await verifyPassword(password, row.password_hash as string, row.salt as string | null);
+  return check.valid;
+}
+
 export async function updateUserProfile(
   userId: number,
   data: { display_name?: string; email?: string; phone?: string },
@@ -1848,7 +1863,19 @@ export async function resetWallet(username: string): Promise<{ success: boolean;
   const database = await getDb();
   const user = await database.get("SELECT id FROM users WHERE LOWER(username) = LOWER(?)", [username]);
   if (!user) return { success: false, error: "Không tìm thấy người dùng" };
-  await database.run("DELETE FROM wallet WHERE user_id = ?", [Number(user.id)]);
+  const userId = Number(user.id);
+
+  // Xoá ví + huỷ luôn các yêu cầu rút ĐANG CHỜ. Nếu chỉ xoá wallet mà để lại
+  // withdrawal pending, khi admin duyệt sau đó sẽ thiếu dòng debit tương ứng →
+  // số dư bị thổi phồng. Gói trong transaction + advisory lock cho an toàn.
+  await database.transaction(async (tx) => {
+    await tx.run("SELECT pg_advisory_xact_lock(?, ?)", [WALLET_LOCK_NAMESPACE, userId]);
+    await tx.run(
+      "UPDATE withdrawals SET status = 'rejected', admin_note = COALESCE(admin_note, 'Huỷ do reset ví'), updated_at = NOW() WHERE user_id = ? AND status IN ('pending', 'Đang xử lý')",
+      [userId],
+    );
+    await tx.run("DELETE FROM wallet WHERE user_id = ?", [userId]);
+  });
   return { success: true };
 }
 
@@ -3871,7 +3898,9 @@ export function verifyTotpCode(secret: string, code: string): boolean {
   const clean = (code || "").replace(/\s+/g, "").trim();
   if (!/^\d{6}$/.test(clean)) return false;
   const now = Date.now();
-  for (let step = -3; step <= 3; step++) {
+  // Cửa sổ ±1 step (±30s) — chuẩn RFC 6238, đủ dung sai lệch giờ mà không nới
+  // quá rộng (trước đây ±3 = ~±90s, tăng bề mặt brute-force code 6 số).
+  for (let step = -1; step <= 1; step++) {
     if (generateTotpCode(secret, now + step * 30_000) === clean) return true;
   }
   return false;
@@ -4439,7 +4468,7 @@ export async function createSessionForUser(
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
   await database.run(
     "INSERT INTO sessions (user_id, token, expires_at, last_seen_at, ip, user_agent) VALUES (?, ?, ?, NOW(), ?, ?)",
-    [userId, token, expiresAt, meta.ip ?? null, meta.userAgent ?? null],
+    [userId, hashToken(token), expiresAt, meta.ip ?? null, meta.userAgent ?? null],
   );
   await database.run("UPDATE users SET last_login = NOW() WHERE id = ?", [userId]);
   return token;
