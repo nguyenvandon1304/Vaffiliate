@@ -9,6 +9,7 @@ import { TierPill, TierHeroCard, useTierInfo } from "@/components/TierDisplay";
 import { StatCard as StatCardNew } from "@/components/StatCard";
 import { EmptyState, IllustrationBox, IllustrationLink, IllustrationWallet } from "@/components/EmptyState";
 import { WalletHero } from "@/components/WalletHero";
+import { GettingStarted } from "@/components/GettingStarted";
 import { OrderList } from "@/components/OrderCard";
 import { CommandBarTrigger } from "@/components/CommandBar";
 import { DashboardSkeleton } from "@/components/Skeleton";
@@ -717,6 +718,15 @@ function DashboardContent() {
               </div>
             </div>
           </section>
+
+          {/* Hành trình ngày đầu — chỉ hiện khi user chưa rút tiền lần nào (người mới / chưa hoàn tất 1 vòng) */}
+          {stats.totalWithdrawn === 0 && (
+            <GettingStarted
+              totalOrders={stats.totalOrders}
+              completedOrders={stats.completedOrders}
+              totalWithdrawn={stats.totalWithdrawn}
+            />
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
             {/* Cột chính (3/5) — Đơn hàng + Đối tác */}
