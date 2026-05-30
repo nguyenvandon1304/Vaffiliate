@@ -642,11 +642,11 @@ function DashboardContent() {
 
           {/* Welcome Banner — thay cho phần "Bảng Xếp Hạng" cũ.
               Nội dung: lời chào + nhắc tỷ lệ 50% hoàn + 2 CTA (tạo link / mời bạn bè). */}
-          <section className="mb-6 relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-50 to-amber-50 dark:from-gray-800 dark:to-gray-800 border border-orange-100 dark:border-gray-700 shadow-sm">
-            {/* Decorative shapes — chỉ là chấm phá màu cam thật mờ, không gắt */}
-            <div className="pointer-events-none absolute -top-10 -right-10 w-40 h-40 rounded-full bg-orange-200/30 dark:bg-orange-500/10" />
-            <div className="pointer-events-none absolute -bottom-12 right-24 w-24 h-24 rounded-full bg-amber-200/30 dark:bg-amber-500/10" />
-            <div className="pointer-events-none absolute top-1/2 right-8 text-orange-300/50 dark:text-orange-500/30 text-xl">★</div>
+          <section className="mb-6 relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/40 dark:via-gray-900 dark:to-amber-950/30 border border-orange-100 dark:border-orange-500/25 shadow-sm dark:shadow-lg dark:shadow-orange-950/30">
+            {/* Decorative shapes — chấm phá màu cam mờ; ở dark sáng hơn chút để tạo điểm nhấn */}
+            <div className="pointer-events-none absolute -top-10 -right-10 w-40 h-40 rounded-full bg-orange-200/30 dark:bg-orange-500/20 dark:blur-2xl" />
+            <div className="pointer-events-none absolute -bottom-12 right-24 w-24 h-24 rounded-full bg-amber-200/30 dark:bg-amber-500/15 dark:blur-2xl" />
+            <div className="pointer-events-none absolute top-1/2 right-8 text-orange-300/50 dark:text-orange-400/40 text-xl">★</div>
 
             <div className="relative p-6 sm:p-7 flex flex-col sm:flex-row items-start sm:items-center gap-5">
               {/* Avatar circle — điểm nhấn cam duy nhất trên nền sáng */}
@@ -676,7 +676,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/referral")}
-                    className="inline-flex items-center gap-2 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                    className="inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-gray-50 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
                   >
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -688,7 +688,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/spin")}
-                    className="inline-flex items-center gap-2 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                    className="inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-gray-50 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
                     title="Vòng quay may mắn — đổi lượt từ đơn hàng & mời bạn"
                   >
                     <span className="text-base">🎰</span>
@@ -696,7 +696,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/wishlist")}
-                    className="inline-flex items-center gap-2 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                    className="inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-gray-50 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
                     title="Wishlist — theo dõi giá Shopee"
                   >
                     <span className="text-base">❤️</span>
@@ -704,7 +704,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/help")}
-                    className="inline-flex items-center gap-2 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                    className="inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-gray-50 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
                   >
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />
