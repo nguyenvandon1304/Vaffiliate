@@ -86,10 +86,18 @@ npm run test:e2e
 
 - Test trong `e2e/`, chạy trên Chromium (đã `npx playwright install chromium`).
 - Tự khởi động dev server (`reuseExistingServer: true` nếu đã chạy).
-- Phủ smoke quan trọng: trang chủ load, form đăng nhập/đăng ký, đăng nhập sai
-  không vào được dashboard, auth gating (`/dashboard` redirect, API 401/200).
-- Cố ý KHÔNG test flow phụ thuộc API ngoài (Shopee/GoAffiliate) hay email thật
-  để tránh flaky. Selector dùng placeholder cho ổn định.
+- Phủ:
+  - **public**: trang chủ load, form đăng nhập/đăng ký, đăng nhập sai không vào
+    được dashboard, auth gating (`/dashboard` redirect, API 401/200).
+  - **admin** (`setup` đăng nhập admin → đi qua **cả 16 tab** admin, assert không
+    lỗi/5xx).
+  - **user** (`user-setup` tạo + đăng nhập user → đi qua các trang dashboard:
+    overview/orders/wallet/link-history/cashback/referral/help/spin/wishlist/
+    security; `user-teardown` xoá user test sau khi xong).
+- Đăng nhập trong E2E đọc mã captcha SVG fallback (local, `DISABLE_TURNSTILE=1`).
+  Session lưu vào `e2e/.auth/*.json` (đã gitignore) để tái dùng, không login lại
+  từng test.
+- Cố ý KHÔNG test flow phụ thuộc API ngoài (Shopee/GoAffiliate) hay email thật.
 
 ## Việc nên làm tiếp (chưa làm)
 

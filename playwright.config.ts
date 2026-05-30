@@ -29,6 +29,12 @@ export default defineConfig({
   projects: [
     { name: "setup", testMatch: /auth\.setup\.ts/ },
     {
+      name: "user-setup",
+      testMatch: /user\.setup\.ts/,
+      teardown: "user-teardown",
+    },
+    { name: "user-teardown", testMatch: /user\.teardown\.ts/ },
+    {
       name: "public",
       testMatch: /smoke\.spec\.ts/,
       use: { ...devices["Desktop Chrome"] },
@@ -38,6 +44,12 @@ export default defineConfig({
       testMatch: /admin-tabs\.spec\.ts/,
       dependencies: ["setup"],
       use: { ...devices["Desktop Chrome"], storageState: "e2e/.auth/admin.json" },
+    },
+    {
+      name: "user",
+      testMatch: /user-dashboard\.spec\.ts/,
+      dependencies: ["user-setup"],
+      use: { ...devices["Desktop Chrome"], storageState: "e2e/.auth/user.json" },
     },
   ],
   webServer: {
