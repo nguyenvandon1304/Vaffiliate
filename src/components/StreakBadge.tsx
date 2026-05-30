@@ -59,15 +59,18 @@ export function StreakBadge() {
 
       {open && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-md sm:p-4 animate-in fade-in duration-150"
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-md max-h-[90vh] flex flex-col bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-gray-200/70 dark:border-zinc-700 overflow-hidden animate-in zoom-in-95 fade-in duration-200"
+            className="w-full sm:max-w-md max-h-[88vh] sm:max-h-[90vh] flex flex-col bg-white dark:bg-zinc-900 rounded-t-3xl sm:rounded-2xl shadow-2xl border border-gray-200/70 dark:border-zinc-700 overflow-hidden animate-in slide-in-from-bottom-4 sm:zoom-in-95 fade-in duration-200"
+            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header gradient cam-vàng */}
-            <div className="shrink-0 bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 px-6 pt-6 pb-7 text-white relative overflow-hidden">
+            <div className="shrink-0 bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 px-6 pt-5 pb-7 text-white relative overflow-hidden">
+              {/* Grab handle — chỉ mobile (bottom-sheet) */}
+              <div className="sm:hidden mx-auto mb-3 w-10 h-1 rounded-full bg-white/40" />
               <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-yellow-300/30 blur-2xl pointer-events-none" />
               <div className="absolute -bottom-12 -left-8 w-32 h-32 rounded-full bg-orange-300/20 blur-2xl pointer-events-none" />
               <button
@@ -109,7 +112,7 @@ export function StreakBadge() {
             </div>
 
             {/* Body */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+            <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4">
               {info.nextMilestone ? (
                 <div className="rounded-xl bg-orange-50/70 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 p-4">
                   <div className="flex items-center justify-between text-xs mb-2">
