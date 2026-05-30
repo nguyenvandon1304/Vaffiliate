@@ -759,7 +759,7 @@ function ImportSection(props: Omit<ImportSectionProps, "importParsedT">) {
       {importResult && (
         <div className="mt-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
           <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Kết quả Import</h3>
-          <div className="grid grid-cols-5 gap-3 mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
             <ResultCard color="blue" label="Tổng dòng" value={importResult.total} />
             <ResultCard color="green" label="Match thành công" value={importResult.matched} />
             <ResultCard color="cyan" label="Cập nhật" value={importResult.updated} />

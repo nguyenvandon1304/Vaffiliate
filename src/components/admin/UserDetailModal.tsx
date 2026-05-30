@@ -217,6 +217,7 @@ function OverviewSection({ data }: { data: Detail }) {
 function OrdersSection({ rows }: { rows: Record<string, unknown>[] }) {
   if (rows.length === 0) return <p className="text-xs text-gray-400">Chưa có đơn</p>;
   return (
+    <div className="overflow-x-auto">
     <table className="w-full text-xs">
       <thead className="text-gray-500 dark:text-gray-400">
         <tr><th className="text-left py-1">Mã đơn</th><th className="text-left">Cửa hàng</th><th className="text-right">Tổng</th><th className="text-right">Hoàn</th><th className="text-center">Trạng thái</th><th className="text-right">Ngày</th></tr>
@@ -234,12 +235,14 @@ function OrdersSection({ rows }: { rows: Record<string, unknown>[] }) {
         ))}
       </tbody>
     </table>
+    </div>
   );
 }
 
 function WalletSection({ rows }: { rows: Record<string, unknown>[] }) {
   if (rows.length === 0) return <p className="text-xs text-gray-400">Chưa có giao dịch</p>;
   return (
+    <div className="overflow-x-auto">
     <table className="w-full text-xs">
       <thead className="text-gray-500 dark:text-gray-400">
         <tr><th className="text-left py-1">Diễn giải</th><th className="text-right">Số tiền</th><th className="text-center">Loại</th><th className="text-right">Ngày</th></tr>
@@ -257,12 +260,14 @@ function WalletSection({ rows }: { rows: Record<string, unknown>[] }) {
         ))}
       </tbody>
     </table>
+    </div>
   );
 }
 
 function BankSection({ rows }: { rows: Record<string, unknown>[] }) {
   if (rows.length === 0) return <p className="text-xs text-gray-400">Chưa có TK ngân hàng</p>;
   return (
+    <div className="overflow-x-auto">
     <table className="w-full text-xs">
       <thead className="text-gray-500 dark:text-gray-400">
         <tr><th className="text-left py-1">Ngân hàng</th><th className="text-left">STK</th><th className="text-left">Chủ TK</th><th className="text-center">Mặc định</th></tr>
@@ -278,12 +283,14 @@ function BankSection({ rows }: { rows: Record<string, unknown>[] }) {
         ))}
       </tbody>
     </table>
+    </div>
   );
 }
 
 function WithdrawSection({ rows }: { rows: Record<string, unknown>[] }) {
   if (rows.length === 0) return <p className="text-xs text-gray-400">Chưa có yêu cầu rút</p>;
   return (
+    <div className="overflow-x-auto">
     <table className="w-full text-xs">
       <thead className="text-gray-500 dark:text-gray-400">
         <tr><th className="text-right py-1">Số tiền</th><th className="text-left">Bank</th><th className="text-center">Trạng thái</th><th>Ghi chú</th><th className="text-right">Ngày</th></tr>
@@ -300,12 +307,14 @@ function WithdrawSection({ rows }: { rows: Record<string, unknown>[] }) {
         ))}
       </tbody>
     </table>
+    </div>
   );
 }
 
 function SessionSection({ rows }: { rows: Record<string, unknown>[] }) {
   if (rows.length === 0) return <p className="text-xs text-gray-400">Không có phiên đang mở</p>;
   return (
+    <div className="overflow-x-auto">
     <table className="w-full text-xs">
       <thead className="text-gray-500 dark:text-gray-400">
         <tr><th className="text-left py-1">IP</th><th className="text-left">User Agent</th><th className="text-right">Last seen</th><th className="text-right">Hết hạn</th></tr>
@@ -323,5 +332,6 @@ function SessionSection({ rows }: { rows: Record<string, unknown>[] }) {
         ))}
       </tbody>
     </table>
+    </div>
   );
 }

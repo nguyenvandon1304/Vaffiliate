@@ -97,8 +97,8 @@ export function WalletHero({ balance, pendingWithdraw, totalWithdrawn, totalCash
         </div>
 
         {/* Big balance number — gradient text cam ấm để nổi bật như "tài sản", không chói vì là chữ trên nền sáng */}
-        <div className="flex items-baseline gap-1 mb-2">
-          <span className="text-4xl sm:text-5xl font-black tabular-nums tracking-tight bg-gradient-to-br from-orange-600 to-amber-500 dark:from-orange-300 dark:to-amber-200 bg-clip-text text-transparent">
+        <div className="flex items-baseline gap-1 mb-2 flex-wrap">
+          <span className="text-4xl sm:text-5xl font-black tabular-nums tracking-tight bg-gradient-to-br from-orange-600 to-amber-500 dark:from-orange-300 dark:to-amber-200 bg-clip-text text-transparent break-all">
             {animatedBalance.toLocaleString("vi-VN")}
           </span>
           <span className="text-xl sm:text-2xl font-bold text-orange-500 dark:text-orange-400">đ</span>

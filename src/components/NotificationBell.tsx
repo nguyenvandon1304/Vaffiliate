@@ -125,7 +125,7 @@ export function NotificationBell({ className = "" }: { className?: string }) {
         </button>
 
         {open && (
-          <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden z-50 animate-in slide-in-from-top-2 fade-in duration-150">
+          <div className="absolute right-0 mt-2 w-80 sm:w-96 max-w-[calc(100vw-1rem)] bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden z-50 animate-in slide-in-from-top-2 fade-in duration-150">
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-zinc-800">
               <h3 className="text-sm font-bold text-gray-800 dark:text-zinc-100">
                 Thông báo {unreadCount > 0 && <span className="text-orange-500">({unreadCount})</span>}
@@ -266,12 +266,12 @@ function NotifItem({
           </p>
           <div className="flex items-center justify-between mt-1.5">
             <span className="text-[11px] text-gray-400 dark:text-zinc-500">{time}</span>
-            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center gap-3 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
               {isUnread && (
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); onMarkRead(); }}
-                  className="text-[11px] font-medium text-orange-500 hover:text-orange-600"
+                  className="text-xs font-medium text-orange-500 hover:text-orange-600 py-1"
                 >
                   Đã đọc
                 </button>
@@ -279,7 +279,7 @@ function NotifItem({
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); onRemove(); }}
-                className="text-[11px] font-medium text-gray-400 hover:text-red-500"
+                className="text-xs font-medium text-gray-400 hover:text-red-500 py-1"
               >
                 Xoá
               </button>
