@@ -426,10 +426,10 @@ export default function CashbackPage() {
                         Mẹo: Săn thêm voucher Shopee khi thanh toán
                       </p>
                       <ul className="text-xs text-amber-700 dark:text-amber-200/90 space-y-1 leading-relaxed">
-                        <li>• <b>Nên mua trên app Shopee ở điện thoại</b> — voucher Social Media / Facebook chỉ hiện đầy đủ trong app, mua trên máy tính thường không thấy mã.</li>
-                        <li>• Sau khi bấm <b>Mua ngay</b>, vào mục <b>&quot;Shopee Voucher&quot;</b> ở trang thanh toán.</li>
-                        <li>• Nếu có voucher <b>Social Media (22%)</b> hoặc <b>Facebook (20%)</b> → chọn để giảm thêm.</li>
-                        <li>• Nếu không thấy → dùng <b>voucher có sẵn trong tài khoản</b> của bạn cũng được.</li>
+                        <li>• <b>Bấm &quot;Mua ngay&quot; để mở thẳng app Shopee</b> — voucher Facebook / Social Media chỉ hiện trong app, mở trên máy tính thường không thấy mã.</li>
+                        <li>• Nếu đang xem trong <b>Facebook/Zalo</b>: bấm dấu <b>⋯</b> góc trên → chọn <b>&quot;Mở bằng trình duyệt&quot;</b> rồi mới bấm Mua ngay (link trong app FB/Zalo hay chặn mở Shopee).</li>
+                        <li>• Ở trang thanh toán, mở mục <b>&quot;Shopee Voucher&quot;</b> → chọn voucher <b>Facebook (giảm 20%, đơn từ 50k)</b> hoặc <b>Social Media (22%, đơn từ 150k)</b> nếu có.</li>
+                        <li>• Không thấy mã kênh → dùng <b>voucher có sẵn trong tài khoản</b> cũng được.</li>
                         <li>• <b>Hoàn tiền {product.cashbackRate ?? 50}% vẫn về ví</b> dù có hay không có voucher.</li>
                       </ul>
                       <p className="text-[11px] text-amber-600/80 dark:text-amber-300/70 mt-2">
