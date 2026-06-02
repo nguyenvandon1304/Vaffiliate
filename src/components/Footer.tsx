@@ -28,7 +28,7 @@ export default function Footer() {
               </div>
               <svg viewBox="0 0 24 24" className="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
             </a>
-            <a href="https://zalo.me/g/kw4grzxrzqzgrbwyys6f" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-white dark:bg-white/[0.06] hover:bg-orange-50 dark:hover:bg-white/10 border border-orange-100 dark:border-white/10 rounded-xl p-3 transition-colors">
+            <a href="https://zalo.me/g/fvb2ibqot4eeankjntn7" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 bg-white dark:bg-white/[0.06] hover:bg-orange-50 dark:hover:bg-white/10 border border-orange-100 dark:border-white/10 rounded-xl p-3 transition-colors">
               <div className="w-9 h-9 bg-blue-500 rounded-full flex items-center justify-center shrink-0">
                 <span className="text-white text-xs font-bold">Z</span>
               </div>

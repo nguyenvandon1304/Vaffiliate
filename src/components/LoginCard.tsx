@@ -537,7 +537,7 @@ export function LoginCard() {
               <UsersIcon className="w-5 h-5" />
             </a>
             <a
-              href="https://zalo.me/g/kw4grzxrzqzgrbwyys6f"
+              href="https://zalo.me/g/fvb2ibqot4eeankjntn7"
               target="_blank"
               rel="noopener noreferrer"
               className="text-gray-400 dark:text-zinc-500 hover:text-orange-500 transition-colors"
