@@ -1984,7 +1984,7 @@ function WalletTab({
                         key={v}
                         type="button"
                         onClick={() => setWithdrawAmount(String(v))}
-                        className="text-xs font-semibold px-3 py-1.5 rounded-full border border-orange-200 text-orange-600 hover:bg-orange-50 transition"
+                        className="tap-target text-xs font-semibold px-4 py-2 rounded-full border border-orange-200 text-orange-600 hover:bg-orange-50 transition"
                       >
                         {formatPrice(v)}đ
                       </button>
@@ -1993,7 +1993,7 @@ function WalletTab({
                       <button
                         type="button"
                         onClick={() => setWithdrawAmount(String(stats.walletBalance))}
-                        className="text-xs font-bold px-3 py-1.5 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition"
+                        className="tap-target text-xs font-bold px-4 py-2 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition"
                       >
                         Tất cả
                       </button>

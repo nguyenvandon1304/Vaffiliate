@@ -204,7 +204,7 @@ export default function WishlistPage() {
             <button
               onClick={() => reload(true)}
               disabled={refreshing}
-              className="text-xs font-medium px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:border-rose-400 hover:text-rose-500 transition-colors disabled:opacity-50"
+              className="tap-target text-xs font-medium px-4 py-2 rounded-lg bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:border-rose-400 hover:text-rose-500 transition-colors disabled:opacity-50"
               title="Cập nhật giá mới nhất"
             >
               {refreshing ? "🔄 Đang cập nhật..." : "🔄 Cập nhật giá"}

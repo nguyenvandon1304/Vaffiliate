@@ -339,7 +339,7 @@ export default function SecurityPage() {
                   {!s.is_current && (
                     <button
                       onClick={() => revokeSession(s.id)}
-                      className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20 transition-colors"
+                      className="tap-target shrink-0 text-xs font-medium px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20 transition-colors"
                     >
                       Đăng xuất
                     </button>
