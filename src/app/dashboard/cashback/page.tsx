@@ -420,20 +420,19 @@ export default function CashbackPage() {
                     Tránh hứa cứng, chỉ hướng dẫn user tự kiểm tra ở bước thanh toán. */}
                 <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl p-4 mb-4">
                   <div className="flex items-start gap-2.5">
-                    <span className="text-lg shrink-0">🎁</span>
+                    <span className="text-lg shrink-0">🛒</span>
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-amber-800 dark:text-amber-300 mb-1.5">
-                        Mẹo: Săn thêm voucher Shopee khi thanh toán
+                        Mua sao để chắc chắn được hoàn tiền
                       </p>
                       <ul className="text-xs text-amber-700 dark:text-amber-200/90 space-y-1 leading-relaxed">
-                        <li>• <b>Bấm &quot;Mua ngay&quot; để mở thẳng app Shopee</b> — voucher Facebook / Social Media chỉ hiện trong app, mở trên máy tính thường không thấy mã.</li>
+                        <li>• <b>Bấm &quot;Mua ngay&quot; để mở thẳng app Shopee</b> rồi mua như bình thường — đơn sẽ được ghi nhận hoàn tiền.</li>
                         <li>• Nếu đang xem trong <b>Facebook/Zalo</b>: bấm dấu <b>⋯</b> góc trên → chọn <b>&quot;Mở bằng trình duyệt&quot;</b> rồi mới bấm Mua ngay (link trong app FB/Zalo hay chặn mở Shopee).</li>
-                        <li>• Ở trang thanh toán, mở mục <b>&quot;Shopee Voucher&quot;</b> → chọn voucher <b>Facebook (giảm 20%, đơn từ 50k)</b> hoặc <b>Social Media (22%, đơn từ 150k)</b> nếu có.</li>
-                        <li>• Không thấy mã kênh → dùng <b>voucher có sẵn trong tài khoản</b> cũng được.</li>
-                        <li>• <b>Hoàn tiền {product.cashbackRate ?? 50}% vẫn về ví</b> dù có hay không có voucher.</li>
+                        <li>• Ở trang thanh toán, mở mục <b>&quot;Shopee Voucher&quot;</b> xem có mã giảm giá nào áp được không — có thì chọn, không có cũng không sao.</li>
+                        <li>• <b>Hoàn tiền {product.cashbackRate ?? 50}% luôn về ví</b> dù có hay không có voucher.</li>
                       </ul>
                       <p className="text-[11px] text-amber-600/80 dark:text-amber-300/70 mt-2">
-                        💡 Voucher cần đơn tối thiểu (22%: từ 150k · 20%: từ 50k). Mua đủ đơn để áp được nhé.
+                        💡 Voucher giảm giá là phần Shopee tặng thêm tuỳ thời điểm — không phải đơn nào cũng có. Giá trị chính bạn luôn nhận là <b>tiền hoàn về ví</b>.
                       </p>
                       <p className="text-[11px] font-semibold text-amber-700 dark:text-amber-300 mt-1.5">
                         📱 Đang dùng máy tính? Bấm nút copy bên cạnh &quot;Mua ngay&quot; để gửi link sang điện thoại rồi mở bằng app Shopee.
@@ -502,7 +501,7 @@ export default function CashbackPage() {
             <div className="flex items-start gap-2 text-sm px-6 pt-5 sm:px-8">
               <span className="text-orange-500 text-base shrink-0 leading-relaxed">✨</span>
               <p className="text-gray-600 leading-relaxed">
-                Hướng dẫn nhận thêm <span className="font-bold text-gray-800">voucher 20-22%</span> từ Shopee
+                Cách mua để <span className="font-bold text-gray-800">nhận hoàn tiền</span> &amp; săn voucher Shopee (nếu có)
               </p>
             </div>
 
@@ -516,23 +515,23 @@ export default function CashbackPage() {
                 {/* Tổng quan voucher social */}
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-base">🎁</span>
-                    <h3 className="text-sm font-bold text-gray-800">Voucher Shopee là gì?</h3>
+                    <span className="text-base">💸</span>
+                    <h3 className="text-sm font-bold text-gray-800">Bạn được gì khi mua qua link?</h3>
                   </div>
                   <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-3 ml-6">
                     <p className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
                       <span className="text-orange-500 shrink-0">💰</span>
                       <span>
-                        Khi bạn mua qua link V-Affiliate, Shopee có thể tặng thêm
-                        <span className="font-bold text-orange-600"> voucher giảm 20-22%</span> trên giá sản phẩm
-                        (voucher <span className="font-semibold">Social Media / Facebook</span>).
-                        Voucher xuất hiện <span className="font-semibold">ngẫu nhiên</span> tuỳ shop có chạy chiến dịch và còn ngân sách hay không.
+                        Mỗi đơn mua qua link V-Affiliate được
+                        <span className="font-bold text-orange-600"> hoàn {product?.cashbackRate ?? 50}% hoa hồng</span> về ví, tự động.
+                        Thỉnh thoảng Shopee còn có thêm voucher giảm giá ở bước thanh toán —
+                        nhưng cái này <span className="font-semibold">tuỳ Shopee, không phải lúc nào cũng có</span>.
                       </span>
                     </p>
                   </div>
                   <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 ml-6">
                     <p className="text-xs text-gray-700">
-                      <span className="text-emerald-600 font-bold">✓ Yên tâm:</span> Dù có voucher hay không,
+                      <span className="text-emerald-600 font-bold">✓ Chắc chắn:</span> Dù có voucher hay không,
                       <span className="font-bold"> tiền hoàn {product?.cashbackRate ?? 50}% vẫn về ví đầy đủ</span> như đã cam kết.
                     </p>
                   </div>
@@ -565,38 +564,21 @@ export default function CashbackPage() {
 
                   <div className="relative pl-10 pb-1 ml-3">
                     <div className="absolute left-[-13px] top-0 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm shadow-orange-200">3</div>
-                    <h4 className="text-sm font-bold text-gray-800 mb-1">Chọn voucher khi thanh toán</h4>
+                    <h4 className="text-sm font-bold text-gray-800 mb-1">Kiểm tra voucher khi thanh toán</h4>
                     <p className="text-xs text-gray-500 leading-relaxed mb-2">
-                      Ở trang thanh toán Shopee, mở mục <span className="font-semibold">&quot;Shopee Voucher&quot;</span>.
-                      Nếu có voucher Social Media (22%) / Facebook (20%) → chọn để giảm thêm. Nếu không có, dùng voucher sẵn trong tài khoản bạn cũng được.
+                      Ở trang thanh toán Shopee, mở mục <span className="font-semibold">&quot;Shopee Voucher&quot;</span> xem có mã nào áp được không.
+                      Có thì chọn để giảm thêm; không có thì dùng voucher sẵn trong tài khoản bạn cũng được — <span className="font-semibold">hoàn tiền vẫn về ví như thường</span>.
                     </p>
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5">
-                      <p className="text-[11px] text-amber-700">⚡ Voucher cần đơn tối thiểu (22%: từ 150k · 20%: từ 50k). Mua đủ đơn để áp được nhé.</p>
-                    </div>
-
-                    {/* Ảnh minh hoạ voucher 22% + giải thích tuỳ sản phẩm.
-                        Tự ẩn nếu file ảnh chưa được upload (onError) → không vỡ layout. */}
-                    <VoucherExampleImage />
                   </div>
                 </div>
 
                 {/* Mẹo thêm */}
                 <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
                   <p className="text-xs text-gray-700 leading-relaxed">
-                    <span className="text-purple-600 font-bold">💡 Mẹo thêm: Mua đủ đơn tối thiểu</span><br />
-                    Voucher có điều kiện đơn tối thiểu. Gộp nhiều món vào cùng 1 đơn để đạt mức tối thiểu —
-                    vừa đủ điều kiện áp voucher, vừa tiết kiệm phí ship. Cashback vẫn tính trên tổng giá trị đơn.
+                    <span className="text-purple-600 font-bold">💡 Mẹo: Gộp đơn để tiết kiệm</span><br />
+                    Gộp nhiều món vào cùng 1 đơn vừa tiết kiệm phí ship, vừa dễ đạt điều kiện nếu Shopee có voucher.
+                    Cashback vẫn tính trên tổng giá trị đơn.
                   </p>
-                </div>
-
-                {/* So sánh mã — giúp khách chọn voucher tối ưu */}
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                  <p className="text-xs font-bold text-blue-700 mb-2">💰 Chọn mã nào lợi hơn?</p>
-                  <ul className="text-xs text-gray-700 leading-relaxed space-y-1 list-none">
-                    <li>• Đơn <span className="font-semibold">dưới 500k</span> → chọn mã <span className="font-bold text-orange-600">22%</span> (giảm nhiều hơn)</li>
-                    <li>• Đơn <span className="font-semibold">từ 500k trở lên</span> → chọn mã <span className="font-bold text-orange-600">20%</span> (trần giảm cao tới 250k)</li>
-                    <li>• Mua nhiều món? <span className="font-semibold">Gộp chung 1 đơn</span> để đạt mốc cao, dùng mã 20% sẽ lợi hơn.</li>
-                  </ul>
                 </div>
               </div>
 
@@ -611,7 +593,7 @@ export default function CashbackPage() {
               onClick={() => setShowGuide(!showGuide)}
               className="w-full flex items-center justify-center gap-2 py-3 border-t border-gray-100 text-sm font-medium text-orange-500 hover:text-orange-600 hover:bg-orange-50/30 transition-colors"
             >
-              {showGuide ? "Thu gọn" : "Xem hướng dẫn nhận voucher đầy đủ"}
+              {showGuide ? "Thu gọn" : "Xem hướng dẫn mua & nhận hoàn tiền"}
               <svg
                 viewBox="0 0 24 24"
                 className={`w-4 h-4 transition-transform duration-300 ${showGuide ? "rotate-180" : "animate-bounce"}`}
@@ -635,39 +617,3 @@ export default function CashbackPage() {
 }
 
 
-/**
- * Ảnh minh hoạ voucher 22% "Social Media" trên app Shopee + giải thích tuỳ sản phẩm.
- * Đặt trong section hướng dẫn collapse (bước 3) — ẩn mặc định, ai mở mới thấy.
- *
- * Tự ẩn ảnh nếu file chưa được upload (onError) → không vỡ layout.
- * File ảnh: public/images/voucher-22-example.jpg
- */
-function VoucherExampleImage() {
-  const [imgOk, setImgOk] = useState(true);
-
-  return (
-    <div className="mt-3 bg-orange-50 border border-orange-200 rounded-lg p-3">
-      <p className="text-[11px] font-bold text-orange-700 mb-1.5">
-        🎁 Khi thanh toán, voucher 22% sẽ hiện như thế này để bạn chọn:
-      </p>
-      {imgOk && (
-        <div className="rounded-lg overflow-hidden border border-orange-200 mb-2 bg-white">
-          {/* eslint-disable-next-line @next/next/no-img-element -- ảnh tĩnh minh hoạ, dùng next/image không cần thiết */}
-          <img
-            src="/images/voucher-22-example.jpg"
-            alt="Màn hình Chọn Shopee Voucher hiển thị voucher giảm 22% Social Media"
-            className="w-full max-w-[360px] mx-auto block"
-            loading="lazy"
-            onError={() => setImgOk(false)}
-          />
-        </div>
-      )}
-      <p className="text-[11px] text-orange-700 leading-relaxed">
-        ⚠️ <b>Không phải sản phẩm nào cũng có voucher này.</b> Shopee chỉ tặng voucher 20-22%
-        cho một số sản phẩm đang chạy chiến dịch (tuỳ thời điểm + còn ngân sách).
-        Vào mục <b>&quot;Chọn Shopee Voucher&quot;</b> lúc thanh toán — nếu có thì chọn để giảm thêm,
-        nếu không có thì bạn vẫn nhận hoàn tiền về ví đầy đủ.
-      </p>
-    </div>
-  );
-}

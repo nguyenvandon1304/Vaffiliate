@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getHost, isShopeeHost, isShopeeShortHost } from "@/lib/shopee-url";
+import { getHost, isShopeeHost, isShopeeShortHost, extractShopeeUrl } from "@/lib/shopee-url";
 
 describe("shopee-url SSRF guards", () => {
   describe("isShopeeHost", () => {
@@ -45,6 +45,37 @@ describe("shopee-url SSRF guards", () => {
     });
     it("returns null for invalid", () => {
       expect(getHost("::::")).toBe(null);
+    });
+  });
+
+  describe("extractShopeeUrl", () => {
+    it("returns a clean Shopee URL unchanged", () => {
+      expect(extractShopeeUrl("https://s.shopee.vn/3B4i0dsQ3c")).toBe("https://s.shopee.vn/3B4i0dsQ3c");
+    });
+
+    it("extracts link from Android share text (link kèm mô tả)", () => {
+      const text = "Quạt mini cầm tay siêu mỏng GOOJODOQ https://s.shopee.vn/3B4i0dsQ3c xem ngay nhé!";
+      expect(extractShopeeUrl(text)).toBe("https://s.shopee.vn/3B4i0dsQ3c");
+    });
+
+    it("strips trailing punctuation", () => {
+      expect(extractShopeeUrl("Mua ngay: https://s.shopee.vn/abc.")).toBe("https://s.shopee.vn/abc");
+      expect(extractShopeeUrl("(https://shopee.vn/product-i.1.2)")).toBe("https://shopee.vn/product-i.1.2");
+    });
+
+    it("handles link without scheme", () => {
+      expect(extractShopeeUrl("s.shopee.vn/abc")).toBe("https://s.shopee.vn/abc");
+    });
+
+    it("ignores non-Shopee links, picks the Shopee one", () => {
+      const text = "xem https://google.com roi vao https://s.shopee.vn/abc nhe";
+      expect(extractShopeeUrl(text)).toBe("https://s.shopee.vn/abc");
+    });
+
+    it("returns null when no Shopee link present", () => {
+      expect(extractShopeeUrl("https://google.com/abc")).toBe(null);
+      expect(extractShopeeUrl("không có link")).toBe(null);
+      expect(extractShopeeUrl("")).toBe(null);
     });
   });
 });

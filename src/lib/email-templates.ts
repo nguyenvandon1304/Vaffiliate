@@ -466,7 +466,6 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
 <p>Đây là thời điểm <strong>tiết kiệm lớn nhất trong năm</strong> — mua qua link V-Affiliate để vừa hưởng giá sale, vừa được hoàn tiền về ví:</p>
 <ul>
   <li>🔥 Hoàn tiền trên <strong>mọi đơn Shopee</strong> mua qua link</li>
-  <li>🎁 Nhiều sản phẩm còn kèm <strong>voucher Shopee giảm thêm tới 22%</strong> ở bước thanh toán</li>
   <li>🎰 Càng nhiều đơn, càng nhiều lượt quay may mắn</li>
 </ul>
 

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getUserByToken, getDb, createNotification, getCashbackRateForUser, calcCashback } from "@/lib/db";
 import { grantBadge } from "@/lib/achievements";
 import { rateLimitAsync } from "@/lib/rate-limit";
-import { isShopeeHost, isShopeeShortHost } from "@/lib/shopee-url";
+import { isShopeeHost, isShopeeShortHost, extractShopeeUrl } from "@/lib/shopee-url";
 
 const GOAFFILIATE_CHECK_COMMISSION_URL = "https://www.goaffiliate.online/api/check-commission";
 const GOAFFILIATE_GET_LINK_URL = "https://www.goaffiliate.online/api/get-link";
@@ -205,13 +205,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Vui lòng nhập link sản phẩm" }, { status: 400 });
     }
 
+    // Android: nút "Chia sẻ" của app Shopee copy CẢ đoạn text kèm link → trích
+    // ra URL Shopee sạch trước khi validate (tránh báo lỗi oan cho user).
+    const extracted = extractShopeeUrl(productUrl);
+    if (!extracted) {
+      return NextResponse.json({
+        success: false,
+        error: "Không tìm thấy link Shopee. Hãy dán link sản phẩm Shopee (vd https://s.shopee.vn/...).",
+      }, { status: 400 });
+    }
+
     // Validate host nghiêm ngặt (chống SSRF) thay vì .includes().
-    if (!isShopeeHost(productUrl)) {
+    if (!isShopeeHost(extracted)) {
       return NextResponse.json({ success: false, error: "Chỉ hỗ trợ link từ Shopee" }, { status: 400 });
     }
 
     // Resolve short URL nếu cần (đã có guard host + no-follow + timeout bên trong).
-    let resolvedUrl = productUrl.trim();
+    let resolvedUrl = extracted.trim();
     if (isShopeeShortHost(resolvedUrl)) {
       resolvedUrl = await resolveShortUrl(resolvedUrl);
     }

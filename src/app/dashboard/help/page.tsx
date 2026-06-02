@@ -31,7 +31,7 @@ const STEPS: Step[] = [
     num: 3,
     title: "Bấm MUA NGAY để mua",
     icon: "🛍",
-    body: "Bấm nút MUA NGAY → mở thẳng app Shopee, mua và thanh toán như bình thường. Mẹo: ở bước thanh toán, mở mục \"Shopee Voucher\" — nếu sản phẩm có voucher Social Media (giảm tới 22%) thì chọn để giảm thêm. Nên mua trên app điện thoại để thấy voucher đầy đủ. ⚠️ Quan trọng: sau khi bấm link V-Affiliate, đừng mở lại Shopee từ chỗ khác (Google, Messenger...) kẻo mất quyền hoàn tiền của đơn đó.",
+    body: "Bấm nút MUA NGAY → mở thẳng app Shopee, mua và thanh toán như bình thường. Mẹo: ở bước thanh toán, mở mục \"Shopee Voucher\" xem có mã giảm giá nào áp được không — có thì chọn, không có cũng không sao. Nên mua trên app điện thoại. ⚠️ Quan trọng: sau khi bấm link V-Affiliate, đừng mở lại Shopee từ chỗ khác (Google, Messenger...) kẻo mất quyền hoàn tiền của đơn đó.",
   },
   {
     num: 4,
@@ -50,7 +50,7 @@ const STEPS: Step[] = [
 const FAQS: FAQ[] = [
   {
     q: "Tôi được hoàn lại bao nhiêu tiền?",
-    a: "Bạn nhận lại phần lớn hoa hồng mà Shopee trả cho mỗi đơn — bắt đầu từ 50% (hạng Bronze). Càng mua nhiều hoặc mời nhiều bạn, hạng càng cao và cashback càng tăng: 🥈 Silver 53% · 🥇 Gold 55% · 💎 VIP 58%, áp dụng vĩnh viễn cho MỌI đơn về sau. Hoa hồng tuỳ shop & sản phẩm (thường 1-15% giá trị đơn), một số đơn còn kèm voucher Shopee giảm thêm tới 22%.",
+    a: "Bạn nhận lại phần lớn hoa hồng mà Shopee trả cho mỗi đơn — bắt đầu từ 50% (hạng Bronze). Càng mua nhiều hoặc mời nhiều bạn, hạng càng cao và cashback càng tăng: 🥈 Silver 53% · 🥇 Gold 55% · 💎 VIP 58%, áp dụng vĩnh viễn cho MỌI đơn về sau. Hoa hồng tuỳ shop & sản phẩm (thường 1-15% giá trị đơn). Thỉnh thoảng Shopee còn có thêm voucher giảm giá ở bước thanh toán, nhưng cái này tuỳ thời điểm — không phải đơn nào cũng có.",
   },
   {
     q: "Bao lâu tiền mới về ví?",
@@ -61,8 +61,8 @@ const FAQS: FAQ[] = [
     a: "Đơn KHÔNG xuất hiện ngay sau khi mua — V-Affiliate cần đối soát dữ liệu từ Shopee (thường 1-3 ngày) rồi đơn mới hiện ở mục \"Đang chờ duyệt\". Nếu sau đó vẫn không thấy, có thể do: (1) Sau khi bấm link V-Affiliate bạn lại mở Shopee từ chỗ khác (Google, Messenger...) → mất tracking; (2) Trình duyệt chặn cookie; (3) Đơn bị huỷ/trả hàng; (4) Shop không tham gia affiliate. Hãy thử đơn mới và làm đúng hướng dẫn nhé.",
   },
   {
-    q: "Voucher giảm 22% là gì? Đơn nào cũng có không?",
-    a: "Một số sản phẩm khi mua qua link V-Affiliate sẽ được Shopee tặng thêm voucher \"Social Media\" giảm tới 22%. Voucher này tuỳ sản phẩm + tuỳ thời điểm (Shopee quyết định), KHÔNG phải đơn nào cũng có. Cách dùng: bấm MUA NGAY → vào app Shopee → ở bước thanh toán mở mục \"Shopee Voucher\" → nếu có thì chọn. Quan trọng: dù có voucher hay không, bạn LUÔN nhận hoàn tiền về ví.",
+    q: "Mua qua link có được voucher giảm giá không?",
+    a: "Thỉnh thoảng Shopee có thêm voucher giảm giá ở bước thanh toán, nhưng cái này tuỳ Shopee và tuỳ thời điểm — KHÔNG phải đơn nào cũng có, V-Affiliate không tự gắn được voucher này. Cách kiểm tra: bấm MUA NGAY → vào app Shopee → ở bước thanh toán mở mục \"Shopee Voucher\" → có mã thì chọn, không có thì dùng voucher sẵn trong tài khoản bạn. Điều quan trọng nhất: dù có voucher hay không, bạn LUÔN nhận hoàn tiền về ví — đó mới là giá trị chính của V-Affiliate.",
   },
   {
     q: "Tại sao tôi không rút được tiền?",
