@@ -221,33 +221,63 @@ export async function POST(request: NextRequest) {
     }
 
     // Resolve short URL nếu cần (đã có guard host + no-follow + timeout bên trong).
+    // KHÔNG để bước này là điểm chết: nếu resolve fail (Android / Render bị chặn),
+    // vẫn gọi GoAffiliate với link gốc — API tự resolve short link được (đã xác minh).
     let resolvedUrl = extracted.trim();
     if (isShopeeShortHost(resolvedUrl)) {
       resolvedUrl = await resolveShortUrl(resolvedUrl);
     }
 
-    // Trích xuất IDs
-    const ids = extractShopeeIds(resolvedUrl);
-    if (!ids) {
-      return NextResponse.json({
-        success: false,
-        error: "Không thể nhận diện link sản phẩm. Vui lòng thử link khác.",
-      }, { status: 400 });
-    }
-
-    // Tạo clean product URL
-    const cleanProductUrl = `https://shopee.vn/product-i.${ids.shopId}.${ids.itemId}`;
+    // Link để gọi GoAffiliate: nếu resolve ra full link tách được IDs thì dùng,
+    // không thì truyền thẳng link gốc — GoAffiliate tự xử lý short link.
+    const lookupUrl = extractShopeeIds(resolvedUrl) ? resolvedUrl : extracted.trim();
 
     // Lấy thông tin sản phẩm từ GoAffiliate (giá, hoa hồng) + link affiliate có voucher.
     // Gọi song song 2 endpoint để giảm thời gian chờ.
     const [info, linkResult] = await Promise.all([
-      fetchProductInfo(cleanProductUrl),
-      fetchAffiliateLink(cleanProductUrl, user?.id),
+      fetchProductInfo(lookupUrl),
+      fetchAffiliateLink(lookupUrl, user?.id),
     ]);
 
+    // ═══ Xác định shopId/itemId theo thứ tự ưu tiên ═══
+    // 1) Từ link đã resolve (nếu là full link).
+    // 2) Từ response check-commission của GoAffiliate (có sẵn shopId/itemId).
+    // 3) Từ originalLink get-link trả về.
+    // 4) Decode origin_link trong shopeeLink (an_redir?origin_link=...).
+    let ids = extractShopeeIds(resolvedUrl);
+    if (!ids && info?.shopId && info?.itemId) {
+      ids = { shopId: String(info.shopId), itemId: String(info.itemId) };
+    }
+    if (!ids && linkResult?.originalLink) {
+      ids = extractShopeeIds(linkResult.originalLink);
+    }
+    if (!ids && linkResult?.shopeeLink) {
+      try {
+        const u = new URL(linkResult.shopeeLink);
+        const origin = u.searchParams.get("origin_link");
+        if (origin) ids = extractShopeeIds(decodeURIComponent(origin));
+      } catch { /* ignore */ }
+    }
+
+    // Chỉ báo lỗi khi KHÔNG có IDs VÀ cũng KHÔNG có link affiliate hợp lệ.
+    // (Có shopeeLink là vẫn tạo được link hoàn tiền cho user dù thiếu IDs.)
+    if (!ids && !linkResult?.shopeeLink) {
+      return NextResponse.json({
+        success: false,
+        error: "Không thể nhận diện link sản phẩm. Vui lòng thử lại hoặc dán link sản phẩm khác.",
+      }, { status: 400 });
+    }
+
+    // Tạo clean product URL — có IDs thì chuẩn hoá, không thì dùng link gốc.
+    const cleanProductUrl = ids
+      ? `https://shopee.vn/product-i.${ids.shopId}.${ids.itemId}`
+      : (linkResult?.originalLink || extracted.trim());
+
     // Ưu tiên link CHÍNH THỨC từ get-link (có nhúng voucher Social Media).
-    // Nếu get-link fail → fallback link ghép tay (vẫn track cashback, nhưng không voucher).
-    const affiliateLink = linkResult?.shopeeLink || buildAffiliateLink(ids.shopId, ids.itemId, user?.id);
+    // Nếu get-link fail → fallback link ghép tay (cần IDs).
+    const affiliateLink =
+      linkResult?.shopeeLink ||
+      (ids ? buildAffiliateLink(ids.shopId, ids.itemId, user?.id) : cleanProductUrl);
     // Link rút gọn đẹp để hiển thị/share (nếu có).
     const shortLink = linkResult?.affiliateLink || affiliateLink;
     // Cờ cho UI biết link này có voucher hay không (link get-link mới có).
@@ -282,8 +312,8 @@ export async function POST(request: NextRequest) {
       shortLink,    // link rút gọn đẹp để share (goaffiliate.online/XXX)
       hasVoucher,   // true nếu link có nhúng voucher Social Media
       productUrl: cleanProductUrl,
-      shopId: ids.shopId,
-      itemId: ids.itemId,
+      shopId: ids?.shopId ?? "",
+      itemId: ids?.itemId ?? "",
       shop: "SHOPEE",
     };
 
@@ -294,7 +324,7 @@ export async function POST(request: NextRequest) {
         const database = await getDb();
         database.run(
           "INSERT INTO affiliate_links (user_id, shop_id, item_id, product_name, product_price, commission, commission_rate, cashback, affiliate_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-          [user.id, ids.shopId, ids.itemId, product.name, product.price, product.commission, product.commissionRate, product.cashback, affiliateLink]
+          [user.id, ids?.shopId ?? "", ids?.itemId ?? "", product.name, product.price, product.commission, product.commissionRate, product.cashback, affiliateLink]
         );
         await createNotification(user.id, "✨ Link hoàn tiền đã sẵn sàng!", `Đã tạo link cho "${product.name}". Bấm nút "MUA NGAY" để mở Shopee — nhớ kiểm tra mục "Shopee Voucher" lúc thanh toán để được giảm thêm nếu có. Sau khi nhận hàng, ${product.cashback.toLocaleString("vi-VN")}đ (hoàn tiền ${cashbackRate}%) sẽ tự về ví. Mua sắm vui nhé! 🛍️`, "link");
         // Grant badge "first_link" — idempotent, chỉ earn lần đầu.
