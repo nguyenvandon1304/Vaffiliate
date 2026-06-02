@@ -375,11 +375,11 @@ function DashboardContent() {
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-4 min-w-0">
             <button
               onClick={() => router.replace("/dashboard")}
-              className="cursor-pointer"
+              className="cursor-pointer shrink-0"
               title="Về trang chủ"
             >
               <CaffiliateLogo />
@@ -447,7 +447,7 @@ function DashboardContent() {
               })}
             </nav>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Streak badge — only when user has active streak */}
             <StreakBadge />
             {/* Command bar trigger — Ctrl+K shortcut */}
@@ -476,13 +476,13 @@ function DashboardContent() {
             <NotificationBell />
 
             {/* User dropdown */}
-            <div className="relative" ref={dropdownRef}>
+            <div className="relative shrink-0" ref={dropdownRef}>
               <button
               onClick={() => setShowDropdown(!showDropdown)}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <span className="hidden sm:block text-sm text-gray-600 font-medium">{user?.display_name || user?.username || "..."}</span>
-              <div className="w-9 h-9 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold text-sm">
+              <div className="w-9 h-9 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold text-sm shrink-0">
                 {(user?.display_name || user?.username || "U").charAt(0).toUpperCase()}
               </div>
             </button>
