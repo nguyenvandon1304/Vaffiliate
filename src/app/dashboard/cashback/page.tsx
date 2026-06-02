@@ -353,28 +353,28 @@ export default function CashbackPage() {
 
                 {/* Hoa hồng + Hoàn tiền */}
                 <div className="grid grid-cols-2 gap-3 mb-5">
-                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
+                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
                       <span className="text-green-600 text-lg font-bold">%</span>
                     </div>
-                    <div>
-                      <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Hoa hồng đối tác</p>
-                      <p className="text-base font-bold text-green-600">{product.commissionRate || "0%"}</p>
-                      <p className="text-xs text-green-500">~đ{formatPrice(product.commission)}</p>
+                    <div className="min-w-0">
+                      <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider leading-tight">Hoa hồng đối tác</p>
+                      <p className="text-base font-bold text-green-600 leading-tight">{product.commissionRate || "0%"}</p>
+                      <p className="text-xs text-green-500 leading-tight">~đ{formatPrice(product.commission)}</p>
                     </div>
                   </div>
-                  <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center shrink-0">
+                  <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 bg-orange-100 rounded-full flex items-center justify-center shrink-0">
                       <svg viewBox="0 0 24 24" className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>
                     </div>
-                    <div>
-                      <p className="text-[10px] text-orange-500 font-semibold uppercase tracking-wider">
-                        Hoàn tiền {product.cashbackRate ?? 50}% cho bạn
+                    <div className="min-w-0">
+                      <p className="text-[10px] text-orange-500 font-semibold uppercase tracking-wider leading-tight">
+                        Hoàn tiền {product.cashbackRate ?? 50}%
                         {product.tierName && product.tierCode !== "bronze" && (
                           <span className="ml-1 text-amber-500 normal-case font-bold">({product.tierName})</span>
                         )}
                       </p>
-                      <p className="text-base font-bold text-orange-500">~đ{formatPrice(product.cashback)}</p>
+                      <p className="text-base font-bold text-orange-500 leading-tight">~đ{formatPrice(product.cashback)}</p>
                     </div>
                   </div>
                 </div>
