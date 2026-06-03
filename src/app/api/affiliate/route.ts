@@ -91,12 +91,16 @@ async function fetchAffiPadLink(productUrl: string): Promise<AffiPadResult | nul
       body: JSON.stringify({ url: productUrl }),
     });
 
+    const responseText = await res.text();
+    console.log("[AffiPad] Response status:", res.status);
+    console.log("[AffiPad] Response body:", responseText);
+
     if (!res.ok) {
-      console.error(`[AffiPad] fb-convert ${res.status}: ${await res.text().catch(() => "")}`);
+      console.error(`[AffiPad] fb-convert ${res.status}: ${responseText}`);
       return null;
     }
 
-    const data = await res.json();
+    const data = JSON.parse(responseText);
     // AffiPad trả về: { original_url, affiliate_url, short_url, ... }
     if (data?.affiliate_url) {
       return {
