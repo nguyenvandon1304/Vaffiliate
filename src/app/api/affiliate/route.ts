@@ -92,21 +92,26 @@ async function fetchAffiPadLink(productUrl: string): Promise<AffiPadResult | nul
     });
 
     const responseText = await res.text();
-    console.log("[AffiPad] Response status:", res.status);
-    console.log("[AffiPad] Response body:", responseText);
+    let data: Record<string, unknown> | null = null;
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      data = null;
+    }
+    console.log("[AffiPad] Status:", res.status);
+    console.log("[AffiPad] Keys:", Object.keys(data || {}));
+    console.log("[AffiPad] Body:", responseText);
 
     if (!res.ok) {
-      console.error(`[AffiPad] fb-convert ${res.status}: ${responseText}`);
+      console.error(`[AffiPad] fb-convert ${res.status}`);
       return null;
     }
 
-    const data = JSON.parse(responseText);
-    // AffiPad trả về: { original_url, affiliate_url, short_url, ... }
     if (data?.affiliate_url) {
       return {
-        originalUrl: data.original_url || productUrl,
-        affiliateUrl: data.affiliate_url,
-        shortUrl: data.short_url || data.affiliate_url,
+        originalUrl: (data.original_url as string) || productUrl,
+        affiliateUrl: data.affiliate_url as string,
+        shortUrl: (data.short_url as string) || (data.affiliate_url as string),
       };
     }
     return null;
@@ -123,7 +128,7 @@ interface AffiPadProductInfo {
   price: number;
 }
 
-async function fetchAffiPadWithInfo(productUrl: string): Promise<AffiPadProductInfo | null> {
+async function fetchAffiPadWithInfo(_productUrl: string): Promise<AffiPadProductInfo | null> {
   // AffiPad có thể trả thêm info trong response, thử lấy từ response trước
   // Nếu không có, fallback sẽ dùng "Sản phẩm Shopee"
   return null; // AffiPad hiện tại chỉ trả link, cần gọi thêm endpoint khác nếu có
