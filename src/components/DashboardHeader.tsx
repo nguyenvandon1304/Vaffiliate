@@ -74,7 +74,7 @@ export function DashboardHeader() {
             className="cursor-pointer shrink-0"
             title="Về trang chủ"
           >
-            <CaffiliateLogo hideTextOnMobile />
+            <CaffiliateLogo />
           </button>
           <div className="hidden md:block h-6 w-px bg-gray-200 dark:bg-zinc-700 shrink-0" />
           <DashboardNavIcons />
