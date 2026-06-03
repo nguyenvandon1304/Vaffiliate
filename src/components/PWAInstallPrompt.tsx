@@ -142,7 +142,7 @@ export function PWAInstallPrompt() {
   if (showBanner && deferredPrompt) {
     return (
       <div
-        className={`fixed bottom-20 sm:bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-sm z-[90] transition-all duration-300 ${
+        className={`fixed bottom-24 sm:bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-sm z-[90] transition-all duration-300 ${
           closing ? "translate-y-4 opacity-0" : "translate-y-0 opacity-100"
         }`}
       >

@@ -282,7 +282,7 @@ export default function CashbackPage() {
                   value={productLink}
                   onChange={(e) => setProductLink(e.target.value)}
                   placeholder="Dán link sản phẩm vào đây..."
-                  className="w-full pl-10 pr-16 py-3.5 border-2 border-gray-200 rounded-full text-sm focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all"
+                  className="w-full pl-10 pr-16 py-3.5 border-2 border-gray-200 rounded-full text-base focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none transition-all"
                 />
                 <svg viewBox="0 0 24 24" className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />

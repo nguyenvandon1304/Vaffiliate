@@ -122,7 +122,7 @@ export function MobileBottomNav() {
               <button
                 key={item.key}
                 onClick={() => goTo(item.href)}
-                className={`flex flex-col items-center justify-center gap-1 py-2 transition-colors ${
+                className={`flex flex-col items-center justify-center gap-1 py-3 transition-colors min-h-[48px] ${
                   isActive ? "text-orange-500" : "text-gray-500 dark:text-zinc-400"
                 }`}
                 aria-current={isActive ? "page" : undefined}
@@ -138,7 +138,7 @@ export function MobileBottomNav() {
           {/* Nút Thêm */}
           <button
             onClick={() => setShowMore(true)}
-            className={`relative flex flex-col items-center justify-center gap-1 py-2 transition-colors ${
+            className={`relative flex flex-col items-center justify-center gap-1 py-3 transition-colors min-h-[48px] ${
               isMoreActive || showMore ? "text-orange-500" : "text-gray-500 dark:text-zinc-400"
             }`}
           >

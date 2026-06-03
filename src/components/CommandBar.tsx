@@ -236,7 +236,7 @@ export function CommandBar({ open, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-start justify-center pt-20 sm:pt-32 px-4 bg-black/50 backdrop-blur-md animate-in fade-in duration-150"
+      className="fixed inset-0 z-[200] flex items-start justify-center pt-20 sm:pt-32 px-4 pb-[env(safe-area-inset-bottom,0px)] bg-black/50 backdrop-blur-md animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div

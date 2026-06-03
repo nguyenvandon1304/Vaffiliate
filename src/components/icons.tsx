@@ -177,10 +177,13 @@ export function CaffiliateLogo({
   className,
   title = "V-Affiliate",
   subtitle = "Thương mại liên kết",
+  hideTextOnMobile = false,
 }: {
   className?: string;
   title?: string;
   subtitle?: string;
+  /** Ẩn cụm chữ trên màn nhỏ (chỉ hiện icon) — dùng cho header chật. */
+  hideTextOnMobile?: boolean;
 }) {
   // Dùng image PNG đã render từ icon.svg (cùng asset với PWA / favicon /
   // Home Screen) → branding nhất quán + nhẹ hơn SVG inline phức tạp.
@@ -197,7 +200,7 @@ export function CaffiliateLogo({
             className="w-full h-full object-cover"
           />
         </span>
-        <div className="flex flex-col leading-tight min-w-0">
+        <div className={`flex-col leading-tight min-w-0 ${hideTextOnMobile ? "hidden sm:flex" : "flex"}`}>
           <span className="text-base sm:text-lg font-extrabold leading-tight bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 bg-clip-text text-transparent group-hover/logo:from-orange-400 group-hover/logo:to-orange-500 transition-colors truncate">
             {title}
           </span>

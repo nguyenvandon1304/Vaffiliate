@@ -68,7 +68,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       <div
         className="fixed top-4 right-4 z-[100] flex flex-col gap-2 w-full max-w-sm pointer-events-none"
-        style={{ paddingTop: "env(safe-area-inset-top, 0)" }}
+        style={{
+          paddingTop: "env(safe-area-inset-top, 0)",
+          paddingRight: "max(1rem, env(safe-area-inset-right, 1rem))",
+          paddingLeft: "max(1rem, env(safe-area-inset-left, 1rem))",
+        }}
         aria-live="polite"
         aria-atomic="false"
       >

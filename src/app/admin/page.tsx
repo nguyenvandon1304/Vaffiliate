@@ -341,7 +341,7 @@ function AdminPageInner() {
               <button
                 key={t.key}
                 onClick={() => setTab(t.key)}
-                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors min-h-[48px] ${
                   tab === t.key ? "bg-orange-500 text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
                 }`}
               >

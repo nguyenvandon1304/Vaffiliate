@@ -551,7 +551,7 @@ function DashboardContent() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 pb-24 md:pb-6">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] md:pb-6">
         {/* Email verify banner — hiện khi chưa verify, soft gate cho rút tiền/2FA/password */}
         {user && !user.email_verified && (
           <EmailVerifyBanner

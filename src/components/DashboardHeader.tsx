@@ -63,21 +63,24 @@ export function DashboardHeader() {
   const initial = (user?.display_name || user?.username || "U").charAt(0).toUpperCase();
 
   return (
-    <header className="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-30">
+    <header
+      className="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-30"
+      style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+    >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 min-w-0">
           <button
             onClick={() => router.push("/dashboard")}
-            className="cursor-pointer"
+            className="cursor-pointer shrink-0"
             title="Về trang chủ"
           >
             <CaffiliateLogo />
           </button>
-          <div className="hidden md:block h-6 w-px bg-gray-200 dark:bg-zinc-700" />
+          <div className="hidden md:block h-6 w-px bg-gray-200 dark:bg-zinc-700 shrink-0" />
           <DashboardNavIcons />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           {/* Streak badge — chỉ hiện khi user có streak đang chạy */}
           <StreakBadge />
           {/* Command bar trigger — dispatch Ctrl+K cho hook ở DashboardShell bắt */}

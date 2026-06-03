@@ -53,7 +53,7 @@ export function Modal({ open, onClose, title, children, size = "md", disableBack
 
   return (
     <div
-      className={`fixed inset-0 z-[90] flex items-start justify-center overflow-y-auto p-4 pt-12 sm:pt-16 transition-all duration-200 ${
+      className={`fixed inset-0 z-[90] flex items-center justify-center overflow-y-auto p-4 transition-all duration-200 ${
         mounted ? "bg-black/50 backdrop-blur-md opacity-100" : "bg-black/0 backdrop-blur-0 opacity-0"
       }`}
     >
