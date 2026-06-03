@@ -746,6 +746,22 @@
   }
 
 
+  /* ─── iOS reset — ensure iOS uses default full-size streak badge ─── */
+  .is-ios .streak-badge-compact {
+    padding: 6px 12px !important;
+    gap: 6px !important;
+  }
+  .is-ios .streak-badge-compact .streak-icon {
+    font-size: 16px !important;
+  }
+  .is-ios .streak-badge-compact .streak-text {
+    font-size: 12px !important;
+  }
+  .is-ios .streak-badge-compact .streak-label {
+    display: inline !important;
+    font-size: 10px !important;
+  }
+
   /* ─── Android-only streak badge compact ───
    * Chỉ Android bị overflow header → chỉ thu nhỏ streak badge trên Android.
    * Class `is-android` được thêm bởi inline script trong layout.tsx.

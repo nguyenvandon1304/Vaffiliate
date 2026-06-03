@@ -112,9 +112,11 @@ export default function RootLayout({
         <Script id="platform-detect">{`
           (function() {
             var ua = navigator.userAgent;
-            var isAndroid = /Android/i.test(ua);
-            if (isAndroid) {
+            if (/Android/i.test(ua)) {
               document.documentElement.classList.add('is-android');
+            }
+            if (/iPhone|iPad|iPod/i.test(ua)) {
+              document.documentElement.classList.add('is-ios');
             }
           })();
         `}</Script>
