@@ -81,8 +81,10 @@ export function DashboardHeader() {
         </div>
 
         <div className="flex items-center gap-1 sm:gap-3 shrink-0">
-          {/* Streak badge — chỉ hiện khi user có streak đang chạy */}
-          <StreakBadge />
+          {/* Streak badge — chỉ hiện khi user có streak đang chạy, ẩn trên mobile */}
+          <div className="hidden lg:inline-flex">
+            <StreakBadge />
+          </div>
           {/* Command bar trigger — dispatch Ctrl+K cho hook ở DashboardShell bắt */}
           <CommandBarTrigger
             onClick={() => {

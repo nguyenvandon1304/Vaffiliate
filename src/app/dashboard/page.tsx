@@ -448,8 +448,10 @@ function DashboardContent() {
             </nav>
           </div>
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Streak badge — only when user has active streak */}
-            <StreakBadge />
+            {/* Streak badge — only when user has active streak, hidden on mobile */}
+            <div className="hidden lg:inline-flex">
+              <StreakBadge />
+            </div>
             {/* Command bar trigger — Ctrl+K shortcut */}
             <CommandBarTrigger
               onClick={() => {
