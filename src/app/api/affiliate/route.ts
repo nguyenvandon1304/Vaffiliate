@@ -295,17 +295,33 @@ export async function POST(request: NextRequest) {
     // không thì truyền thẳng link gốc — GoAffiliate tự xử lý short link.
     const lookupUrl = extractShopeeIds(resolvedUrl) ? resolvedUrl : extracted.trim();
 
-    // ─── Gọi AffiPad trước (ưu tiên) ───
-    // AffiPad trả cả affiliate link + thông tin sản phẩm
-    const affiPadResult = await fetchAffiPadLink(lookupUrl);
+    // ─── Luồng xử lý chính: AffiPad (có voucher Facebook) → GoAffiliate (lấy info) ───
+    let affiPadResult: AffiPadResult | null = null;
+    let info: GoAffProductInfo | null = null;
+    let linkResult: { affiliateLink: string; shopeeLink: string; originalLink: string } | null = null;
 
-    // Nếu AffiPad fail → fallback GoAffiliate
-    const [info, linkResult] = affiPadResult
-      ? [null, { affiliateLink: affiPadResult.shortUrl || affiPadResult.affiliateUrl, shopeeLink: affiPadResult.affiliateUrl, originalLink: affiPadResult.originalUrl }]
-      : await Promise.all([
-          fetchProductInfo(lookupUrl),
-          fetchAffiliateLink(lookupUrl, user?.id),
-        ]);
+    if (AFFIPAD_API_KEY) {
+      // Ưu tiên AffiPad — lấy link affiliate (có voucher Facebook)
+      affiPadResult = await fetchAffiPadLink(lookupUrl);
+
+      if (affiPadResult) {
+        linkResult = {
+          affiliateLink: affiPadResult.shortUrl || affiPadResult.affiliateUrl,
+          shopeeLink: affiPadResult.affiliateUrl,
+          originalLink: affiPadResult.originalUrl,
+        };
+        // GoAffiliate chỉ dùng để lấy thông tin sản phẩm (tên, giá, hoa hồng)
+        info = await fetchProductInfo(lookupUrl);
+      }
+    }
+
+    // Nếu AffiPad fail hoặc không có key → fallback hoàn toàn sang GoAffiliate
+    if (!affiPadResult) {
+      [info, linkResult] = await Promise.all([
+        fetchProductInfo(lookupUrl),
+        fetchAffiliateLink(lookupUrl, user?.id),
+      ]);
+    }
 
     // ═══ Xác định shopId/itemId theo thứ tự ưu tiên ═══
     // 1) Từ link đã resolve (nếu là full link).
@@ -348,8 +364,8 @@ export async function POST(request: NextRequest) {
       (ids ? buildAffiliateLink(ids.shopId, ids.itemId, user?.id) : cleanProductUrl);
     // Link rút gọn đẹp để hiển thị/share (nếu có).
     const shortLink = linkResult?.affiliateLink || affiliateLink;
-    // Cờ cho UI biết link này có voucher hay không (link get-link mới có).
-    const hasVoucher = !!linkResult?.shopeeLink;
+    // AffiPad luôn có voucher Facebook, GoAffiliate thì không
+    const hasVoucher = !!affiPadResult || !!linkResult?.shopeeLink;
 
     // Cashback rate theo tier user (Bronze 50% / Silver 53% / Gold 55% / VIP 58%).
     // Nếu chưa login thì dùng tier Bronze (50%) làm fallback.
