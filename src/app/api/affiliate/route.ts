@@ -16,7 +16,6 @@ const AFFIPAD_API_KEY = process.env.AFFIPAD_API_KEY || "";
 
 // ─── GoAffiliate API (fallback) ───
 const GOAFFILIATE_CHECK_COMMISSION_URL = "https://www.goaffiliate.online/api/check-commission";
-const GOAFFILIATE_GET_LINK_URL = "https://www.goaffiliate.online/api/get-link";
 const GOAFFILIATE_API_KEY = process.env.GOAFFILIATE_API_KEY || "";
 
 // ═══ Trích xuất shopId/itemId từ URL Shopee ═══
@@ -134,17 +133,6 @@ async function fetchAffiPadLink(productUrl: string): Promise<AffiPadResult | nul
 }
 
 // Lấy thêm thông tin sản phẩm từ AffiPad (nếu có)
-interface AffiPadProductInfo {
-  name: string;
-  image: string;
-  price: number;
-}
-
-async function fetchAffiPadWithInfo(_productUrl: string): Promise<AffiPadProductInfo | null> {
-  // AffiPad có thể trả thêm info trong response, thử lấy từ response trước
-  // Nếu không có, fallback sẽ dùng "Sản phẩm Shopee"
-  return null; // AffiPad hiện tại chỉ trả link, cần gọi thêm endpoint khác nếu có
-}
 
 // ═══ Gọi GoAffiliate /api/check-commission (fallback) ═══
 // Docs: https://goaffiliate.online/dashboard → Tài liệu → Kiểm tra Hoa hồng
@@ -191,59 +179,6 @@ async function fetchProductInfo(productUrl: string): Promise<GoAffProductInfo | 
     return null;
   } catch (e) {
     console.error("[GoAffiliate] check-commission error:", e);
-    return null;
-  }
-}
-
-// ═══ Gọi GoAffiliate /api/get-link — chuyển link Shopee → link affiliate CHÍNH THỨC ═══
-// Endpoint này trả về `shopeeLink` dùng `s.shopee.vn/an_redir` (deep link Shopee thật)
-// → voucher "Mạng Xã Hội" gắn theo sản phẩm sẽ TỰ ĐỘNG được nhúng + lưu vào tài khoản
-// user khi họ bấm link. Khác hẳn link ghép tay (không có voucher).
-//
-// subId = `uid_<userId>` để tracking cashback đúng user trong báo cáo affiliate.
-interface GoAffLinkResult {
-  affiliateLink: string;   // link rút gọn đẹp (goaffiliate.online/XXX)
-  shopeeLink: string;      // deep link Shopee chính thức (s.shopee.vn/an_redir...)
-  originalLink: string;
-}
-
-async function fetchAffiliateLink(productUrl: string, userId?: number): Promise<GoAffLinkResult | null> {
-  if (!GOAFFILIATE_API_KEY) {
-    console.warn("[GoAffiliate] GOAFFILIATE_API_KEY chưa set — skip get-link");
-    return null;
-  }
-
-  try {
-    const res = await fetch(GOAFFILIATE_GET_LINK_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": GOAFFILIATE_API_KEY,
-        "Accept": "application/json",
-      },
-      body: JSON.stringify({
-        originalLink: productUrl,
-        subId: userId ? `uid_${userId}` : undefined,
-      }),
-    });
-
-    if (!res.ok) {
-      console.error(`[GoAffiliate] get-link ${res.status}: ${await res.text().catch(() => "")}`);
-      return null;
-    }
-
-    const json = await res.json();
-    const d = json?.data;
-    if (json?.success && d?.shopeeLink) {
-      return {
-        affiliateLink: String(d.affiliateLink ?? ""),
-        shopeeLink: String(d.shopeeLink),
-        originalLink: String(d.originalLink ?? productUrl),
-      };
-    }
-    return null;
-  } catch (e) {
-    console.error("[GoAffiliate] get-link error:", e);
     return null;
   }
 }
@@ -387,13 +322,10 @@ export async function POST(request: NextRequest) {
     const commissionAmount = parsePrice(info?.commission || "");
     const cashback = calcCashback(commissionAmount, cashbackRate);
 
-    // AffiPad trả thông tin sản phẩm nếu có
-    const affiPadData = affiPadResult ? (await fetchAffiPadWithInfo(lookupUrl)) : null;
-
     const product = {
-      name: info?.name || affiPadData?.name || "Sản phẩm Shopee",
-      image: info?.image || affiPadData?.image || "",
-      price: parsePrice(info?.price || "") || affiPadData?.price || 0,
+      name: info?.name || "Sản phẩm Shopee",
+      image: info?.image || "",
+      price: parsePrice(info?.price || "") || 0,
       originalPrice: 0,
       commission: commissionAmount,
       commissionRate: info?.commissionRate || "",
