@@ -83,7 +83,7 @@ function buildAffiPadStyleLink(productUrl: string, userId?: number): string {
   u.searchParams.set("mmp_pid", `an_${SHOPEE_AFFILIATE_ID}`);
   u.searchParams.set("utm_source", `an_${SHOPEE_AFFILIATE_ID}`);
   u.searchParams.set("utm_medium", "affiliates");
-  u.searchParams.set("utm_campaign", "caffiliate");
+  u.searchParams.set("utm_campaign", "vaffiliate");
   u.searchParams.set("utm_content", userId ? `uid_${userId}` : "affipad----");
   if (userId) {
     u.searchParams.set("sub_id", `uid_${userId}`);

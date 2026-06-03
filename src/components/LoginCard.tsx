@@ -509,7 +509,7 @@ export function LoginCard() {
           <p className="text-xs text-center text-gray-400 dark:text-zinc-500 mt-5">
             Bằng việc tiếp tục, bạn đồng ý với{" "}
             <a
-              href="https://caffiliate.vn/policies.html"
+              href="https://vaffiliate.vn/policies.html"
               target="_blank"
               rel="noopener noreferrer"
               className="text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 underline underline-offset-2 font-medium transition-colors"
