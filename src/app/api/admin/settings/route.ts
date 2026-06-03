@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { DEFAULT_SETTINGS, getAllSettings, logAudit, setSetting } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { getClientIp } from "@/lib/turnstile";
+import { clearTierCache } from "@/lib/tier";
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin(request);
@@ -33,6 +34,9 @@ export async function POST(request: NextRequest) {
       updated[key] = v;
     }
   }
+
+  // Clear tier cache so new settings take effect immediately
+  clearTierCache();
 
   await logAudit("admin.settings.update", {
     userId: auth.user.id,

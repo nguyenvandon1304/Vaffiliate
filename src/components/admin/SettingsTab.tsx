@@ -117,40 +117,167 @@ export function SettingsTab() {
 
       {/* Tier cashback */}
       <div className="mt-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-        <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Tier hoàn tiền + Giới thiệu bạn bè</h3>
+        <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Cấu hình Tier hoàn tiền</h3>
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-          User mặc định nhận <b>{s.cashback_base_percent}%</b> hoa hồng. Khi mời đủ <b>{s.referral_milestone_count}</b> bạn có ≥1 đơn hoàn tiền → cộng thêm <b>+{s.referral_milestone_bonus_percent}%</b> = <b>{Number(s.cashback_base_percent || 0) + Number(s.referral_milestone_bonus_percent || 0)}%</b>.
+          Mỗi tier có ngưỡng đơn hoàn tiền và/hoặc bạn mời riêng. User đạt tier khi đáp ứng <b>1 trong 2</b> điều kiện.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div>
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Tỷ lệ cơ bản (%)</label>
-            <input
-              type="number" min="0" max="100"
-              value={s.cashback_base_percent}
-              onChange={(e) => set("cashback_base_percent", e.target.value)}
-              className="mt-1 w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
-            />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Mặc định 50.</p>
+
+        {/* Bronze tier */}
+        <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-500/10 rounded-lg border border-amber-200 dark:border-amber-500/30">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-lg">🥉</span>
+            <h4 className="text-sm font-bold text-amber-700 dark:text-amber-400">Bronze</h4>
+            <span className="text-xs text-amber-600 dark:text-amber-300">(Mặc định)</span>
           </div>
-          <div>
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Số bạn bè để nâng tier</label>
-            <input
-              type="number" min="1"
-              value={s.referral_milestone_count}
-              onChange={(e) => set("referral_milestone_count", e.target.value)}
-              className="mt-1 w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
-            />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Mặc định 50.</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Tỷ lệ hoàn (%)</label>
+              <input
+                type="number" min="0" max="100"
+                value={s.cashback_base_percent}
+                onChange={(e) => set("cashback_base_percent", e.target.value)}
+                className="mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
+              />
+            </div>
           </div>
-          <div>
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">% bonus thêm</label>
-            <input
-              type="number" min="0" max="100"
-              value={s.referral_milestone_bonus_percent}
-              onChange={(e) => set("referral_milestone_bonus_percent", e.target.value)}
-              className="mt-1 w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
-            />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Mặc định 5.</p>
+        </div>
+
+        {/* Silver tier */}
+        <div className="mb-4 p-3 bg-slate-50 dark:bg-slate-500/10 rounded-lg border border-slate-200 dark:border-slate-500/30">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-lg">🥈</span>
+            <h4 className="text-sm font-bold text-slate-600 dark:text-slate-300">Silver</h4>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Đơn hoàn tiền</label>
+              <input
+                type="number" min="0"
+                value={s.tier_silver_orders || "50"}
+                onChange={(e) => set("tier_silver_orders", e.target.value)}
+                className="mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Bạn mời</label>
+              <input
+                type="number" min="0"
+                value={s.tier_silver_referrals || "25"}
+                onChange={(e) => set("tier_silver_referrals", e.target.value)}
+                className="mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Tỷ lệ (%)</label>
+              <input
+                type="number" min="0" max="100"
+                value={s.tier_silver_percent || "53"}
+                onChange={(e) => set("tier_silver_percent", e.target.value)}
+                className="mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Gold tier */}
+        <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-500/10 rounded-lg border border-yellow-200 dark:border-yellow-500/30">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-lg">🥇</span>
+            <h4 className="text-sm font-bold text-yellow-700 dark:text-yellow-400">Gold</h4>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Đơn hoàn tiền</label>
+              <input
+                type="number" min="0"
+                value={s.tier_gold_orders || "100"}
+                onChange={(e) => set("tier_gold_orders", e.target.value)}
+                className="mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Bạn mời</label>
+              <input
+                type="number" min="0"
+                value={s.tier_gold_referrals || "50"}
+                onChange={(e) => set("tier_gold_referrals", e.target.value)}
+                className="mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Tỷ lệ (%)</label>
+              <input
+                type="number" min="0" max="100"
+                value={s.tier_gold_percent || "55"}
+                onChange={(e) => set("tier_gold_percent", e.target.value)}
+                className="mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* VIP tier */}
+        <div className="mb-4 p-3 bg-violet-50 dark:bg-violet-500/10 rounded-lg border border-violet-200 dark:border-violet-500/30">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-lg">💎</span>
+            <h4 className="text-sm font-bold text-violet-700 dark:text-violet-300">VIP</h4>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Đơn hoàn tiền</label>
+              <input
+                type="number" min="0"
+                value={s.tier_vip_orders || "300"}
+                onChange={(e) => set("tier_vip_orders", e.target.value)}
+                className="mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Bạn mời</label>
+              <input
+                type="number" min="0"
+                value={s.tier_vip_referrals || "100"}
+                onChange={(e) => set("tier_vip_referrals", e.target.value)}
+                className="mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Tỷ lệ (%)</label>
+              <input
+                type="number" min="0" max="100"
+                value={s.tier_vip_percent || "58"}
+                onChange={(e) => set("tier_vip_percent", e.target.value)}
+                className="mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Giới thiệu bạn bè */}
+        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Giới thiệu bạn bè</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+            Mời bạn để nhận thêm bonus. Mỗi tier có bonus riêng.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Số bạn để nhận bonus</label>
+              <input
+                type="number" min="1"
+                value={s.referral_milestone_count}
+                onChange={(e) => set("referral_milestone_count", e.target.value)}
+                className="mt-1 w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">% bonus thêm</label>
+              <input
+                type="number" min="0" max="100"
+                value={s.referral_milestone_bonus_percent}
+                onChange={(e) => set("referral_milestone_bonus_percent", e.target.value)}
+                className="mt-1 w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
+              />
+            </div>
           </div>
         </div>
       </div>
