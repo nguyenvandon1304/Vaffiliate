@@ -59,13 +59,13 @@ export function StreakBadge() {
         type="button"
         onClick={() => setOpen(true)}
         title={`Streak ${info.currentStreak} ngày — Click để xem chi tiết`}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500/15 to-amber-500/15 dark:from-orange-500/20 dark:to-amber-500/20 border border-orange-300/50 dark:border-orange-500/30 hover:scale-105 transition-transform shadow-sm group"
+        className="inline-flex items-center gap-1 px-1.5 py-1 rounded-full bg-gradient-to-r from-orange-500/15 to-amber-500/15 dark:from-orange-500/20 dark:to-amber-500/20 border border-orange-300/50 dark:border-orange-500/30 hover:scale-105 transition-transform shadow-sm group sm:px-3 sm:py-1.5 sm:gap-1.5"
       >
-        <span className="text-base group-hover:animate-bounce-once">{intensity}</span>
-        <span className="text-xs font-black text-orange-600 dark:text-orange-400 tabular-nums">
+        <span className="text-sm sm:text-base group-hover:animate-bounce-once">{intensity}</span>
+        <span className="text-[10px] sm:text-xs font-black text-orange-600 dark:text-orange-400 tabular-nums">
           {info.currentStreak}
         </span>
-        <span className="text-[10px] font-medium text-orange-700/80 dark:text-orange-300/80">
+        <span className="hidden sm:inline text-[10px] font-medium text-orange-700/80 dark:text-orange-300/80">
           ngày
         </span>
       </button>
