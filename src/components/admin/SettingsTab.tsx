@@ -253,33 +253,6 @@ export function SettingsTab() {
           </div>
         </div>
 
-        {/* Giới thiệu bạn bè */}
-        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Giới thiệu bạn bè</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-            Mời bạn để nhận thêm bonus. Mỗi tier có bonus riêng.
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div>
-              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Số bạn để nhận bonus</label>
-              <input
-                type="number" min="1"
-                value={s.referral_milestone_count}
-                onChange={(e) => set("referral_milestone_count", e.target.value)}
-                className="mt-1 w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-gray-600 dark:text-gray-400">% bonus thêm</label>
-              <input
-                type="number" min="0" max="100"
-                value={s.referral_milestone_bonus_percent}
-                onChange={(e) => set("referral_milestone_bonus_percent", e.target.value)}
-                className="mt-1 w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
-              />
-            </div>
-          </div>
-        </div>
       </div>
 
       <div className="mt-4">
