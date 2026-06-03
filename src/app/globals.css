@@ -748,20 +748,18 @@
 
   /* ─── Android-only streak badge compact ───
    * Chỉ Android bị overflow header → chỉ thu nhỏ streak badge trên Android.
-   * Dùng @supports với -webkit-touch-callout để detect Android browser.
+   * Class `is-android` được thêm bởi inline script trong layout.tsx.
    */
-  @supports (-webkit-touch-callout: none) {
-    .android-only {
-      padding: 4px 8px !important;
-      gap: 4px !important;
-    }
-    .android-only .streak-icon {
-      font-size: 14px !important;
-    }
-    .android-only .streak-text {
-      font-size: 10px !important;
-    }
-    .android-only .streak-label {
-      display: none !important;
-    }
+  .is-android .streak-badge-compact {
+    padding: 4px 8px !important;
+    gap: 4px !important;
+  }
+  .is-android .streak-badge-compact .streak-icon {
+    font-size: 14px !important;
+  }
+  .is-android .streak-badge-compact .streak-text {
+    font-size: 10px !important;
+  }
+  .is-android .streak-badge-compact .streak-label {
+    display: none !important;
   }

@@ -109,6 +109,15 @@ export default function RootLayout({
          * gây hydration mismatch (lỗi hay gặp khi inline trong <head>).
          */}
         <Script src="/theme-init.js" strategy="beforeInteractive" />
+        <Script id="platform-detect">{`
+          (function() {
+            var ua = navigator.userAgent;
+            var isAndroid = /Android/i.test(ua);
+            if (isAndroid) {
+              document.documentElement.classList.add('is-android');
+            }
+          })();
+        `}</Script>
         <ConditionalThemeToggle />
         <ToastProvider>
           {children}
