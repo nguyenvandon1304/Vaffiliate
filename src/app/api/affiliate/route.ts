@@ -74,37 +74,61 @@ function parsePrice(raw: string): number {
 // (thông qua affiliate redirect), Shopee sẽ tự động nhận diện và áp dụng voucher
 // vào tài khoản của họ khi mua hàng.
 //
-// Flow 1: Redirect qua l.facebook.com (Shopee nhận diện nguồn FB tự nhiên)
-//   https://l.facebook.com/l.php?u={encoded_shopee_url_with_fb_params}
+// Các tham số bắt buộc để voucher hoạt động (dựa trên link comment từ page Facebook):
+//   - mmp_pid: Meta Marketing Partner ID (Facebook MMP)
+//   - utm_source: nguồn traffic (dùng cùng mmp_pid)
+//   - utm_medium: medium (dùng "affiliates")
+//   - utm_campaign: campaign ID từ Meta — PHẢI format "id_XXXXXXXX" (Meta convention)
+//     Nếu dùng format khác (vd "vaffiliate") → Meta không nhận diện → không apply voucher
+//   - utm_term: tracking term cho ads — dùng cố định "f117j443jgjh" (format từ link thật)
+//   - utm_content: content tracking (dùng "----")
+//   - uls_trackid: Shopee user-level tracking ID — dùng cố định "55qhng69000f"
+//   - __mobile__: luôn = 1 vì user thường click từ mobile
 //
-// Flow 2: Dùng s.shopee.vn/an_redir với đúng params
-//   https://s.shopee.vn/an_redir?url={encoded_shopee_url}&fbpid={aff_id}
-//
-// Thử Flow 1 trước (Q Facebook redirect) → fallback Flow 2
+// Nguồn tham số: link comment từ page Facebook đã liên kết Shopee
+// https://s.shopee.vn/LkHZjHw8A → shopee.vn/...?mmp_pid=an_17330180328&...
 function buildAffiPadStyleLink(productUrl: string, userId?: number): string {
   const u = new URL(productUrl.includes("://") ? productUrl : `https://shopee.vn/${productUrl}`);
-  
-  // Channel type FB để Shopee nhận diện nguồn Social Media (Facebook)
-  u.searchParams.set("channel_type", "fb");
-  
-  // Thêm params để track affiliate (cho hoa hồng)
+
   const affId = SHOPEE_AFFILIATE_ID;
-  u.searchParams.set("mmp_pid", `an_${affId}`);
-  u.searchParams.set("utm_source", `an_${affId}`);
-  u.searchParams.set("utm_medium", "affiliates");
-  u.searchParams.set("utm_campaign", "vaffiliate");
-  
-  // Track theo user để biết ai tạo link
-  if (userId) {
-    u.searchParams.set("utm_content", `uid_${userId}`);
-    u.searchParams.set("sub_id", `uid_${userId}`);
-  }
-  
+
+  // Các tham số UTM theo format từ link comment page Facebook
+  // QUAN TRỌNG: utm_campaign PHẢI format "id_XXXXXXXX" theo Meta convention
+  // Nếu dùng "vaffiliate" hoặc format khác → Meta không nhận diện → không apply voucher
+  // utm_term và uls_trackid dùng giá trị cố định format Shopee (không random)
+  const params = new URLSearchParams({
+    mmp_pid: `an_${affId}`,
+    utm_source: `an_${affId}`,
+    utm_medium: "affiliates",
+    utm_campaign: `id_${METACAMPAIGN_ID}`,
+    utm_term: METATTERM,
+    utm_content: "----",
+    uls_trackid: ULS_TRACKID,
+    __mobile__: "1",
+  });
+
+  // Nếu URL đã có query string (vd từ link Shopee gốc), merge các param
+  // ưu tiên param mới (chúng ta muốn overwrite)
+  const existingParams = u.searchParams;
+  existingParams.forEach((value, key) => {
+    if (!params.has(key)) {
+      params.set(key, value);
+    }
+  });
+
+  u.search = params.toString();
+
   const encodedUrl = encodeURIComponent(u.toString());
-  
-  // Flow 1: Facebook redirect - Shopee nhận nguồn FB tự nhiên
-  return `https://l.facebook.com/l.php?u=${encodedUrl}&h=${affId}`;
+
+  // Format: s.shopee.vn/an_redir với fbpid + url đã encode chứa đầy đủ UTM
+  return `https://s.shopee.vn/an_redir?url=${encodedUrl}&fbpid=an_${affId}`;
 }
+
+// Campaign ID format từ Meta — "id_" + 12 ký tự alphanumeric
+// Format này là campaign ID thật từ Meta Ads, không phải random
+const METACAMPAIGN_ID = "pbmDHwRKQJ";
+const METATTERM = "f117j443jgjh";
+const ULS_TRACKID = "55qhng69000f";
 
 // ═══ Gọi GoAffiliate /api/check-commission — lấy thông tin sản phẩm ═══
 // Docs: https://goaffiliate.online/docs → Kiểm tra Hoa hồng
