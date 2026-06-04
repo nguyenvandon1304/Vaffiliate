@@ -386,27 +386,48 @@ export default function CashbackPage() {
                   </div>
                 </div>
 
-                {/* MUA NGAY Button - Main CTA */}
-                <a
-                  href={product.affiliateLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-3 text-white text-lg font-bold py-4 rounded-xl transition-all shadow-lg bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 mb-3"
-                >
-                  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="9" cy="21" r="1" />
-                    <circle cx="20" cy="21" r="1" />
-                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                  </svg>
-                  MUA NGAY — NHẬN HOÀN TIỀN
-                  <svg viewBox="0 0 24 24" className="w-5 h-5 opacity-80" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M7 17l9.2-9.2M17 17V7H7" />
-                  </svg>
-                </a>
+                {/* Action Buttons Row */}
+                <div className="flex gap-3 mb-3">
+                  <a
+                    href={product.affiliateLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 flex items-center justify-center gap-2 text-white text-base font-bold py-3.5 rounded-xl transition-all shadow-lg bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700"
+                  >
+                    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="9" cy="21" r="1" />
+                      <circle cx="20" cy="21" r="1" />
+                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                    </svg>
+                    MUA NGAY
+                  </a>
+                  <button
+                    onClick={handleCopy}
+                    className="flex items-center justify-center gap-2 text-white text-sm font-bold px-5 py-3.5 rounded-xl bg-gray-600 hover:bg-gray-700 transition-all shadow-sm"
+                    title="Copy link để gửi sang điện thoại"
+                  >
+                    {copied ? (
+                      <>
+                        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        Đã copy!
+                      </>
+                    ) : (
+                      <>
+                        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                        </svg>
+                        Copy link
+                      </>
+                    )}
+                  </button>
+                </div>
 
                 {/* Guarantee text */}
                 <p className="text-xs text-gray-500 text-center">
-                  Đảm bảo hoàn tiền {product.cashbackRate ?? 50}% vào ví — Voucher Facebook kiểm tra tự động khi thanh toán
+                  Đảm bảo hoàn tiền {product.cashbackRate ?? 50}% vào ví — Voucher Facebook tự động khi thanh toán
                 </p>
               </div>
             )}
