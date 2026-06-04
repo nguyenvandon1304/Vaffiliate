@@ -24,13 +24,15 @@ const TESTIMONIALS: Testimonial[] = [
     avatar: "🌸",
     rating: 5,
     quote: "Mình mua đồ Shopee thường xuyên, giờ qua V-Affiliate là có hoàn tiền về ví. Sinh viên mà — tiết kiệm được đồng nào hay đồng đó!",
+    earned: 320000,
   },
   {
     name: "Anh Tuấn",
     role: "Văn phòng · TP.HCM",
     avatar: "👨‍💻",
     rating: 5,
-    quote: "Trước mua thẳng Shopee, giờ chỉ mất 30 giây tạo link là có hoàn tiền. Thao tác đơn giản, tiền về ví rõ ràng minh bạch.",
+    quote: "Trước mua thẳng Shopee, giờ chỉ mất 30 giây tạo link là có hoàn tiền. Rút tiền nhanh, lại minh bạch.",
+    earned: 750000,
   },
   {
     name: "Chị Hương",
@@ -38,6 +40,7 @@ const TESTIMONIALS: Testimonial[] = [
     avatar: "🤱",
     rating: 5,
     quote: "App dùng dễ, hoàn tiền minh bạch, lại có thông báo khi shop giảm giá. Mua đồ cho bé cũng được hoàn — rất đáng dùng!",
+    earned: 580000,
   },
   {
     name: "Anh Khoa",
@@ -45,7 +48,6 @@ const TESTIMONIALS: Testimonial[] = [
     avatar: "💼",
     rating: 5,
     quote: "Bán hàng online mà dùng V-Affiliate thì vừa mua vừa nhận hoàn tiền, lợi cả đôi đường. Tháng nào cũng tiết kiệm được vài triệu.",
-    earned: 4800000,
   },
   {
     name: "Chị Linh",
@@ -61,7 +63,6 @@ const TESTIMONIALS: Testimonial[] = [
     avatar: "⚙️",
     rating: 5,
     quote: "Hoàn tiền thật 100%, không có trò lừa đảo. Đã giới thiệu cho cả team cùng dùng, ai cũng khen.",
-    earned: 3500000,
   },
 ];
 
@@ -281,7 +282,7 @@ export function LoginHero() {
   const usersDisplay = stats && stats.totalUsers > 0
     ? `${formatBig(stats.totalUsers)}${stats.totalUsers >= 10 ? '+' : ''}`
     : "Cộng đồng đang phát triển";
-  const cashbackTarget = Math.max(stats?.totalCashback ?? 0, 1_000_000);
+  const cashbackTarget = stats?.totalCashback ?? 0;
   const cashbackAnim = useCountUp(cashbackTarget, 2000);
   const ordersDisplay = stats && stats.totalOrders > 0
     ? `${formatBig(stats.totalOrders)}${stats.totalOrders >= 10 ? '+' : ''} đơn`
