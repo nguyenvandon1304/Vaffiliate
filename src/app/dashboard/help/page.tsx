@@ -109,6 +109,53 @@ export default function HelpPage() {
       <DashboardHeader />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-24 md:pb-8 space-y-8">
+        {/* Banner dẫn dắt đến voucher Facebook */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-orange-500 via-orange-600 to-amber-500 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-orange-500/25">
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4 blur-2xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-amber-400/20 rounded-full translate-y-1/2 -translate-x-1/4 blur-2xl pointer-events-none" />
+
+          <div className="relative flex flex-col sm:flex-row gap-5 items-start sm:items-center">
+            {/* Icon */}
+            <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
+              <span className="text-4xl sm:text-5xl">🎁</span>
+            </div>
+
+            {/* Text */}
+            <div className="flex-1">
+              <div className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-2">
+                <span className="w-1.5 h-1.5 bg-green-300 rounded-full animate-pulse" />
+                Đang hoạt động
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black leading-tight">
+                Kênh Nhận Voucher Đặc Biệt
+              </h2>
+              <p className="text-orange-100 text-sm sm:text-base mt-1.5 leading-relaxed max-w-md">
+                Mỗi tuần chúng tôi ghim <strong className="text-white">voucher giảm giá độc quyền</strong> trên Facebook. 
+                Comment link mua hàng của bạn vào bài viết để nhận <strong className="text-white">mã giảm giá tự động</strong> — 
+                áp dụng ngay tại bước thanh toán Shopee.
+              </p>
+            </div>
+
+            {/* CTA */}
+            <div className="flex-shrink-0 w-full sm:w-auto">
+              <a
+                href="/dashboard/cashback"
+                className="flex items-center justify-center gap-2 bg-white text-orange-600 font-black text-sm sm:text-base px-6 py-3.5 rounded-xl hover:bg-orange-50 active:scale-95 transition-all shadow-lg shadow-black/15"
+              >
+                <span className="text-lg">📘</span>
+                Nhận Voucher Ngay
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </a>
+              <p className="text-center text-orange-100 text-[11px] mt-2 font-medium">
+                4 bước đơn giản · Mất dưới 1 phút
+              </p>
+            </div>
+          </div>
+        </section>
+
         <div>
           <h1 className="text-2xl font-bold text-gray-800 dark:text-zinc-100">Hướng dẫn sử dụng</h1>
           <p className="text-sm text-gray-500 dark:text-zinc-400 mt-1">5 bước để bắt đầu nhận hoàn tiền với V-Affiliate.</p>
