@@ -39,6 +39,30 @@ const TESTIMONIALS: Testimonial[] = [
     rating: 5,
     quote: "App dùng dễ, hoàn tiền minh bạch, lại có thông báo khi shop giảm giá. Mua đồ cho bé cũng được hoàn — rất đáng dùng!",
   },
+  {
+    name: "Anh Khoa",
+    role: "Kinh doanh · Cần Thơ",
+    avatar: "💼",
+    rating: 5,
+    quote: "Bán hàng online mà dùng V-Affiliate thì vừa mua vừa nhận hoàn tiền, lợi cả đôi đường. Tháng nào cũng tiết kiệm được vài triệu.",
+    earned: 4800000,
+  },
+  {
+    name: "Chị Linh",
+    role: "Freelancer · Hải Phòng",
+    avatar: "🎨",
+    rating: 5,
+    quote: "Mình mua đồ công nghệ, spa, du lịch gì cũng có hoàn tiền. Rút về ngân hàng nhanh, không phải chờ đợi.",
+    earned: 2100000,
+  },
+  {
+    name: "Anh Đức",
+    role: "Kỹ sư · Bình Dương",
+    avatar: "⚙️",
+    rating: 5,
+    quote: "Hoàn tiền thật 100%, không có trò lừa đảo. Đã giới thiệu cho cả team cùng dùng, ai cũng khen.",
+    earned: 3500000,
+  },
 ];
 
 /** Hook count-up cho big number. */
