@@ -665,6 +665,7 @@ export interface User {
   email: string;
   display_name: string | null;
   phone: string | null;
+  avatar: string | null;
   has_withdraw_pin: boolean;
   email_verified: boolean;
   created_at: string;
@@ -680,6 +681,7 @@ function rowToUser(row: Record<string, unknown>): User {
     email: row.email as string,
     display_name: (row.display_name as string | null) ?? null,
     phone: (row.phone as string | null) ?? null,
+    avatar: (row.avatar_url as string | null) ?? null,
     has_withdraw_pin: !!row.withdraw_pin_hash,
     email_verified: Number(row.email_verified) === 1,
     created_at: toIso(row.created_at),
@@ -733,7 +735,7 @@ export async function registerUser(
   );
 
   const row = await database.get(
-    "SELECT id, username, email, display_name, phone, withdraw_pin_hash, role, email_verified, created_at, last_login, is_active FROM users WHERE username = ?",
+    "SELECT id, username, email, display_name, phone, withdraw_pin_hash, role, email_verified, created_at, last_login, is_active, avatar_url FROM users WHERE username = ?",
     [normalizedUsername],
   );
   saveDb();
@@ -892,6 +894,7 @@ export async function loginUser(
     email: row.email as string,
     display_name: (row.display_name as string | null) ?? null,
     phone: (row.phone as string | null) ?? null,
+    avatar: (row.avatar_url as string | null) ?? null,
     has_withdraw_pin: !!row.withdraw_pin_hash,
     email_verified: !!row.email_verified,
     created_at: toIso(row.created_at),
@@ -939,7 +942,7 @@ export async function getUserByToken(
   }
 
   const row = await database.get(
-    "SELECT id, username, email, display_name, phone, withdraw_pin_hash, role, email_verified, created_at, last_login, is_active FROM users WHERE id = ?",
+    "SELECT id, username, email, display_name, phone, withdraw_pin_hash, role, email_verified, created_at, last_login, is_active, avatar_url FROM users WHERE id = ?",
     [Number(session.user_id)],
   );
   if (!row) return null;
@@ -1553,7 +1556,7 @@ export async function verifyUserPassword(userId: number, password: string): Prom
 
 export async function updateUserProfile(
   userId: number,
-  data: { display_name?: string; email?: string; phone?: string },
+  data: { display_name?: string; email?: string; phone?: string; avatar?: string | null },
 ): Promise<{ success: boolean; error?: string; emailChanged?: boolean }> {
   const database = await getDb();
 
@@ -1577,6 +1580,7 @@ export async function updateUserProfile(
   if (data.display_name !== undefined) { fields.push("display_name = ?"); values.push(data.display_name); }
   if (data.email !== undefined) { fields.push("email = ?"); values.push(data.email); }
   if (data.phone !== undefined) { fields.push("phone = ?"); values.push(data.phone); }
+  if (data.avatar !== undefined) { fields.push("avatar_url = ?"); values.push(data.avatar); }
 
   // Đổi email → bắt verify lại email mới (chống chiếm email chưa sở hữu).
   if (emailChanged) { fields.push("email_verified = 0"); }
@@ -4537,7 +4541,7 @@ export async function findOrCreateUserByGoogle(profile: {
 
   // 2. Chưa link, kiểm tra theo email — nếu đã có user local → auto link
   const existingByEmail = await database.get(
-    "SELECT id, username, email, display_name, phone, withdraw_pin_hash, role, email_verified, created_at, last_login, is_active, auth_provider FROM users WHERE LOWER(email) = LOWER(?)",
+    "SELECT id, username, email, display_name, phone, withdraw_pin_hash, role, email_verified, created_at, last_login, is_active, auth_provider, avatar_url FROM users WHERE LOWER(email) = LOWER(?)",
     [email],
   );
   if (existingByEmail) {
@@ -4588,7 +4592,7 @@ export async function findOrCreateUserByGoogle(profile: {
   );
 
   const newUserRow = await database.get(
-    "SELECT id, username, email, display_name, phone, withdraw_pin_hash, role, email_verified, created_at, last_login, is_active FROM users WHERE LOWER(email) = LOWER(?)",
+    "SELECT id, username, email, display_name, phone, withdraw_pin_hash, role, email_verified, created_at, last_login, is_active, avatar_url FROM users WHERE LOWER(email) = LOWER(?)",
     [email],
   );
   if (!newUserRow) throw new Error("Failed to create user from Google profile");

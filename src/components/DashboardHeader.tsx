@@ -14,6 +14,7 @@ interface HeaderUser {
   username: string;
   email: string;
   display_name: string | null;
+  avatar: string | null;
 }
 
 /**
@@ -113,7 +114,7 @@ export function DashboardHeader() {
                 {user?.display_name || user?.username || "..."}
               </span>
               <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-orange-500/30">
-                {initial}
+                {user?.avatar || initial}
               </div>
             </button>
 
@@ -121,7 +122,7 @@ export function DashboardHeader() {
               <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-gray-100 dark:border-zinc-800 py-3 z-50 animate-in fade-in slide-in-from-top-1">
                 <div className="flex items-center gap-3 px-4 pb-3 border-b border-gray-100 dark:border-zinc-800">
                   <div className="w-11 h-11 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-orange-500/30 shrink-0">
-                    {initial}
+                    {user?.avatar || initial}
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-gray-800 dark:text-zinc-100 truncate">{user?.display_name || user?.username}</p>

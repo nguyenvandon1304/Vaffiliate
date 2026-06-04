@@ -12,6 +12,7 @@ export async function PUT(request: NextRequest) {
   const display_name = pickString(body?.display_name, 80);
   const email = pickString(body?.email, 200);
   const phone = pickString(body?.phone, 30);
+  const avatar = typeof body?.avatar === "string" ? body.avatar : null;
   const current_password = typeof body?.current_password === "string" ? body.current_password : "";
 
   if (email !== undefined && !isEmail(email)) {
@@ -34,7 +35,7 @@ export async function PUT(request: NextRequest) {
     }
   }
 
-  const result = await updateUserProfile(auth.user.id, { display_name, email, phone });
+  const result = await updateUserProfile(auth.user.id, { display_name, email, phone, avatar });
 
   if (!result.success) {
     return NextResponse.json({ success: false, error: result.error }, { status: 400 });

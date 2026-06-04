@@ -47,6 +47,7 @@ interface UserInfo {
   email: string;
   display_name: string | null;
   phone: string | null;
+  avatar: string | null;
   has_withdraw_pin: boolean;
   email_verified: boolean;
   role?: string;
@@ -1262,6 +1263,7 @@ function ProfileSection({ user, onProfileUpdated, onBack }: { user: UserInfo; on
   const [email, setEmail] = useState(user.email || "");
   const [phone, setPhone] = useState(user.phone || "");
   const [currentPassword, setCurrentPassword] = useState("");
+  const [selectedAvatar, setSelectedAvatar] = useState(user.avatar || "");
   const [profileMsg, setProfileMsg] = useState("");
   const [profileErr, setProfileErr] = useState("");
   const [saving, setSaving] = useState(false);
@@ -1281,6 +1283,7 @@ function ProfileSection({ user, onProfileUpdated, onBack }: { user: UserInfo; on
           display_name: displayName,
           email,
           phone: phone || undefined,
+          avatar: selectedAvatar || null,
           ...(emailChanged ? { current_password: currentPassword } : {}),
         }),
       });
@@ -1316,6 +1319,53 @@ function ProfileSection({ user, onProfileUpdated, onBack }: { user: UserInfo; on
           Hồ sơ cá nhân
         </h2>
         <div className="space-y-4">
+          {/* Avatar preset picker */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-2">Ảnh đại diện</label>
+            <div className="grid grid-cols-8 gap-2">
+              {[
+                { emoji: "🌸", color: "from-pink-400 to-rose-500" },
+                { emoji: "🌺", color: "from-red-400 to-orange-500" },
+                { emoji: "🍊", color: "from-orange-400 to-amber-500" },
+                { emoji: "🌻", color: "from-yellow-400 to-amber-500" },
+                { emoji: "🌿", color: "from-green-400 to-emerald-500" },
+                { emoji: "🌊", color: "from-blue-400 to-cyan-500" },
+                { emoji: "🩵", color: "from-sky-400 to-blue-500" },
+                { emoji: "🦋", color: "from-indigo-400 to-violet-500" },
+                { emoji: "🍇", color: "from-purple-400 to-fuchsia-500" },
+                { emoji: "🌙", color: "from-zinc-400 to-zinc-600" },
+                { emoji: "⭐", color: "from-amber-400 to-yellow-500" },
+                { emoji: "🔥", color: "from-orange-500 to-red-500" },
+                { emoji: "💜", color: "from-violet-500 to-purple-600" },
+                { emoji: "💚", color: "from-green-500 to-emerald-600" },
+                { emoji: "💙", color: "from-blue-500 to-sky-600" },
+                { emoji: "🧡", color: "from-amber-500 to-orange-600" },
+              ].map((a, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setSelectedAvatar(a.emoji)}
+                  title={`Chọn ${a.emoji}`}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center text-2xl transition-all shadow-sm ${
+                    selectedAvatar === a.emoji
+                      ? "ring-2 ring-orange-500 ring-offset-2 scale-110 shadow-md shadow-orange-500/30"
+                      : "bg-gray-100 dark:bg-zinc-800 hover:scale-105 hover:shadow-md"
+                  }`}
+                >
+                  {a.emoji}
+                </button>
+              ))}
+            </div>
+            {selectedAvatar && (
+              <button
+                type="button"
+                onClick={() => setSelectedAvatar("")}
+                className="mt-2 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              >
+                ✕ Bỏ chọn avatar
+              </button>
+            )}
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">Tên đăng nhập</label>
             <input type="text" value={user.username} disabled className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-400 cursor-not-allowed" />
