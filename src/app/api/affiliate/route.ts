@@ -74,15 +74,13 @@ function parsePrice(raw: string): number {
 // (thông qua affiliate redirect), Shopee sẽ tự động nhận diện và áp dụng voucher
 // vào tài khoản của họ khi mua hàng.
 //
-// Flow tối ưu:
-//   User click link → s.shopee.vn/an_redir → Shopee nhận diện nguồn FB
-//   → Tự động apply Voucher Social cho user khi mua hàng
+// Flow 1: Redirect qua l.facebook.com (Shopee nhận diện nguồn FB tự nhiên)
+//   https://l.facebook.com/l.php?u={encoded_shopee_url_with_fb_params}
 //
-// Format:
-//   https://s.shopee.vn/an_redir?origin_link={encoded_shopee_url}
+// Flow 2: Dùng s.shopee.vn/an_redir với đúng params
+//   https://s.shopee.vn/an_redir?url={encoded_shopee_url}&fbpid={aff_id}
 //
-// Dùng s.shopee.vn/an_redir (Shopee's official affiliate redirect) thay vì l.facebook.com
-// để đảm bảo Shopee nhận diện đúng nguồn affiliate traffic.
+// Thử Flow 1 trước (Q Facebook redirect) → fallback Flow 2
 function buildAffiPadStyleLink(productUrl: string, userId?: number): string {
   const u = new URL(productUrl.includes("://") ? productUrl : `https://shopee.vn/${productUrl}`);
   
@@ -102,10 +100,10 @@ function buildAffiPadStyleLink(productUrl: string, userId?: number): string {
     u.searchParams.set("sub_id", `uid_${userId}`);
   }
   
-  // Dùng Shopee's official affiliate redirect để Shopee nhận diện nguồn FB
-  // → Tự động apply Voucher Social cho user khi mua hàng
   const encodedUrl = encodeURIComponent(u.toString());
-  return `https://s.shopee.vn/an_redir?origin_link=${encodedUrl}`;
+  
+  // Flow 1: Facebook redirect - Shopee nhận nguồn FB tự nhiên
+  return `https://l.facebook.com/l.php?u=${encodedUrl}&h=${affId}`;
 }
 
 // ═══ Gọi GoAffiliate /api/check-commission — lấy thông tin sản phẩm ═══
