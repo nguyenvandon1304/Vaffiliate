@@ -320,50 +320,69 @@ export default function CashbackPage() {
               </div>
             )}
 
-            {/* Product Result Card - Simplified Flow */}
+            {/* Product Result Card - Compact with product info */}
             {product && (
               <div className="mt-5">
                 <div className="h-1 w-full rounded-full bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 mb-5" />
 
                 {/* Success Badge */}
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
-                      <svg viewBox="0 0 24 24" className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center shrink-0">
+                      <svg viewBox="0 0 24 24" className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-base font-bold text-green-700">Chuyển đổi thành công!</p>
-                      <p className="text-sm text-green-600">Link hoàn tiền đã sẵn sàng</p>
-                    </div>
+                    <p className="text-sm font-bold text-green-700">Chuyển đổi thành công!</p>
                   </div>
                 </div>
 
-                {/* Cashback Info */}
-                <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center shrink-0">
-                        <svg viewBox="0 0 24 24" className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="2" y="5" width="20" height="14" rx="2" />
-                          <line x1="2" y1="10" x2="22" y2="10" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-orange-700">
-                          Hoàn tiền {product.cashbackRate ?? 50}%
-                          {product.tierName && product.tierCode !== "bronze" && (
-                            <span className="ml-1 text-amber-600 normal-case font-bold">({product.tierName})</span>
-                          )}
-                        </p>
-                        <p className="text-lg font-extrabold text-orange-600">~đ{formatPrice(product.cashback)}</p>
-                      </div>
+                {/* Product Info Card */}
+                <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4 flex items-start gap-4">
+                  {product.image && (
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-20 h-20 object-contain rounded-lg bg-gray-50 shrink-0 border border-gray-100"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-800 line-clamp-2 mb-1">{product.name}</p>
+                    <p className="text-lg font-bold text-gray-900">đ{formatPrice(product.price)}</p>
+                    {product.shop && (
+                      <p className="text-xs text-gray-400 mt-0.5">{product.shop}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Cashback + Voucher Info Row */}
+                <div className="flex gap-3 mb-4">
+                  <div className="flex-1 bg-orange-50 border border-orange-200 rounded-xl p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <svg viewBox="0 0 24 24" className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="5" width="20" height="14" rx="2" />
+                        <line x1="2" y1="10" x2="22" y2="10" />
+                      </svg>
+                      <span className="text-xs text-orange-600 font-medium">Hoàn tiền</span>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-gray-500">Voucher Facebook</p>
-                      <p className="text-sm font-bold text-green-600">Tự động áp dụng</p>
+                    <p className="text-xl font-extrabold text-orange-600">
+                      {product.cashbackRate ?? 50}%
+                      {product.tierName && product.tierCode !== "bronze" && (
+                        <span className="text-sm font-bold text-amber-600 ml-1">({product.tierName})</span>
+                      )}
+                    </p>
+                    <p className="text-sm font-bold text-orange-700">~đ{formatPrice(product.cashback)}</p>
+                  </div>
+                  <div className="flex-1 bg-green-50 border border-green-200 rounded-xl p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <svg viewBox="0 0 24 24" className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                        <line x1="7" y1="7" x2="7.01" y2="7" />
+                      </svg>
+                      <span className="text-xs text-green-600 font-medium">Voucher</span>
                     </div>
+                    <p className="text-sm font-bold text-green-700">Facebook</p>
+                    <p className="text-xs text-green-600">Tự động áp dụng</p>
                   </div>
                 </div>
 
@@ -372,9 +391,9 @@ export default function CashbackPage() {
                   href={product.affiliateLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-3 text-white text-lg font-bold py-5 rounded-xl transition-all shadow-lg bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 mb-4"
+                  className="flex items-center justify-center gap-3 text-white text-lg font-bold py-4 rounded-xl transition-all shadow-lg bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 mb-3"
                 >
-                  <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="9" cy="21" r="1" />
                     <circle cx="20" cy="21" r="1" />
                     <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
@@ -385,12 +404,10 @@ export default function CashbackPage() {
                   </svg>
                 </a>
 
-                {/* Hint about voucher */}
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
-                  <p className="text-xs text-amber-700 text-center">
-                    Voucher giảm giá Facebook sẽ được kiểm tra tự động khi thanh toán
-                  </p>
-                </div>
+                {/* Guarantee text */}
+                <p className="text-xs text-gray-500 text-center">
+                  Đảm bảo hoàn tiền {product.cashbackRate ?? 50}% vào ví — Voucher Facebook kiểm tra tự động khi thanh toán
+                </p>
               </div>
             )}
           </div>
@@ -453,7 +470,7 @@ export default function CashbackPage() {
                     <div className="absolute left-[-13px] top-0 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm shadow-orange-200">1</div>
                     <h4 className="text-sm font-bold text-gray-800 mb-1">Tạo link hoàn tiền</h4>
                     <p className="text-xs text-gray-500 leading-relaxed">
-                      Dán link sản phẩm Shopee vào ô phía trên → bấm <span className="font-semibold">Lấy Link</span>.
+                      Dán link sản phẩm Shopee vào ô phía trên → bấm <span className="font-semibold">Chuyển đổi</span>.
                       Hệ thống tạo link affiliate chính thức gắn mã hoàn tiền của bạn.
                     </p>
                   </div>
