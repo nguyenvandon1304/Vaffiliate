@@ -11,7 +11,7 @@ services:
     branch: main
     buildCommand: npm ci && npm run build
     startCommand: npm start
-    healthCheckPath: /api/auth/me
+    healthCheckPath: /api/health?simple=1
     autoDeploy: true
     envVars:
       - key: NODE_VERSION
