@@ -7,12 +7,7 @@ import { isShopeeHost, isShopeeShortHost, extractShopeeUrl } from "@/lib/shopee-
 const BROWSER_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 const SHOPEE_AFFILIATE_ID = process.env.SHOPEE_AFFILIATE_ID || "17330180328";
 
-// ─── AffiPad API — KHÔNG DÙNG ĐƯỢC ───
-// AffiPad chỉ cấp quyền cho domain nguyenvandon.afp.ad, không dùng được với vaffiliate.vn
-// → Dùng buildShopeeAffiliateLink (format chuẩn Shopee Affiliate 2026)
-const AFFIPAD_API_KEY = "";
-
-// ─── GoAffiliate API (fallback) ───
+// ─── GoAffiliate API (product info) ───
 const GOAFFILIATE_CHECK_COMMISSION_URL = "https://www.goaffiliate.online/api/check-commission";
 const GOAFFILIATE_API_KEY = process.env.GOAFFILIATE_API_KEY || "";
 
