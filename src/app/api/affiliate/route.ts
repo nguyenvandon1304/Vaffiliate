@@ -7,12 +7,10 @@ import { isShopeeHost, isShopeeShortHost, extractShopeeUrl } from "@/lib/shopee-
 const BROWSER_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 const SHOPEE_AFFILIATE_ID = process.env.SHOPEE_AFFILIATE_ID || "17330180328";
 
-// ─── AffiPad API — dùng để lấy thông tin sản phẩm (tuỳ chọn, không bắt buộc) ───
-// NOTE: AffiPad không cung cấp API tạo link. Link affiliate được ghép trực tiếp
-// với format chuẩn của Shopee. Tuy nhiên AffiPad cung cấp credential_token khi user
-// dùng plugin Chrome — token này có thể dùng để tạo link nếu được cung cấp.
-const AFFIPAD_API_URL = "https://api.affipad.com/v1/fb-convert";
-const AFFIPAD_API_KEY = process.env.AFFIPAD_API_KEY || "";
+// ─── AffiPad API — HIỆN TẠI KHÔNG DÙNG ĐƯỢC ───
+// AffiPad chỉ cấp quyền cho domain nguyenvandon.afp.ad, không dùng được với vaffiliate.vn
+// → Build link thủ công theo format AffiPad chuẩn (xem buildAffiPadStyleLink bên dưới)
+const AFFIPAD_API_KEY = "";
 
 // ─── GoAffiliate API (fallback) ───
 const GOAFFILIATE_CHECK_COMMISSION_URL = "https://www.goaffiliate.online/api/check-commission";
@@ -70,72 +68,48 @@ function parsePrice(raw: string): number {
   return Number(cleaned) || 0;
 }
 
-// ═══ Build Shopee affiliate link theo format AffiPad chuẩn ═══
-// Format: thêm các param utm_*, channel_type=fb, affiliate_id, voucher params
-// vào URL sản phẩm gốc.
-// credential_token/encrypted_payload chỉ có khi user dùng plugin Chrome của AffiPad
-// → chúng ta ghép link dạng cơ bản (không có token vì server-side).
+// ═══ Build Shopee affiliate link với VOUCHER SOCIAL MEDIA ═══
+//
+// Shopee có hệ thống "Voucher Social" — khi user click link từ nguồn Facebook
+// (thông qua affiliate redirect), Shopee sẽ tự động nhận diện và áp dụng voucher
+// vào tài khoản của họ khi mua hàng.
+//
+// Flow tối ưu:
+//   User click link → s.shopee.vn/an_redir → Shopee nhận diện nguồn FB
+//   → Tự động apply Voucher Social cho user khi mua hàng
+//
+// Format:
+//   https://s.shopee.vn/an_redir?origin_link={encoded_shopee_url}
+//
+// Dùng s.shopee.vn/an_redir (Shopee's official affiliate redirect) thay vì l.facebook.com
+// để đảm bảo Shopee nhận diện đúng nguồn affiliate traffic.
 function buildAffiPadStyleLink(productUrl: string, userId?: number): string {
   const u = new URL(productUrl.includes("://") ? productUrl : `https://shopee.vn/${productUrl}`);
-  // Thêm params theo format AffiPad
+  
+  // Channel type FB để Shopee nhận diện nguồn Social Media (Facebook)
   u.searchParams.set("channel_type", "fb");
-  u.searchParams.set("mmp_pid", `an_${SHOPEE_AFFILIATE_ID}`);
-  u.searchParams.set("utm_source", `an_${SHOPEE_AFFILIATE_ID}`);
+  
+  // Thêm params để track affiliate (cho hoa hồng)
+  const affId = SHOPEE_AFFILIATE_ID;
+  u.searchParams.set("mmp_pid", `an_${affId}`);
+  u.searchParams.set("utm_source", `an_${affId}`);
   u.searchParams.set("utm_medium", "affiliates");
   u.searchParams.set("utm_campaign", "vaffiliate");
-  u.searchParams.set("utm_content", userId ? `uid_${userId}` : "affipad----");
+  
+  // Track theo user để biết ai tạo link
   if (userId) {
+    u.searchParams.set("utm_content", `uid_${userId}`);
     u.searchParams.set("sub_id", `uid_${userId}`);
   }
-  return u.toString();
+  
+  // Dùng Shopee's official affiliate redirect để Shopee nhận diện nguồn FB
+  // → Tự động apply Voucher Social cho user khi mua hàng
+  const encodedUrl = encodeURIComponent(u.toString());
+  return `https://s.shopee.vn/an_redir?origin_link=${encodedUrl}`;
 }
 
-// ═══ Gọi AffiPad /v1/fb-convert — giữ nguyên cho lấy thông tin bổ sung (tuỳ) ═══
-interface AffiPadResult {
-  originalUrl: string;
-  affiliateUrl: string;
-  shortUrl?: string;
-}
-
-async function fetchAffiPadLink(productUrl: string): Promise<AffiPadResult | null> {
-  // AffiPad không cung cấp API server-side → ghép link trực tiếp theo format chuẩn
-  // Nếu có AFFIPAD_API_KEY, thử gọi API trước (phòng trường hợp họ có endpoint mới)
-  if (AFFIPAD_API_KEY) {
-    try {
-      const res = await fetch(AFFIPAD_API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${AFFIPAD_API_KEY}`,
-        },
-        body: JSON.stringify({ url: productUrl }),
-      });
-      const responseText = await res.text();
-      let data: Record<string, unknown> | null = null;
-      try { data = JSON.parse(responseText); } catch { /* ignore */ }
-      console.log("[AffiPad] Status:", res.status, "Keys:", Object.keys(data || {}));
-      if (res.ok && data) {
-        const link = (data?.link as string) || (data?.affiliate_url as string) || "";
-        if (link) {
-          return {
-            originalUrl: (data.original_url as string) || (data.originalUrl as string) || productUrl,
-            affiliateUrl: link,
-            shortUrl: (data.short_url as string) || (data.shortUrl as string) || link,
-          };
-        }
-      }
-    } catch (e) {
-      console.warn("[AffiPad] API call failed, falling back to manual link build:", e);
-    }
-  }
-  // Fallback: ghép link thủ công theo format AffiPad
-  return null;
-}
-
-// Lấy thêm thông tin sản phẩm từ AffiPad (nếu có)
-
-// ═══ Gọi GoAffiliate /api/check-commission (fallback) ═══
-// Docs: https://goaffiliate.online/dashboard → Tài liệu → Kiểm tra Hoa hồng
+// ═══ Gọi GoAffiliate /api/check-commission — lấy thông tin sản phẩm ═══
+// Docs: https://goaffiliate.online/docs → Kiểm tra Hoa hồng
 interface GoAffProductInfo {
   itemId: number;
   shopId: number;
@@ -237,34 +211,20 @@ export async function POST(request: NextRequest) {
     const lookupUrl = extractShopeeIds(resolvedUrl) ? resolvedUrl : extracted.trim();
 
     // ─── Luồng xử lý: AffiPad-style link (ghép trực tiếp) → GoAffiliate (lấy info + link) ───
-    let affiPadResult: AffiPadResult | null = null;
+    // NOTE: AffiPad API không hoạt động với domain vaffiliate.vn (chỉ được cấp cho nguyenvandon.afp.ad)
+    // → Luôn dùng buildAffiPadStyleLink + GoAffiliate fallback
     let info: GoAffProductInfo | null = null;
     let linkResult: { affiliateLink: string; shopeeLink: string; originalLink: string } | null = null;
 
-    if (AFFIPAD_API_KEY) {
-      // Ưu tiên AffiPad — thử lấy link từ API trước
-      affiPadResult = await fetchAffiPadLink(lookupUrl);
-    }
-
-    if (affiPadResult) {
-      // AffiPad API trả được link
-      linkResult = {
-        affiliateLink: affiPadResult.shortUrl || affiPadResult.affiliateUrl,
-        shopeeLink: affiPadResult.affiliateUrl,
-        originalLink: affiPadResult.originalUrl,
-      };
-      // GoAffiliate chỉ dùng để lấy thông tin sản phẩm (tên, giá, hoa hồng)
-      info = await fetchProductInfo(lookupUrl);
-    } else {
-      // AffiPad không khả dụng hoặc không có key
-      // → Ghép link theo format AffiPad chuẩn + lấy info từ GoAffiliate
-      info = await fetchProductInfo(lookupUrl);
-      linkResult = {
-        affiliateLink: buildAffiPadStyleLink(lookupUrl, user?.id),
-        shopeeLink: buildAffiPadStyleLink(lookupUrl, user?.id),
-        originalLink: lookupUrl,
-      };
-    }
+    // GoAffiliate lấy thông tin sản phẩm
+    info = await fetchProductInfo(lookupUrl);
+    
+    // Ghép link theo format AffiPad chuẩn
+    linkResult = {
+      affiliateLink: buildAffiPadStyleLink(lookupUrl, user?.id),
+      shopeeLink: buildAffiPadStyleLink(lookupUrl, user?.id),
+      originalLink: lookupUrl,
+    };
 
     // ═══ Xác định shopId/itemId theo thứ tự ưu tiên ═══
     // 1) Từ link đã resolve (nếu là full link).
