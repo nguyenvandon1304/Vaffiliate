@@ -335,140 +335,158 @@ export default function CashbackPage() {
               </div>
             )}
 
-            {/* Product Result Card - Compact with product info */}
+            {/* Product Result Card - Redesigned for conversion */}
             {product && (
-              <div className="mt-5">
-                <div className="h-1 w-full rounded-full bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 mb-5" />
+              <div className="mt-6">
+                {/* ─── Conversion Panel ─── */}
+                <div className="bg-white border-2 border-orange-200 rounded-2xl shadow-lg shadow-orange-100 overflow-hidden">
 
-                {/* Success Badge */}
-                <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center shrink-0">
-                      <svg viewBox="0 0 24 24" className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    </div>
-                    <p className="text-sm font-bold text-green-700">Chuyển đổi thành công!</p>
-                  </div>
-                </div>
-
-                {/* Product Info Card */}
-                <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4 flex items-start gap-4">
-                  {product.image && (
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-20 h-20 object-contain rounded-lg bg-gray-50 shrink-0 border border-gray-100"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-800 line-clamp-2 mb-1">{product.name}</p>
-                    <p className="text-lg font-bold text-gray-900">đ{formatPrice(product.price)}</p>
-                    {product.shop && (
-                      <p className="text-xs text-gray-400 mt-0.5">{product.shop}</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Cashback + Voucher Info Row */}
-                <div className="flex gap-3 mb-4">
-                  <div className="flex-1 bg-orange-50 border border-orange-200 rounded-xl p-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <svg viewBox="0 0 24 24" className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="2" y="5" width="20" height="14" rx="2" />
-                        <line x1="2" y1="10" x2="22" y2="10" />
-                      </svg>
-                      <span className="text-xs text-orange-600 font-medium">Hoàn tiền</span>
-                    </div>
-                    <p className="text-xl font-extrabold text-orange-600">
-                      {product.cashbackRate ?? 50}%
-                      {product.tierName && product.tierCode !== "bronze" && (
-                        <span className="text-sm font-bold text-amber-600 ml-1">({product.tierName})</span>
-                      )}
-                    </p>
-                    <p className="text-sm font-bold text-orange-700">~đ{formatPrice(product.cashback)}</p>
-                  </div>
-                  <div className="flex-1 bg-green-50 border border-green-200 rounded-xl p-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <svg viewBox="0 0 24 24" className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-                        <line x1="7" y1="7" x2="7.01" y2="7" />
-                      </svg>
-                      <span className="text-xs text-green-600 font-medium">Voucher</span>
-                    </div>
-                    {facebookPostUrl ? (
-                      <>
-                        <p className="text-sm font-bold text-green-700">Facebook</p>
-                        <p className="text-xs text-green-600">Dùng luồng Facebook bên dưới</p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-sm font-bold text-green-700">Facebook</p>
-                        <p className="text-xs text-green-600">Tuỳ thời điểm</p>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Action Buttons Row */}
-                <div className="flex gap-3 mb-3">
-                  <a
-                    href={product.affiliateLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 text-white text-base font-bold py-3.5 rounded-xl transition-all shadow-lg bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700"
-                  >
-                    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="9" cy="21" r="1" />
-                      <circle cx="20" cy="21" r="1" />
-                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                    </svg>
-                    MUA NGAY
-                  </a>
-                  <button
-                    onClick={handleCopy}
-                    className="flex items-center justify-center gap-2 text-white text-sm font-bold px-5 py-3.5 rounded-xl bg-gray-600 hover:bg-gray-700 transition-all shadow-sm"
-                    title="Copy link để gửi sang điện thoại"
-                  >
-                    {copied ? (
-                      <>
-                        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  {/* Panel Header — Trust Badge */}
+                  <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-5 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center">
+                        <svg viewBox="0 0 24 24" className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="20 6 9 17 4 12" />
                         </svg>
-                        Đã copy!
-                      </>
-                    ) : (
-                      <>
-                        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-                          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-                        </svg>
-                        Copy link
-                      </>
+                      </div>
+                      <span className="text-white font-bold text-sm">Link đã gắn hoàn tiền thành công!</span>
+                    </div>
+                    <span className="text-white/80 text-xs font-medium">Bước tiếp theo: Mua như bình thường</span>
+                  </div>
+
+                  {/* Product + Cashback Row */}
+                  <div className="p-5">
+                    <div className="flex gap-4">
+
+                      {/* Product thumbnail */}
+                      {product.image && (
+                        <div className="shrink-0">
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-20 h-20 object-contain rounded-xl bg-gray-50 border border-gray-100"
+                          />
+                        </div>
+                      )}
+
+                      {/* Product info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug">{product.name}</p>
+                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                          <span className="text-base font-black text-gray-900">đ{formatPrice(product.price)}</span>
+                          {product.shop && (
+                            <span className="text-[11px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{product.shop}</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Cashback highlight — BIG */}
+                      <div className="shrink-0 bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 rounded-xl px-4 py-3 text-center min-w-[130px]">
+                        <p className="text-[10px] text-orange-500 font-semibold uppercase tracking-wide mb-0.5">Cashback dự kiến</p>
+                        <p className="text-2xl font-black text-orange-600 leading-none">
+                          đ{formatPrice(product.cashback)}
+                        </p>
+                        <div className="mt-1 bg-orange-100 rounded-full px-2 py-0.5 inline-block">
+                          <p className="text-[11px] font-bold text-orange-700">
+                            ≈ {product.cashbackRate ?? 50}%
+                            {product.tierName && product.tierCode !== "bronze" && (
+                              <span className="font-medium"> ({product.tierName})</span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="h-px bg-gradient-to-r from-transparent via-orange-200 to-transparent" />
+
+                  {/* ─── CTA Section ─── */}
+                  <div className="p-5">
+
+                    {/* Primary: MUA NGAY */}
+                    <a
+                      href={product.affiliateLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-3 w-full text-white text-base font-black py-4 rounded-xl transition-all shadow-lg shadow-rose-500/25 bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 mb-3"
+                    >
+                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="9" cy="21" r="1" />
+                        <circle cx="20" cy="21" r="1" />
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                      </svg>
+                      MUA NGAY — CASHBACK SẼ VỀ VÍ
+                    </a>
+
+                    {/* How it works — compact inline trust */}
+                    <p className="text-xs text-gray-500 text-center mb-4 leading-relaxed">
+                      Mua như bình thường · Hệ thống tự ghi nhận · Không phát sinh phí
+                    </p>
+
+                    {/* Secondary actions row */}
+                    <div className="flex gap-2.5">
+                      <button
+                        onClick={handleCopy}
+                        className="flex-1 flex items-center justify-center gap-2 text-gray-600 text-sm font-semibold px-4 py-2.5 rounded-xl border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
+                      >
+                        {copied ? (
+                          <>
+                            <svg viewBox="0 0 24 24" className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                            <span className="text-green-600">Đã copy!</span>
+                          </>
+                        ) : (
+                          <>
+                            <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                              <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                            </svg>
+                            <span>Copy link</span>
+                          </>
+                        )}
+                      </button>
+
+                      {/* Facebook — chỉ hiện khi có facebook_post_url */}
+                      {facebookPostUrl && (
+                        <a
+                          href={facebookPostUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-[2] flex items-center justify-center gap-2 text-white text-sm font-bold px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm"
+                        >
+                          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                          </svg>
+                          Nhận thêm voucher Facebook
+                        </a>
+                      )}
+                    </div>
+
+                    {/* Voucher callout — chỉ hiện khi có Facebook URL */}
+                    {facebookPostUrl && (
+                      <div className="mt-3 bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-start gap-2.5">
+                        <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                          <span className="text-xs">🎁</span>
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-blue-700 mb-0.5">Mở Facebook trước để nhận thêm voucher</p>
+                          <p className="text-[11px] text-blue-600 leading-relaxed">Voucher giảm giá sẽ hiện ở bước thanh toán. Cashback hoàn toàn không phụ thuộc vào voucher.</p>
+                        </div>
+                      </div>
                     )}
-                  </button>
+
+                    {/* Guarantee */}
+                    <div className="mt-3 flex items-center justify-center gap-1.5">
+                      <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        <path d="m9 12 2 2 4-4" />
+                      </svg>
+                      <p className="text-[11px] text-emerald-600 font-medium">
+                        Đảm bảo {product.cashbackRate ?? 50}% cashback về ví · Không phát sinh phí · Miễn phí sử dụng
+                      </p>
+                    </div>
+                  </div>
                 </div>
-
-                {/* Nút Facebook - chỉ hiện khi có facebook_post_url */}
-                {facebookPostUrl && (
-                  <a
-                    href={facebookPostUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-2 text-white text-sm font-bold py-3 rounded-xl transition-all shadow-sm bg-blue-600 hover:bg-blue-700 mb-3"
-                  >
-                    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                    </svg>
-                    Mở Facebook — Nhận voucher
-                  </a>
-                )}
-
-                {/* Guarantee text */}
-                <p className="text-xs text-gray-500 text-center">
-                  Đảm bảo hoàn tiền {product.cashbackRate ?? 50}% vào ví
-                  {facebookPostUrl && " — Dùng luồng Facebook để nhận thêm voucher giảm giá"}
-                </p>
               </div>
             )}
           </div>
@@ -536,11 +554,11 @@ export default function CashbackPage() {
                     <div className="space-y-3 mb-4">
                       <div className="flex items-start gap-3">
                         <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">1</div>
-                        <p className="text-xs text-gray-700">Copy <span className="font-semibold text-blue-600">link đã chuyển đổi</span> bằng nút "Copy link"</p>
+                        <p className="text-xs text-gray-700">Copy <span className="font-semibold text-blue-600">link đã chuyển đổi</span> bằng nút &quot;Copy link&quot;</p>
                       </div>
                       <div className="flex items-start gap-3">
                         <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">2</div>
-                        <p className="text-xs text-gray-700">Bấm <span className="font-bold text-blue-600">"Mở Facebook"</span> để đến bài viết ghim</p>
+                        <p className="text-xs text-gray-700">Bấm <span className="font-bold text-blue-600">&quot;Mở Facebook&quot;</span> để đến bài viết ghim</p>
                       </div>
                       <div className="flex items-start gap-3">
                         <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">3</div>
