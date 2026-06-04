@@ -284,7 +284,8 @@ INSERT INTO system_settings (key, value) VALUES
   ('referral_milestone_bonus_percent', '5'),
   ('min_withdraw_amount',         '50000'),
   ('require_admin_2fa',           '0'),
-  ('maintenance_mode',            '0')
+  ('maintenance_mode',            '0'),
+  ('facebook_post_url',           '')
 ON CONFLICT (key) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════════════════════

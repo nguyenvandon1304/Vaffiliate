@@ -105,6 +105,20 @@ export function SettingsTab() {
           </div>
 
           <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+            <div>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">URL bài viết Facebook ghim</label>
+              <input
+                type="url"
+                value={s.facebook_post_url || ""}
+                onChange={(e) => set("facebook_post_url", e.target.value)}
+                placeholder="https://www.facebook.com/groups/xxx/posts/xxx"
+                className="mt-1 w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none focus:border-orange-500"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Link bài viết Facebook có comment chứa link Shopee có voucher. Để trống = ẩn luồng Facebook.</p>
+            </div>
+          </div>
+
+          <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
             <ToggleRow
               label="Bắt buộc 2FA cho admin"
               hint="Khi bật, admin chưa setup 2FA sẽ không login được. Nhớ kích hoạt 2FA cho tài khoản admin của bạn TRƯỚC khi bật mục này (vào /dashboard/security)."

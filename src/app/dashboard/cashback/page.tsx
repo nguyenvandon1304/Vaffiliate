@@ -67,6 +67,8 @@ export default function CashbackPage() {
 
   // Tier info của user — để hiện đúng % hoàn tiền theo hạng (Bronze 50% / Silver 53% / Gold 55% / VIP 58%)
   const [userTier, setUserTier] = useState<{ ratePercent: number; tierName: string; tierCode: string } | null>(null);
+  // Facebook Pinned Post URL — được admin cấu hình trong /admin/settings
+  const [facebookPostUrl, setFacebookPostUrl] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -81,6 +83,19 @@ export default function CashbackPage() {
         });
       })
       .catch(() => { /* silent — fallback 50% */ });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Fetch Facebook post URL từ settings (public, không cần auth)
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/public/settings")
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled || !d.success) return;
+        setFacebookPostUrl(d.facebookPostUrl || "");
+      })
+      .catch(() => { /* silent */ });
     return () => { cancelled = true; };
   }, []);
 
@@ -381,8 +396,17 @@ export default function CashbackPage() {
                       </svg>
                       <span className="text-xs text-green-600 font-medium">Voucher</span>
                     </div>
-                    <p className="text-sm font-bold text-green-700">Facebook</p>
-                    <p className="text-xs text-green-600">Tự động áp dụng</p>
+                    {facebookPostUrl ? (
+                      <>
+                        <p className="text-sm font-bold text-green-700">Facebook</p>
+                        <p className="text-xs text-green-600">Dùng luồng Facebook bên dưới</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm font-bold text-green-700">Facebook</p>
+                        <p className="text-xs text-green-600">Tuỳ thời điểm</p>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -425,9 +449,25 @@ export default function CashbackPage() {
                   </button>
                 </div>
 
+                {/* Nút Facebook - chỉ hiện khi có facebook_post_url */}
+                {facebookPostUrl && (
+                  <a
+                    href={facebookPostUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 text-white text-sm font-bold py-3 rounded-xl transition-all shadow-sm bg-blue-600 hover:bg-blue-700 mb-3"
+                  >
+                    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                    Mở Facebook — Nhận voucher
+                  </a>
+                )}
+
                 {/* Guarantee text */}
                 <p className="text-xs text-gray-500 text-center">
-                  Đảm bảo hoàn tiền {product.cashbackRate ?? 50}% vào ví — Voucher Facebook tự động khi thanh toán
+                  Đảm bảo hoàn tiền {product.cashbackRate ?? 50}% vào ví
+                  {facebookPostUrl && " — Dùng luồng Facebook để nhận thêm voucher giảm giá"}
                 </p>
               </div>
             )}
@@ -470,8 +510,8 @@ export default function CashbackPage() {
                       <span>
                         Mỗi đơn mua qua link V-Affiliate được
                         <span className="font-bold text-orange-600"> hoàn {product?.cashbackRate ?? 50}% hoa hồng</span> về ví, tự động.
-                        Thỉnh thoảng Shopee còn có thêm voucher giảm giá ở bước thanh toán —
-                        nhưng cái này <span className="font-semibold">tuỳ Shopee, không phải lúc nào cũng có</span>.
+                        Shopee cũng có thêm <span className="font-semibold text-green-600">voucher giảm giá Facebook</span> ở bước thanh toán —
+                        dùng đúng luồng bên dưới để nhận voucher.
                       </span>
                     </p>
                   </div>
@@ -483,12 +523,54 @@ export default function CashbackPage() {
                   </div>
                 </div>
 
-                {/* Chiến thuật 3 bước */}
-                <div>
-                  <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mb-4">Quy trình 3 bước</p>
+                {/* Luồng Facebook khuyến nghị */}
+                {facebookPostUrl && (
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-xl p-4 mb-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-lg">📘</span>
+                      <h3 className="text-sm font-bold text-blue-800">Luồng khuyến nghị — Nhận voucher Facebook</h3>
+                    </div>
+                    <p className="text-xs text-blue-700 leading-relaxed mb-3">
+                      Copy link đã chuyển đổi → comment vào bài viết ghim → click lại link vừa comment để nhận voucher.
+                    </p>
+                    <div className="space-y-3 mb-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">1</div>
+                        <p className="text-xs text-gray-700">Copy <span className="font-semibold text-blue-600">link đã chuyển đổi</span> bằng nút "Copy link"</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">2</div>
+                        <p className="text-xs text-gray-700">Bấm <span className="font-bold text-blue-600">"Mở Facebook"</span> để đến bài viết ghim</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">3</div>
+                        <p className="text-xs text-gray-700">Comment <span className="font-semibold">link vừa copy</span> vào bài viết ghim đó</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">4</div>
+                        <p className="text-xs text-gray-700">Bấm vào <span className="font-semibold">chính link bạn vừa comment</span> → <span className="font-semibold text-green-600">voucher Facebook tự động hiện</span> ở bước thanh toán</p>
+                      </div>
+                    </div>
+                    <a
+                      href={facebookPostUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-3 rounded-xl transition-all shadow-sm"
+                    >
+                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                      </svg>
+                      Mở Facebook — Bài viết ghim
+                    </a>
+                  </div>
+                )}
 
-                  <div className="relative pl-10 pb-6 border-l-2 border-orange-200 ml-3">
-                    <div className="absolute left-[-13px] top-0 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm shadow-orange-200">1</div>
+                {/* Luồng Direct */}
+                <div>
+                  <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mb-4">Luồng direct — Hoàn tiền về ví</p>
+
+                  <div className="relative pl-10 pb-6 border-l-2 border-gray-200 ml-3">
+                    <div className="absolute left-[-13px] top-0 w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm shadow-gray-200">1</div>
                     <h4 className="text-sm font-bold text-gray-800 mb-1">Tạo link hoàn tiền</h4>
                     <p className="text-xs text-gray-500 leading-relaxed">
                       Dán link sản phẩm Shopee vào ô phía trên → bấm <span className="font-semibold">Chuyển đổi</span>.
@@ -496,24 +578,23 @@ export default function CashbackPage() {
                     </p>
                   </div>
 
-                  <div className="relative pl-10 pb-6 border-l-2 border-orange-200 ml-3">
-                    <div className="absolute left-[-13px] top-0 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm shadow-orange-200">2</div>
+                  <div className="relative pl-10 pb-6 border-l-2 border-gray-200 ml-3">
+                    <div className="absolute left-[-13px] top-0 w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm shadow-gray-200">2</div>
                     <h4 className="text-sm font-bold text-gray-800 mb-1">Bấm MUA NGAY trên điện thoại</h4>
                     <p className="text-xs text-gray-500 leading-relaxed mb-2">
                       Bấm nút <span className="font-semibold text-rose-600">MUA NGAY</span> → mở thẳng app Shopee.
-                      Nên dùng <span className="font-semibold">điện thoại có app Shopee</span> để voucher hiển thị đầy đủ.
                     </p>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5">
-                      <p className="text-[11px] text-blue-700">📱 Đang dùng máy tính? Bấm nút copy bên cạnh &quot;Mua ngay&quot; để gửi link sang điện thoại rồi mở bằng app Shopee.</p>
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-2.5">
+                      <p className="text-[11px] text-gray-600">📱 Đang dùng máy tính? Bấm nút copy bên cạnh &quot;Mua ngay&quot; để gửi link sang điện thoại rồi mở bằng app Shopee.</p>
                     </div>
                   </div>
 
                   <div className="relative pl-10 pb-1 ml-3">
-                    <div className="absolute left-[-13px] top-0 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm shadow-orange-200">3</div>
-                    <h4 className="text-sm font-bold text-gray-800 mb-1">Kiểm tra voucher khi thanh toán</h4>
-                    <p className="text-xs text-gray-500 leading-relaxed mb-2">
-                      Ở trang thanh toán Shopee, mở mục <span className="font-semibold">&quot;Shopee Voucher&quot;</span> xem có mã nào áp được không.
-                      Có thì chọn để giảm thêm; không có thì dùng voucher sẵn trong tài khoản bạn cũng được — <span className="font-semibold">hoàn tiền vẫn về ví như thường</span>.
+                    <div className="absolute left-[-13px] top-0 w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm shadow-gray-200">3</div>
+                    <h4 className="text-sm font-bold text-gray-800 mb-1">Nhận hoàn tiền</h4>
+                    <p className="text-xs text-gray-500 leading-relaxed">
+                      Sau khi nhận hàng, <span className="font-bold text-orange-600">{product?.cashbackRate ?? 50}% hoa hồng</span> tự động về ví.
+                      Không cần kiểm tra voucher — tiền vẫn về đủ.
                     </p>
                   </div>
                 </div>

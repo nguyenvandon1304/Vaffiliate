@@ -67,7 +67,7 @@ export function DashboardHeader() {
       className="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-30"
       style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between overflow-hidden">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           <button
             onClick={() => router.push("/dashboard")}

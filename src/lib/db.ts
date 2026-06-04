@@ -3815,6 +3815,9 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   spin_enabled: "1",
   spin_orders_per_token: "10",       // 10 đơn hoàn tiền = 1 lượt quay
   spin_referrals_per_token: "5",     // 5 bạn mời active = 1 lượt quay
+  // Facebook Pinned Post URL — redirect user đến bài viết ghim trên Facebook
+  // để nhận voucher Social Media (voucher tự apply khi click từ Facebook).
+  facebook_post_url: "",
 };
 
 export async function getSetting(key: string): Promise<string> {

@@ -29,9 +29,9 @@ const STEPS: Step[] = [
   },
   {
     num: 3,
-    title: "Bấm MUA NGAY để mua",
+    title: "Mua & nhận voucher + hoàn tiền",
     icon: "🛍",
-    body: "Bấm nút MUA NGAY → mở thẳng app Shopee, mua và thanh toán như bình thường. Mẹo: ở bước thanh toán, mở mục \"Shopee Voucher\" xem có mã giảm giá nào áp được không — có thì chọn, không có cũng không sao. Nên mua trên app điện thoại. ⚠️ Quan trọng: sau khi bấm link V-Affiliate, đừng mở lại Shopee từ chỗ khác (Google, Messenger...) kẻo mất quyền hoàn tiền của đơn đó.",
+    body: "Có 2 cách mua:\n\n📘 CÁCH 1 — Nhận voucher Facebook (khuyến nghị): (1) Copy link đã chuyển đổi bằng nút \"Copy link\"; (2) Bấm \"Mở Facebook\" đến bài viết ghim; (3) Comment link vừa copy vào bài viết; (4) Bấm vào chính link bạn vừa comment → voucher Facebook tự động hiện ở bước thanh toán.\n\n⚡ CÁCH 2 — Direct: Bấm \"MUA NGAY\" → mở app Shopee → mua bình thường → hoàn tiền vẫn về ví đầy đủ.\n\n⚠️ Quan trọng: sau khi bấm link, đừng mở lại Shopee từ chỗ khác (Google, Messenger...) kẻo mất hoàn tiền.",
   },
   {
     num: 4,
@@ -62,7 +62,7 @@ const FAQS: FAQ[] = [
   },
   {
     q: "Mua qua link có được voucher giảm giá không?",
-    a: "Thỉnh thoảng Shopee có thêm voucher giảm giá ở bước thanh toán, nhưng cái này tuỳ Shopee và tuỳ thời điểm — KHÔNG phải đơn nào cũng có, V-Affiliate không tự gắn được voucher này. Cách kiểm tra: bấm MUA NGAY → vào app Shopee → ở bước thanh toán mở mục \"Shopee Voucher\" → có mã thì chọn, không có thì dùng voucher sẵn trong tài khoản bạn. Điều quan trọng nhất: dù có voucher hay không, bạn LUÔN nhận hoàn tiền về ví — đó mới là giá trị chính của V-Affiliate.",
+    a: "Có! Luồng nhận voucher Facebook: (1) Copy link đã chuyển đổi bằng nút \"Copy link\"; (2) Bấm \"Mở Facebook\" để đến bài viết ghim; (3) Comment link vừa copy vào bài viết; (4) Bấm vào chính link bạn vừa comment → voucher Facebook tự động hiện ở bước thanh toán. Dù có voucher hay không, bạn LUÔN nhận hoàn tiền về ví — đó mới là giá trị chính của V-Affiliate.",
   },
   {
     q: "Tại sao tôi không rút được tiền?",
