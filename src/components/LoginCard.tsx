@@ -25,7 +25,7 @@ import { trackEvent, identifyUser } from "@/components/Analytics";
 import { GoogleSignInButton, AuthDivider } from "@/components/GoogleSignInButton";
 
 const inputClass =
-  "w-full pl-10 pr-4 py-2.5 bg-white dark:bg-zinc-950/40 border-2 border-gray-200 dark:border-zinc-700 rounded-lg text-sm text-gray-900 dark:text-zinc-100 placeholder:text-gray-300 dark:placeholder:text-zinc-600 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-500/20 outline-none transition-all";
+  "w-full pl-10 pr-4 py-2.5 bg-white dark:bg-zinc-800 border-2 border-gray-200 dark:border-zinc-600 rounded-lg text-sm text-gray-900 dark:text-zinc-100 placeholder:text-gray-300 dark:placeholder:text-zinc-500 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-500/20 outline-none transition-all";
 
 const inputClassWithRightIcon = inputClass.replace("pr-4", "pr-10");
 
@@ -700,7 +700,7 @@ function LoginForm({
       <button
         onClick={() => onSubmit(username, password)}
         disabled={loading}
-        className="w-full flex items-center justify-center gap-2 bg-white dark:bg-zinc-800 border-2 border-gray-200 dark:border-zinc-700 rounded-lg px-4 py-2.5 text-sm font-semibold text-gray-600 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-zinc-700 hover:border-gray-300 dark:hover:border-zinc-600 transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-lg px-4 py-2.5 text-sm font-semibold shadow-lg shadow-orange-500/30 transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <LogInIcon className="w-4 h-4" />
         <span>{loading ? "Đang xử lý..." : "Đăng nhập"}</span>
@@ -1047,7 +1047,7 @@ function TotpStepForm({
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
               placeholder="000000"
-              className="w-full px-4 py-3 bg-white dark:bg-zinc-950/40 border-2 border-gray-200 dark:border-zinc-700 rounded-lg text-2xl font-mono tracking-[0.5em] text-center text-gray-900 dark:text-zinc-100 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-500/20 outline-none"
+              className="w-full px-4 py-3 bg-white dark:bg-zinc-800 border-2 border-gray-200 dark:border-zinc-600 rounded-lg text-2xl font-mono tracking-[0.5em] text-center text-gray-900 dark:text-zinc-100 placeholder:text-gray-300 dark:placeholder:text-zinc-500 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-500/20 outline-none transition-all"
             />
             <p className="text-xs text-gray-400 dark:text-zinc-500 mt-1.5">
               Mở Google Authenticator / Authy / 1Password để lấy mã hiện tại.
@@ -1064,7 +1064,7 @@ function TotpStepForm({
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z2-9-]/g, "").slice(0, 9))}
               placeholder="ABCD-1234"
-              className="w-full px-4 py-3 bg-white dark:bg-zinc-950/40 border-2 border-gray-200 dark:border-zinc-700 rounded-lg text-xl font-mono tracking-widest text-center uppercase text-gray-900 dark:text-zinc-100 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-500/20 outline-none"
+              className="w-full px-4 py-3 bg-white dark:bg-zinc-800 border-2 border-gray-200 dark:border-zinc-600 rounded-lg text-xl font-mono tracking-widest text-center uppercase text-gray-900 dark:text-zinc-100 placeholder:text-gray-300 dark:placeholder:text-zinc-500 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-500/20 outline-none transition-all"
             />
             <p className="text-xs text-gray-400 dark:text-zinc-500 mt-1.5">
               Mã 1 lần dùng đã lưu khi enable 2FA. Sau khi dùng, mã đó sẽ vô hiệu.

@@ -67,8 +67,8 @@ export function DashboardHeader() {
       className="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-30"
       style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           <button
             onClick={() => router.push("/dashboard")}
             className="cursor-pointer shrink-0"
@@ -76,8 +76,11 @@ export function DashboardHeader() {
           >
             <CaffiliateLogo />
           </button>
-          <div className="hidden md:block h-6 w-px bg-gray-200 dark:bg-zinc-700 shrink-0" />
-          <DashboardNavIcons />
+          <div className="h-6 w-px bg-gray-200 dark:bg-zinc-700 shrink-0 hidden sm:block" />
+          {/* Nav icons — hiện trên tablet trở lên, mobile có bottom nav */}
+          <div className="hidden sm:block shrink-0">
+            <DashboardNavIcons />
+          </div>
         </div>
 
         <div className="flex items-center gap-1 sm:gap-3 shrink-0">
@@ -109,7 +112,7 @@ export function DashboardHeader() {
               <span className="hidden sm:block text-sm text-gray-600 dark:text-zinc-300 font-medium">
                 {user?.display_name || user?.username || "..."}
               </span>
-              <div className="w-9 h-9 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold text-sm">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-orange-500/30">
                 {initial}
               </div>
             </button>
@@ -117,7 +120,7 @@ export function DashboardHeader() {
             {showDropdown && (
               <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-gray-100 dark:border-zinc-800 py-3 z-50 animate-in fade-in slide-in-from-top-1">
                 <div className="flex items-center gap-3 px-4 pb-3 border-b border-gray-100 dark:border-zinc-800">
-                  <div className="w-11 h-11 rounded-full bg-purple-500 flex items-center justify-center text-white font-bold text-lg shrink-0">
+                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-orange-500/30 shrink-0">
                     {initial}
                   </div>
                   <div className="min-w-0">
