@@ -342,16 +342,22 @@ export default function CashbackPage() {
                 <div className="bg-white border-2 border-orange-200 rounded-2xl shadow-lg shadow-orange-100 overflow-hidden">
 
                   {/* Panel Header — Trust Badge */}
-                  <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-5 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center">
+                  <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 bg-[length:200%_100%] animate-shimmer px-5 py-3.5 flex items-center justify-between overflow-hidden">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
                         <svg viewBox="0 0 24 24" className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="20 6 9 17 4 12" />
                         </svg>
                       </div>
-                      <span className="text-white font-bold text-sm">Link đã gắn hoàn tiền thành công!</span>
+                      <div>
+                        <span className="text-white font-black text-sm">Link đã gắn hoàn tiền!</span>
+                        <p className="text-white/70 text-[11px] font-medium">Shopee sẽ ghi nhận đơn hàng tự động</p>
+                      </div>
                     </div>
-                    <span className="text-white/80 text-xs font-medium">Bước tiếp theo: Mua như bình thường</span>
+                    <div className="hidden sm:flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5">
+                      <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                      <span className="text-white text-[11px] font-bold">{product?.cashbackRate ?? 50}% hoàn tiền</span>
+                    </div>
                   </div>
 
                   {/* Product + Cashback Row */}
@@ -544,145 +550,226 @@ export default function CashbackPage() {
         <div className="mb-8">
 
           {/* ── Hướng Dẫn Sử Dụng ── */}
-          <div className="lg:col-span-3 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            {/* Header */}
-            <div className="flex items-start gap-2 text-sm px-6 pt-5 sm:px-8">
-              <span className="text-orange-500 text-base shrink-0 leading-relaxed">✨</span>
-              <p className="text-gray-600 leading-relaxed">
-                Cách mua để <span className="font-bold text-gray-800">nhận hoàn tiền</span> &amp; săn voucher Shopee (nếu có)
-              </p>
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+
+            {/* Header — professional */}
+            <div className="px-6 pt-6 sm:px-8 sm:pt-8 pb-0">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                    <span className="text-[11px] font-bold text-orange-500 uppercase tracking-widest">Hướng dẫn</span>
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-black text-gray-900 leading-tight">
+                    Cách mua &amp; nhận hoàn tiền
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1.5 leading-relaxed">
+                    Theo 3 bước đơn giản để vừa tiết kiệm chi phí, vừa nhận hoàn tiền tối đa về ví.
+                  </p>
+                </div>
+                <div className="hidden sm:flex items-center gap-3 mt-1">
+                  <div className="flex items-center gap-1.5 bg-orange-50 border border-orange-100 rounded-full px-3 py-1.5">
+                    <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                    <span className="text-[11px] font-bold text-orange-600">Hoàn tiền {product?.cashbackRate ?? 50}%</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Content with max-height + fade */}
             <div className="relative">
               <div
-                className={`px-6 sm:px-8 pt-4 pb-2 space-y-5 transition-all duration-500 ease-in-out overflow-hidden ${
-                  showGuide ? "max-h-[2000px]" : "max-h-[320px]"
+                className={`px-6 sm:px-8 pt-5 pb-2 space-y-6 transition-all duration-500 ease-in-out overflow-hidden ${
+                  showGuide ? "max-h-[3000px]" : "max-h-[400px]"
                 }`}
               >
-                {/* Tổng quan voucher social */}
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-base">💸</span>
-                    <h3 className="text-sm font-bold text-gray-800">Bạn được gì khi mua qua link?</h3>
+
+                {/* ── 2-Column Overview Stats ── */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Cashback stat */}
+                  <div className="relative bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-100 rounded-2xl p-4 overflow-hidden group hover:shadow-md hover:shadow-orange-100 transition-all">
+                    <div className="absolute right-0 top-0 w-24 h-24 rounded-full bg-orange-100/60 -translate-y-6 translate-x-6" />
+                    <div className="relative">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center shadow-sm shadow-orange-200">
+                          <svg viewBox="0 0 24 24" className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                          </svg>
+                        </div>
+                        <span className="text-[11px] font-bold text-orange-600 uppercase tracking-wide">Hoàn tiền</span>
+                      </div>
+                      <p className="text-2xl font-black text-gray-900 leading-none mb-0.5">{product?.cashbackRate ?? 50}%</p>
+                      <p className="text-[11px] text-gray-500 leading-relaxed">Mỗi đơn mua — tự động về ví ngay khi đơn hoàn tất, không cần thao tác thêm.</p>
+                    </div>
                   </div>
-                  <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-3 ml-6">
-                    <p className="flex items-start gap-2 text-xs text-gray-700 leading-relaxed">
-                      <span className="text-orange-500 shrink-0">💰</span>
-                      <span>
-                        Mỗi đơn mua qua link V-Affiliate được
-                        <span className="font-bold text-orange-600"> hoàn {product?.cashbackRate ?? 50}% hoa hồng</span> về ví, tự động.
-                        Shopee cũng có thêm <span className="font-semibold text-green-600">voucher giảm giá Facebook</span> ở bước thanh toán —
-                        dùng đúng luồng bên dưới để nhận voucher.
-                      </span>
-                    </p>
+
+                  {/* Voucher stat */}
+                  <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 overflow-hidden group hover:shadow-md hover:shadow-blue-100 transition-all">
+                    <div className="absolute right-0 top-0 w-24 h-24 rounded-full bg-blue-100/60 -translate-y-6 translate-x-6" />
+                    <div className="relative">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-8 h-8 rounded-xl bg-blue-500 flex items-center justify-center shadow-sm shadow-blue-200">
+                          <svg viewBox="0 0 24 24" className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 12 20 22 4 22 4 12" /><rect width="22" height="5" x="1" y="3" rx="1" /><line width="22" x1="12" x2="12" y1="3" y2="8" />
+                          </svg>
+                        </div>
+                        <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wide">Voucher</span>
+                      </div>
+                      <p className="text-2xl font-black text-gray-900 leading-none mb-0.5">Shopee</p>
+                      <p className="text-[11px] text-gray-500 leading-relaxed">Voucher giảm giá bổ sung từ Facebook — áp dụng tự động ở bước thanh toán.</p>
+                    </div>
                   </div>
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 ml-6">
-                    <p className="text-xs text-gray-700">
-                      <span className="text-emerald-600 font-bold">✓ Chắc chắn:</span> Dù có voucher hay không,
-                      <span className="font-bold"> tiền hoàn {product?.cashbackRate ?? 50}% vẫn về ví đầy đủ</span> như đã cam kết.
-                    </p>
-                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-px bg-gray-100" />
+                  <span className="text-[10px] text-gray-300 font-medium uppercase tracking-widest">Chọn luồng phù hợp với bạn</span>
+                  <div className="flex-1 h-px bg-gray-100" />
                 </div>
 
                 {/* Luồng Facebook khuyến nghị */}
                 {facebookPostUrl && (
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-xl p-4 mb-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-lg">📘</span>
-                      <h3 className="text-sm font-bold text-blue-800">Luồng khuyến nghị — Nhận voucher Facebook</h3>
-                    </div>
-                    <p className="text-xs text-blue-700 leading-relaxed mb-3">
-                      Copy link đã chuyển đổi → comment vào bài viết ghim → click lại link vừa comment để nhận voucher.
-                    </p>
-                    <div className="space-y-3 mb-4">
-                      <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">1</div>
-                        <p className="text-xs text-gray-700">Copy <span className="font-semibold text-blue-600">link đã chuyển đổi</span> bằng nút &quot;Copy link&quot;</p>
+                  <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-white border-2 border-blue-200 rounded-2xl p-5 overflow-hidden">
+                    {/* Card header */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-200">
+                          <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="currentColor">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                          </svg>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <h3 className="text-base font-black text-gray-900">Luồng khuyến nghị</h3>
+                            <span className="bg-blue-100 text-blue-600 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide">+Voucher</span>
+                          </div>
+                          <p className="text-[11px] text-gray-500">Nhận cả hoàn tiền lẫn voucher giảm giá Shopee</p>
+                        </div>
                       </div>
-                      <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">2</div>
-                        <p className="text-xs text-gray-700">Bấm <span className="font-bold text-blue-600">&quot;Mở Facebook&quot;</span> để đến bài viết ghim</p>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">3</div>
-                        <p className="text-xs text-gray-700">Comment <span className="font-semibold">link vừa copy</span> vào bài viết ghim đó</p>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">4</div>
-                        <p className="text-xs text-gray-700">Bấm vào <span className="font-semibold">chính link bạn vừa comment</span> → <span className="font-semibold text-green-600">voucher Facebook tự động hiện</span> ở bước thanh toán</p>
+                      <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-blue-600 font-semibold bg-blue-100 rounded-full px-2.5 py-1">
+                        <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
+                        Khuyến nghị
                       </div>
                     </div>
+
+                    {/* Steps */}
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-5">
+                      {[
+                        { n: "1", text: "Bấm &ldquo;Sao chép link&rdquo;", sub: "Copy link đã gắn mã hoàn tiền" },
+                        { n: "2", text: "Mở bài ghim Facebook", sub: "Dán link vừa copy vào comment" },
+                        { n: "3", text: "Bấm link trong comment", sub: "Shopee mở ra kèm voucher" },
+                        { n: "4", text: "Mua & nhận hoàn tiền", sub: "Cashback + voucher đều được ghi nhận" },
+                      ].map(({ n, text, sub }) => (
+                        <div key={n} className="relative">
+                          <div className="bg-white border border-blue-100 rounded-xl p-3.5 h-full">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-[11px] font-black">{n}</div>
+                              <p className="text-xs font-bold text-gray-800 leading-tight">{text}</p>
+                            </div>
+                            <p className="text-[11px] text-gray-400 leading-relaxed">{sub}</p>
+                          </div>
+                          {n !== "4" && (
+                            <div className="hidden sm:flex absolute right-[-13px] top-1/2 -translate-y-1/2 z-10">
+                              <svg viewBox="0 0 24 24" className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* CTA */}
                     <a
                       href={facebookPostUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-3 rounded-xl transition-all shadow-sm"
+                      className="group relative flex items-center justify-center gap-2 w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm font-black py-3.5 rounded-xl transition-all shadow-lg shadow-blue-200/60 overflow-hidden"
                     >
-                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+                      <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 bg-[length:200%_100%] animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <svg viewBox="0 0 24 24" className="w-5 h-5 relative" fill="currentColor">
                         <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                       </svg>
-                      Mở Facebook — Bài viết ghim
+                      <span className="relative">Mở bài ghim Facebook — Nhận voucher ngay</span>
+                      <svg viewBox="0 0 24 24" className="w-4 h-4 relative transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                     </a>
                   </div>
                 )}
 
                 {/* Luồng Direct */}
-                <div>
-                  <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-widest mb-4">Luồng direct — Hoàn tiền về ví</p>
-
-                  <div className="relative pl-10 pb-6 border-l-2 border-gray-200 ml-3">
-                    <div className="absolute left-[-13px] top-0 w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm shadow-gray-200">1</div>
-                    <h4 className="text-sm font-bold text-gray-800 mb-1">Tạo link hoàn tiền</h4>
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                      Dán link sản phẩm Shopee vào ô phía trên → bấm <span className="font-semibold">Chuyển đổi</span>.
-                      Hệ thống tạo link affiliate chính thức gắn mã hoàn tiền của bạn.
-                    </p>
-                  </div>
-
-                  <div className="relative pl-10 pb-6 border-l-2 border-gray-200 ml-3">
-                    <div className="absolute left-[-13px] top-0 w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm shadow-gray-200">2</div>
-                    <h4 className="text-sm font-bold text-gray-800 mb-1">Bấm MUA NGAY trên điện thoại</h4>
-                    <p className="text-xs text-gray-500 leading-relaxed mb-2">
-                      Bấm nút <span className="font-semibold text-rose-600">MUA NGAY</span> → mở thẳng app Shopee.
-                    </p>
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-2.5">
-                      <p className="text-[11px] text-gray-600">📱 Đang dùng máy tính? Bấm nút copy bên cạnh &quot;Mua ngay&quot; để gửi link sang điện thoại rồi mở bằng app Shopee.</p>
+                <div className="bg-gray-50/80 border border-gray-100 rounded-2xl p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 rounded-xl bg-gray-200 flex items-center justify-center">
+                      <svg viewBox="0 0 24 24" className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-gray-700">Luồng nhanh — Chỉ cần hoàn tiền</h3>
+                      <p className="text-[11px] text-gray-400">Không cần voucher — tiền vẫn về đủ {product?.cashbackRate ?? 50}%</p>
                     </div>
                   </div>
 
-                  <div className="relative pl-10 pb-1 ml-3">
-                    <div className="absolute left-[-13px] top-0 w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm shadow-gray-200">3</div>
-                    <h4 className="text-sm font-bold text-gray-800 mb-1">Nhận hoàn tiền</h4>
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                      Sau khi nhận hàng, <span className="font-bold text-orange-600">{product?.cashbackRate ?? 50}% hoa hồng</span> tự động về ví.
-                      Không cần kiểm tra voucher — tiền vẫn về đủ.
-                    </p>
+                  <div className="relative pl-9 pb-5 border-l border-gray-200 ml-3 space-y-5">
+                    <div className="relative">
+                      <div className="absolute left-[-25px] top-0 w-6 h-6 rounded-full bg-gray-400 flex items-center justify-center text-white text-[11px] font-black shadow-sm">1</div>
+                      <h4 className="text-sm font-bold text-gray-800 mb-1">Tạo link hoàn tiền</h4>
+                      <p className="text-xs text-gray-500 leading-relaxed">
+                        Dán link sản phẩm Shopee vào ô bên trên → bấm <span className="font-semibold text-orange-600">Chuyển đổi</span>.
+                        Hệ thống tạo link gắn mã hoàn tiền của bạn tự động.
+                      </p>
+                    </div>
+                    <div className="relative">
+                      <div className="absolute left-[-25px] top-0 w-6 h-6 rounded-full bg-gray-400 flex items-center justify-center text-white text-[11px] font-black shadow-sm">2</div>
+                      <h4 className="text-sm font-bold text-gray-800 mb-1">Mua hàng qua link</h4>
+                      <p className="text-xs text-gray-500 leading-relaxed mb-2">
+                        Bấm <span className="font-semibold text-orange-600">MUA NGAY</span> để mở app Shopee.
+                      </p>
+                      <div className="bg-white border border-gray-200 rounded-lg p-2.5 flex items-start gap-2">
+                        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                        <p className="text-[11px] text-gray-500">Dùng máy tính? Bấm <span className="font-semibold">&ldquo;Sao chép link&rdquo;</span> rồi gửi sang điện thoại để mở app Shopee.</p>
+                      </div>
+                    </div>
+                    <div className="relative">
+                      <div className="absolute left-[-25px] top-0 w-6 h-6 rounded-full bg-emerald-400 flex items-center justify-center text-white text-[11px] font-black shadow-sm">
+                        <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                      </div>
+                      <h4 className="text-sm font-bold text-gray-800 mb-1">Nhận hoàn tiền tự động</h4>
+                      <p className="text-xs text-gray-500 leading-relaxed">
+                        Sau khi nhận hàng, <span className="font-bold text-orange-600">{product?.cashbackRate ?? 50}% hoa hồng</span> tự động về ví — không cần làm gì thêm.
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                {/* Mẹo thêm */}
-                <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
-                  <p className="text-xs text-gray-700 leading-relaxed">
-                    <span className="text-purple-600 font-bold">💡 Mẹo: Gộp đơn để tiết kiệm</span><br />
-                    Gộp nhiều món vào cùng 1 đơn vừa tiết kiệm phí ship, vừa dễ đạt điều kiện nếu Shopee có voucher.
-                    Cashback vẫn tính trên tổng giá trị đơn.
-                  </p>
+                {/* Mẹo */}
+                <div className="flex items-start gap-3 bg-purple-50 border border-purple-100 rounded-xl p-4">
+                  <div className="w-7 h-7 rounded-lg bg-purple-500 flex items-center justify-center shrink-0 mt-0.5">
+                    <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-purple-700 mb-1">Mẹo tối ưu chi phí</p>
+                    <p className="text-[11px] text-purple-600/80 leading-relaxed">
+                      Gộp nhiều món vào cùng 1 đơn vừa tiết kiệm phí ship, vừa dễ đạt điều kiện Shopee voucher.
+                      Cashback vẫn tính đủ trên tổng giá trị đơn.
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* Fade overlay + arrow khi chưa mở rộng */}
+              {/* Fade overlay */}
               {!showGuide && (
-                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none" />
+                <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white via-white/85 to-transparent pointer-events-none" />
               )}
             </div>
 
-            {/* Expand / Collapse button */}
+            {/* Expand / Collapse */}
             <button
               onClick={() => setShowGuide(!showGuide)}
-              className="w-full flex items-center justify-center gap-2 py-3 border-t border-gray-100 text-sm font-medium text-orange-500 hover:text-orange-600 hover:bg-orange-50/30 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-3.5 border-t border-gray-100 text-sm font-semibold text-orange-500 hover:text-orange-600 hover:bg-orange-50/40 transition-colors"
             >
-              {showGuide ? "Thu gọn" : "Xem hướng dẫn mua & nhận hoàn tiền"}
+              <span>{showGuide ? "Thu gọn hướng dẫn" : "Xem hướng dẫn mua & nhận hoàn tiền"}</span>
               <svg
                 viewBox="0 0 24 24"
                 className={`w-4 h-4 transition-transform duration-300 ${showGuide ? "rotate-180" : "animate-bounce"}`}
