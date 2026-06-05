@@ -659,18 +659,18 @@ function DashboardContent() {
               </div>
 
               <div className="flex-1 min-w-0">
-                <h2 className="text-xl sm:text-2xl font-black text-gray-800 dark:text-gray-100">
+                <h2 className="text-lg sm:text-2xl font-black text-gray-800 dark:text-gray-100 leading-tight">
                   Xin chào, {user?.display_name || user?.username || "bạn"}!
                 </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 leading-relaxed">
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1 leading-relaxed">
                   V-Affiliate <b className="text-orange-600 dark:text-orange-400">hoàn 50% hoa hồng</b> cho mọi đơn mua sắm qua link của bạn.
                   Lấy link → mua sắm → tiền về ví tự động.
                 </p>
 
-                <div className="mt-4 flex flex-wrap items-center gap-2">
+                <div className="mt-3 sm:mt-4 flex flex-wrap gap-2">
                   <button
                     onClick={() => router.push("/dashboard/cashback")}
-                    className="tap-target inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-lg shadow-sm transition-all hover:scale-105"
+                    className="tap-target inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-xs sm:text-sm font-bold px-3 sm:px-4 py-2 rounded-lg shadow-sm transition-all hover:scale-105 min-h-[40px]"
                   >
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
@@ -680,7 +680,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/referral")}
-                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 hover:scale-105 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-all"
+                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 hover:scale-105 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 rounded-lg transition-all min-h-[40px]"
                   >
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -688,11 +688,11 @@ function DashboardContent() {
                       <line x1="19" y1="8" x2="19" y2="14" />
                       <line x1="22" y1="11" x2="16" y2="11" />
                     </svg>
-                    Mời bạn nhận thưởng
+                    Mời bạn
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/spin")}
-                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 hover:scale-105 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-all"
+                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 hover:scale-105 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 rounded-lg transition-all min-h-[40px]"
                     title="Vòng quay may mắn — đổi lượt từ đơn hàng & mời bạn"
                   >
                     <span className="text-base">🎰</span>
@@ -700,7 +700,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/wishlist")}
-                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 hover:scale-105 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-all"
+                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 hover:scale-105 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 rounded-lg transition-all min-h-[40px]"
                     title="Wishlist — theo dõi giá Shopee"
                   >
                     <span className="text-base">❤️</span>
@@ -708,7 +708,7 @@ function DashboardContent() {
                   </button>
                   <button
                     onClick={() => router.push("/dashboard/help")}
-                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 hover:scale-105 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg transition-all"
+                    className="tap-target inline-flex items-center gap-2 bg-white dark:bg-orange-500/10 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 hover:scale-105 dark:hover:bg-orange-500/20 border border-gray-200 dark:border-orange-500/30 text-gray-700 dark:text-orange-100 text-xs sm:text-sm font-semibold px-3 sm:px-4 py-2 rounded-lg transition-all min-h-[40px]"
                   >
                     <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />

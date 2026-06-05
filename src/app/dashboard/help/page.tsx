@@ -110,49 +110,65 @@ export default function HelpPage() {
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-24 md:pb-8 space-y-8">
         {/* Banner dẫn dắt đến voucher Facebook */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-orange-500 via-orange-600 to-amber-500 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-orange-500/25">
-          {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4 blur-2xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-amber-400/20 rounded-full translate-y-1/2 -translate-x-1/4 blur-2xl pointer-events-none" />
-
-          <div className="relative flex flex-col sm:flex-row gap-5 items-start sm:items-center">
-            {/* Icon */}
-            <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-4xl sm:text-5xl">🎁</span>
-            </div>
-
-            {/* Text */}
-            <div className="flex-1">
-              <div className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-2">
-                <span className="w-1.5 h-1.5 bg-green-300 rounded-full animate-pulse" />
-                Đang hoạt động
+        <section className="bg-white rounded-2xl border-2 border-blue-200 shadow-sm overflow-hidden">
+          {/* Header với icon + tiêu đề */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-5 pt-5 pb-4 border-b border-blue-100">
+            <div className="flex items-start gap-3">
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
+                <span className="text-2xl">🎁</span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-black leading-tight">
-                Kênh Nhận Voucher Đặc Biệt
-              </h2>
-              <p className="text-orange-100 text-sm sm:text-base mt-1.5 leading-relaxed max-w-md">
-                Mỗi tuần chúng tôi ghim <strong className="text-white">voucher giảm giá độc quyền</strong> trên Facebook. 
-                Comment link mua hàng của bạn vào bài viết để nhận <strong className="text-white">mã giảm giá tự động</strong> — 
-                áp dụng ngay tại bước thanh toán Shopee.
-              </p>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <span className="text-xs font-semibold text-green-600">Đang hoạt động</span>
+                </div>
+                <h2 className="text-lg font-bold text-gray-800">
+                  Nhận Voucher Facebook Giảm Giá
+                </h2>
+                <p className="text-sm text-gray-500 mt-1 leading-relaxed">
+                  Comment link mua hàng vào bài viết ghim trên Facebook để nhận mã giảm giá tự động — áp dụng ngay tại bước thanh toán Shopee.
+                </p>
+              </div>
             </div>
+          </div>
 
-            {/* CTA */}
-            <div className="flex-shrink-0 w-full sm:w-auto">
-              <a
-                href="/dashboard/cashback"
-                className="flex items-center justify-center gap-2 bg-white text-orange-600 font-black text-sm sm:text-base px-6 py-3.5 rounded-xl hover:bg-orange-50 active:scale-95 transition-all shadow-lg shadow-black/15"
-              >
-                <span className="text-lg">📘</span>
-                Nhận Voucher Ngay
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </a>
-              <p className="text-center text-orange-100 text-[11px] mt-2 font-medium">
-                4 bước đơn giản · Mất dưới 1 phút
-              </p>
-            </div>
+          {/* 4 bước rõ ràng */}
+          <div className="px-5 py-4 space-y-3">
+            {[
+              { step: 1, text: "Copy link đã chuyển đổi", highlight: "bằng nút \"Copy link\"" },
+              { step: 2, text: "Bấm \"Mở Facebook\" đến bài viết ghim", highlight: "" },
+              { step: 3, text: "Comment link vừa copy vào bài viết", highlight: "" },
+              { step: 4, text: "Bấm vào chính link bạn vừa comment →", highlight: "voucher tự động hiện" },
+            ].map((item) => (
+              <div key={item.step} className="flex items-start gap-3">
+                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">
+                  {item.step}
+                </div>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {item.text}
+                  {item.highlight && (
+                    <span className="font-semibold text-blue-600"> {item.highlight}</span>
+                  )}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA + note */}
+          <div className="px-5 pb-5">
+            <a
+              href="/dashboard/cashback"
+              className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-6 py-3 rounded-xl transition-all shadow-sm w-full"
+            >
+              <span className="text-lg">📘</span>
+              Nhận Voucher Ngay
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </a>
+            <p className="text-center text-xs text-gray-400 mt-2">
+              Dù có voucher hay không, hoàn tiền vẫn về ví đầy đủ
+            </p>
           </div>
         </section>
 

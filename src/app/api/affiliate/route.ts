@@ -63,43 +63,58 @@ function parsePrice(raw: string): number {
   return Number(cleaned) || 0;
 }
 
-// ═══ Build Shopee affiliate link chuẩn Shopee Affiliate 2026 ═══
+// ═══ Build Shopee affiliate link với VOUCHER SOCIAL MEDIA ═══
 //
-// Format chuẩn Shopee 2026 (theo Shopee Affiliate Short-link Implementation Guide):
-//   https://s.shopee.vn/an_redir?origin_link=<ENCODED>&affiliate_id=<ID>&sub_id=<sub1-sub2-sub3-sub4-sub5>
+// Shopee có hệ thống "Voucher Social" — khi user click link từ nguồn Facebook
+// (thông qua affiliate redirect), Shopee sẽ tự động nhận diện và áp dụng voucher
+// vào tài khoản của họ khi mua hàng.
 //
-// Các tham số UTM (utm_campaign, utm_term...) KHÔNG gắn thủ công — Shopee tự động
-// populate sau redirect. Gắn thủ công = vi phạm policy 2026.
+// Các tham số bắt buộc để voucher hoạt động:
+//   - mmp_pid: Meta Marketing Partner ID (Facebook MMP)
+//   - utm_source: nguồn traffic (dùng cùng mmp_pid)
+//   - utm_medium: medium (dùng "affiliates")
+//   - utm_campaign: campaign ID từ Meta — PHẢI format "id_XXXXXXXX" (Meta convention)
+//   - utm_term: tracking term cho ads
+//   - utm_content: content tracking
+//   - uls_trackid: Shopee user-level tracking ID
+//   - __mobile__: luôn = 1
 //
-// sub_id structure (5 phần, phân cách bằng "-"):
-//   sub1: Publisher (nguồn link — "vaffiliate")
-//   sub2: Campaign (chiến dịch — "cashback")
-//   sub3: Source (kênh — "social" vì voucher Social từ Facebook)
-//   sub4: Click/user ID để trace
-//   sub5: Reserved
-//
-// Nguồn: https://help.shopee.sg/portal/10/article/171184
-function buildShopeeAffiliateLink(productUrl: string, userId?: number): string {
+// Nguồn: link comment từ page Facebook đã liên kết Shopee
+function buildAffiPadStyleLink(productUrl: string, _userId?: number): string {
+  const u = new URL(productUrl.includes("://") ? productUrl : `https://shopee.vn/${productUrl}`);
+
   const affId = SHOPEE_AFFILIATE_ID;
 
-  // Chuẩn hoá product URL — dùng clean URL (không có query string cũ)
-  let cleanUrl = productUrl;
-  try {
-    const u = new URL(productUrl.includes("://") ? productUrl : `https://shopee.vn/${productUrl}`);
-    cleanUrl = `https://shopee.vn${u.pathname}`;
-  } catch {
-    cleanUrl = productUrl.startsWith("http") ? productUrl : `https://shopee.vn/${productUrl}`;
-  }
+  const params = new URLSearchParams({
+    mmp_pid: `an_${affId}`,
+    utm_source: `an_${affId}`,
+    utm_medium: "affiliates",
+    utm_campaign: `id_${METACAMPAIGN_ID}`,
+    utm_term: METATTERM,
+    utm_content: "----",
+    uls_trackid: ULS_TRACKID,
+    __mobile__: "1",
+  });
 
-  // sub_id: sub1=vaffiliate, sub2=cashback, sub3=social, sub4=userId or "guest", sub5=reserved
-  const sub4 = userId ? String(userId) : "guest";
-  const subId = `vaffiliate-cashback-social-${sub4}-`;
+  const existingParams = u.searchParams;
+  existingParams.forEach((value, key) => {
+    if (!params.has(key)) {
+      params.set(key, value);
+    }
+  });
 
-  const encodedUrl = encodeURIComponent(cleanUrl);
+  u.search = params.toString();
 
-  // Format chuẩn Shopee 2026: origin_link + affiliate_id + sub_id
-  return `https://s.shopee.vn/an_redir?origin_link=${encodedUrl}&affiliate_id=${affId}&sub_id=${subId}`;
+  const encodedUrl = encodeURIComponent(u.toString());
+
+  // Format: s.shopee.vn/an_redir với fbpid + url đã encode chứa đầy đủ UTM
+  return `https://s.shopee.vn/an_redir?url=${encodedUrl}&fbpid=an_${affId}`;
 }
+
+// Campaign ID format từ Meta — "id_" + 12 ký tự alphanumeric
+const METACAMPAIGN_ID = "pbmDHwRKQJ";
+const METATTERM = "f117j443jgjh";
+const ULS_TRACKID = "55qhng69000f";
 
 // ═══ Gọi GoAffiliate /api/check-commission — lấy thông tin sản phẩm ═══
 // Docs: https://goaffiliate.online/docs → Kiểm tra Hoa hồng
@@ -205,17 +220,17 @@ export async function POST(request: NextRequest) {
 
     // ─── Luồng xử lý: AffiPad-style link (ghép trực tiếp) → GoAffiliate (lấy info + link) ───
     // NOTE: AffiPad API không hoạt động với domain vaffiliate.vn (chỉ được cấp cho nguyenvandon.afp.ad)
-    // → Luôn dùng buildShopeeAffiliateLink + GoAffiliate fallback
+    // → Luôn dùng buildAffiPadStyleLink + GoAffiliate fallback
     let info: GoAffProductInfo | null = null;
     let linkResult: { affiliateLink: string; shopeeLink: string; originalLink: string } | null = null;
 
     // GoAffiliate lấy thông tin sản phẩm
     info = await fetchProductInfo(lookupUrl);
     
-    // Ghép link theo format Shopee Affiliate chuẩn 2026
+    // Ghép link theo format AffiPad chuẩn
     linkResult = {
-      affiliateLink: buildShopeeAffiliateLink(lookupUrl, user?.id),
-      shopeeLink: buildShopeeAffiliateLink(lookupUrl, user?.id),
+      affiliateLink: buildAffiPadStyleLink(lookupUrl, user?.id),
+      shopeeLink: buildAffiPadStyleLink(lookupUrl, user?.id),
       originalLink: lookupUrl,
     };
 
@@ -255,10 +270,10 @@ export async function POST(request: NextRequest) {
 
     // Ưu tiên link từ GoAffiliate (có voucher Social Media) hoặc AffiPad-style.
     // Nếu linkResult rỗng → ghép tay.
-    const affiliateLink = linkResult?.shopeeLink || buildShopeeAffiliateLink(cleanProductUrl, user?.id);
+    const affiliateLink = linkResult?.shopeeLink || buildAffiPadStyleLink(cleanProductUrl, user?.id);
     // Link rút gọn đẹp để hiển thị/share (nếu có).
     const shortLink = linkResult?.affiliateLink || affiliateLink;
-    // Link Shopee Affiliate chuẩn 2026 — voucher Facebook tự động áp khi user click từ nguồn hợp lệ
+    // AffiPad-style link luôn có channel_type=fb (voucher Facebook)
     const hasVoucher = true;
 
     // Cashback rate theo tier user (Bronze 50% / Silver 53% / Gold 55% / VIP 58%).

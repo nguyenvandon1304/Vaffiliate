@@ -163,8 +163,8 @@ export function StatCard({ label, value, icon, tone, series, onClick, ariaLabel 
 
   const inner = (
     <>
-      <div className="flex items-start justify-between gap-2 mb-1.5 sm:mb-2">
-        <span className="text-xl sm:text-2xl">{icon}</span>
+      <div className="flex items-start justify-between gap-2 mb-1">
+        <span className="text-lg sm:text-xl">{icon}</span>
         {wow && (
           <span
             className={`inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/70 dark:bg-zinc-900/50 backdrop-blur-sm ${
@@ -183,13 +183,13 @@ export function StatCard({ label, value, icon, tone, series, onClick, ariaLabel 
           </span>
         )}
       </div>
-      <p className="text-[10px] sm:text-xs font-medium opacity-70 mb-0.5">{label}</p>
-      <p className={`text-sm sm:text-lg font-black truncate tabular-nums ${cls.text}`}>
+      <p className="text-[10px] sm:text-xs font-medium opacity-70">{label}</p>
+      <p className={`text-xs sm:text-sm font-black tabular-nums ${cls.text}`}>
         {animatedValue}
       </p>
       {/* Sparkline */}
       {series && series.length > 0 && (
-        <div className={`mt-2 ${cls.sparkline}`}>
+        <div className={`mt-1.5 sm:mt-2 ${cls.sparkline}`}>
           <Sparkline data={series} />
         </div>
       )}
