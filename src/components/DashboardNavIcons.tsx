@@ -27,16 +27,19 @@ const TABS: { key: TabKey; title: string; href: string }[] = [
   { key: "wallet", title: "Ví tiền", href: "/dashboard?tab=wallet" },
   { key: "link-history", title: "Lịch sử link", href: "/dashboard?tab=link-history" },
   { key: "help", title: "Hướng dẫn", href: "/dashboard/help" },
-  { key: "referral", title: "Giới thiệu bạn bè", href: "/dashboard/referral" },
+  { key: "referral", title: "Giới thiệu", href: "/dashboard/referral" },
 ];
 
-/**
- * Nav icons row dùng chung cho các sub-page (`/dashboard/help`, `/dashboard/referral`...)
- * — match design với navbar chính trên `/dashboard` để user không bị mất context.
- *
- * Trên mobile vẫn dựa vào `MobileBottomNav` (đã render qua DashboardShell), nên
- * row này chỉ hiện ở `md:` trở lên giống navbar chính.
- */
+const ICONS: Record<TabKey, React.ComponentType<{ active?: boolean; size?: number }>> = {
+  overview: GridIcon3D,
+  "create-link": LinkIcon3D,
+  orders: OrdersIcon3D,
+  wallet: WalletIcon3D,
+  "link-history": ClockIcon3D,
+  help: HelpIcon3D,
+  referral: ReferralIcon3D,
+};
+
 export function DashboardNavIcons() {
   const router = useRouter();
   const pathname = usePathname() || "";
@@ -55,33 +58,30 @@ export function DashboardNavIcons() {
     <nav className="hidden md:flex items-center gap-1">
       {TABS.map((t) => {
         const active = isActive(t.key);
+        const Icon = ICONS[t.key];
         return (
           <button
             key={t.key}
             onClick={() => router.push(t.href)}
-            className={`nav-bubble group relative inline-flex items-center justify-center transition-transform ${
-              active ? "" : "hover:-translate-y-0.5"
+            className={`nav-bubble group relative inline-flex items-center justify-center rounded-xl transition-all duration-200 ${
+              active
+                ? "bg-orange-500/10 shadow-sm"
+                : "hover:bg-black/5 dark:hover:bg-white/5"
             }`}
             data-active={active ? "true" : "false"}
             title={t.title}
           >
-            {t.key === "overview" && <GridIcon3D active={active} size={32} />}
-            {t.key === "create-link" && <LinkIcon3D active={active} size={32} />}
-            {t.key === "orders" && <OrdersIcon3D active={active} size={32} />}
-            {t.key === "wallet" && <WalletIcon3D active={active} size={32} />}
-            {t.key === "link-history" && <ClockIcon3D active={active} size={32} />}
-            {t.key === "help" && <HelpIcon3D active={active} size={32} />}
-            {t.key === "referral" && <ReferralIcon3D active={active} size={32} />}
+            <div className={`relative p-1.5 rounded-xl transition-all duration-200 ${
+              active
+                ? "scale-110"
+                : "group-hover:scale-105"
+            }`}>
+              <Icon active={active} size={32} />
+            </div>
+
+            {/* Active indicator dot */}
             {active && (
-              <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-semibold text-orange-600 whitespace-nowrap">
-                {t.key === "overview" && "Tổng quan"}
-                {t.key === "create-link" && "Tạo link"}
-                {t.key === "orders" && "Đơn hàng"}
-                {t.key === "wallet" && "Ví tiền"}
-                {t.key === "link-history" && "Lịch sử"}
-                {t.key === "help" && "Hướng dẫn"}
-                {t.key === "referral" && "Giới thiệu"}
-              </span>
+              <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-orange-500" />
             )}
           </button>
         );

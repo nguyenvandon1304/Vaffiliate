@@ -18,15 +18,6 @@ interface HeaderUser {
   avatar: string | null;
 }
 
-/**
- * Header đầy đủ dùng chung cho các sub-page dashboard (`/dashboard/cashback`,
- * `/dashboard/help`, `/dashboard/referral`...). Mục tiêu: header các trang con
- * GIỐNG HỆT trang chính `/dashboard` để user không bị "nhảy" giao diện —
- * có streak, command bar, tier pill, theme toggle, chuông thông báo, avatar/tên.
- *
- * Component tự fetch user + tier (self-contained) nên trang con chỉ cần render
- * <DashboardHeader /> mà không phải truyền props.
- */
 export function DashboardHeader() {
   const router = useRouter();
   const { info: tierInfo } = useTierInfo();
@@ -35,7 +26,6 @@ export function DashboardHeader() {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch user info (tên + email cho avatar/dropdown).
   useEffect(() => {
     let cancelled = false;
     fetch("/api/auth/me", { cache: "no-store" })
@@ -45,7 +35,6 @@ export function DashboardHeader() {
     return () => { cancelled = true; };
   }, []);
 
-  // Đóng dropdown khi click ra ngoài.
   useEffect(() => {
     if (!showDropdown) return;
     const onClick = (e: MouseEvent) => {
@@ -64,107 +53,122 @@ export function DashboardHeader() {
 
   return (
     <header
-      className="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-30"
+      className="glass-sm sticky top-0 z-30 border-b border-black/5 dark:border-white/10"
       style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
+        {/* Left: logo + divider + nav */}
+        <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={() => router.push("/dashboard")}
-            className="cursor-pointer shrink-0"
+            className="cursor-pointer shrink-0 transition-transform hover:scale-105 active:scale-95"
             title="Về trang chủ"
           >
             <CaffiliateLogo />
           </button>
-          <div className="h-6 w-px bg-gray-200 dark:bg-zinc-700 shrink-0 hidden sm:block" />
-          {/* Nav icons — hiện trên tablet trở lên, mobile có bottom nav */}
+          <div className="h-5 w-px bg-black/10 dark:bg-white/10 shrink-0 hidden sm:block" />
           <div className="hidden sm:block shrink-0">
             <DashboardNavIcons />
           </div>
         </div>
 
-        <div className="flex items-center gap-1 sm:gap-3 shrink-0">
-          {/* Streak badge — chỉ hiện khi user có streak đang chạy */}
+        {/* Right: actions */}
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           <StreakBadge />
-          {/* Command bar trigger — dispatch Ctrl+K cho hook ở DashboardShell bắt */}
           <CommandBarTrigger
             onClick={() => {
               const evt = new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true });
               window.dispatchEvent(evt);
             }}
           />
-          {/* Tier pill — click để về dashboard xem chi tiết hạng */}
           <div className="hidden sm:block">
             <TierPill
               info={tierInfo}
               onClick={() => router.push("/dashboard")}
             />
           </div>
+          <div className="w-px h-4 bg-black/10 dark:bg-white/10 hidden sm:block" />
           <ThemeToggleButton />
           <NotificationBell />
 
-          {/* User dropdown */}
+          {/* User avatar / dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setShowDropdown((v) => !v)}
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2 hover:opacity-80 transition-all duration-200 active:scale-95 rounded-full p-0.5 hover:bg-black/5 dark:hover:bg-white/5"
             >
-              <span className="hidden sm:block text-sm text-gray-600 dark:text-zinc-300 font-medium">
-                {user?.display_name || user?.username || "..."}
-              </span>
-              <UserAvatar avatar={user?.avatar} name={user?.display_name || user?.username} size={36} fontSize={14} />
+              <UserAvatar
+                avatar={user?.avatar}
+                name={user?.display_name || user?.username}
+                size={34}
+                fontSize={13}
+              />
             </button>
 
             {showDropdown && (
-              <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-gray-100 dark:border-zinc-800 py-3 z-50 animate-in fade-in slide-in-from-top-1">
-                <div className="flex items-center gap-3 px-4 pb-3 border-b border-gray-100 dark:border-zinc-800">
-                  <UserAvatar avatar={user?.avatar} name={user?.display_name || user?.username} size={44} fontSize={18} className="shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-gray-800 dark:text-zinc-100 truncate">{user?.display_name || user?.username}</p>
-                    <p className="text-xs text-gray-400 dark:text-zinc-500 truncate">{user?.email}</p>
+              <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-[#18181b] rounded-2xl shadow-xl shadow-black/10 dark:shadow-black/50 border border-black/5 dark:border-white/10 py-2 z-50 animate-fade-in-up">
+                {/* User info header */}
+                <div className="flex items-center gap-3 px-4 pt-1 pb-3 border-b border-black/5 dark:border-white/5">
+                  <UserAvatar
+                    avatar={user?.avatar}
+                    name={user?.display_name || user?.username}
+                    size={42}
+                    fontSize={16}
+                    className="shrink-0 ring-2 ring-orange-500/20"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-gray-900 dark:text-zinc-100 truncate">
+                      {user?.display_name || user?.username}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-zinc-500 truncate">{user?.email}</p>
                   </div>
+                  {/* Online indicator */}
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 shadow-[0_0_6px_rgba(34,197,94,0.5)]" />
                 </div>
 
+                {/* Menu items */}
                 <div className="pt-2 px-2 space-y-0.5">
                   <button
                     onClick={() => { setShowDropdown(false); router.push("/dashboard?view=profile"); }}
-                    className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-gray-700 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                    className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-gray-700 dark:text-zinc-200 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors group"
                   >
-                    <svg viewBox="0 0 24 24" className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                    Hồ sơ
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-100 dark:group-hover:bg-blue-500/20 transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                    </div>
+                    Hồ sơ cá nhân
                   </button>
                   <button
                     onClick={() => { setShowDropdown(false); router.push("/dashboard?view=bank"); }}
-                    className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-gray-700 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                    className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-gray-700 dark:text-zinc-200 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors group"
                   >
-                    <svg viewBox="0 0 24 24" className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-                      <line x1="1" x2="23" y1="10" y2="10" />
-                    </svg>
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-100 dark:group-hover:bg-emerald-500/20 transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" x2="23" y1="10" y2="10" /></svg>
+                    </div>
                     Tài chính
                   </button>
                   <button
                     onClick={() => { setShowDropdown(false); router.push("/dashboard/security"); }}
-                    className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-gray-700 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                    className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-gray-700 dark:text-zinc-200 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors group"
                   >
-                    <svg viewBox="0 0 24 24" className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                    </svg>
+                    <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-100 dark:group-hover:bg-purple-500/20 transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                    </div>
                     Bảo mật
                   </button>
-                  <div className="border-t border-gray-100 dark:border-zinc-800 my-1" />
+
+                  <div className="border-t border-black/5 dark:border-white/5 my-1" />
+
                   <button
                     onClick={() => { setShowDropdown(false); handleLogout(); }}
-                    className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-gray-400 dark:text-zinc-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 rounded-lg transition-colors"
+                    className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-gray-500 dark:text-zinc-500 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500 rounded-xl transition-colors group"
                   >
-                    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                      <polyline points="16 17 21 12 16 7" />
-                      <line x1="21" x2="9" y1="12" y2="12" />
-                    </svg>
+                    <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-500/10 flex items-center justify-center group-hover:bg-red-100 dark:group-hover:bg-red-500/20 transition-colors">
+                      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" x2="9" y1="12" y2="12" />
+                      </svg>
+                    </div>
                     Đăng xuất
                   </button>
                 </div>
