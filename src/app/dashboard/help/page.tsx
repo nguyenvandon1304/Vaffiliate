@@ -90,6 +90,7 @@ export default function HelpPage() {
   const toast = useToast();
   const [openFAQ, setOpenFAQ] = useState<number | null>(0);
   const [showContact, setShowContact] = useState(false);
+  const [faqSearch, setFaqSearch] = useState("");
 
   const ADMIN_EMAIL = "nguyenvandon1304@gmail.com";
   const SUBJECT = "Hỗ trợ V-Affiliate";
@@ -104,130 +105,313 @@ export default function HelpPage() {
     }
   };
 
+  const filteredFAQ = FAQS.filter(
+    (f) =>
+      faqSearch.length < 2 ||
+      f.q.toLowerCase().includes(faqSearch.toLowerCase()) ||
+      f.a.toLowerCase().includes(faqSearch.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 via-gray-50 to-gray-50 dark:from-zinc-950 dark:via-zinc-950 dark:to-black">
       <DashboardHeader />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-24 md:pb-8 space-y-8">
-        {/* Banner dẫn dắt đến voucher Facebook */}
-        <section className="bg-white rounded-2xl border-2 border-blue-200 shadow-sm overflow-hidden">
-          {/* Header với icon + tiêu đề */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-5 pt-5 pb-4 border-b border-blue-100">
-            <div className="flex items-start gap-3">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
-                <span className="text-2xl">🎁</span>
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  <span className="text-xs font-semibold text-green-600">Đang hoạt động</span>
-                </div>
-                <h2 className="text-lg font-bold text-gray-800">
-                  Nhận Voucher Facebook Giảm Giá
-                </h2>
-                <p className="text-sm text-gray-500 mt-1 leading-relaxed">
-                  Comment link mua hàng vào bài viết ghim trên Facebook để nhận mã giảm giá tự động — áp dụng ngay tại bước thanh toán Shopee.
-                </p>
+
+        {/* ── Hero Banner ── */}
+        <section className="relative rounded-3xl overflow-hidden shadow-xl shadow-orange-200/30 dark:shadow-orange-900/20">
+          {/* Background layers */}
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_50%,rgba(255,255,255,0.12)_0%,transparent_60%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent_30%,rgba(255,255,255,0.08)_50%,transparent_70%)]" />
+          {/* Floating orbs */}
+          <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
+          <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-amber-300/20 blur-xl" />
+          <div className="absolute top-1/2 right-1/4 w-16 h-16 rounded-full bg-white/5 blur-lg" />
+
+          <div className="relative px-6 py-8 sm:px-8 sm:py-10">
+            {/* Eyebrow */}
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                <span className="text-white/90 text-[11px] font-bold uppercase tracking-widest">5 phút để hiểu</span>
               </div>
             </div>
-          </div>
 
-          {/* 4 bước rõ ràng */}
-          <div className="px-5 py-4 space-y-3">
-            {[
-              { step: 1, text: "Copy link đã chuyển đổi", highlight: "bằng nút \"Copy link\"" },
-              { step: 2, text: "Bấm \"Mở Facebook\" đến bài viết ghim", highlight: "" },
-              { step: 3, text: "Comment link vừa copy vào bài viết", highlight: "" },
-              { step: 4, text: "Bấm vào chính link bạn vừa comment →", highlight: "voucher tự động hiện" },
-            ].map((item) => (
-              <div key={item.step} className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5">
-                  {item.step}
+            {/* Title */}
+            <h1 className="text-2xl sm:text-3xl font-black text-white leading-tight mb-2">
+              Hướng dẫn sử dụng
+            </h1>
+            <p className="text-white/75 text-sm sm:text-base leading-relaxed mb-6 max-w-lg">
+              Từ đăng ký đến rút tiền — tất cả trong 5 bước đơn giản. Bắt đầu nhận hoàn tiền ngay hôm nay.
+            </p>
+
+            {/* Quick stats row */}
+            <div className="flex flex-wrap gap-3 mb-6">
+              {[
+                { icon: "→", label: "Tạo link" },
+                { icon: "🛒", label: "Mua hàng" },
+                { icon: "💰", label: "Nhận cashback" },
+                { icon: "🏦", label: "Rút tiền" },
+              ].map(({ icon, label }) => (
+                <div key={label} className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5">
+                  <span className="text-sm">{icon}</span>
+                  <span className="text-white text-[11px] font-semibold">{label}</span>
                 </div>
-                <p className="text-sm text-gray-700 leading-relaxed">
-                  {item.text}
-                  {item.highlight && (
-                    <span className="font-semibold text-blue-600"> {item.highlight}</span>
-                  )}
-                </p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          {/* CTA + note */}
-          <div className="px-5 pb-5">
+            {/* CTA */}
             <a
               href="/dashboard/cashback"
-              className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-6 py-3 rounded-xl transition-all shadow-sm w-full"
+              className="group relative inline-flex items-center gap-2.5 bg-white text-orange-600 font-black text-sm px-6 py-3 rounded-xl shadow-lg shadow-orange-900/25 overflow-hidden"
             >
-              <span className="text-lg">📘</span>
-              Nhận Voucher Ngay
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
+              <span className="absolute inset-0 bg-gradient-to-r from-orange-50 to-amber-50 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <svg viewBox="0 0 24 24" className="w-4 h-4 relative" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span className="relative">Bắt đầu ngay</span>
+              <svg viewBox="0 0 24 24" className="w-4 h-4 relative transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </a>
-            <p className="text-center text-xs text-gray-400 mt-2">
-              Dù có voucher hay không, hoàn tiền vẫn về ví đầy đủ
-            </p>
           </div>
         </section>
 
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-zinc-100">Hướng dẫn sử dụng</h1>
-          <p className="text-sm text-gray-500 dark:text-zinc-400 mt-1">5 bước để bắt đầu nhận hoàn tiền với V-Affiliate.</p>
-        </div>
-
-        {/* Steps */}
-        <section className="space-y-3">
-          {STEPS.map((s) => (
-            <div key={s.num} className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-5 flex gap-4 items-start">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white flex items-center justify-center text-xl font-bold shadow-md">
-                {s.num}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base font-bold text-gray-800 dark:text-zinc-100 flex items-center gap-2">
-                  <span className="text-2xl">{s.icon}</span>
-                  <span>{s.title}</span>
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-zinc-400 mt-1.5 leading-relaxed">{s.body}</p>
-              </div>
-            </div>
-          ))}
-        </section>
-
-        {/* FAQ */}
+        {/* ── 5-Step Journey ── */}
         <section>
-          <h2 className="text-lg font-bold text-gray-800 dark:text-zinc-100 mb-3">Câu hỏi thường gặp</h2>
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 divide-y divide-gray-100 dark:divide-zinc-800">
-            {FAQS.map((f, i) => (
-              <details
-                key={i}
-                open={openFAQ === i}
-                onToggle={(e) => { if ((e.target as HTMLDetailsElement).open) setOpenFAQ(i); }}
-                className="group p-4 cursor-pointer"
-              >
-                <summary className="flex items-center justify-between cursor-pointer list-none">
-                  <h3 className="text-sm font-semibold text-gray-800 dark:text-zinc-100 pr-4">{f.q}</h3>
-                  <svg className="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
-                </summary>
-                <p className="text-sm text-gray-600 dark:text-zinc-400 mt-3 leading-relaxed">{f.a}</p>
-              </details>
+          {/* Section header */}
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center">
+              <svg viewBox="0 0 24 24" className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-gray-900 dark:text-zinc-100 leading-tight">5 bước để nhận hoàn tiền</h2>
+              <p className="text-xs text-gray-400 dark:text-zinc-500">Mỗi bước chỉ mất vài giây</p>
+            </div>
+          </div>
+
+          <div className="relative space-y-4">
+            {/* Vertical connector line */}
+            <div className="absolute left-[29px] top-14 bottom-14 w-px bg-gradient-to-b from-orange-200 via-amber-200 to-orange-200 dark:from-orange-800 dark:via-amber-800 dark:to-orange-800 hidden sm:block" />
+
+            {STEPS.map((s, idx) => (
+              <div key={s.num} className="group relative flex gap-4 items-start">
+                {/* Step indicator */}
+                <div className="relative flex-shrink-0">
+                  <div className="w-14 h-14 rounded-2xl bg-white dark:bg-zinc-900 border-2 border-orange-100 dark:border-zinc-800 flex items-center justify-center shadow-sm group-hover:shadow-md group-hover:shadow-orange-200/50 dark:group-hover:shadow-orange-900/30 group-hover:border-orange-300 dark:group-hover:border-orange-700 transition-all duration-300">
+                    {/* Step number bubble */}
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm transition-all duration-300 ${
+                      idx === 0 ? "bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-sm shadow-orange-200" :
+                      idx === STEPS.length - 1 ? "bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-sm shadow-emerald-200" :
+                      "bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
+                    }`}>
+                      {idx === STEPS.length - 1 ? (
+                        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+                      ) : s.num}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Content card */}
+                <div className="flex-1 min-w-0 bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-5 group-hover:border-orange-200 dark:group-hover:border-orange-800/50 group-hover:shadow-md group-hover:shadow-orange-100/40 dark:group-hover:shadow-orange-900/20 transition-all duration-300">
+                  <div className="flex items-start gap-3 mb-3">
+                    {/* Icon */}
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                      idx === 0 ? "bg-orange-50 dark:bg-orange-900/40" :
+                      idx === 1 ? "bg-blue-50 dark:bg-blue-900/40" :
+                      idx === 2 ? "bg-indigo-50 dark:bg-indigo-900/40" :
+                      idx === 3 ? "bg-amber-50 dark:bg-amber-900/40" :
+                      "bg-emerald-50 dark:bg-emerald-900/40"
+                    }`}>
+                      {idx === 0 ? (
+                        <svg viewBox="0 0 24 24" className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                        </svg>
+                      ) : idx === 1 ? (
+                        <svg viewBox="0 0 24 24" className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                        </svg>
+                      ) : idx === 2 ? (
+                        <svg viewBox="0 0 24 24" className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                        </svg>
+                      ) : idx === 3 ? (
+                        <svg viewBox="0 0 24 24" className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+                        </svg>
+                      ) : (
+                        <svg viewBox="0 0 24 24" className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" />
+                        </svg>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-black text-gray-900 dark:text-zinc-100 leading-tight">{s.title}</h3>
+                      <p className="text-[11px] font-semibold text-gray-400 dark:text-zinc-600 uppercase tracking-wide mt-0.5">
+                        {idx === 0 ? "Đăng ký" : idx === 1 ? "Tạo link" : idx === 2 ? "Mua hàng" : idx === 3 ? "Chờ duyệt" : "Rút tiền"}
+                      </p>
+                    </div>
+                    <div className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      idx === 0 ? "bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400" :
+                      idx === 1 ? "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400" :
+                      idx === 2 ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400" :
+                      idx === 3 ? "bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400" :
+                      "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400"
+                    }`}>
+                      Bước {s.num}
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-zinc-400 leading-relaxed pl-[46px]">{s.body}</p>
+                </div>
+              </div>
             ))}
           </div>
         </section>
 
-        {/* Contact */}
-        <section className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-2xl border border-orange-100 dark:border-orange-900/40 p-5 text-center">
-          <h3 className="text-base font-bold text-gray-800 dark:text-zinc-100">Vẫn cần hỗ trợ?</h3>
-          <p className="text-sm text-gray-600 dark:text-zinc-400 mt-1">Liên hệ qua email hỗ trợ trong vòng 24h.</p>
-          <button
-            onClick={() => setShowContact(true)}
-            className="inline-block mt-3 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors"
-          >
-            📨 Liên hệ hỗ trợ
-          </button>
+        {/* ── Voucher Banner ── */}
+        <section className="relative rounded-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_50%,rgba(255,255,255,0.1)_0%,transparent_60%)]" />
+          <div className="absolute -top-10 right-10 w-40 h-40 rounded-full bg-white/5 blur-2xl" />
+          <div className="relative px-6 py-6 sm:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex items-start gap-4 flex-1">
+                <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center shrink-0">
+                  <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="currentColor">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  </svg>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="bg-white/15 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">+Voucher</span>
+                    <span className="bg-white/10 text-white/70 text-[10px] font-medium px-2 py-0.5 rounded-full">Khuyến nghị</span>
+                  </div>
+                  <h3 className="text-base font-black text-white leading-tight mb-1">Nhận voucher Facebook giảm giá</h3>
+                  <p className="text-white/70 text-sm leading-relaxed">
+                    Comment link mua hàng vào bài viết ghim → voucher tự động hiện khi thanh toán.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col sm:items-end gap-2">
+                <a
+                  href="/dashboard/cashback"
+                  className="group relative flex items-center justify-center gap-2 bg-white text-blue-600 font-black text-sm px-5 py-2.5 rounded-xl shadow-lg overflow-hidden"
+                >
+                  <span className="absolute inset-0 bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 relative" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                  <span className="relative">Nhận voucher</span>
+                </a>
+                <p className="text-white/50 text-[11px] text-center sm:text-right">Dù không có voucher, cashback vẫn về đủ</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── FAQ ── */}
+        <section>
+          {/* Section header */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+              <svg viewBox="0 0 24 24" className="w-4 h-4 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-gray-900 dark:text-zinc-100 leading-tight">Câu hỏi thường gặp</h2>
+              <p className="text-xs text-gray-400 dark:text-zinc-500">{FAQS.length} câu hỏi được trả lời</p>
+            </div>
+          </div>
+
+          {/* Search */}
+          <div className="relative mb-4">
+            <svg viewBox="0 0 24 24" className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              value={faqSearch}
+              onChange={(e) => { setFaqSearch(e.target.value); setOpenFAQ(null); }}
+              placeholder="Tìm câu hỏi..."
+              className="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl text-sm text-gray-800 dark:text-zinc-100 placeholder-gray-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-900/30 outline-none transition-all"
+            />
+          </div>
+
+          {/* Results count */}
+          {faqSearch.length >= 2 && (
+            <p className="text-xs text-gray-400 dark:text-zinc-500 mb-3">
+              {filteredFAQ.length} kết quả cho &ldquo;{faqSearch}&rdquo;
+            </p>
+          )}
+
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 divide-y divide-gray-100 dark:divide-zinc-800 overflow-hidden">
+            {filteredFAQ.length === 0 ? (
+              <div className="p-8 text-center">
+                <svg viewBox="0 0 24 24" className="w-8 h-8 text-gray-300 dark:text-zinc-700 mx-auto mb-2" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                <p className="text-sm text-gray-400 dark:text-zinc-600">Không tìm thấy câu hỏi phù hợp</p>
+              </div>
+            ) : (
+              filteredFAQ.map((f, i) => {
+                const globalIdx = FAQS.indexOf(f);
+                const isOpen = openFAQ === globalIdx;
+                return (
+                  <div key={i}>
+                    <button
+                      onClick={() => setOpenFAQ(isOpen ? null : globalIdx)}
+                      className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors"
+                    >
+                      <h3 className="text-sm font-semibold text-gray-800 dark:text-zinc-100 flex-1 leading-snug">{f.q}</h3>
+                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-all duration-300 ${
+                        isOpen ? "bg-orange-500 text-white rotate-90" : "bg-gray-100 dark:bg-zinc-800 text-gray-400"
+                      }`}>
+                        <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 18l6-6-6-6" /></svg>
+                      </div>
+                    </button>
+                    <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
+                      <div className="px-5 pb-4">
+                        <div className="bg-gray-50 dark:bg-zinc-800/60 rounded-xl p-4">
+                          <p className="text-sm text-gray-600 dark:text-zinc-400 leading-relaxed">{f.a}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </section>
+
+        {/* ── Support CTA ── */}
+        <section className="relative rounded-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 to-zinc-950 dark:from-black dark:to-black" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(251,146,60,0.08)_0%,transparent_60%)]" />
+          <div className="relative px-6 py-8 sm:px-8 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mx-auto mb-4">
+              <svg viewBox="0 0 24 24" className="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-black text-white mb-1">Cần hỗ trợ thêm?</h3>
+            <p className="text-zinc-400 text-sm mb-5">Liên hệ qua email, thường phản hồi trong vòng 24 giờ.</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={() => setShowContact(true)}
+                className="inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-6 py-3 rounded-xl transition-colors shadow-lg shadow-orange-500/25"
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+                Liên hệ hỗ trợ
+              </button>
+              <a
+                href="/dashboard"
+                className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 text-white text-sm font-bold px-6 py-3 rounded-xl transition-colors"
+              >
+                Quay lại Dashboard
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+              </a>
+            </div>
+          </div>
         </section>
       </main>
 
