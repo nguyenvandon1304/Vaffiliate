@@ -355,8 +355,8 @@ export default function CashbackPage() {
                   </div>
 
                   {/* Product + Cashback Row */}
-                  <div className="p-5">
-                    <div className="flex gap-4">
+                  <div className="p-4">
+                    <div className="flex gap-3 items-start">
 
                       {/* Product thumbnail */}
                       {product.image && (
@@ -364,7 +364,7 @@ export default function CashbackPage() {
                           <img
                             src={product.image}
                             alt={product.name}
-                            className="w-20 h-20 object-contain rounded-xl bg-gray-50 border border-gray-100"
+                            className="w-16 h-16 object-contain rounded-xl bg-gray-50 border border-gray-100"
                           />
                         </div>
                       )}
@@ -380,19 +380,21 @@ export default function CashbackPage() {
                         </div>
                       </div>
 
-                      {/* Cashback highlight — BIG */}
-                      <div className="shrink-0 bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 rounded-xl px-4 py-3 text-center min-w-[130px]">
-                        <p className="text-[10px] text-orange-500 font-semibold uppercase tracking-wide mb-0.5">Cashback dự kiến</p>
-                        <p className="text-2xl font-black text-orange-600 leading-none">
-                          đ{formatPrice(product.cashback)}
-                        </p>
-                        <div className="mt-1 bg-orange-100 rounded-full px-2 py-0.5 inline-block">
-                          <p className="text-[11px] font-bold text-orange-700">
-                            ≈ {product.cashbackRate ?? 50}%
-                            {product.tierName && product.tierCode !== "bronze" && (
-                              <span className="font-medium"> ({product.tierName})</span>
-                            )}
+                      {/* Cashback badge — compact pill, top-aligned */}
+                      <div className="shrink-0 text-right">
+                        <div className="bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl px-3 py-2 text-center shadow-md shadow-orange-500/20">
+                          <p className="text-[9px] text-white/80 font-semibold uppercase tracking-wide leading-none mb-0.5">Cashback</p>
+                          <p className="text-lg font-black text-white leading-none">
+                            đ{formatPrice(product.cashback)}
                           </p>
+                          <div className="mt-1 bg-white/20 rounded-full px-1.5 py-0.5">
+                            <p className="text-[10px] font-bold text-white">
+                              ≈ {product.cashbackRate ?? 50}%
+                              {product.tierName && product.tierCode !== "bronze" && (
+                                <span className="font-medium"> ({product.tierName})</span>
+                              )}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -402,16 +404,16 @@ export default function CashbackPage() {
                   <div className="h-px bg-gradient-to-r from-transparent via-orange-200 to-transparent" />
 
                   {/* ─── CTA Section ─── */}
-                  <div className="p-5">
+                  <div className="px-4 pb-4">
 
                     {/* Primary: MUA NGAY */}
                     <a
                       href={product.affiliateLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-3 w-full text-white text-base font-black py-4 rounded-xl transition-all shadow-lg shadow-rose-500/25 bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 mb-3"
+                      className="flex items-center justify-center gap-2.5 w-full text-white text-sm font-black py-3.5 rounded-xl transition-all shadow-lg shadow-orange-500/25 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 mb-3"
                     >
-                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="9" cy="21" r="1" />
                         <circle cx="20" cy="21" r="1" />
                         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
@@ -420,15 +422,15 @@ export default function CashbackPage() {
                     </a>
 
                     {/* How it works — compact inline trust */}
-                    <p className="text-xs text-gray-500 text-center mb-4 leading-relaxed">
+                    <p className="text-[11px] text-gray-400 text-center mb-3 leading-relaxed">
                       Mua như bình thường · Hệ thống tự ghi nhận · Không phát sinh phí
                     </p>
 
                     {/* Secondary actions row */}
-                    <div className="flex gap-2.5">
+                    <div className="flex gap-2">
                       <button
                         onClick={handleCopy}
-                        className="flex-1 flex items-center justify-center gap-2 text-gray-600 text-sm font-semibold px-4 py-2.5 rounded-xl border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
+                        className="flex-1 flex items-center justify-center gap-2 text-gray-600 text-xs font-semibold px-3 py-2.5 rounded-xl border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
                       >
                         {copied ? (
                           <>
@@ -467,7 +469,7 @@ export default function CashbackPage() {
                       <div className="mt-3 bg-blue-50 border border-blue-200 rounded-xl p-3">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-base">🎁</span>
-                          <p className="text-xs font-bold text-blue-700">Nhận voucher Facebook — Làm theo 3 bước:</p>
+                          <p className="text-[11px] font-bold text-blue-700">Nhận voucher Facebook — 3 bước đơn giản:</p>
                         </div>
                         <div className="space-y-1.5">
                           <div className="flex items-start gap-2">
