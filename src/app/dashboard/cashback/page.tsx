@@ -464,14 +464,28 @@ export default function CashbackPage() {
 
                     {/* Voucher callout — chỉ hiện khi có Facebook URL */}
                     {facebookPostUrl && (
-                      <div className="mt-3 bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-start gap-2.5">
-                        <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
-                          <span className="text-xs">🎁</span>
+                      <div className="mt-3 bg-blue-50 border border-blue-200 rounded-xl p-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-base">🎁</span>
+                          <p className="text-xs font-bold text-blue-700">Nhận voucher Facebook — Làm theo 3 bước:</p>
                         </div>
-                        <div>
-                          <p className="text-xs font-bold text-blue-700 mb-0.5">Mở Facebook trước để nhận thêm voucher</p>
-                          <p className="text-[11px] text-blue-600 leading-relaxed">Voucher giảm giá sẽ hiện ở bước thanh toán. Cashback hoàn toàn không phụ thuộc vào voucher.</p>
+                        <div className="space-y-1.5">
+                          <div className="flex items-start gap-2">
+                            <span className="bg-blue-200 text-blue-700 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5">1</span>
+                            <p className="text-[11px] text-blue-700 leading-relaxed">Bấm nút <b>&ldquo;Nhận thêm voucher Facebook&rdquo;</b> bên dưới để mở bài viết trên Facebook.</p>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="bg-blue-200 text-blue-700 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5">2</span>
+                            <p className="text-[11px] text-blue-700 leading-relaxed">Nhấn <b>&ldquo;Lưu&rdquo;</b> hoặc <b>&ldquo;Nhận voucher&rdquo;</b> trên bài viết Facebook.</p>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <span className="bg-blue-200 text-blue-700 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5">3</span>
+                            <p className="text-[11px] text-blue-700 leading-relaxed">Quay lại app Shopee → <b>voucher sẽ tự hiện ở bước thanh toán.</b></p>
+                          </div>
                         </div>
+                        <p className="mt-2 text-[10px] text-blue-500/80 italic border-t border-blue-200 pt-2">
+                          💡 Lưu ý: Cashback hoàn toàn không phụ thuộc voucher. Dù có hay không có voucher, bạn vẫn nhận đủ {product?.cashbackRate ?? 50}% cashback về ví.
+                        </p>
                       </div>
                     )}
 
