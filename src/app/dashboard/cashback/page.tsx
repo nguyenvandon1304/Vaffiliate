@@ -472,15 +472,15 @@ export default function CashbackPage() {
                         <div className="space-y-1.5">
                           <div className="flex items-start gap-2">
                             <span className="bg-blue-200 text-blue-700 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5">1</span>
-                            <p className="text-[11px] text-blue-700 leading-relaxed">Bấm nút <b>&ldquo;Nhận thêm voucher Facebook&rdquo;</b> bên dưới để mở bài viết trên Facebook.</p>
+                            <p className="text-[11px] text-blue-700 leading-relaxed">Sao chép <b>link đã chuyển đổi</b> (nút Copy link bên trên), sau đó <b>comment vào bài ghim</b> trên Facebook.</p>
                           </div>
                           <div className="flex items-start gap-2">
                             <span className="bg-blue-200 text-blue-700 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5">2</span>
-                            <p className="text-[11px] text-blue-700 leading-relaxed">Nhấn <b>&ldquo;Lưu&rdquo;</b> hoặc <b>&ldquo;Nhận voucher&rdquo;</b> trên bài viết Facebook.</p>
+                            <p className="text-[11px] text-blue-700 leading-relaxed">Bấm vào <b>link trong comment</b> vừa comment — Shopee sẽ mở ra với <b>voucher đã được áp dụng sẵn</b>.</p>
                           </div>
                           <div className="flex items-start gap-2">
                             <span className="bg-blue-200 text-blue-700 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5">3</span>
-                            <p className="text-[11px] text-blue-700 leading-relaxed">Quay lại app Shopee → <b>voucher sẽ tự hiện ở bước thanh toán.</b></p>
+                            <p className="text-[11px] text-blue-700 leading-relaxed">Mua hàng như bình thường — voucher giảm giá + cashback về ví đều được ghi nhận.</p>
                           </div>
                         </div>
                         <p className="mt-2 text-[10px] text-blue-500/80 italic border-t border-blue-200 pt-2">
