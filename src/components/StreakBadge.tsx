@@ -155,8 +155,8 @@ export function StreakBadge() {
                   </div>
                 </div>
               ) : (
-                <div className="rounded-xl bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/20 px-4 py-3 text-center">
-                  <p className="text-sm font-bold text-violet-700 dark:text-violet-300">
+                <div className="rounded-xl bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-yellow-500/10 border border-orange-500/30 px-4 py-3 text-center">
+                  <p className="text-sm font-bold text-amber-700 dark:text-amber-300">
                     🎉 Bạn đã đạt mốc cao nhất!
                   </p>
                   <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">

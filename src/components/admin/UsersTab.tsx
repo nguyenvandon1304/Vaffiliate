@@ -338,7 +338,7 @@ export function UsersTab() {
                           </button>
                           <button
                             onClick={() => handleSetRole(u.id, "admin", u.username)}
-                            className="text-xs font-medium px-2.5 py-1 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20 transition-colors"
+                            className="text-xs font-medium px-2.5 py-1 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 transition-colors"
                           >
                             ↑ Admin
                           </button>

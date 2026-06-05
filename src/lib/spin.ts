@@ -42,7 +42,7 @@ export const SPIN_SEGMENTS: SpinSegment[] = [
   { index: 4, amount: 0,     label: "Chúc may mắn", color: "from-gray-300 to-gray-400",       weight: 10 },
   { index: 5, amount: 10000, label: "10.000đ",    color: "from-emerald-400 to-emerald-500", weight: 5 },
   { index: 6, amount: 0,     label: "Thử lại",    color: "from-slate-300 to-slate-400",     weight: 5 },
-  { index: 7, amount: 50000, label: "50.000đ 🎁", color: "from-fuchsia-400 to-purple-500",  weight: 5 },
+  { index: 7, amount: 50000, label: "50.000đ 🎁", color: "from-amber-400 to-orange-500",  weight: 5 },
 ];
 
 function weightedRandom(): SpinSegment {

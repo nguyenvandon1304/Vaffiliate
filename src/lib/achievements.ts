@@ -40,7 +40,7 @@ export const BADGES: BadgeMeta[] = [
   { code: "first_order",     name: "Mua hàng đầu",        description: "Đơn hàng cashback đầu tiên đã hoàn tiền",      icon: "🛒", color: "orange" },
   { code: "first_withdraw",  name: "Rút tiền lần đầu",    description: "Rút tiền thành công lần đầu",                  icon: "💰", color: "yellow" },
   { code: "invite_friend",   name: "Người kết nối",       description: "Có ít nhất 1 người được mời active",           icon: "🤝", color: "rose" },
-  { code: "tier_55",         name: "VIP 55%",             description: "Đạt mốc 50 người mời active — hoàn 55%",       icon: "💎", color: "violet" },
+  { code: "tier_55",         name: "VIP 55%",             description: "Đạt mốc 50 người mời active — hoàn 55%",       icon: "💎", color: "amber" },
   { code: "top_10",          name: "Top 10 tháng",        description: "Lọt top 10 leaderboard tháng",                 icon: "🏆", color: "amber" },
 ];
 

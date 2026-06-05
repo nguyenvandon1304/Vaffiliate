@@ -117,7 +117,7 @@ export default function HelpPage() {
   const STEP_COLORS = [
     { base: "from-orange-400 to-amber-500", icon: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20" },
     { base: "from-blue-400 to-indigo-500", icon: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
-    { base: "from-indigo-400 to-purple-500", icon: "text-indigo-400", bg: "bg-indigo-500/10", border: "border-indigo-500/20" },
+    { base: "from-orange-400 to-amber-500", icon: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20" },
     { base: "from-amber-400 to-orange-500", icon: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
     { base: "from-emerald-400 to-teal-500", icon: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
   ];
@@ -230,7 +230,7 @@ export default function HelpPage() {
 
         {/* ── VOUCHER BANNER — full width bento card ── */}
         <div className="relative rounded-2xl overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 via-indigo-600/90 to-purple-600/90" />
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/90 via-amber-500/90 to-yellow-500/90" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_50%,rgba(255,255,255,0.08)_0%,transparent_60%)]" />
           <div className="absolute inset-0 backdrop-blur-[1px]" />
           <div className="relative px-6 py-5 sm:px-8">

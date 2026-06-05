@@ -105,7 +105,7 @@ export function FinanceTab() {
               <h3 className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mb-3">⬇️ Tiền vào ví (theo nguồn)</h3>
               <div className="space-y-2">
                 <Row label="Hoàn tiền đơn hàng (cashback)" value={data.creditCashback} total={data.totalCredit} color="emerald" />
-                <Row label="Vòng quay may mắn" value={data.creditSpin} total={data.totalCredit} color="purple" />
+                <Row label="Vòng quay may mắn" value={data.creditSpin} total={data.totalCredit} color="amber" />
                 <Row label="Thưởng streak đăng nhập" value={data.creditStreak} total={data.totalCredit} color="blue" />
                 <Row label="Hoàn tiền rút bị từ chối" value={data.creditRefund} total={data.totalCredit} color="amber" />
                 <Row label="Admin cộng tay / khác" value={data.creditAdmin} total={data.totalCredit} color="gray" />
@@ -174,7 +174,7 @@ function MiniCard({ label, value, cls }: { label: string; value: string; cls: st
 
 const COLOR_MAP: Record<string, string> = {
   emerald: "from-emerald-400 to-emerald-500",
-  purple: "from-purple-400 to-purple-500",
+  amber: "from-amber-400 to-orange-500",
   blue: "from-blue-400 to-blue-500",
   amber: "from-amber-400 to-amber-500",
   rose: "from-rose-400 to-rose-500",

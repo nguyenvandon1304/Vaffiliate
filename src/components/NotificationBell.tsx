@@ -8,7 +8,7 @@ import { EmptyState, IllustrationBell } from "@/components/EmptyState";
 type FilterCat = "all" | "money" | "order" | "other";
 
 const TYPE_COLORS: Record<string, string> = {
-  achievement: "from-violet-400 to-fuchsia-500",
+  achievement: "from-orange-400 to-amber-500",
   spin:        "from-pink-400 to-rose-500",
   withdrawal:  "from-emerald-400 to-green-500",
   withdraw:    "from-emerald-400 to-green-500",

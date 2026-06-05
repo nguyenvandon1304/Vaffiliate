@@ -400,7 +400,7 @@ function TwoFactorGuideModal({ open, onClose }: { open: boolean; onClose: () => 
         <GuideStep
           num={3}
           title="Dán Secret hoặc URL otpauth"
-          color="purple"
+          color="orange"
         >
           <p>Sau khi bấm <b>+ Thêm tài khoản</b> ở app, có 2 cách:</p>
           <div className="mt-3 space-y-2">
@@ -583,7 +583,7 @@ function BackupCodesModal({ codes, onClose }: { codes: string[] | null; onClose:
           <button onClick={copy} className="flex flex-col items-center gap-1 py-2 rounded-lg bg-orange-50 hover:bg-orange-100 dark:bg-orange-500/10 dark:hover:bg-orange-500/20 text-orange-700 dark:text-orange-300 text-xs font-semibold transition-colors">
             <span className="text-lg">📋</span>Copy
           </button>
-          <button onClick={printPage} className="flex flex-col items-center gap-1 py-2 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-500/10 dark:hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 text-xs font-semibold transition-colors">
+          <button onClick={printPage} className="flex flex-col items-center gap-1 py-2 rounded-lg bg-orange-50 hover:bg-orange-100 dark:bg-orange-500/10 dark:hover:bg-orange-500/20 text-orange-700 dark:text-orange-300 text-xs font-semibold transition-colors">
             <span className="text-lg">🖨</span>In
           </button>
         </div>

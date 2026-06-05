@@ -173,7 +173,7 @@ export function SpinTab() {
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
             <KpiCard label="Tổng lượt quay" value={stats.totalSpins.toLocaleString("vi-VN")} icon="🎡" cls="bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400" />
             <KpiCard label="Tổng đã chi" value={fmtVND(stats.totalPaidOut)} icon="💸" cls="bg-orange-500/10 border-orange-500/30 text-orange-600 dark:text-orange-400" />
-            <KpiCard label="Lượt quay hôm nay" value={stats.spinsToday.toLocaleString("vi-VN")} icon="📅" cls="bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400" />
+            <KpiCard label="Lượt quay hôm nay" value={stats.spinsToday.toLocaleString("vi-VN")} icon="📅" cls="bg-orange-500/10 border-orange-500/30 text-orange-600 dark:text-orange-400" />
             <KpiCard label="Chi hôm nay" value={fmtVND(stats.paidToday)} icon="💰" cls="bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400" />
             <KpiCard label="Người chơi" value={stats.uniquePlayers.toLocaleString("vi-VN")} icon="👥" cls="bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400" />
           </div>

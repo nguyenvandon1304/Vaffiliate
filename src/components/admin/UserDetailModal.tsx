@@ -84,7 +84,7 @@ export function UserDetailModal({ userId, onClose, onChanged }: Props) {
             <Stat label="Số dư ví" value={formatVND(data.walletBalance)} color="emerald" />
             <Stat label="Đơn hàng" value={String(data.totalOrders)} color="blue" />
             <Stat label="Cashback" value={formatVND(data.totalCashback)} color="orange" />
-            <Stat label="Phiên đăng nhập" value={String(data.sessions.length)} color="purple" />
+            <Stat label="Phiên đăng nhập" value={String(data.sessions.length)} color="amber" />
           </div>
 
           {/* Profile + actions */}
@@ -161,12 +161,12 @@ export function UserDetailModal({ userId, onClose, onChanged }: Props) {
   );
 }
 
-function Stat({ label, value, color }: { label: string; value: string; color: "emerald" | "blue" | "orange" | "purple" }) {
+function Stat({ label, value, color }: { label: string; value: string; color: "emerald" | "blue" | "orange" | "amber" }) {
   const map: Record<string, string> = {
     emerald: "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300",
     blue: "bg-blue-500/10 border-blue-500/30 text-blue-700 dark:text-blue-300",
     orange: "bg-orange-500/10 border-orange-500/30 text-orange-700 dark:text-orange-300",
-    purple: "bg-purple-500/10 border-purple-500/30 text-purple-700 dark:text-purple-300",
+    amber: "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300",
   };
   return (
     <div className={`rounded-lg border p-3 ${map[color]}`}>

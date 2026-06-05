@@ -95,20 +95,20 @@ const TIER_THEME: Record<string, TierTheme> = {
     rewardsBorder: "border-yellow-500/30",
   },
   vip: {
-    pill: "from-violet-100 to-fuchsia-100 text-violet-700 border-violet-200",
-    pillIcon: "bg-violet-500/20 text-violet-600",
-    cardBg: "from-violet-50/80 via-fuchsia-50/50 to-white dark:from-violet-500/[0.10] dark:via-fuchsia-500/[0.06] dark:to-zinc-900",
-    cardGlow: "from-violet-500/40 to-fuchsia-500/30",
-    medalRing: "from-violet-400 via-fuchsia-500 to-purple-600",
-    medalBg: "bg-gradient-to-br from-violet-100 to-fuchsia-200 dark:from-violet-950/60 dark:to-fuchsia-950/40",
+    pill: "from-amber-100 to-orange-200 text-amber-700 border-amber-200",
+    pillIcon: "bg-orange-500/15 text-orange-600",
+    cardBg: "from-amber-50/80 via-orange-50/50 to-white dark:from-orange-500/[0.10] dark:via-amber-500/[0.06] dark:to-zinc-900",
+    cardGlow: "from-orange-500/40 to-amber-500/30",
+    medalRing: "from-orange-400 via-amber-500 to-yellow-500",
+    medalBg: "bg-gradient-to-br from-amber-100 to-orange-200 dark:from-amber-950/60 dark:to-orange-950/40",
     medalIcon: "💎",
-    accentText: "bg-gradient-to-r from-violet-500 via-fuchsia-500 to-purple-600 bg-clip-text text-transparent",
-    accentSolid: "text-violet-600 dark:text-violet-400",
-    progressBar: "from-violet-400 via-fuchsia-500 to-purple-600",
+    accentText: "bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 bg-clip-text text-transparent",
+    accentSolid: "text-orange-600 dark:text-amber-400",
+    progressBar: "from-orange-400 via-amber-500 to-amber-400",
     shimmerColor: "from-transparent via-white/70 to-transparent",
-    cardOrder: "from-violet-500/[0.08] to-fuchsia-500/[0.04] border-violet-500/20",
+    cardOrder: "from-orange-500/[0.08] to-amber-500/[0.04] border-orange-500/20",
     cardRef: "from-rose-500/[0.08] to-pink-500/[0.04] border-rose-500/20",
-    rewardsBorder: "border-violet-500/30",
+    rewardsBorder: "border-orange-500/30",
   },
 };
 
@@ -402,8 +402,8 @@ export function TierHeroCard({ info, tiers, totalCashback = 0, walletBalance = 0
               )}
             </>
           ) : (
-            <div className="rounded-xl bg-gradient-to-r from-violet-500/10 via-fuchsia-500/10 to-purple-500/10 border border-violet-500/30 px-4 py-3 text-center">
-              <p className="text-sm font-semibold text-violet-700 dark:text-violet-300">
+            <div className="rounded-xl bg-gradient-to-r from-orange-500/10 via-amber-500/10 to-yellow-500/10 border border-orange-500/30 px-4 py-3 text-center">
+              <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">
                 🎉 Tuyệt vời! Bạn đã đạt tier cao nhất.
               </p>
               <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">
@@ -495,7 +495,7 @@ export function TierHeroCard({ info, tiers, totalCashback = 0, walletBalance = 0
           <button
             type="button"
             onClick={() => setPerksOpen(!perksOpen)}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-gray-600 dark:text-zinc-300 hover:text-violet-500 dark:hover:text-violet-400 transition-colors"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-gray-600 dark:text-zinc-300 hover:text-orange-500 dark:hover:text-orange-400 transition-colors"
           >
             <svg
               viewBox="0 0 24 24"

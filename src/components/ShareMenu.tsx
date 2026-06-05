@@ -39,9 +39,9 @@ const PLATFORMS: SharePlatform[] = [
     name: "Messenger",
     color: "hover:bg-blue-50 dark:hover:bg-blue-500/10",
     icon: (
-      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
         <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="currentColor">
-          <path d="M12 2C6.48 2 2 6.04 2 11.04c0 2.81 1.42 5.32 3.66 6.97V22l3.34-1.83c.89.25 1.83.38 2.8.38 5.52 0 10-4.04 10-9.04S17.52 2 12 2zm.99 12.16l-2.55-2.72-4.97 2.72 5.46-5.8 2.61 2.72 4.91-2.72-5.46 5.8z" />
+          <path d="M12 2C6.48 2 2 6.04 2 11.04c0 2.81 1.42 5.32 3.66 6.97V22l3.34-1.83c.89.25 1.83.38 2.8.38 5.52 0 10-4.04 10-9.04S17.52 2 12 2z"/>
         </svg>
       </div>
     ),

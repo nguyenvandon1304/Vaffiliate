@@ -84,7 +84,7 @@ export function ReferralsTab() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
             <KpiCard label="Tổng lượt mời" value={overview.totalReferrals.toLocaleString("vi-VN")} icon="🔗" cls="bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400" />
             <KpiCard label="Mời thành công" value={overview.activeReferrals.toLocaleString("vi-VN")} icon="✅" cls="bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400" />
-            <KpiCard label="Số người mời" value={overview.totalReferrers.toLocaleString("vi-VN")} icon="👥" cls="bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400" />
+            <KpiCard label="Số người mời" value={overview.totalReferrers.toLocaleString("vi-VN")} icon="👥" cls="bg-orange-500/10 border-orange-500/30 text-orange-600 dark:text-orange-400" />
             <KpiCard label="Tỉ lệ chuyển đổi" value={`${overview.conversionRate}%`} icon="📈" cls="bg-orange-500/10 border-orange-500/30 text-orange-600 dark:text-orange-400" />
           </div>
 
@@ -168,7 +168,7 @@ function ReferrerRow({ referrer, rank, onError }: { referrer: TopReferrer; rank:
                   <span className="text-gray-300 dark:text-gray-600">└</span>
                   <span className="flex-1 truncate text-gray-700 dark:text-gray-200">{c.display_name || c.username}</span>
                   {c.invited_count > 0 && (
-                    <span className="text-[10px] text-purple-500 bg-purple-100 dark:bg-purple-500/15 px-1.5 py-0.5 rounded-full">
+                    <span className="text-[10px] text-orange-500 bg-orange-100 dark:bg-orange-500/15 px-1.5 py-0.5 rounded-full">
                       mời {c.invited_count}
                     </span>
                   )}

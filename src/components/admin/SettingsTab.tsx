@@ -340,7 +340,7 @@ export function SettingsTab() {
                     if (dd.success) setStats(dd.stats);
                   } else toast.error(d.error || "Lỗi");
                 }}
-                className="text-xs font-medium px-3 py-1.5 rounded-lg bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-500/20"
+                className="text-xs font-medium px-3 py-1.5 rounded-lg bg-orange-500/10 text-orange-700 dark:text-orange-300 hover:bg-orange-500/20"
               >
                 ⚙️ Cleanup + VACUUM
               </button>

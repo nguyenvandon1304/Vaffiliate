@@ -31,7 +31,7 @@ const TYPE_META: Record<string, { icon: string; color: string }> = {
   order_complete:      { icon: "🎉", color: "from-emerald-400 to-emerald-500" },
   withdrawal_request:  { icon: "💸", color: "from-amber-400 to-amber-500" },
   withdrawal_approved: { icon: "✅", color: "from-green-500 to-green-600" },
-  tier_up:             { icon: "🏅", color: "from-violet-400 to-fuchsia-500" },
+  tier_up:             { icon: "🏅", color: "from-amber-400 to-orange-500" },
   audit:               { icon: "📜", color: "from-slate-400 to-slate-500" },
 };
 

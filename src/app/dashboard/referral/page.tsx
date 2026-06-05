@@ -305,7 +305,7 @@ export default function ReferralPage() {
                 </div>
                 <div className="w-full h-3 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-orange-400 via-rose-400 to-fuchsia-500 rounded-full transition-all"
+                    className="h-full bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 rounded-full transition-all"
                     style={{ width: `${tier.progressPercent}%` }}
                   />
                 </div>
@@ -338,11 +338,11 @@ export default function ReferralPage() {
                 </p>
               </div>
             ) : (
-              <div className="bg-gradient-to-r from-violet-100 to-fuchsia-100 dark:from-violet-500/15 dark:to-fuchsia-500/15 rounded-xl p-4 text-center">
-                <p className="text-sm font-bold text-violet-700 dark:text-violet-300">
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-orange-500/15 dark:to-amber-500/15 rounded-xl p-4 text-center">
+                <p className="text-sm font-bold text-amber-700 dark:text-amber-300">
                   💎 Bạn đã đạt tier cao nhất!
                 </p>
-                <p className="text-xs text-violet-600 dark:text-violet-400 mt-1">
+                <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
                   Hoàn {tier.cashbackPercent}% mãi mãi
                 </p>
               </div>

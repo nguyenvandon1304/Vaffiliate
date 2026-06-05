@@ -742,15 +742,15 @@ export default function CashbackPage() {
                 </div>
 
                 {/* Mẹo */}
-                <div className="flex items-start gap-3 bg-purple-50 border border-purple-100 rounded-xl p-4">
-                  <div className="w-7 h-7 rounded-lg bg-purple-500 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-xl p-4">
+                  <div className="w-7 h-7 rounded-lg bg-orange-500 flex items-center justify-center shrink-0 mt-0.5">
                     <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                     </svg>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-purple-700 mb-1">Mẹo tối ưu chi phí</p>
-                    <p className="text-[11px] text-purple-600/80 leading-relaxed">
+                    <p className="text-xs font-bold text-amber-700 mb-1">Mẹo tối ưu chi phí</p>
+                    <p className="text-[11px] text-amber-600/80 leading-relaxed">
                       Gộp nhiều món vào cùng 1 đơn vừa tiết kiệm phí ship, vừa dễ đạt điều kiện Shopee voucher.
                       Cashback vẫn tính đủ trên tổng giá trị đơn.
                     </p>

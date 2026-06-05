@@ -41,7 +41,7 @@ const DEFAULT_TIERS: Tier[] = [
   { code: "bronze", name: "Bronze", icon: "🥉", color: "amber",   minOrders: 0,   minReferrals: 0,   cashbackPercent: 50 },
   { code: "silver", name: "Silver", icon: "🥈", color: "slate",   minOrders: 50,  minReferrals: 25,  cashbackPercent: 53 },
   { code: "gold",   name: "Gold",   icon: "🥇", color: "yellow",  minOrders: 100, minReferrals: 50,  cashbackPercent: 55 },
-  { code: "vip",    name: "VIP",    icon: "💎", color: "violet",  minOrders: 300, minReferrals: 100, cashbackPercent: 58 },
+  { code: "vip",    name: "VIP",    icon: "💎", color: "amber",  minOrders: 300, minReferrals: 100, cashbackPercent: 58 },
 ];
 
 /**

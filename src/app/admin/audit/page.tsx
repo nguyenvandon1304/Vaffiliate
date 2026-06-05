@@ -26,7 +26,7 @@ function formatDate(s: string): string {
 
 // Map action → màu theo nhóm.
 function actionColor(action: string): string {
-  if (action.startsWith("admin.")) return "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30";
+  if (action.startsWith("admin.")) return "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/30";
   if (action.includes("login.failed") || action.includes("denied") || action.includes("delete")) return "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30";
   if (action.includes("login")) return "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30";
   if (action.includes("password") || action.includes("session") || action.includes("totp")) return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30";
