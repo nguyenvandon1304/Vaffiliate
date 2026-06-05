@@ -16,6 +16,7 @@ import { OrderList } from "@/components/OrderCard";
 import { CommandBarTrigger } from "@/components/CommandBar";
 import { DashboardSkeleton } from "@/components/Skeleton";
 import { StreakBadge } from "@/components/StreakBadge";
+import { UserAvatar } from "@/components/UserAvatar";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { trackEvent } from "@/components/Analytics";
 import { useConfetti } from "@/components/Confetti";
@@ -483,18 +484,14 @@ function DashboardContent() {
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <span className="hidden sm:block text-sm text-gray-600 font-medium">{user?.display_name || user?.username || "..."}</span>
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-orange-500/30 shrink-0">
-                {(user?.display_name || user?.username || "U").charAt(0).toUpperCase()}
-              </div>
+              <UserAvatar avatar={user?.avatar} name={user?.display_name || user?.username} size={36} fontSize={14} className="shrink-0" />
             </button>
 
             {showDropdown && (
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-3 z-50 animate-in fade-in slide-in-from-top-1">
                 {/* User info header */}
                 <div className="flex items-center gap-3 px-4 pb-3 border-b border-gray-100">
-                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-orange-500/30 shrink-0">
-                    {(user?.display_name || user?.username || "U").charAt(0).toUpperCase()}
-                  </div>
+                  <UserAvatar avatar={user?.avatar} name={user?.display_name || user?.username} size={44} fontSize={18} className="shrink-0" />
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-gray-800 truncate">{user?.display_name || user?.username}</p>
                     <p className="text-xs text-gray-400 truncate">{user?.email}</p>

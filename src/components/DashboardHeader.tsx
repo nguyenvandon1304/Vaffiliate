@@ -9,6 +9,7 @@ import { CommandBarTrigger } from "@/components/CommandBar";
 import { TierPill, useTierInfo } from "@/components/TierDisplay";
 import { ThemeToggleButton } from "@/components/ThemeToggle";
 import { NotificationBell } from "@/components/NotificationBell";
+import { UserAvatar } from "@/components/UserAvatar";
 
 interface HeaderUser {
   username: string;
@@ -61,8 +62,6 @@ export function DashboardHeader() {
     router.push("/");
   };
 
-  const initial = (user?.display_name || user?.username || "U").charAt(0).toUpperCase();
-
   return (
     <header
       className="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-30"
@@ -113,17 +112,13 @@ export function DashboardHeader() {
               <span className="hidden sm:block text-sm text-gray-600 dark:text-zinc-300 font-medium">
                 {user?.display_name || user?.username || "..."}
               </span>
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-orange-500/30">
-                {user?.avatar || initial}
-              </div>
+              <UserAvatar avatar={user?.avatar} name={user?.display_name || user?.username} size={36} fontSize={14} />
             </button>
 
             {showDropdown && (
               <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-gray-100 dark:border-zinc-800 py-3 z-50 animate-in fade-in slide-in-from-top-1">
                 <div className="flex items-center gap-3 px-4 pb-3 border-b border-gray-100 dark:border-zinc-800">
-                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-orange-500/30 shrink-0">
-                    {user?.avatar || initial}
-                  </div>
+                  <UserAvatar avatar={user?.avatar} name={user?.display_name || user?.username} size={44} fontSize={18} className="shrink-0" />
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-gray-800 dark:text-zinc-100 truncate">{user?.display_name || user?.username}</p>
                     <p className="text-xs text-gray-400 dark:text-zinc-500 truncate">{user?.email}</p>
