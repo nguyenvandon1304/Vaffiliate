@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Tilt3D } from "@/components/Tilt3D";
 import {
   CaffiliateLogo,
   HeadsetIcon,
@@ -335,9 +336,10 @@ export function LoginCard() {
         ))}
       </div>
 
-      {/* Auth Card */}
-      <div className="max-w-lg mx-auto bg-white dark:bg-zinc-900 rounded-2xl shadow-lg shadow-gray-200/60 dark:shadow-black/40 border border-gray-100 dark:border-zinc-800 overflow-hidden">
-        {/* Card Header — segmented toggle Login / Register cho rõ ràng */}
+      {/* Auth Card with 3D tilt effect */}
+      <Tilt3D max={4} lift={5} glare>
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-lg shadow-gray-200/60 dark:shadow-black/40 border border-gray-100 dark:border-zinc-800 overflow-hidden">
+          {/* Card Header — segmented toggle Login / Register cho rõ ràng */}
         {mode !== "forgot" ? (
           <div className="px-6 pt-5 pb-3">
             <div className="flex bg-gray-100 dark:bg-zinc-800 rounded-xl p-1 gap-1">
@@ -603,7 +605,7 @@ export function LoginCard() {
             </div>
           </div>
         </div>
-      </div>
+      </Tilt3D>
     </div>
   );
 }

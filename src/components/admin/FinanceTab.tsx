@@ -174,9 +174,8 @@ function MiniCard({ label, value, cls }: { label: string; value: string; cls: st
 
 const COLOR_MAP: Record<string, string> = {
   emerald: "from-emerald-400 to-emerald-500",
-  amber: "from-amber-400 to-orange-500",
-  blue: "from-blue-400 to-blue-500",
   amber: "from-amber-400 to-amber-500",
+  blue: "from-blue-400 to-blue-500",
   rose: "from-rose-400 to-rose-500",
   gray: "from-gray-300 to-gray-400",
 };
