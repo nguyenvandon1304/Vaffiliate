@@ -1264,9 +1264,38 @@ function ProfileSection({ user, onProfileUpdated, onBack }: { user: UserInfo; on
   const [profileMsg, setProfileMsg] = useState("");
   const [profileErr, setProfileErr] = useState("");
   const [saving, setSaving] = useState(false);
+  // Trạng thái save avatar riêng: 'idle' | 'saving' | 'saved' | 'error'
+  const [avatarSaveState, setAvatarSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [avatarSaveMsg, setAvatarSaveMsg] = useState("");
 
   // Email đổi là thao tác nhạy cảm → cần nhập mật khẩu hiện tại để xác nhận.
   const emailChanged = email.trim().toLowerCase() !== (user.email || "").toLowerCase();
+
+  // Auto-save avatar mỗi khi user chọn emoji hoặc upload ảnh
+  const saveAvatar = async (avatar: string) => {
+    setAvatarSaveState("saving");
+    setAvatarSaveMsg("");
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatar: avatar || null }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAvatarSaveState("saved");
+        setAvatarSaveMsg("Đã lưu!");
+        setTimeout(() => { setAvatarSaveState("idle"); setAvatarSaveMsg(""); }, 2000);
+        onProfileUpdated();
+      } else {
+        setAvatarSaveState("error");
+        setAvatarSaveMsg(data.error || "Lỗi");
+      }
+    } catch {
+      setAvatarSaveState("error");
+      setAvatarSaveMsg("Lỗi kết nối");
+    }
+  };
 
   const handleProfileSave = async () => {
     setSaving(true);
@@ -1336,7 +1365,7 @@ function ProfileSection({ user, onProfileUpdated, onBack }: { user: UserInfo; on
                     <polyline points="17 8 12 3 7 8" />
                     <line x1="12" x2="12" y1="3" y2="15" />
                   </svg>
-                  Tải ảnh lên
+                  {avatarSaveState === "saving" ? "Đang lưu..." : "Tải ảnh lên"}
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp,image/gif"
@@ -1359,7 +1388,7 @@ function ProfileSection({ user, onProfileUpdated, onBack }: { user: UserInfo; on
                         const result = await res.json();
                         if (result.success) {
                           setSelectedAvatar(result.avatarUrl);
-                          setProfileMsg("Cập nhật thành công!");
+                          await saveAvatar(result.avatarUrl);
                         } else {
                           setProfileErr(result.error || "Tải ảnh thất bại");
                         }
@@ -1369,10 +1398,19 @@ function ProfileSection({ user, onProfileUpdated, onBack }: { user: UserInfo; on
                     }}
                   />
                 </label>
+                {avatarSaveState === "saved" && (
+                  <span className="text-[10px] text-green-600 font-medium flex items-center gap-0.5">
+                    <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6L9 17l-5-5" /></svg>
+                    {avatarSaveMsg}
+                  </span>
+                )}
+                {avatarSaveState === "error" && (
+                  <span className="text-[10px] text-red-500 font-medium">{avatarSaveMsg}</span>
+                )}
                 {selectedAvatar && !selectedAvatar.startsWith("/") && !selectedAvatar.startsWith("http") && (
                   <button
                     type="button"
-                    onClick={() => { setSelectedAvatar(""); }}
+                    onClick={async () => { setSelectedAvatar(""); await saveAvatar(""); }}
                     className="text-[10px] text-gray-400 hover:text-gray-600 transition-colors text-left"
                   >
                     ✕ Bỏ chọn
@@ -1389,7 +1427,7 @@ function ProfileSection({ user, onProfileUpdated, onBack }: { user: UserInfo; on
                 <button
                   key={emoji}
                   type="button"
-                  onClick={() => setSelectedAvatar(emoji)}
+                  onClick={async () => { setSelectedAvatar(emoji); await saveAvatar(emoji); }}
                   title={`Chọn ${emoji}`}
                   className={`w-9 h-9 rounded-lg flex items-center justify-center text-xl transition-all ${
                     selectedAvatar === emoji
