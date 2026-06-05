@@ -9,7 +9,6 @@ interface Step {
   num: number;
   title: string;
   body: string;
-  icon: string;
 }
 
 interface FAQ { q: string; a: string; }
@@ -18,39 +17,34 @@ const STEPS: Step[] = [
   {
     num: 1,
     title: "Đăng ký tài khoản",
-    icon: "📧",
-    body: "Bấm Đăng ký → nhập tên đăng nhập, email và mật khẩu. Hoặc nhanh hơn: bấm \"Tiếp tục với Google\" để đăng nhập 1 chạm bằng Gmail. Nếu đăng ký bằng email, mở hộp thư bấm nút xác thực (kiểm tra cả mục Spam/Quảng cáo nếu chưa thấy sau 1-2 phút). Xong là dùng được ngay!",
+    body: "Bấm Đăng ký → nhập tên đăng nhập, email và mật khẩu. Hoặc bấm \"Tiếp tục với Google\" để đăng nhập 1 chạm. Nếu đăng ký bằng email, mở hộp thư bấm nút xác thực (kiểm tra cả Spam/Quảng cáo).",
   },
   {
     num: 2,
-    title: "Tạo link hoàn tiền cho sản phẩm",
-    icon: "🔗",
-    body: "Thấy món đồ ưng ý trên Shopee? Ở app Shopee bấm Chia sẻ → Sao chép link (hoặc copy link trên web). Vào \"Tạo link\" của V-Affiliate → dán link → bấm Lấy Link. Trong vài giây bạn có ngay link hoàn tiền riêng + thấy luôn số tiền sẽ được hoàn về ví.",
+    title: "Tạo link hoàn tiền",
+    body: "Thấy món đồ ưng ý trên Shopee? Ở app Shopee bấm Chia sẻ → Sao chép link. Vào \"Tạo link\" của V-Affiliate → dán link → bấm Lấy Link. Trong vài giây có ngay link hoàn tiền riêng + thấy số tiền sẽ được hoàn về ví.",
   },
   {
     num: 3,
     title: "Mua & nhận voucher + hoàn tiền",
-    icon: "🛍",
-    body: "Có 2 cách mua:\n\n📘 CÁCH 1 — Nhận voucher Facebook (khuyến nghị): (1) Copy link đã chuyển đổi bằng nút \"Copy link\"; (2) Bấm \"Mở Facebook\" đến bài viết ghim; (3) Comment link vừa copy vào bài viết; (4) Bấm vào chính link bạn vừa comment → voucher Facebook tự động hiện ở bước thanh toán.\n\n⚡ CÁCH 2 — Direct: Bấm \"MUA NGAY\" → mở app Shopee → mua bình thường → hoàn tiền vẫn về ví đầy đủ.\n\n⚠️ Quan trọng: sau khi bấm link, đừng mở lại Shopee từ chỗ khác (Google, Messenger...) kẻo mất hoàn tiền.",
+    body: "CÁCH 1 — Nhận voucher Facebook (khuyến nghị): Copy link đã chuyển đổi → Bấm \"Mở Facebook\" → Comment link vào bài viết ghim → Bấm vào chính link vừa comment → voucher tự động hiện ở bước thanh toán. CÁCH 2 — Direct: Bấm \"MUA NGAY\" → mua bình thường → hoàn tiền vẫn về đủ.",
   },
   {
     num: 4,
     title: "Chờ đơn duyệt → tiền về ví",
-    icon: "⏳",
-    body: "Đơn vừa đặt sẽ hiện ở mục \"Đang chờ duyệt\" — đây là cashback đang chờ Shopee xác nhận, CHƯA rút được. Khi bạn nhận hàng và không trả lại (thường 7-15 ngày, tối đa 90 ngày tuỳ Shopee), đơn chuyển sang \"Đã hoàn tiền\" và tiền tự động cộng vào Ví — lúc này mới rút được.",
+    body: "Đơn vừa đặt hiện ở mục \"Đang chờ duyệt\" — đang chờ Shopee xác nhận, CHƯA rút được. Khi nhận hàng (thường 7-15 ngày, tối đa 90 ngày), đơn chuyển sang \"Đã hoàn tiền\" và tiền tự động cộng vào Ví.",
   },
   {
     num: 5,
     title: "Rút tiền về ngân hàng",
-    icon: "💸",
-    body: "Vào Tài chính → Thêm tài khoản ngân hàng (chỉ làm 1 lần) → đặt mật khẩu rút tiền 4-6 chữ số. Khi ví đủ số dư tối thiểu, bấm Rút tiền → nhập số tiền + mật khẩu rút → admin duyệt và chuyển khoản, tiền về tài khoản của bạn trong 1-2 ngày làm việc. Hoàn toàn miễn phí!",
+    body: "Vào Tài chính → Thêm tài khoản ngân hàng (chỉ làm 1 lần) → đặt mật khẩu rút tiền 4-6 chữ số. Khi ví đủ số dư tối thiểu, bấm Rút tiền → nhập số tiền + mật khẩu → admin duyệt, tiền về trong 1-2 ngày làm việc.",
   },
 ];
 
 const FAQS: FAQ[] = [
   {
     q: "Tôi được hoàn lại bao nhiêu tiền?",
-    a: "Bạn nhận lại phần lớn hoa hồng mà Shopee trả cho mỗi đơn — bắt đầu từ 50% (hạng Bronze). Càng mua nhiều hoặc mời nhiều bạn, hạng càng cao và cashback càng tăng: 🥈 Silver 53% · 🥇 Gold 55% · 💎 VIP 58%, áp dụng vĩnh viễn cho MỌI đơn về sau. Hoa hồng tuỳ shop & sản phẩm (thường 1-15% giá trị đơn). Thỉnh thoảng Shopee còn có thêm voucher giảm giá ở bước thanh toán, nhưng cái này tuỳ thời điểm — không phải đơn nào cũng có.",
+    a: "Bạn nhận lại phần lớn hoa hồng mà Shopee trả cho mỗi đơn — bắt đầu từ 50% (hạng Bronze). Càng mua nhiều hoặc mời nhiều bạn, hạng càng cao và cashback càng tăng: Silver 53% · Gold 55% · VIP 58%, áp dụng vĩnh viễn cho MỌI đơn về sau. Hoa hồng tuỳ shop & sản phẩm (thường 1-15% giá trị đơn).",
   },
   {
     q: "Bao lâu tiền mới về ví?",
@@ -58,15 +52,15 @@ const FAQS: FAQ[] = [
   },
   {
     q: "Tôi đã mua hàng rồi mà không thấy đơn nào trên V-Affiliate?",
-    a: "Đơn KHÔNG xuất hiện ngay sau khi mua — V-Affiliate cần đối soát dữ liệu từ Shopee (thường 1-3 ngày) rồi đơn mới hiện ở mục \"Đang chờ duyệt\". Nếu sau đó vẫn không thấy, có thể do: (1) Sau khi bấm link V-Affiliate bạn lại mở Shopee từ chỗ khác (Google, Messenger...) → mất tracking; (2) Trình duyệt chặn cookie; (3) Đơn bị huỷ/trả hàng; (4) Shop không tham gia affiliate. Hãy thử đơn mới và làm đúng hướng dẫn nhé.",
+    a: "Đơn KHÔNG xuất hiện ngay sau khi mua — V-Affiliate cần đối soát dữ liệu từ Shopee (thường 1-3 ngày) rồi đơn mới hiện ở mục \"Đang chờ duyệt\". Nếu sau đó vẫn không thấy, có thể do: (1) Sau khi bấm link V-Affiliate bạn lại mở Shopee từ chỗ khác (Google, Messenger...) → mất tracking; (2) Trình duyệt chặn cookie; (3) Đơn bị huỷ/trả hàng; (4) Shop không tham gia affiliate.",
   },
   {
     q: "Mua qua link có được voucher giảm giá không?",
-    a: "Có! Luồng nhận voucher Facebook: (1) Copy link đã chuyển đổi bằng nút \"Copy link\"; (2) Bấm \"Mở Facebook\" để đến bài viết ghim; (3) Comment link vừa copy vào bài viết; (4) Bấm vào chính link bạn vừa comment → voucher Facebook tự động hiện ở bước thanh toán. Dù có voucher hay không, bạn LUÔN nhận hoàn tiền về ví — đó mới là giá trị chính của V-Affiliate.",
+    a: "Có! Luồng nhận voucher Facebook: (1) Copy link đã chuyển đổi bằng nút \"Copy link\"; (2) Bấm \"Mở Facebook\" để đến bài viết ghim; (3) Comment link vừa copy vào bài viết; (4) Bấm vào chính link bạn vừa comment → voucher tự động hiện ở bước thanh toán. Dù có voucher hay không, bạn LUÔN nhận hoàn tiền về ví.",
   },
   {
     q: "Tại sao tôi không rút được tiền?",
-    a: "Cần đủ 4 điều kiện: (1) Đã thêm tài khoản ngân hàng trong Tài chính; (2) Đã đặt mật khẩu rút tiền 4-6 chữ số; (3) Có ít nhất 1 đơn đã hoàn tiền (mua sắm thật qua link V-Affiliate) để mở khoá rút — tiền thưởng chào mừng, streak, vòng quay vẫn được giữ nguyên trong ví; (4) Số dư ví đủ mức tối thiểu (mặc định 50.000đ). Lưu ý: tiền ở mục \"Đang chờ duyệt\" CHƯA rút được — chỉ rút được phần đã vào Ví. Mật khẩu rút tiền khác mật khẩu đăng nhập, nhập sai 5 lần sẽ khoá 15 phút để bảo vệ bạn.",
+    a: "Cần đủ 4 điều kiện: (1) Đã thêm tài khoản ngân hàng trong Tài chính; (2) Đã đặt mật khẩu rút tiền 4-6 chữ số; (3) Có ít nhất 1 đơn đã hoàn tiền để mở khoá rút — tiền thưởng chào mừng, streak, vòng quay vẫn được giữ nguyên; (4) Số dư ví đủ mức tối thiểu (mặc định 50.000đ). Lưu ý: tiền ở mục \"Đang chờ duyệt\" CHƯA rút được.",
   },
   {
     q: "Lỡ quên mật khẩu / nhập sai nhiều lần thì sao?",
@@ -78,17 +72,17 @@ const FAQS: FAQ[] = [
   },
   {
     q: "Mời bạn bè được lợi gì?",
-    a: "Vào \"Giới thiệu bạn bè\" → copy link cá nhân → gửi qua Zalo/Facebook/SMS. Mỗi người bạn mời đăng ký và có đơn đầu tiên sẽ giúp bạn tiến gần hơn tới hạng cao: đủ 25 bạn active → lên 🥈 Silver (53%), 50 bạn → 🥇 Gold (55%), 100 bạn → 💎 VIP (58%). Cashback tăng áp dụng vĩnh viễn cho mọi đơn — mời càng nhiều, lời càng lớn!",
+    a: "Vào \"Giới thiệu bạn bè\" → copy link cá nhân → gửi qua Zalo/Facebook/SMS. Mỗi người bạn mời đăng ký và có đơn đầu tiên sẽ giúp bạn tiến gần hơn tới hạng cao: đủ 25 bạn active → Silver (53%), 50 bạn → Gold (55%), 100 bạn → VIP (58%). Cashback tăng áp dụng vĩnh viễn cho mọi đơn — mời càng nhiều, lời càng lớn!",
   },
   {
     q: "Tôi có cần làm gì sau khi đặt đơn không?",
-    a: "Không cần làm gì cả! V-Affiliate tự đối soát với Shopee và cập nhật đơn cho bạn. Bạn chỉ cần thỉnh thoảng ghé tab Đơn hàng để theo dõi. Khi đơn được duyệt, tiền tự cộng vào ví và bạn nhận được thông báo ngay. Ngồi chờ tiền về thôi! 💰",
+    a: "Không cần làm gì cả! V-Affiliate tự đối soát với Shopee và cập nhật đơn cho bạn. Bạn chỉ cần thỉnh thoảng ghé tab Đơn hàng để theo dõi. Khi đơn được duyệt, tiền tự cộng vào ví và bạn nhận được thông báo ngay. Ngồi chờ tiền về thôi!",
   },
 ];
 
 export default function HelpPage() {
   const toast = useToast();
-  const [openFAQ, setOpenFAQ] = useState<number | null>(0);
+  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [showContact, setShowContact] = useState(false);
   const [faqSearch, setFaqSearch] = useState("");
 
@@ -112,245 +106,192 @@ export default function HelpPage() {
       f.a.toLowerCase().includes(faqSearch.toLowerCase())
   );
 
+  const STEP_ICONS = [
+    <svg key="user" viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>,
+    <svg key="link" viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>,
+    <svg key="cart" viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></svg>,
+    <svg key="clock" viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>,
+    <svg key="bank" viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" /></svg>,
+  ];
+
+  const STEP_COLORS = [
+    { base: "from-orange-400 to-amber-500", icon: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20" },
+    { base: "from-blue-400 to-indigo-500", icon: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
+    { base: "from-indigo-400 to-purple-500", icon: "text-indigo-400", bg: "bg-indigo-500/10", border: "border-indigo-500/20" },
+    { base: "from-amber-400 to-orange-500", icon: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
+    { base: "from-emerald-400 to-teal-500", icon: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 via-gray-50 to-gray-50 dark:from-zinc-950 dark:via-zinc-950 dark:to-black">
+    <div className="min-h-screen bg-[#09090b]">
       <DashboardHeader />
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-24 md:pb-8 space-y-8">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 pb-24 md:pb-8 space-y-4">
 
-        {/* ── Hero Banner ── */}
-        <section className="relative rounded-3xl overflow-hidden shadow-xl shadow-orange-200/30 dark:shadow-orange-900/20">
-          {/* Background layers */}
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_50%,rgba(255,255,255,0.12)_0%,transparent_60%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(120deg,transparent_30%,rgba(255,255,255,0.08)_50%,transparent_70%)]" />
-          {/* Floating orbs */}
-          <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
-          <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-amber-300/20 blur-xl" />
-          <div className="absolute top-1/2 right-1/4 w-16 h-16 rounded-full bg-white/5 blur-lg" />
-
-          <div className="relative px-6 py-8 sm:px-8 sm:py-10">
-            {/* Eyebrow */}
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                <span className="text-white/90 text-[11px] font-bold uppercase tracking-widest">5 phút để hiểu</span>
-              </div>
+        {/* ── PAGE HEADER — Bento: title left, badge right ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+          {/* Title block — spans 8 cols */}
+          <div className="sm:col-span-8 bg-[#18181b] border border-white/5 rounded-2xl p-6">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-1 h-5 rounded-full bg-gradient-to-b from-orange-400 to-amber-500" />
+              <span className="text-[10px] font-bold text-orange-400/70 uppercase tracking-widest">Getting Started</span>
             </div>
-
-            {/* Title */}
-            <h1 className="text-2xl sm:text-3xl font-black text-white leading-tight mb-2">
+            <h1 className="text-2xl sm:text-3xl font-black text-white leading-tight tracking-tight mb-2">
               Hướng dẫn sử dụng
             </h1>
-            <p className="text-white/75 text-sm sm:text-base leading-relaxed mb-6 max-w-lg">
-              Từ đăng ký đến rút tiền — tất cả trong 5 bước đơn giản. Bắt đầu nhận hoàn tiền ngay hôm nay.
+            <p className="text-sm text-zinc-400 leading-relaxed max-w-lg">
+              Từ đăng ký đến rút tiền — 5 bước đơn giản. Bắt đầu nhận hoàn tiền ngay hôm nay.
             </p>
-
-            {/* Quick stats row */}
-            <div className="flex flex-wrap gap-3 mb-6">
-              {[
-                { icon: "→", label: "Tạo link" },
-                { icon: "🛒", label: "Mua hàng" },
-                { icon: "💰", label: "Nhận cashback" },
-                { icon: "🏦", label: "Rút tiền" },
-              ].map(({ icon, label }) => (
-                <div key={label} className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5">
-                  <span className="text-sm">{icon}</span>
-                  <span className="text-white text-[11px] font-semibold">{label}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* CTA */}
-            <a
-              href="/dashboard/cashback"
-              className="group relative inline-flex items-center gap-2.5 bg-white text-orange-600 font-black text-sm px-6 py-3 rounded-xl shadow-lg shadow-orange-900/25 overflow-hidden"
-            >
-              <span className="absolute inset-0 bg-gradient-to-r from-orange-50 to-amber-50 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <svg viewBox="0 0 24 24" className="w-4 h-4 relative" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              <span className="relative">Bắt đầu ngay</span>
-              <svg viewBox="0 0 24 24" className="w-4 h-4 relative transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </a>
-          </div>
-        </section>
-
-        {/* ── 5-Step Journey ── */}
-        <section>
-          {/* Section header */}
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center">
-              <svg viewBox="0 0 24 24" className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-lg font-black text-gray-900 dark:text-zinc-100 leading-tight">5 bước để nhận hoàn tiền</h2>
-              <p className="text-xs text-gray-400 dark:text-zinc-500">Mỗi bước chỉ mất vài giây</p>
-            </div>
           </div>
 
-          <div className="relative space-y-4">
-            {/* Vertical connector line */}
-            <div className="absolute left-[29px] top-14 bottom-14 w-px bg-gradient-to-b from-orange-200 via-amber-200 to-orange-200 dark:from-orange-800 dark:via-amber-800 dark:to-orange-800 hidden sm:block" />
-
-            {STEPS.map((s, idx) => (
-              <div key={s.num} className="group relative flex gap-4 items-start">
-                {/* Step indicator */}
-                <div className="relative flex-shrink-0">
-                  <div className="w-14 h-14 rounded-2xl bg-white dark:bg-zinc-900 border-2 border-orange-100 dark:border-zinc-800 flex items-center justify-center shadow-sm group-hover:shadow-md group-hover:shadow-orange-200/50 dark:group-hover:shadow-orange-900/30 group-hover:border-orange-300 dark:group-hover:border-orange-700 transition-all duration-300">
-                    {/* Step number bubble */}
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm transition-all duration-300 ${
-                      idx === 0 ? "bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-sm shadow-orange-200" :
-                      idx === STEPS.length - 1 ? "bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-sm shadow-emerald-200" :
-                      "bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
-                    }`}>
-                      {idx === STEPS.length - 1 ? (
-                        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
-                      ) : s.num}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Content card */}
-                <div className="flex-1 min-w-0 bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-5 group-hover:border-orange-200 dark:group-hover:border-orange-800/50 group-hover:shadow-md group-hover:shadow-orange-100/40 dark:group-hover:shadow-orange-900/20 transition-all duration-300">
-                  <div className="flex items-start gap-3 mb-3">
-                    {/* Icon */}
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                      idx === 0 ? "bg-orange-50 dark:bg-orange-900/40" :
-                      idx === 1 ? "bg-blue-50 dark:bg-blue-900/40" :
-                      idx === 2 ? "bg-indigo-50 dark:bg-indigo-900/40" :
-                      idx === 3 ? "bg-amber-50 dark:bg-amber-900/40" :
-                      "bg-emerald-50 dark:bg-emerald-900/40"
-                    }`}>
-                      {idx === 0 ? (
-                        <svg viewBox="0 0 24 24" className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-                        </svg>
-                      ) : idx === 1 ? (
-                        <svg viewBox="0 0 24 24" className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                        </svg>
-                      ) : idx === 2 ? (
-                        <svg viewBox="0 0 24 24" className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                        </svg>
-                      ) : idx === 3 ? (
-                        <svg viewBox="0 0 24 24" className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-                        </svg>
-                      ) : (
-                        <svg viewBox="0 0 24 24" className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" />
-                        </svg>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-black text-gray-900 dark:text-zinc-100 leading-tight">{s.title}</h3>
-                      <p className="text-[11px] font-semibold text-gray-400 dark:text-zinc-600 uppercase tracking-wide mt-0.5">
-                        {idx === 0 ? "Đăng ký" : idx === 1 ? "Tạo link" : idx === 2 ? "Mua hàng" : idx === 3 ? "Chờ duyệt" : "Rút tiền"}
-                      </p>
-                    </div>
-                    <div className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      idx === 0 ? "bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400" :
-                      idx === 1 ? "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400" :
-                      idx === 2 ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400" :
-                      idx === 3 ? "bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400" :
-                      "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400"
-                    }`}>
-                      Bước {s.num}
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-zinc-400 leading-relaxed pl-[46px]">{s.body}</p>
-                </div>
+          {/* Quick stats — spans 4 cols, 2 small tiles stacked */}
+          <div className="sm:col-span-4 flex flex-col gap-3">
+            <div className="flex-1 bg-[#18181b] border border-white/5 rounded-2xl p-4 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 24 24" className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
               </div>
-            ))}
+              <div>
+                <p className="text-lg font-black text-white leading-none">50%+</p>
+                <p className="text-[10px] text-zinc-500 font-medium">Cashback tối thiểu</p>
+              </div>
+            </div>
+            <div className="flex-1 bg-[#18181b] border border-white/5 rounded-2xl p-4 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 24 24" className="w-4 h-4 text-blue-400" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              </div>
+              <div>
+                <p className="text-lg font-black text-white leading-none">+Voucher</p>
+                <p className="text-[10px] text-zinc-500 font-medium">Giảm giá Shopee</p>
+              </div>
+            </div>
           </div>
-        </section>
+        </div>
 
-        {/* ── Voucher Banner ── */}
-        <section className="relative rounded-2xl overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_50%,rgba(255,255,255,0.1)_0%,transparent_60%)]" />
-          <div className="absolute -top-10 right-10 w-40 h-40 rounded-full bg-white/5 blur-2xl" />
-          <div className="relative px-6 py-6 sm:px-8">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className="flex items-start gap-4 flex-1">
-                <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center shrink-0">
-                  <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="currentColor">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
+        {/* ── 5-STEP BENTO GRID ── */}
+        <div>
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <div className="w-1 h-4 rounded-full bg-gradient-to-b from-blue-400 to-indigo-500" />
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Process</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+            {STEPS.map((s, i) => {
+              const col = [0, 1].includes(i) ? "sm:col-span-6" : "sm:col-span-4";
+              return (
+                <div key={s.num} className={`${col} group`}>
+                  <div className="bg-[#18181b] border border-white/5 hover:border-white/10 rounded-2xl p-5 h-full transition-all duration-200 hover:shadow-[0_0_20px_rgba(255,255,255,0.04)]">
+                    {/* Header row */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${STEP_COLORS[i].base} flex items-center justify-center ${STEP_COLORS[i].icon} shadow-lg shrink-0`}>
+                        {STEP_ICONS[i]}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm font-bold text-white leading-tight truncate">{s.title}</h3>
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[10px] font-mono text-zinc-600">0{s.num}</span>
+                          <div className="flex-1 h-px bg-white/5" />
+                        </div>
+                      </div>
+                    </div>
+                    {/* Body */}
+                    <p className="text-xs text-zinc-400 leading-relaxed">{s.body}</p>
+                    {/* Bottom accent line */}
+                    <div className={`mt-4 h-0.5 rounded-full bg-gradient-to-r ${STEP_COLORS[i].base} opacity-30 group-hover:opacity-60 transition-opacity`} />
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* CTA tile — spans 4 cols on row 3 */}
+            <div className="sm:col-span-4">
+              <a
+                href="/dashboard/cashback"
+                className="group flex flex-col justify-between bg-gradient-to-br from-orange-500/20 to-amber-500/10 border border-orange-500/20 hover:border-orange-500/40 rounded-2xl p-5 h-full transition-all duration-200 hover:shadow-[0_0_30px_rgba(251,146,60,0.1)]"
+              >
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
+                      <svg viewBox="0 0 24 24" className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                    </div>
+                    <span className="text-xs font-bold text-orange-400/70 uppercase tracking-widest">Bắt đầu</span>
+                  </div>
+                  <h3 className="text-base font-black text-white leading-tight mb-2">Tạo link hoàn tiền đầu tiên</h3>
+                  <p className="text-xs text-zinc-400 leading-relaxed">Chuyển đổi link Shopee thành link có hoàn tiền trong vài giây.</p>
+                </div>
+                <div className="mt-4 flex items-center gap-2 text-orange-400 text-xs font-bold">
+                  <span>Đến trang tạo link</span>
+                  <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* ── VOUCHER BANNER — full width bento card ── */}
+        <div className="relative rounded-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 via-indigo-600/90 to-purple-600/90" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_50%,rgba(255,255,255,0.08)_0%,transparent_60%)]" />
+          <div className="absolute inset-0 backdrop-blur-[1px]" />
+          <div className="relative px-6 py-5 sm:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+              <div className="flex items-center gap-4 flex-1">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center shrink-0 backdrop-blur-sm">
+                  <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="bg-white/15 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">+Voucher</span>
-                    <span className="bg-white/10 text-white/70 text-[10px] font-medium px-2 py-0.5 rounded-full">Khuyến nghị</span>
+                    <span className="bg-white/15 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">+Voucher</span>
+                    <span className="bg-white/10 text-white/70 text-[9px] font-medium px-2 py-0.5 rounded-full">Khuyến nghị</span>
                   </div>
-                  <h3 className="text-base font-black text-white leading-tight mb-1">Nhận voucher Facebook giảm giá</h3>
-                  <p className="text-white/70 text-sm leading-relaxed">
-                    Comment link mua hàng vào bài viết ghim → voucher tự động hiện khi thanh toán.
-                  </p>
+                  <h3 className="text-base font-black text-white leading-tight">Nhận voucher Facebook giảm giá Shopee</h3>
+                  <p className="text-white/60 text-xs mt-0.5">Comment link mua hàng vào bài ghim → voucher tự động hiện khi thanh toán</p>
                 </div>
               </div>
-              <div className="flex flex-col sm:items-end gap-2">
+              <div className="flex flex-col sm:items-end gap-2 shrink-0">
                 <a
                   href="/dashboard/cashback"
-                  className="group relative flex items-center justify-center gap-2 bg-white text-blue-600 font-black text-sm px-5 py-2.5 rounded-xl shadow-lg overflow-hidden"
+                  className="inline-flex items-center gap-2 bg-white text-blue-600 font-black text-xs px-5 py-2.5 rounded-xl shadow-lg hover:bg-zinc-100 transition-colors"
                 >
-                  <span className="absolute inset-0 bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <svg viewBox="0 0 24 24" className="w-4 h-4 relative" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                  <span className="relative">Nhận voucher</span>
+                  Nhận voucher
+                  <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                 </a>
-                <p className="text-white/50 text-[11px] text-center sm:text-right">Dù không có voucher, cashback vẫn về đủ</p>
+                <p className="text-white/40 text-[10px] text-center sm:text-right">Dù không có voucher, cashback vẫn về đủ</p>
               </div>
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* ── FAQ ── */}
-        <section>
-          {/* Section header */}
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-              <svg viewBox="0 0 24 24" className="w-4 h-4 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-lg font-black text-gray-900 dark:text-zinc-100 leading-tight">Câu hỏi thường gặp</h2>
-              <p className="text-xs text-gray-400 dark:text-zinc-500">{FAQS.length} câu hỏi được trả lời</p>
-            </div>
+        {/* ── FAQ — tight density, Linear-style ── */}
+        <div>
+          <div className="flex items-center gap-2 mb-3 px-1">
+            <div className="w-1 h-4 rounded-full bg-zinc-600" />
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">FAQ</span>
           </div>
 
           {/* Search */}
-          <div className="relative mb-4">
-            <svg viewBox="0 0 24 24" className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
+          <div className="relative mb-3">
+            <svg viewBox="0 0 24 24" className="w-4 h-4 text-zinc-600 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
             <input
               type="text"
               value={faqSearch}
               onChange={(e) => { setFaqSearch(e.target.value); setOpenFAQ(null); }}
               placeholder="Tìm câu hỏi..."
-              className="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl text-sm text-gray-800 dark:text-zinc-100 placeholder-gray-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 dark:focus:ring-orange-900/30 outline-none transition-all"
+              className="w-full pl-10 pr-4 py-3 bg-[#18181b] border border-white/5 rounded-xl text-sm text-zinc-300 placeholder-zinc-600 focus:border-white/15 focus:ring-0 outline-none transition-all"
             />
           </div>
 
-          {/* Results count */}
           {faqSearch.length >= 2 && (
-            <p className="text-xs text-gray-400 dark:text-zinc-500 mb-3">
+            <p className="text-[11px] text-zinc-600 mb-3 px-1">
               {filteredFAQ.length} kết quả cho &ldquo;{faqSearch}&rdquo;
             </p>
           )}
 
-          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 divide-y divide-gray-100 dark:divide-zinc-800 overflow-hidden">
+          <div className="bg-[#18181b] border border-white/5 rounded-2xl overflow-hidden divide-y divide-white/5">
             {filteredFAQ.length === 0 ? (
-              <div className="p-8 text-center">
-                <svg viewBox="0 0 24 24" className="w-8 h-8 text-gray-300 dark:text-zinc-700 mx-auto mb-2" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-                <p className="text-sm text-gray-400 dark:text-zinc-600">Không tìm thấy câu hỏi phù hợp</p>
+              <div className="p-10 text-center">
+                <svg viewBox="0 0 24 24" className="w-7 h-7 text-zinc-700 mx-auto mb-2" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                <p className="text-sm text-zinc-600">Không tìm thấy câu hỏi phù hợp</p>
               </div>
             ) : (
               filteredFAQ.map((f, i) => {
@@ -360,19 +301,19 @@ export default function HelpPage() {
                   <div key={i}>
                     <button
                       onClick={() => setOpenFAQ(isOpen ? null : globalIdx)}
-                      className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors"
+                      className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left hover:bg-white/[0.02] transition-colors"
                     >
-                      <h3 className="text-sm font-semibold text-gray-800 dark:text-zinc-100 flex-1 leading-snug">{f.q}</h3>
-                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-all duration-300 ${
-                        isOpen ? "bg-orange-500 text-white rotate-90" : "bg-gray-100 dark:bg-zinc-800 text-gray-400"
+                      <h3 className="text-sm font-medium text-zinc-200 flex-1 leading-snug pr-2">{f.q}</h3>
+                      <div className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200 ${
+                        isOpen ? "bg-orange-500 text-white rotate-90" : "bg-white/5 text-zinc-500"
                       }`}>
-                        <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 18l6-6-6-6" /></svg>
+                        <svg viewBox="0 0 24 24" className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 18l6-6-6-6" /></svg>
                       </div>
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
+                    <div className={`overflow-hidden transition-all duration-200 ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
                       <div className="px-5 pb-4">
-                        <div className="bg-gray-50 dark:bg-zinc-800/60 rounded-xl p-4">
-                          <p className="text-sm text-gray-600 dark:text-zinc-400 leading-relaxed">{f.a}</p>
+                        <div className="bg-white/[0.03] border border-white/5 rounded-xl p-4">
+                          <p className="text-xs text-zinc-400 leading-relaxed">{f.a}</p>
                         </div>
                       </div>
                     </div>
@@ -381,102 +322,89 @@ export default function HelpPage() {
               })
             )}
           </div>
-        </section>
+        </div>
 
-        {/* ── Support CTA ── */}
-        <section className="relative rounded-2xl overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 to-zinc-950 dark:from-black dark:to-black" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(251,146,60,0.08)_0%,transparent_60%)]" />
-          <div className="relative px-6 py-8 sm:px-8 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mx-auto mb-4">
-              <svg viewBox="0 0 24 24" className="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        {/* ── SUPPORT CTA — dark glass card ── */}
+        <div className="relative rounded-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-[#18181b]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(251,146,60,0.06)_0%,transparent_60%)]" />
+          <div className="absolute inset-0 border border-white/5 rounded-2xl" />
+          <div className="relative px-6 py-6 sm:px-8 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mx-auto mb-4">
+              <svg viewBox="0 0 24 24" className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
             </div>
-            <h3 className="text-lg font-black text-white mb-1">Cần hỗ trợ thêm?</h3>
-            <p className="text-zinc-400 text-sm mb-5">Liên hệ qua email, thường phản hồi trong vòng 24 giờ.</p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <h3 className="text-base font-black text-white mb-1">Cần hỗ trợ thêm?</h3>
+            <p className="text-zinc-500 text-xs mb-5">Liên hệ qua email, thường phản hồi trong vòng 24 giờ.</p>
+            <div className="flex flex-col sm:flex-row gap-2 justify-center max-w-sm mx-auto">
               <button
                 onClick={() => setShowContact(true)}
-                className="inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-6 py-3 rounded-xl transition-colors shadow-lg shadow-orange-500/25"
+                className="inline-flex items-center justify-center gap-2 bg-white text-zinc-900 text-xs font-bold px-5 py-2.5 rounded-xl hover:bg-zinc-100 transition-colors"
               >
-                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+                <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
                 Liên hệ hỗ trợ
               </button>
               <a
                 href="/dashboard"
-                className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 text-white text-sm font-bold px-6 py-3 rounded-xl transition-colors"
+                className="inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-medium px-5 py-2.5 rounded-xl transition-colors border border-white/5"
               >
                 Quay lại Dashboard
-                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
               </a>
             </div>
           </div>
-        </section>
+        </div>
+
       </main>
 
-      {/* Contact modal — 3 cách liên hệ tuỳ thiết bị/trình duyệt user */}
+      {/* ── CONTACT MODAL ── */}
       <Modal open={showContact} onClose={() => setShowContact(false)} title="Liên hệ hỗ trợ" size="md">
         <div className="space-y-4">
-          <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-900/40 rounded-lg p-3">
-            <p className="text-xs text-gray-500 dark:text-zinc-400 mb-1">Email admin</p>
-            <p className="text-sm font-mono font-semibold text-gray-800 dark:text-zinc-100 break-all">
-              {ADMIN_EMAIL}
-            </p>
+          <div className="bg-[#18181b] border border-white/5 rounded-xl p-4">
+            <p className="text-[10px] text-zinc-600 font-medium uppercase tracking-widest mb-1">Email admin</p>
+            <p className="text-sm font-mono font-semibold text-zinc-200 break-all">{ADMIN_EMAIL}</p>
           </div>
 
-          <p className="text-sm text-gray-600 dark:text-zinc-300">Chọn cách liên hệ phù hợp:</p>
+          <p className="text-xs text-zinc-500">Chọn cách liên hệ phù hợp:</p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            {/* Gmail web — chắc chắn hoạt động cho mọi user có Gmail */}
+          <div className="grid grid-cols-3 gap-2">
             <a
               href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(ADMIN_EMAIL)}&su=${encodeURIComponent(SUBJECT)}&body=${encodeURIComponent(BODY)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 border-gray-200 dark:border-zinc-700 hover:border-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/10 transition-colors"
+              className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-white/5 hover:border-white/10 hover:bg-white/[0.03] transition-colors"
             >
-              <span className="text-2xl">📧</span>
-              <p className="text-sm font-semibold text-gray-800 dark:text-zinc-100">Gmail</p>
-              <p className="text-[10px] text-gray-500 dark:text-zinc-500 text-center">Mở Gmail trên web</p>
+              <svg viewBox="0 0 24 24" className="w-5 h-5 text-red-400" fill="currentColor"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
+              <p className="text-xs font-semibold text-zinc-300">Gmail</p>
+              <p className="text-[9px] text-zinc-600 text-center">Web</p>
             </a>
-
-            {/* Outlook web */}
             <a
               href={`https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(ADMIN_EMAIL)}&subject=${encodeURIComponent(SUBJECT)}&body=${encodeURIComponent(BODY)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 border-gray-200 dark:border-zinc-700 hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors"
+              className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-white/5 hover:border-white/10 hover:bg-white/[0.03] transition-colors"
             >
-              <span className="text-2xl">📨</span>
-              <p className="text-sm font-semibold text-gray-800 dark:text-zinc-100">Outlook</p>
-              <p className="text-[10px] text-gray-500 dark:text-zinc-500 text-center">Mở Outlook web</p>
+              <svg viewBox="0 0 24 24" className="w-5 h-5 text-blue-400" fill="currentColor"><path d="M24 7.387v10.478c0 .23-.08.424-.24.584-.16.16-.354.24-.584.24H.76c-.23 0-.424-.08-.584-.24C.02 18.29 0 18.09 0 17.865V7.387c0 .23.08.424.24.584.16.16.354.24.584.24h22.48c.23 0 .424-.08.584-.24.16-.16.24-.354.24-.584zM1.74 8.77l9.72 6.03V8.77H1.74zm10.52 6.03l9.72-6.03v10.74l-9.72 6.181z"/></svg>
+              <p className="text-xs font-semibold text-zinc-300">Outlook</p>
+              <p className="text-[9px] text-zinc-600 text-center">Web</p>
             </a>
-
-            {/* App mặc định */}
             <a
               href={`mailto:${ADMIN_EMAIL}?subject=${encodeURIComponent(SUBJECT)}&body=${encodeURIComponent(BODY)}`}
-              className="flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 border-gray-200 dark:border-zinc-700 hover:border-orange-400 hover:bg-orange-50/50 dark:hover:bg-orange-900/10 transition-colors"
+              className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-white/5 hover:border-white/10 hover:bg-white/[0.03] transition-colors"
             >
-              <span className="text-2xl">✉️</span>
-              <p className="text-sm font-semibold text-gray-800 dark:text-zinc-100">App email</p>
-              <p className="text-[10px] text-gray-500 dark:text-zinc-500 text-center">Email mặc định trên máy</p>
+              <svg viewBox="0 0 24 24" className="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+              <p className="text-xs font-semibold text-zinc-300">App email</p>
+              <p className="text-[9px] text-zinc-600 text-center">Mặc định</p>
             </a>
           </div>
 
           <button
             onClick={copyEmail}
-            className="w-full flex items-center justify-center gap-2 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-200 text-sm font-semibold py-2.5 rounded-lg transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-medium py-2.5 rounded-xl transition-colors border border-white/5"
           >
-            <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="9" y="9" width="13" height="13" rx="2" />
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-            </svg>
-            Sao chép email vào clipboard
+            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
+            Sao chép email
           </button>
-
-          <p className="text-xs text-gray-500 dark:text-zinc-500 text-center">
-            Cách nào không tiện, hãy mở app email bạn đang dùng và gửi tới email phía trên.
-          </p>
         </div>
       </Modal>
     </div>
