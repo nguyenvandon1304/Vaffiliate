@@ -1316,52 +1316,91 @@ function ProfileSection({ user, onProfileUpdated, onBack }: { user: UserInfo; on
           Hồ sơ cá nhân
         </h2>
         <div className="space-y-4">
-          {/* Avatar preset picker */}
+          {/* Avatar picker: emoji + upload ảnh thật */}
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-2">Ảnh đại diện</label>
-            <div className="grid grid-cols-8 gap-2">
+            {/* Preview row */}
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-3xl shadow-md overflow-hidden shrink-0">
+                {selectedAvatar.startsWith("/") || selectedAvatar.startsWith("http") ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- uploaded avatar URL
+                  <img src={selectedAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  selectedAvatar || "👤"
+                )}
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="cursor-pointer inline-flex items-center gap-2 text-xs font-semibold text-orange-600 hover:text-orange-700 border border-orange-200 hover:border-orange-400 rounded-lg px-3 py-1.5 transition-colors bg-orange-50 hover:bg-orange-100">
+                  <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" x2="12" y1="3" y2="15" />
+                  </svg>
+                  Tải ảnh lên
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 2 * 1024 * 1024) {
+                        setProfileErr("Ảnh vượt quá 2MB");
+                        return;
+                      }
+                      const reader = new FileReader();
+                      reader.onload = async (ev) => {
+                        const dataUrl = ev.target?.result as string;
+                        const res = await fetch("/api/avatar/upload", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ data: dataUrl, filename: file.name }),
+                        });
+                        const result = await res.json();
+                        if (result.success) {
+                          setSelectedAvatar(result.avatarUrl);
+                          setProfileMsg("Cập nhật thành công!");
+                        } else {
+                          setProfileErr(result.error || "Tải ảnh thất bại");
+                        }
+                      };
+                      reader.readAsDataURL(file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+                {selectedAvatar && !selectedAvatar.startsWith("/") && !selectedAvatar.startsWith("http") && (
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedAvatar(""); }}
+                    className="text-[10px] text-gray-400 hover:text-gray-600 transition-colors text-left"
+                  >
+                    ✕ Bỏ chọn
+                  </button>
+                )}
+              </div>
+            </div>
+            {/* Emoji grid */}
+            <div className="grid grid-cols-8 gap-1.5">
               {[
-                { emoji: "🌸", color: "from-pink-400 to-rose-500" },
-                { emoji: "🌺", color: "from-red-400 to-orange-500" },
-                { emoji: "🍊", color: "from-orange-400 to-amber-500" },
-                { emoji: "🌻", color: "from-yellow-400 to-amber-500" },
-                { emoji: "🌿", color: "from-green-400 to-emerald-500" },
-                { emoji: "🌊", color: "from-blue-400 to-cyan-500" },
-                { emoji: "🩵", color: "from-sky-400 to-blue-500" },
-                { emoji: "🦋", color: "from-indigo-400 to-violet-500" },
-                { emoji: "🍇", color: "from-purple-400 to-fuchsia-500" },
-                { emoji: "🌙", color: "from-zinc-400 to-zinc-600" },
-                { emoji: "⭐", color: "from-amber-400 to-yellow-500" },
-                { emoji: "🔥", color: "from-orange-500 to-red-500" },
-                { emoji: "💜", color: "from-violet-500 to-purple-600" },
-                { emoji: "💚", color: "from-green-500 to-emerald-600" },
-                { emoji: "💙", color: "from-blue-500 to-sky-600" },
-                { emoji: "🧡", color: "from-amber-500 to-orange-600" },
-              ].map((a, i) => (
+                "🌸", "🌺", "🍊", "🌻", "🌿", "🌊", "🩵", "🦋",
+                "🍇", "🌙", "⭐", "🔥", "💜", "💚", "💙", "🧡",
+              ].map((emoji) => (
                 <button
-                  key={i}
+                  key={emoji}
                   type="button"
-                  onClick={() => setSelectedAvatar(a.emoji)}
-                  title={`Chọn ${a.emoji}`}
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center text-2xl transition-all shadow-sm ${
-                    selectedAvatar === a.emoji
-                      ? "ring-2 ring-orange-500 ring-offset-2 scale-110 shadow-md shadow-orange-500/30"
-                      : "bg-gray-100 dark:bg-zinc-800 hover:scale-105 hover:shadow-md"
+                  onClick={() => setSelectedAvatar(emoji)}
+                  title={`Chọn ${emoji}`}
+                  className={`w-9 h-9 rounded-lg flex items-center justify-center text-xl transition-all ${
+                    selectedAvatar === emoji
+                      ? "ring-2 ring-orange-500 ring-offset-1 scale-110 shadow-md shadow-orange-500/30 bg-orange-50"
+                      : "bg-gray-100 dark:bg-zinc-800 hover:scale-105 hover:shadow-sm"
                   }`}
                 >
-                  {a.emoji}
+                  {emoji}
                 </button>
               ))}
             </div>
-            {selectedAvatar && (
-              <button
-                type="button"
-                onClick={() => setSelectedAvatar("")}
-                className="mt-2 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-              >
-                ✕ Bỏ chọn avatar
-              </button>
-            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">Tên đăng nhập</label>
