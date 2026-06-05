@@ -10,7 +10,7 @@ export default function Footer() {
         {/* ── Community Section ── */}
         <div className="relative rounded-2xl overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-amber-500/5 to-transparent dark:from-orange-500/10 dark:via-amber-500/5 dark:to-transparent" />
-          <div className="relative bg-white/80 dark:bg-[#18181b]/80 backdrop-blur-sm border border-black/5 dark:border-white/10 rounded-2xl p-5 sm:p-6">
+          <div className="relative bg-white/80 dark:bg-[#18181b] backdrop-blur-sm border border-black/5 dark:border-white/10 rounded-2xl p-5 sm:p-6">
             <div className="flex items-start gap-4 mb-5">
               <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center shrink-0 shadow-lg shadow-orange-500/25">
                 <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -82,7 +82,7 @@ export default function Footer() {
         </div>
 
         {/* ── App Store Section ── */}
-        <div className="flex items-center justify-between bg-white/80 dark:bg-[#18181b]/80 backdrop-blur-sm border border-black/5 dark:border-white/10 rounded-2xl px-5 py-4">
+        <div className="flex items-center justify-between bg-white/80 dark:bg-[#18181b] backdrop-blur-sm border border-black/5 dark:border-white/10 rounded-2xl px-5 py-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gray-100 dark:bg-white/5 rounded-xl flex items-center justify-center">
               <svg viewBox="0 0 24 24" className="w-5 h-5 text-gray-500 dark:text-zinc-400" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
