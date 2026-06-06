@@ -63,7 +63,7 @@ export function DashboardNavIcons() {
           <button
             key={t.key}
             onClick={() => router.push(t.href)}
-            className={`nav-bubble group relative inline-flex flex-col items-center justify-center rounded-xl transition-all duration-200 ${
+            className={`nav-bubble group relative inline-flex items-center justify-center rounded-xl transition-all duration-200 ${
               active
                 ? "bg-orange-500/10 shadow-sm"
                 : "hover:bg-black/5 dark:hover:bg-white/5"
@@ -71,22 +71,13 @@ export function DashboardNavIcons() {
             data-active={active ? "true" : "false"}
             title={t.title}
           >
-            <div className={`relative p-1 rounded-xl transition-all duration-200 ${
+            <div className={`relative p-1.5 rounded-xl transition-all duration-200 ${
               active
                 ? "scale-110"
                 : "group-hover:scale-105"
             }`}>
               <Icon active={active} size={28} />
             </div>
-
-            {/* Label — chỉ hiện khi active, cố định khoảng trống cho non-active */}
-            <span className={`text-[9px] font-bold whitespace-nowrap leading-none pb-px ${
-              active
-                ? "text-orange-600 dark:text-orange-400"
-                : "invisible"
-            }`}>
-              {t.title}
-            </span>
           </button>
         );
       })}
