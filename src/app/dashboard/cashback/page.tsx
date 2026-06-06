@@ -485,14 +485,13 @@ export default function CashbackPage() {
                           rel="noopener noreferrer"
                           className="flex-[2] relative flex items-center justify-center gap-2 text-white text-xs font-bold px-3 py-3 rounded-xl overflow-hidden"
                         >
-                          <span className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600" />
-                          <span className="absolute right-1 top-1 w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+                          <span className="absolute inset-0 bg-blue-500" />
                           <span className="relative flex items-center gap-1.5">
                             <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
                               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                             </svg>
                             Mở bài ghim Facebook
-                            <span className="bg-white/20 text-[9px] font-black px-1 py-0.5 rounded-md">+Voucher</span>
+                            <span className="bg-white/20 dark:bg-white/30 text-[9px] font-black px-1 py-0.5 rounded-md">+Voucher</span>
                           </span>
                         </a>
                       )}
@@ -500,26 +499,26 @@ export default function CashbackPage() {
 
                     {/* Voucher callout — chỉ hiện khi có Facebook URL */}
                     {facebookPostUrl && (
-                      <div className="mt-3 bg-blue-50 border border-blue-200 rounded-xl p-3">
+                      <div className="mt-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 rounded-xl p-3">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-base">🎁</span>
-                          <p className="text-[11px] font-bold text-blue-700">Nhận voucher Facebook — 3 bước đơn giản:</p>
+                          <p className="text-[11px] font-bold text-blue-700 dark:text-blue-400">Nhận voucher Facebook — 3 bước đơn giản:</p>
                         </div>
                         <div className="space-y-1.5">
                           <div className="flex items-start gap-2">
-                            <span className="bg-blue-200 text-blue-700 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5">1</span>
-                            <p className="text-[11px] text-blue-700 leading-relaxed">Bấm <b>&ldquo;Sao chép link&rdquo;</b> bên trên để copy link mua hàng.</p>
+                            <span className="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5">1</span>
+                            <p className="text-[11px] text-blue-700 dark:text-blue-300 leading-relaxed">Bấm <b>&ldquo;Sao chép link&rdquo;</b> bên trên để copy link mua hàng.</p>
                           </div>
                           <div className="flex items-start gap-2">
-                            <span className="bg-blue-200 text-blue-700 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5">2</span>
-                            <p className="text-[11px] text-blue-700 leading-relaxed">Bấm <b>&ldquo;Mở bài ghim Facebook&rdquo;</b> để mở bài viết ghim, sau đó <b>dán link đã copy</b> vào comment bài viết đó.</p>
+                            <span className="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5">2</span>
+                            <p className="text-[11px] text-blue-700 dark:text-blue-300 leading-relaxed">Bấm <b>&ldquo;Mở bài ghim Facebook&rdquo;</b> để mở bài viết ghim, sau đó <b>dán link đã copy</b> vào comment bài viết đó.</p>
                           </div>
                           <div className="flex items-start gap-2">
-                            <span className="bg-blue-200 text-blue-700 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5">3</span>
-                            <p className="text-[11px] text-blue-700 leading-relaxed">Bấm vào <b>link trong comment</b> vừa đăng — Shopee sẽ mở ra với <b>voucher đã được áp dụng sẵn</b>. Mua hàng như bình thường để nhận cả voucher lẫn cashback.</p>
+                            <span className="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5">3</span>
+                            <p className="text-[11px] text-blue-700 dark:text-blue-300 leading-relaxed">Bấm vào <b>link trong comment</b> vừa đăng — Shopee sẽ mở ra với <b>voucher đã được áp dụng sẵn</b>. Mua hàng như bình thường để nhận cả voucher lẫn cashback.</p>
                           </div>
                         </div>
-                        <p className="mt-2 text-[10px] text-blue-500/80 italic border-t border-blue-200 pt-2">
+                        <p className="mt-2 text-[10px] text-blue-500 dark:text-blue-500/80 italic border-t border-blue-100 dark:border-blue-900/50 pt-2">
                           💡 Lưu ý: Cashback hoàn toàn không phụ thuộc voucher. Dù có hay không có voucher, bạn vẫn nhận đủ {product?.cashbackRate ?? 50}% cashback về ví.
                         </p>
                       </div>
@@ -630,24 +629,24 @@ export default function CashbackPage() {
 
                 {/* Luồng Facebook khuyến nghị */}
                 {facebookPostUrl && (
-                  <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-white border-2 border-blue-200 rounded-2xl p-5 overflow-hidden">
+                  <div className="bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-2xl p-5">
                     {/* Card header */}
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-200">
-                          <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="currentColor">
+                        <div className="w-10 h-10 rounded-2xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                          <svg viewBox="0 0 24 24" className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor">
                             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                           </svg>
                         </div>
                         <div>
                           <div className="flex items-center gap-2 mb-0.5">
-                            <h3 className="text-base font-black text-gray-900">Luồng khuyến nghị</h3>
-                            <span className="bg-blue-100 text-blue-600 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide">+Voucher</span>
+                            <h3 className="text-base font-black text-gray-900 dark:text-gray-100">Luồng khuyến nghị</h3>
+                            <span className="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide">+Voucher</span>
                           </div>
-                          <p className="text-[11px] text-gray-500">Nhận cả hoàn tiền lẫn voucher giảm giá Shopee</p>
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400">Nhận cả hoàn tiền lẫn voucher giảm giá Shopee</p>
                         </div>
                       </div>
-                      <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-blue-600 font-semibold bg-blue-100 rounded-full px-2.5 py-1">
+                      <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-900/30 rounded-full px-2.5 py-1">
                         <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
                         Khuyến nghị
                       </div>
@@ -662,16 +661,16 @@ export default function CashbackPage() {
                         { n: "4", text: "Mua & nhận hoàn tiền", sub: "Cashback + voucher đều được ghi nhận" },
                       ].map(({ n, text, sub }) => (
                         <div key={n} className="relative">
-                          <div className="bg-white border border-blue-100 rounded-xl p-3.5 h-full">
+                          <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl p-3.5 h-full">
                             <div className="flex items-center gap-2 mb-2">
-                              <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-[11px] font-black">{n}</div>
-                              <p className="text-xs font-bold text-gray-800 leading-tight">{text}</p>
+                              <div className="w-6 h-6 bg-blue-50 dark:bg-blue-900/50 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400 text-[11px] font-black">{n}</div>
+                              <p className="text-xs font-bold text-gray-700 dark:text-gray-200 leading-tight">{text}</p>
                             </div>
-                            <p className="text-[11px] text-gray-400 leading-relaxed">{sub}</p>
+                            <p className="text-[11px] text-gray-400 dark:text-gray-500 leading-relaxed">{sub}</p>
                           </div>
                           {n !== "4" && (
                             <div className="hidden sm:flex absolute right-[-13px] top-1/2 -translate-y-1/2 z-10">
-                              <svg viewBox="0 0 24 24" className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                              <svg viewBox="0 0 24 24" className="w-5 h-5 text-gray-300 dark:text-slate-600" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                             </div>
                           )}
                         </div>
@@ -683,14 +682,13 @@ export default function CashbackPage() {
                       href={facebookPostUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group relative flex items-center justify-center gap-2 w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm font-black py-3.5 rounded-xl transition-all shadow-lg shadow-blue-200/60 overflow-hidden"
+                      className="group relative flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white text-sm font-bold py-3 rounded-xl transition-all shadow-sm overflow-hidden"
                     >
-                      <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 bg-[length:200%_100%] animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <svg viewBox="0 0 24 24" className="w-5 h-5 relative" fill="currentColor">
+                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
                         <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                       </svg>
-                      <span className="relative">Mở bài ghim Facebook — Nhận voucher ngay</span>
-                      <svg viewBox="0 0 24 24" className="w-4 h-4 relative transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                      <span>Mở bài ghim Facebook — Nhận voucher ngay</span>
+                      <svg viewBox="0 0 24 24" className="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                     </a>
                   </div>
                 )}
