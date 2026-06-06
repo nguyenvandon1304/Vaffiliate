@@ -56,9 +56,9 @@ export function DashboardHeader() {
       className="glass-sm sticky top-0 z-30 border-b border-black/5 dark:border-white/10"
       style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
         {/* Left: logo + divider + nav */}
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <button
             onClick={() => router.push("/dashboard")}
             className="cursor-pointer shrink-0 transition-transform hover:scale-105 active:scale-95"
