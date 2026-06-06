@@ -448,19 +448,6 @@ function DashboardContent() {
                         }[tab]}
                       </span>
                     )}
-                    {!isActive && (
-                      <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-medium text-gray-400 dark:text-zinc-500 whitespace-nowrap">
-                        {{
-                          overview: "Tổng quan",
-                          "create-link": "Tạo link",
-                          orders: "Đơn hàng",
-                          wallet: "Ví tiền",
-                          "link-history": "Lịch sử",
-                          help: "Hướng dẫn",
-                          referral: "Giới thiệu",
-                        }[tab]}
-                      </span>
-                    )}
                   </button>
                 );
               })}
