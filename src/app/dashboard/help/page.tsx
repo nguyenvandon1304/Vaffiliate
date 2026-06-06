@@ -230,8 +230,8 @@ export default function HelpPage() {
 
         {/* ── VOUCHER BANNER — full width bento card ── */}
         <div className="relative rounded-2xl overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/90 via-amber-500/90 to-yellow-500/90" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_50%,rgba(255,255,255,0.08)_0%,transparent_60%)]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-600/70 via-amber-500/70 to-yellow-500/70" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_50%,rgba(255,255,255,0.06)_0%,transparent_60%)]" />
           <div className="absolute inset-0 backdrop-blur-[1px]" />
           <div className="relative px-6 py-5 sm:px-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-5">
