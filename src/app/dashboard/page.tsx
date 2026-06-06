@@ -376,9 +376,9 @@ function DashboardContent() {
     <PullToRefresh onRefresh={refreshDashboard}>
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-30 overflow-visible">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2 overflow-visible">
-          <div className="flex items-center gap-4 min-w-0 overflow-visible">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-4 min-w-0">
             <button
               onClick={() => router.replace("/dashboard")}
               className="cursor-pointer shrink-0"
@@ -387,7 +387,7 @@ function DashboardContent() {
               <CaffiliateLogo />
             </button>
             <div className="hidden md:block h-6 w-px bg-gray-200" />
-            <nav className="hidden md:flex items-start gap-1.5 relative overflow-visible" aria-label="Dashboard navigation">
+            <nav className="hidden md:flex items-center gap-1.5 relative" aria-label="Dashboard navigation">
               {(["overview", "create-link", "orders", "wallet", "link-history", "help", "referral"] as const).map((tab) => {
                 const isActive = activeTab === tab && !accountView;
                 return (
@@ -409,7 +409,7 @@ function DashboardContent() {
                         }
                       }
                     }}
-                    className={`nav-bubble group relative inline-flex items-start justify-center transition-transform ${
+                    className={`nav-bubble group relative inline-flex flex-col items-center justify-start transition-transform gap-1 pt-0.5 ${
                       isActive ? "" : "hover:-translate-y-0.5"
                     }`}
                     data-active={isActive ? "true" : "false"}
@@ -436,7 +436,7 @@ function DashboardContent() {
                     {tab === "help" && <HelpIcon3D active={isActive} size={32} />}
                     {tab === "referral" && <ReferralIcon3D active={isActive} size={32} />}
                     {isActive && (
-                      <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-orange-600 dark:text-orange-400 whitespace-nowrap">
+                      <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 whitespace-nowrap leading-none">
                         {{
                           overview: "Tổng quan",
                           "create-link": "Tạo link",
