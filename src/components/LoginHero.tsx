@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Tilt3D } from "@/components/Tilt3D";
 
 interface PublicStats {
@@ -115,114 +115,268 @@ function Stars({ count }: { count: number }) {
  * are guaranteed to work in all browsers and production builds.
  */
 function Illustration() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [parallax, setParallax] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = (e.clientX - cx) / (rect.width / 2);
+    const dy = (e.clientY - cy) / (rect.height / 2);
+    setParallax({ x: dx * 12, y: dy * 8 });
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setParallax({ x: 0, y: 0 });
+  }, []);
+
   return (
-    <div className="relative w-full max-w-md mx-auto h-[300px]">
-      {/* Glowing background orbs */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-64 h-64 bg-orange-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl animate-pulse" style={{ animationDelay: "1s" }} />
+    <div
+      ref={containerRef}
+      className="hero-illustration relative w-full max-w-md mx-auto h-[340px] overflow-visible"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* Layer 0: Ambient background glow */}
+      <div
+        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+        style={{
+          transform: `translate(${parallax.x * 0.2}px, ${parallax.y * 0.2}px)`,
+          transition: "transform 0.3s ease-out",
+        }}
+      >
+        <div className="w-72 h-72 bg-orange-500/25 rounded-full blur-3xl animate-pulse-slow" />
+        <div
+          className="absolute top-1/3 left-1/4 w-40 h-40 bg-amber-400/20 rounded-full blur-2xl animate-pulse-slow"
+          style={{ animationDelay: "1.5s" }}
+        />
+        <div
+          className="absolute bottom-1/4 right-1/4 w-28 h-28 bg-emerald-400/15 rounded-full blur-2xl animate-pulse-slow"
+          style={{ animationDelay: "0.8s" }}
+        />
       </div>
 
-      {/* Main credit card — floats as a whole unit */}
-      <div className="absolute left-1/2 -translate-x-1/2 top-[80px] z-10 svg-card-float drop-shadow-2xl">
-        {/* Card body */}
-        <div className="relative w-[250px] h-[160px] rounded-[20px] bg-gradient-to-br from-orange-400 via-amber-400 to-orange-500 shadow-xl shadow-orange-500/30 overflow-hidden">
-          {/* Card glow */}
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-400 via-amber-400 to-orange-500 opacity-75" />
+      {/* Layer 1: Floating particles */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={i}
+            className="particle-dot"
+            style={{
+              left: `${[8, 15, 22, 30, 38, 45, 55, 62, 70, 78, 85, 92][i]}%`,
+              top: `${[75, 20, 50, 85, 15, 60, 30, 90, 45, 70, 10, 40][i]}%`,
+              animationDelay: `${(i * 0.4) % 3}s`,
+              animationDuration: `${2.5 + (i % 3)}s`,
+              width: `${[4, 3, 5, 3, 4, 5, 3, 4, 3, 5, 4, 3][i]}px`,
+              height: `${[4, 3, 5, 3, 4, 5, 3, 4, 3, 5, 4, 3][i]}px`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Layer 2: Main credit card — 3D tilt with parallax */}
+      <div
+        className="absolute left-1/2 -translate-x-1/2 top-[90px] z-10 card-3d"
+        style={{
+          transform: `translateX(-50%) translate(${parallax.x}px, ${parallax.y}px) rotateY(${parallax.x * 0.8}deg) rotateX(${-parallax.y * 0.8}deg)`,
+          transition: "transform 0.2s ease-out",
+        }}
+      >
+        <div className="relative w-[260px] h-[165px] rounded-[20px] overflow-hidden shadow-[0_8px_32px_rgba(249,115,22,0.4),0_2px_8px_rgba(0,0,0,0.2)]">
+          {/* Metallic gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-400 via-amber-400 to-orange-600" />
+          <div className="absolute inset-0 bg-gradient-to-bl from-transparent via-amber-200/20 to-orange-700/30" />
+          {/* Shimmer sweep */}
+          <div className="illu-shimmer" />
           {/* Top row */}
-          <div className="relative flex items-start justify-between p-4">
-            <span className="text-white/90 font-bold tracking-widest text-xs">V-AFFILIATE</span>
-            <div className="w-10 h-7 rounded bg-amber-100/90">
-              <div className="w-7 h-4 rounded-sm bg-amber-800/30 m-[6px]" />
+          <div className="relative flex items-start justify-between p-4 z-10">
+            <div>
+              <span className="text-white/90 font-black tracking-[0.2em] text-xs">V-AFFILIATE</span>
+              <div className="mt-0.5 w-8 h-1 rounded-full bg-amber-200/50" />
             </div>
+            <div className="flex gap-1">
+              <div className="w-6 h-4 rounded-sm bg-amber-200/80" />
+              <div className="w-6 h-4 rounded-sm bg-amber-200/50" />
+            </div>
+          </div>
+          {/* Chip */}
+          <div className="relative mx-4 mt-1 w-10 h-8 rounded-sm bg-gradient-to-br from-amber-200 via-amber-100 to-amber-300 shadow-inner overflow-hidden">
+            <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.15) 4px), repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 4px)" }} />
           </div>
           {/* Card number */}
-          <div className="relative px-4 mt-2">
-            <span className="text-white font-black text-lg tracking-widest font-mono">•••• •••• 5168</span>
+          <div className="relative px-4 mt-3">
+            <span className="text-white/95 font-black text-base tracking-[0.25em] font-mono drop-shadow-sm">4282 ···· ····</span>
           </div>
           {/* Bottom row */}
-          <div className="relative flex items-end justify-between p-4 mt-2">
-            <span className="text-white/80 text-[11px]">CASHBACK VIP · TIER 3</span>
-            <div className="flex items-center gap-1">
-              <span className="bg-white text-orange-500 font-black text-xs px-2 py-0.5 rounded-full">58%</span>
+          <div className="relative flex items-end justify-between p-4 mt-auto">
+            <div>
+              <span className="text-white/70 text-[9px] tracking-wider font-medium">CARD HOLDER</span>
+              <div className="text-white/95 font-bold text-xs tracking-wider mt-0.5">VIP · CASHBACK</div>
+            </div>
+            <div className="flex flex-col items-end">
+              <span className="text-white/70 text-[9px] tracking-wider font-medium">TIER</span>
+              <span className="bg-white text-orange-500 font-black text-sm px-2.5 py-0.5 rounded-full shadow-sm mt-0.5">58%</span>
             </div>
           </div>
-          {/* Shimmer overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-[shimmer_3s_ease-in-out_infinite]" />
+          {/* Glow edge */}
+          <div className="absolute inset-0 rounded-[20px] border border-white/20 pointer-events-none" />
         </div>
       </div>
 
-      {/* Floating mini card — green cashback */}
-      <div className="absolute left-0 top-0 z-20 svg-float-up" style={{ animationDelay: "0.5s" }}>
-        <div className="w-[90px] h-[55px] rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 shadow-lg shadow-emerald-500/20 flex flex-col items-start justify-center px-2">
-          <span className="text-white/85 font-bold text-[10px]">+50.000đ</span>
-          <span className="text-white font-extrabold text-xs">Hoàn tiền</span>
+      {/* Layer 3: Floating reward badge — top-left */}
+      <div
+        className="absolute left-[-5px] top-[30px] z-20 card-3d"
+        style={{
+          transform: `translate(${parallax.x * 1.6}px, ${parallax.y * 1.6}px)`,
+          transition: "transform 0.2s ease-out",
+        }}
+      >
+        <div className="w-[105px] h-[62px] rounded-2xl bg-gradient-to-br from-emerald-400 to-green-500 shadow-[0_4px_20px_rgba(34,197,94,0.4)] p-3 flex flex-col justify-center">
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 text-white" fill="currentColor">
+              <path d="M8 1l1.97 4.03 4.42.64-3.2 3.12.75 4.4L8 11.27 4.06 13.19l.75-4.4-3.2-3.12 4.42-.64L8 1z" />
+            </svg>
+            <span className="text-white/90 font-bold text-[10px]">REWARD</span>
+          </div>
+          <span className="text-white font-black text-lg leading-none tracking-tight">+50.000đ</span>
+          <span className="text-white/80 font-semibold text-[9px]">Hoàn tiền</span>
         </div>
       </div>
 
-      {/* Floating mini card — purple VIP */}
-      <div className="absolute right-0 top-[40px] z-20 svg-float-up-2" style={{ animationDelay: "1s" }}>
-        <div className="w-[95px] h-[55px] rounded-xl bg-gradient-to-br from-purple-400 to-violet-500 shadow-lg shadow-purple-500/20 flex flex-col items-start justify-center px-2">
-          <span className="text-white/85 font-bold text-[10px]">TIER VIP</span>
-          <span className="text-white font-extrabold text-sm">Hoàn 58%</span>
+      {/* Layer 4: VIP tier badge — top-right */}
+      <div
+        className="absolute right-[-5px] top-[75px] z-20 card-3d"
+        style={{
+          transform: `translate(${parallax.x * 1.4}px, ${parallax.y * 1.4}px)`,
+          transition: "transform 0.2s ease-out",
+        }}
+      >
+        <div className="w-[100px] h-[60px] rounded-2xl bg-gradient-to-br from-violet-400 to-purple-600 shadow-[0_4px_20px_rgba(139,92,246,0.4)] p-3 flex flex-col justify-center items-center">
+          <span className="text-white/90 font-black text-[10px] tracking-wider">TIER VIP</span>
+          <span className="text-white font-black text-xl leading-none mt-0.5">58<span className="text-lg">%</span></span>
+          <div className="flex gap-0.5 mt-0.5">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="w-2 h-2 rounded-full bg-white/80" />
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Floating coin 1 */}
-      <div className="absolute left-0 bottom-[70px] z-20 svg-float-coin">
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 shadow-lg shadow-amber-500/30 flex items-center justify-center">
-          <span className="text-white font-black text-lg leading-none">đ</span>
+      {/* Layer 5: Floating coin 1 */}
+      <div
+        className="absolute left-[5px] bottom-[85px] z-20 coin-float"
+        style={{
+          transform: `translate(${parallax.x * 1.8}px, ${parallax.y * 1.8}px)`,
+          transition: "transform 0.2s ease-out",
+        }}
+      >
+        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 shadow-[0_4px_16px_rgba(251,191,36,0.5)] flex items-center justify-center ring-2 ring-amber-200/40">
+          <span className="text-white font-black text-xl leading-none drop-shadow-sm">đ</span>
         </div>
       </div>
 
-      {/* Floating coin 2 */}
-      <div className="absolute right-0 bottom-[50px] z-20 svg-float-coin-2" style={{ animationDelay: "0.7s" }}>
-        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 shadow-lg shadow-amber-500/30 flex items-center justify-center">
-          <span className="text-white font-black text-sm leading-none">đ</span>
+      {/* Layer 6: Floating coin 2 */}
+      <div
+        className="absolute right-[10px] bottom-[60px] z-20 coin-float"
+        style={{
+          transform: `translate(${parallax.x * 2}px, ${parallax.y * 2}px)`,
+          transition: "transform 0.2s ease-out",
+          animationDelay: "0.4s",
+        }}
+      >
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 shadow-[0_3px_12px_rgba(251,191,36,0.4)] flex items-center justify-center ring-2 ring-amber-200/30">
+          <span className="text-white font-black text-base leading-none drop-shadow-sm">đ</span>
         </div>
       </div>
 
-      {/* Floating coin 3 */}
-      <div className="absolute right-[15px] top-[70px] z-20 svg-float-coin-3" style={{ animationDelay: "1.2s" }}>
-        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 shadow-lg shadow-amber-500/30 flex items-center justify-center">
-          <span className="text-white font-black text-xs leading-none">đ</span>
+      {/* Layer 7: Floating coin 3 */}
+      <div
+        className="absolute right-[55px] top-[55px] z-20 coin-float"
+        style={{
+          transform: `translate(${parallax.x * 2.2}px, ${parallax.y * 2.2}px)`,
+          transition: "transform 0.2s ease-out",
+          animationDelay: "0.8s",
+        }}
+      >
+        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-500 shadow-[0_2px_10px_rgba(251,191,36,0.35)] flex items-center justify-center ring-2 ring-amber-200/20">
+          <span className="text-white font-black text-sm leading-none drop-shadow-sm">đ</span>
         </div>
       </div>
 
-      {/* Sparkle 1 */}
-      <div className="absolute left-0 top-[130px] z-20 svg-sparkle">
-        <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-          <path d="M13 1L15.2 9.8L24 12L15.2 14.2L13 23L10.8 14.2L2 12L10.8 9.8L13 1Z" fill="#fbbf24" />
+      {/* Layer 8: Star sparkles */}
+      <div
+        className="absolute left-[25px] top-[140px] z-20 sparkle-spin"
+        style={{
+          transform: `translate(${parallax.x * 2.5}px, ${parallax.y * 2.5}px)`,
+          transition: "transform 0.2s ease-out",
+        }}
+      >
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M14 1L16.5 10.5L26 14L16.5 17.5L14 27L11.5 17.5L2 14L11.5 10.5L14 1Z" fill="#fbbf24" />
         </svg>
       </div>
 
-      {/* Sparkle 2 */}
-      <div className="absolute right-0 top-[170px] z-20 svg-sparkle-2" style={{ animationDelay: "0.5s" }}>
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <path d="M9 0L10.5 6.8L17 8.2L10.5 9.6L9 16.5L7.5 9.6L1 8.2L7.5 6.8L9 0Z" fill="#fbbf24" />
+      <div
+        className="absolute right-[25px] top-[170px] z-20 sparkle-spin"
+        style={{
+          transform: `translate(${parallax.x * 2.5}px, ${parallax.y * 2.5}px)`,
+          transition: "transform 0.2s ease-out",
+          animationDelay: "0.7s",
+        }}
+      >
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 0L12 7.5L19.5 10L12 12.5L10 20L8 12.5L0.5 10L8 7.5L10 0Z" fill="#fbbf24" />
         </svg>
       </div>
 
-      {/* Sparkle 3 */}
-      <div className="absolute left-1/2 -translate-x-1/2 bottom-0 z-20 svg-sparkle-3" style={{ animationDelay: "1s" }}>
-        <div className="w-2 h-2 rounded-full bg-amber-400" />
+      <div
+        className="absolute left-1/2 -translate-x-1/2 bottom-[15px] z-20 sparkle-spin"
+        style={{
+          transform: `translate(${parallax.x * 2.5}px, ${parallax.y * 2.5}px)`,
+          transition: "transform 0.2s ease-out",
+          animationDelay: "1.2s",
+        }}
+      >
+        <div className="w-5 h-5 rounded-full bg-gradient-to-br from-amber-300 to-orange-400 shadow-[0_0_12px_rgba(251,191,36,0.5)]" />
       </div>
 
-      {/* Checkmark badge */}
-      <div className="absolute right-[15px] top-[140px] z-20 svg-float-up-3" style={{ animationDelay: "0.3s" }}>
-        <div className="w-9 h-9 rounded-full bg-white shadow-lg flex items-center justify-center">
-          <svg viewBox="0 0 24 24" className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      {/* Layer 9: Checkmark badge */}
+      <div
+        className="absolute right-[15px] top-[150px] z-20 badge-bounce"
+        style={{
+          transform: `translate(${parallax.x * 1.5}px, ${parallax.y * 1.5}px)`,
+          transition: "transform 0.2s ease-out",
+        }}
+      >
+        <div className="w-10 h-10 rounded-full bg-white shadow-[0_4px_16px_rgba(0,0,0,0.15)] flex items-center justify-center ring-2 ring-emerald-200">
+          <svg viewBox="0 0 24 24" className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
       </div>
 
-      {/* Extra ambient dots */}
-      <div className="absolute left-1/4 -bottom-4 z-10 svg-float-coin-2" style={{ animationDelay: "0.5s" }}>
-        <div className="w-8 h-8 rounded-full bg-amber-400/30 blur-sm" />
+      {/* Layer 10: Decorative rings */}
+      <div
+        className="absolute left-[10px] top-[55px] z-[5] ring-float"
+        style={{
+          transform: `translate(${parallax.x * 0.3}px, ${parallax.y * 0.3}px)`,
+          transition: "transform 0.2s ease-out",
+        }}
+      >
+        <div className="w-16 h-16 rounded-full border-2 border-amber-400/20" />
       </div>
-      <div className="absolute right-1/4 -top-2 z-10 svg-float-coin-3" style={{ animationDelay: "1s" }}>
-        <div className="w-6 h-6 rounded-full bg-orange-400/30 blur-sm" />
+
+      <div
+        className="absolute right-[5px] bottom-[105px] z-[5] ring-float"
+        style={{
+          transform: `translate(${parallax.x * 0.3}px, ${parallax.y * 0.3}px)`,
+          transition: "transform 0.2s ease-out",
+          animationDelay: "1.5s",
+        }}
+      >
+        <div className="w-12 h-12 rounded-full border-2 border-orange-400/15" />
       </div>
     </div>
   );
