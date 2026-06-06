@@ -586,45 +586,45 @@ export default function CashbackPage() {
                 {/* ── 2-Column Overview Stats ── */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {/* Cashback stat */}
-                  <div className="relative bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-100 rounded-2xl p-4 overflow-hidden group hover:shadow-md hover:shadow-orange-100 transition-all">
-                    <div className="absolute right-0 top-0 w-24 h-24 rounded-full bg-orange-100/60 -translate-y-6 translate-x-6" />
+                  <div className="relative bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800/60 rounded-2xl p-4 overflow-hidden group hover:shadow-md hover:shadow-orange-100 dark:hover:shadow-orange-900/20 transition-all">
+                    <div className="absolute right-0 top-0 w-24 h-24 rounded-full bg-orange-100/60 dark:bg-orange-900/30 -translate-y-6 translate-x-6" />
                     <div className="relative">
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center shadow-sm shadow-orange-200">
+                        <div className="w-8 h-8 rounded-xl bg-orange-500 dark:bg-orange-600 flex items-center justify-center shadow-sm shadow-orange-200 dark:shadow-orange-900/50">
                           <svg viewBox="0 0 24 24" className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                           </svg>
                         </div>
-                        <span className="text-[11px] font-bold text-orange-600 uppercase tracking-wide">Hoàn tiền</span>
+                        <span className="text-[11px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wide">Hoàn tiền</span>
                       </div>
-                      <p className="text-2xl font-black text-gray-900 leading-none mb-0.5">{product?.cashbackRate ?? 50}%</p>
-                      <p className="text-[11px] text-gray-500 leading-relaxed">Mỗi đơn mua — tự động về ví ngay khi đơn hoàn tất, không cần thao tác thêm.</p>
+                      <p className="text-2xl font-black text-gray-900 dark:text-orange-100 leading-none mb-0.5">{product?.cashbackRate ?? 50}%</p>
+                      <p className="text-[11px] text-gray-600 dark:text-gray-300 leading-relaxed">Mỗi đơn mua — tự động về ví ngay khi đơn hoàn tất, không cần thao tác thêm.</p>
                     </div>
                   </div>
 
                   {/* Voucher stat */}
-                  <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 overflow-hidden group hover:shadow-md hover:shadow-blue-100 transition-all">
-                    <div className="absolute right-0 top-0 w-24 h-24 rounded-full bg-blue-100/60 -translate-y-6 translate-x-6" />
+                  <div className="relative bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/60 rounded-2xl p-4 overflow-hidden group hover:shadow-md hover:shadow-blue-100 dark:hover:shadow-blue-900/20 transition-all">
+                    <div className="absolute right-0 top-0 w-24 h-24 rounded-full bg-blue-100/60 dark:bg-blue-900/30 -translate-y-6 translate-x-6" />
                     <div className="relative">
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-8 h-8 rounded-xl bg-blue-500 flex items-center justify-center shadow-sm shadow-blue-200">
+                        <div className="w-8 h-8 rounded-xl bg-blue-500 dark:bg-blue-600 flex items-center justify-center shadow-sm shadow-blue-200 dark:shadow-blue-900/50">
                           <svg viewBox="0 0 24 24" className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="20 12 20 22 4 22 4 12" /><rect width="22" height="5" x="1" y="3" rx="1" /><line width="22" x1="12" x2="12" y1="3" y2="8" />
                           </svg>
                         </div>
-                        <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wide">Voucher</span>
+                        <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wide">Voucher</span>
                       </div>
-                      <p className="text-2xl font-black text-gray-900 leading-none mb-0.5">Shopee</p>
-                      <p className="text-[11px] text-gray-500 leading-relaxed">Voucher giảm giá bổ sung từ Facebook — áp dụng tự động ở bước thanh toán.</p>
+                      <p className="text-2xl font-black text-gray-900 dark:text-blue-100 leading-none mb-0.5">Shopee</p>
+                      <p className="text-[11px] text-gray-600 dark:text-gray-300 leading-relaxed">Voucher giảm giá bổ sung từ Facebook — áp dụng tự động ở bước thanh toán.</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Divider */}
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 h-px bg-gray-100" />
-                  <span className="text-[10px] text-gray-300 font-medium uppercase tracking-widest">Chọn luồng phù hợp với bạn</span>
-                  <div className="flex-1 h-px bg-gray-100" />
+                  <div className="flex-1 h-px bg-gray-100 dark:bg-slate-700" />
+                  <span className="text-[10px] text-gray-400 dark:text-slate-500 font-medium uppercase tracking-widest">Chọn luồng phù hợp với bạn</span>
+                  <div className="flex-1 h-px bg-gray-100 dark:bg-slate-700" />
                 </div>
 
                 {/* Luồng Facebook khuyến nghị */}
@@ -663,10 +663,10 @@ export default function CashbackPage() {
                         <div key={n} className="relative">
                           <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl p-3.5 h-full">
                             <div className="flex items-center gap-2 mb-2">
-                              <div className="w-6 h-6 bg-blue-50 dark:bg-blue-900/50 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400 text-[11px] font-black">{n}</div>
-                              <p className="text-xs font-bold text-gray-700 dark:text-gray-200 leading-tight">{text}</p>
+                              <div className="w-6 h-6 bg-blue-50 dark:bg-blue-900/50 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-300 text-[11px] font-black">{n}</div>
+                              <p className="text-xs font-bold text-gray-700 dark:text-gray-100 leading-tight">{text}</p>
                             </div>
-                            <p className="text-[11px] text-gray-400 dark:text-gray-500 leading-relaxed">{sub}</p>
+                            <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">{sub}</p>
                           </div>
                           {n !== "4" && (
                             <div className="hidden sm:flex absolute right-[-13px] top-1/2 -translate-y-1/2 z-10">
@@ -694,61 +694,61 @@ export default function CashbackPage() {
                 )}
 
                 {/* Luồng Direct */}
-                <div className="bg-gray-50/80 border border-gray-100 rounded-2xl p-5">
+                <div className="bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 rounded-2xl p-5">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-8 h-8 rounded-xl bg-gray-200 flex items-center justify-center">
-                      <svg viewBox="0 0 24 24" className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <div className="w-8 h-8 rounded-xl bg-gray-200 dark:bg-slate-700 flex items-center justify-center">
+                      <svg viewBox="0 0 24 24" className="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-sm font-black text-gray-700">Luồng nhanh — Chỉ cần hoàn tiền</h3>
-                      <p className="text-[11px] text-gray-400">Không cần voucher — tiền vẫn về đủ {product?.cashbackRate ?? 50}%</p>
+                      <h3 className="text-sm font-black text-gray-700 dark:text-gray-200">Luồng nhanh — Chỉ cần hoàn tiền</h3>
+                      <p className="text-[11px] text-gray-400 dark:text-gray-500">Không cần voucher — tiền vẫn về đủ {product?.cashbackRate ?? 50}%</p>
                     </div>
                   </div>
 
-                  <div className="relative pl-9 pb-5 border-l border-gray-200 ml-3 space-y-5">
+                  <div className="relative pl-9 pb-5 border-l border-gray-200 dark:border-slate-700 ml-3 space-y-5">
                     <div className="relative">
-                      <div className="absolute left-[-25px] top-0 w-6 h-6 rounded-full bg-gray-400 flex items-center justify-center text-white text-[11px] font-black shadow-sm">1</div>
-                      <h4 className="text-sm font-bold text-gray-800 mb-1">Tạo link hoàn tiền</h4>
-                      <p className="text-xs text-gray-500 leading-relaxed">
-                        Dán link sản phẩm Shopee vào ô bên trên → bấm <span className="font-semibold text-orange-600">Chuyển đổi</span>.
+                      <div className="absolute left-[-25px] top-0 w-6 h-6 rounded-full bg-gray-400 dark:bg-slate-600 flex items-center justify-center text-white text-[11px] font-black shadow-sm">1</div>
+                      <h4 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-1">Tạo link hoàn tiền</h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                        Dán link sản phẩm Shopee vào ô bên trên → bấm <span className="font-semibold text-orange-600 dark:text-orange-400">Chuyển đổi</span>.
                         Hệ thống tạo link gắn mã hoàn tiền của bạn tự động.
                       </p>
                     </div>
                     <div className="relative">
-                      <div className="absolute left-[-25px] top-0 w-6 h-6 rounded-full bg-gray-400 flex items-center justify-center text-white text-[11px] font-black shadow-sm">2</div>
-                      <h4 className="text-sm font-bold text-gray-800 mb-1">Mua hàng qua link</h4>
-                      <p className="text-xs text-gray-500 leading-relaxed mb-2">
-                        Bấm <span className="font-semibold text-orange-600">MUA NGAY</span> để mở app Shopee.
+                      <div className="absolute left-[-25px] top-0 w-6 h-6 rounded-full bg-gray-400 dark:bg-slate-600 flex items-center justify-center text-white text-[11px] font-black shadow-sm">2</div>
+                      <h4 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-1">Mua hàng qua link</h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed mb-2">
+                        Bấm <span className="font-semibold text-orange-600 dark:text-orange-400">MUA NGAY</span> để mở app Shopee.
                       </p>
-                      <div className="bg-white border border-gray-200 rounded-lg p-2.5 flex items-start gap-2">
-                        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-                        <p className="text-[11px] text-gray-500">Dùng máy tính? Bấm <span className="font-semibold">&ldquo;Sao chép link&rdquo;</span> rồi gửi sang điện thoại để mở app Shopee.</p>
+                      <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg p-2.5 flex items-start gap-2">
+                        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                        <p className="text-[11px] text-gray-600 dark:text-gray-400">Dùng máy tính? Bấm <span className="font-semibold">&ldquo;Sao chép link&rdquo;</span> rồi gửi sang điện thoại để mở app Shopee.</p>
                       </div>
                     </div>
                     <div className="relative">
-                      <div className="absolute left-[-25px] top-0 w-6 h-6 rounded-full bg-emerald-400 flex items-center justify-center text-white text-[11px] font-black shadow-sm">
+                      <div className="absolute left-[-25px] top-0 w-6 h-6 rounded-full bg-emerald-400 dark:bg-emerald-600 flex items-center justify-center text-white text-[11px] font-black shadow-sm">
                         <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
                       </div>
-                      <h4 className="text-sm font-bold text-gray-800 mb-1">Nhận hoàn tiền tự động</h4>
-                      <p className="text-xs text-gray-500 leading-relaxed">
-                        Sau khi nhận hàng, <span className="font-bold text-orange-600">{product?.cashbackRate ?? 50}% hoa hồng</span> tự động về ví — không cần làm gì thêm.
+                      <h4 className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-1">Nhận hoàn tiền tự động</h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                        Sau khi nhận hàng, <span className="font-bold text-orange-600 dark:text-orange-400">{product?.cashbackRate ?? 50}% hoa hồng</span> tự động về ví — không cần làm gì thêm.
                       </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Mẹo */}
-                <div className="flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-xl p-4">
-                  <div className="w-7 h-7 rounded-lg bg-orange-500 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="flex items-start gap-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 rounded-xl p-4">
+                  <div className="w-7 h-7 rounded-lg bg-orange-500 dark:bg-orange-600 flex items-center justify-center shrink-0 mt-0.5">
                     <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                     </svg>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-amber-700 mb-1">Mẹo tối ưu chi phí</p>
-                    <p className="text-[11px] text-amber-600/80 leading-relaxed">
+                    <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-1">Mẹo tối ưu chi phí</p>
+                    <p className="text-[11px] text-amber-700 dark:text-amber-300/80 leading-relaxed">
                       Gộp nhiều món vào cùng 1 đơn vừa tiết kiệm phí ship, vừa dễ đạt điều kiện Shopee voucher.
                       Cashback vẫn tính đủ trên tổng giá trị đơn.
                     </p>
@@ -758,16 +758,16 @@ export default function CashbackPage() {
 
               {/* Fade overlay */}
               {!showGuide && (
-                <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white via-white/85 to-transparent pointer-events-none" />
+                <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white dark:from-[#09090b] via-white/85 dark:via-[#09090b]/85 to-transparent pointer-events-none" />
               )}
             </div>
 
             {/* Expand / Collapse */}
             <button
               onClick={() => setShowGuide(!showGuide)}
-              className="w-full flex items-center justify-center gap-2 py-3.5 border-t border-gray-100 text-sm font-semibold text-orange-500 hover:text-orange-600 hover:bg-orange-50/40 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-3.5 border-t border-gray-100 dark:border-slate-700 text-sm font-semibold text-orange-500 dark:text-orange-400 hover:text-orange-600 dark:hover:text-orange-300 hover:bg-orange-50/40 dark:hover:bg-orange-950/20 transition-colors"
             >
-              <span>{showGuide ? "Thu gọn hướng dẫn" : "Xem hướng dẫn mua & nhận hoàn tiền"}</span>
+              <span className="dark:text-orange-100">{showGuide ? "Thu gọn hướng dẫn" : "Xem hướng dẫn mua & nhận hoàn tiền"}</span>
               <svg
                 viewBox="0 0 24 24"
                 className={`w-4 h-4 transition-transform duration-300 ${showGuide ? "rotate-180" : "animate-bounce"}`}
@@ -781,7 +781,7 @@ export default function CashbackPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-gray-400 pb-4">
+        <p className="text-center text-xs text-gray-400 dark:text-gray-500 pb-4">
           V-Affiliate — mua sắm Shopee thông minh, hoàn tiền về ví.
         </p>
       </main>
