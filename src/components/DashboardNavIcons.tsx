@@ -63,7 +63,7 @@ export function DashboardNavIcons() {
           <button
             key={t.key}
             onClick={() => router.push(t.href)}
-            className={`nav-bubble group relative inline-flex items-center justify-center rounded-xl transition-all duration-200 ${
+            className={`nav-bubble group relative inline-flex flex-col items-center justify-start rounded-xl transition-all duration-200 ${
               active
                 ? "bg-orange-500/10 shadow-sm"
                 : "hover:bg-black/5 dark:hover:bg-white/5"
@@ -71,13 +71,24 @@ export function DashboardNavIcons() {
             data-active={active ? "true" : "false"}
             title={t.title}
           >
-            <div className={`relative p-1.5 rounded-xl transition-all duration-200 ${
+            <div className={`relative p-1 rounded-xl transition-all duration-200 ${
               active
                 ? "scale-110"
                 : "group-hover:scale-105"
             }`}>
               <Icon active={active} size={28} />
             </div>
+            {/* Label — absolute overlay, takes NO layout space; inactive tabs only show label on hover */}
+            <span
+              aria-hidden={!active}
+              className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 text-[9px] font-bold whitespace-nowrap leading-none px-1 rounded transition-all duration-200 ${
+                active
+                  ? "text-orange-600 dark:text-orange-400 bg-white/90 dark:bg-zinc-800/90"
+                  : "invisible group-hover:visible group-hover:text-gray-500 dark:group-hover:text-zinc-400 group-hover:bg-black/5 dark:group-hover:bg-white/5"
+              }`}
+            >
+              {t.title}
+            </span>
           </button>
         );
       })}
