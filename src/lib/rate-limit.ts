@@ -44,12 +44,20 @@ const UPSTASH_DOWN_BACKOFF_MS = 60 * 1000; // 1 phút sau khi fail → ngưng th
 
 /** Singleton Redis client */
 let _redisClient: Redis | null = null;
+let _redisInitError = false;
+
 function getRedisClient(): Redis | null {
+  if (_redisInitError) return null;
   if (_redisClient) return _redisClient;
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !token) return null;
-  _redisClient = new Redis({ url, token });
+  try {
+    _redisClient = new Redis({ url, token });
+  } catch {
+    _redisInitError = true;
+    return null;
+  }
   return _redisClient;
 }
 
