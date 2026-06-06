@@ -175,7 +175,7 @@ export default function Footer() {
                   <li key={sub} className="flex items-start gap-2.5">
                     <span className="text-orange-400 mt-0.5 shrink-0">{icon}</span>
                     <div>
-                      <p className="text-xs font-medium text-gray-800 dark:text-zinc-200">{title} &lt; {suffix}</p>
+                      <p className="text-xs font-medium text-gray-800 dark:text-zinc-200">{title}{suffix && <><span className="text-gray-400 dark:text-zinc-600"> &lt; </span>{suffix}</>}</p>
                       <p className="text-[10px] text-gray-400 dark:text-zinc-600">{sub}</p>
                     </div>
                   </li>
