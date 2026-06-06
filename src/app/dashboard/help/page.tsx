@@ -123,7 +123,7 @@ export default function HelpPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#09090b]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950">
       <DashboardHeader />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 pb-24 md:pb-8 space-y-4">
@@ -131,37 +131,37 @@ export default function HelpPage() {
         {/* ── PAGE HEADER — Bento: title left, badge right ── */}
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
           {/* Title block — spans 8 cols */}
-          <div className="sm:col-span-8 bg-[#18181b] border border-white/5 rounded-2xl p-6">
+          <div className="sm:col-span-8 bg-gray-50 dark:bg-[#18181b] border border-gray-100 dark:border-white/5 rounded-2xl p-6">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-1 h-5 rounded-full bg-gradient-to-b from-orange-400 to-amber-500" />
-              <span className="text-[10px] font-bold text-orange-400/70 uppercase tracking-widest">Getting Started</span>
+              <span className="text-[10px] font-bold text-orange-500/70 uppercase tracking-widest">Getting Started</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white leading-tight tracking-tight mb-2">
+            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white leading-tight tracking-tight mb-2">
               Hướng dẫn sử dụng
             </h1>
-            <p className="text-sm text-zinc-400 leading-relaxed max-w-lg">
+            <p className="text-sm text-gray-500 dark:text-zinc-400 leading-relaxed max-w-lg">
               Từ đăng ký đến rút tiền — 5 bước đơn giản. Bắt đầu nhận hoàn tiền ngay hôm nay.
             </p>
           </div>
 
           {/* Quick stats — spans 4 cols, 2 small tiles stacked */}
           <div className="sm:col-span-4 flex flex-col gap-3">
-            <div className="flex-1 bg-[#18181b] border border-white/5 rounded-2xl p-4 flex items-center gap-3">
+            <div className="flex-1 bg-gray-50 dark:bg-[#18181b] border border-gray-100 dark:border-white/5 rounded-2xl p-4 flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shrink-0">
-                <svg viewBox="0 0 24 24" className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
+                <svg viewBox="0 0 24 24" className="w-4 h-4 text-orange-500 dark:text-orange-400" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
               </div>
               <div>
-                <p className="text-lg font-black text-white leading-none">50%+</p>
-                <p className="text-[10px] text-zinc-500 font-medium">Cashback tối thiểu</p>
+                <p className="text-lg font-black text-gray-900 dark:text-white leading-none">50%+</p>
+                <p className="text-[10px] text-gray-400 dark:text-zinc-500 font-medium">Cashback tối thiểu</p>
               </div>
             </div>
-            <div className="flex-1 bg-[#18181b] border border-white/5 rounded-2xl p-4 flex items-center gap-3">
+            <div className="flex-1 bg-gray-50 dark:bg-[#18181b] border border-gray-100 dark:border-white/5 rounded-2xl p-4 flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
-                <svg viewBox="0 0 24 24" className="w-4 h-4 text-blue-400" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                <svg viewBox="0 0 24 24" className="w-4 h-4 text-blue-500 dark:text-blue-400" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
               </div>
               <div>
-                <p className="text-lg font-black text-white leading-none">+Voucher</p>
-                <p className="text-[10px] text-zinc-500 font-medium">Giảm giá Shopee</p>
+                <p className="text-lg font-black text-gray-900 dark:text-white leading-none">+Voucher</p>
+                <p className="text-[10px] text-gray-400 dark:text-zinc-500 font-medium">Giảm giá Shopee</p>
               </div>
             </div>
           </div>
@@ -171,14 +171,14 @@ export default function HelpPage() {
         <div>
           <div className="flex items-center gap-2 mb-3 px-1">
             <div className="w-1 h-4 rounded-full bg-gradient-to-b from-blue-400 to-indigo-500" />
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Process</span>
+            <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">Process</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
             {STEPS.map((s, i) => {
               const col = [0, 1].includes(i) ? "sm:col-span-6" : "sm:col-span-4";
               return (
                 <div key={s.num} className={`${col} group`}>
-                  <div className="bg-[#18181b] border border-white/5 hover:border-white/10 rounded-2xl p-5 h-full transition-all duration-200 hover:shadow-[0_0_20px_rgba(255,255,255,0.04)]">
+                  <div className="bg-gray-50 dark:bg-[#18181b] border border-gray-100 dark:border-white/5 hover:border-gray-200 dark:hover:border-white/10 rounded-2xl p-5 h-full transition-all duration-200 hover:shadow-sm dark:hover:shadow-[0_0_20px_rgba(255,255,255,0.04)]">
                     {/* Header row */}
                     <div className="flex items-center gap-3 mb-4">
                       <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${STEP_COLORS[i].base} flex items-center justify-center ${STEP_COLORS[i].icon} shadow-lg shrink-0`}>
@@ -186,16 +186,16 @@ export default function HelpPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-bold text-white leading-tight truncate">{s.title}</h3>
+                          <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight truncate">{s.title}</h3>
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] font-mono text-zinc-600">0{s.num}</span>
-                          <div className="flex-1 h-px bg-white/5" />
+                          <span className="text-[10px] font-mono text-gray-300 dark:text-zinc-600">0{s.num}</span>
+                          <div className="flex-1 h-px bg-gray-200 dark:bg-white/5" />
                         </div>
                       </div>
                     </div>
                     {/* Body */}
-                    <p className="text-xs text-zinc-400 leading-relaxed">{s.body}</p>
+                    <p className="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">{s.body}</p>
                     {/* Bottom accent line */}
                     <div className={`mt-4 h-0.5 rounded-full bg-gradient-to-r ${STEP_COLORS[i].base} opacity-30 group-hover:opacity-60 transition-opacity`} />
                   </div>
@@ -207,19 +207,19 @@ export default function HelpPage() {
             <div className="sm:col-span-4">
               <a
                 href="/dashboard/cashback"
-                className="group flex flex-col justify-between bg-gradient-to-br from-orange-500/20 to-amber-500/10 border border-orange-500/20 hover:border-orange-500/40 rounded-2xl p-5 h-full transition-all duration-200 hover:shadow-[0_0_30px_rgba(251,146,60,0.1)]"
+                className="group flex flex-col justify-between bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-500/20 dark:to-amber-500/10 border border-orange-200 dark:border-orange-500/20 hover:border-orange-300 dark:hover:border-orange-500/40 rounded-2xl p-5 h-full transition-all duration-200 hover:shadow-md dark:hover:shadow-[0_0_30px_rgba(251,146,60,0.1)]"
               >
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
-                      <svg viewBox="0 0 24 24" className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                    <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-500/20 flex items-center justify-center">
+                      <svg viewBox="0 0 24 24" className="w-5 h-5 text-orange-500 dark:text-orange-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                     </div>
-                    <span className="text-xs font-bold text-orange-400/70 uppercase tracking-widest">Bắt đầu</span>
+                    <span className="text-xs font-bold text-orange-600 dark:text-orange-400/70 uppercase tracking-widest">Bắt đầu</span>
                   </div>
-                  <h3 className="text-base font-black text-white leading-tight mb-2">Tạo link hoàn tiền đầu tiên</h3>
-                  <p className="text-xs text-zinc-400 leading-relaxed">Chuyển đổi link Shopee thành link có hoàn tiền trong vài giây.</p>
+                  <h3 className="text-base font-black text-gray-900 dark:text-white leading-tight mb-2">Tạo link hoàn tiền đầu tiên</h3>
+                  <p className="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">Chuyển đổi link Shopee thành link có hoàn tiền trong vài giây.</p>
                 </div>
-                <div className="mt-4 flex items-center gap-2 text-orange-400 text-xs font-bold">
+                <div className="mt-4 flex items-center gap-2 text-orange-600 dark:text-orange-400 text-xs font-bold">
                   <span>Đến trang tạo link</span>
                   <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                 </div>
@@ -265,33 +265,33 @@ export default function HelpPage() {
         {/* ── FAQ — tight density, Linear-style ── */}
         <div>
           <div className="flex items-center gap-2 mb-3 px-1">
-            <div className="w-1 h-4 rounded-full bg-zinc-600" />
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">FAQ</span>
+            <div className="w-1 h-4 rounded-full bg-gray-300 dark:bg-zinc-600" />
+            <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">FAQ</span>
           </div>
 
           {/* Search */}
           <div className="relative mb-3">
-            <svg viewBox="0 0 24 24" className="w-4 h-4 text-zinc-600 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+            <svg viewBox="0 0 24 24" className="w-4 h-4 text-gray-400 dark:text-zinc-600 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
             <input
               type="text"
               value={faqSearch}
               onChange={(e) => { setFaqSearch(e.target.value); setOpenFAQ(null); }}
               placeholder="Tìm câu hỏi..."
-              className="w-full pl-10 pr-4 py-3 bg-[#18181b] border border-white/5 rounded-xl text-sm text-zinc-300 placeholder-zinc-600 focus:border-white/15 focus:ring-0 outline-none transition-all"
+              className="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-[#18181b] border border-gray-200 dark:border-white/5 rounded-xl text-sm text-gray-800 dark:text-zinc-300 placeholder-gray-400 dark:placeholder-zinc-600 focus:border-orange-400 dark:focus:border-white/15 focus:ring-0 outline-none transition-all"
             />
           </div>
 
           {faqSearch.length >= 2 && (
-            <p className="text-[11px] text-zinc-600 mb-3 px-1">
+            <p className="text-[11px] text-gray-400 dark:text-zinc-600 mb-3 px-1">
               {filteredFAQ.length} kết quả cho &ldquo;{faqSearch}&rdquo;
             </p>
           )}
 
-          <div className="bg-[#18181b] border border-white/5 rounded-2xl overflow-hidden divide-y divide-white/5">
+          <div className="bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/5 rounded-2xl overflow-hidden divide-y divide-gray-100 dark:divide-white/5">
             {filteredFAQ.length === 0 ? (
               <div className="p-10 text-center">
-                <svg viewBox="0 0 24 24" className="w-7 h-7 text-zinc-700 mx-auto mb-2" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-                <p className="text-sm text-zinc-600">Không tìm thấy câu hỏi phù hợp</p>
+                <svg viewBox="0 0 24 24" className="w-7 h-7 text-gray-300 dark:text-zinc-700 mx-auto mb-2" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                <p className="text-sm text-gray-400 dark:text-zinc-600">Không tìm thấy câu hỏi phù hợp</p>
               </div>
             ) : (
               filteredFAQ.map((f, i) => {
@@ -301,19 +301,19 @@ export default function HelpPage() {
                   <div key={i}>
                     <button
                       onClick={() => setOpenFAQ(isOpen ? null : globalIdx)}
-                      className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left hover:bg-white/[0.02] transition-colors"
+                      className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors"
                     >
-                      <h3 className="text-sm font-medium text-zinc-200 flex-1 leading-snug pr-2">{f.q}</h3>
+                      <h3 className="text-sm font-medium text-gray-800 dark:text-zinc-200 flex-1 leading-snug pr-2">{f.q}</h3>
                       <div className={`w-5 h-5 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200 ${
-                        isOpen ? "bg-orange-500 text-white rotate-90" : "bg-white/5 text-zinc-500"
+                        isOpen ? "bg-orange-500 text-white rotate-90" : "bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-zinc-500"
                       }`}>
                         <svg viewBox="0 0 24 24" className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 18l6-6-6-6" /></svg>
                       </div>
                     </button>
                     <div className={`overflow-hidden transition-all duration-200 ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
                       <div className="px-5 pb-4">
-                        <div className="bg-white/[0.03] border border-white/5 rounded-xl p-4">
-                          <p className="text-xs text-zinc-400 leading-relaxed">{f.a}</p>
+                        <div className="bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 rounded-xl p-4">
+                          <p className="text-xs text-gray-600 dark:text-zinc-400 leading-relaxed">{f.a}</p>
                         </div>
                       </div>
                     </div>
@@ -326,28 +326,28 @@ export default function HelpPage() {
 
         {/* ── SUPPORT CTA — dark glass card ── */}
         <div className="relative rounded-2xl overflow-hidden">
-          <div className="absolute inset-0 bg-[#18181b]" />
+          <div className="absolute inset-0 bg-gray-50 dark:bg-[#18181b]" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(251,146,60,0.06)_0%,transparent_60%)]" />
-          <div className="absolute inset-0 border border-white/5 rounded-2xl" />
+          <div className="absolute inset-0 border border-gray-200 dark:border-white/5 rounded-2xl" />
           <div className="relative px-6 py-6 sm:px-8 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mx-auto mb-4">
-              <svg viewBox="0 0 24 24" className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <div className="w-12 h-12 rounded-2xl bg-orange-100 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20 flex items-center justify-center mx-auto mb-4">
+              <svg viewBox="0 0 24 24" className="w-5 h-5 text-orange-500 dark:text-orange-400" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
             </div>
-            <h3 className="text-base font-black text-white mb-1">Cần hỗ trợ thêm?</h3>
-            <p className="text-zinc-500 text-xs mb-5">Liên hệ qua email, thường phản hồi trong vòng 24 giờ.</p>
+            <h3 className="text-base font-black text-gray-900 dark:text-white mb-1">Cần hỗ trợ thêm?</h3>
+            <p className="text-gray-400 dark:text-zinc-500 text-xs mb-5">Liên hệ qua email, thường phản hồi trong vòng 24 giờ.</p>
             <div className="flex flex-col sm:flex-row gap-2 justify-center max-w-sm mx-auto">
               <button
                 onClick={() => setShowContact(true)}
-                className="inline-flex items-center justify-center gap-2 bg-white text-zinc-900 text-xs font-bold px-5 py-2.5 rounded-xl hover:bg-zinc-100 transition-colors"
+                className="inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-colors"
               >
                 <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
                 Liên hệ hỗ trợ
               </button>
               <a
                 href="/dashboard"
-                className="inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-medium px-5 py-2.5 rounded-xl transition-colors border border-white/5"
+                className="inline-flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-zinc-300 text-xs font-medium px-5 py-2.5 rounded-xl transition-colors border border-gray-200 dark:border-white/5"
               >
                 Quay lại Dashboard
               </a>
@@ -360,47 +360,47 @@ export default function HelpPage() {
       {/* ── CONTACT MODAL ── */}
       <Modal open={showContact} onClose={() => setShowContact(false)} title="Liên hệ hỗ trợ" size="md">
         <div className="space-y-4">
-          <div className="bg-[#18181b] border border-white/5 rounded-xl p-4">
-            <p className="text-[10px] text-zinc-600 font-medium uppercase tracking-widest mb-1">Email admin</p>
+          <div className="bg-gray-50 dark:bg-[#18181b] border border-gray-100 dark:border-white/5 rounded-xl p-4">
+            <p className="text-[10px] text-gray-400 dark:text-zinc-600 font-medium uppercase tracking-widest mb-1">Email admin</p>
             <p className="text-sm font-mono font-semibold text-zinc-200 break-all">{ADMIN_EMAIL}</p>
           </div>
 
-          <p className="text-xs text-zinc-500">Chọn cách liên hệ phù hợp:</p>
+          <p className="text-xs text-gray-500 dark:text-zinc-500">Chọn cách liên hệ phù hợp:</p>
 
           <div className="grid grid-cols-3 gap-2">
             <a
               href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(ADMIN_EMAIL)}&su=${encodeURIComponent(SUBJECT)}&body=${encodeURIComponent(BODY)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-white/5 hover:border-white/10 hover:bg-white/[0.03] transition-colors"
+              className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-gray-200 dark:border-white/5 hover:border-gray-300 dark:hover:border-white/10 hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors"
             >
-              <svg viewBox="0 0 24 24" className="w-5 h-5 text-red-400" fill="currentColor"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
-              <p className="text-xs font-semibold text-zinc-300">Gmail</p>
-              <p className="text-[9px] text-zinc-600 text-center">Web</p>
+              <svg viewBox="0 0 24 24" className="w-5 h-5 text-red-500" fill="currentColor"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
+              <p className="text-xs font-semibold text-gray-700 dark:text-zinc-300">Gmail</p>
+              <p className="text-[9px] text-gray-400 dark:text-zinc-600 text-center">Web</p>
             </a>
             <a
               href={`https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(ADMIN_EMAIL)}&subject=${encodeURIComponent(SUBJECT)}&body=${encodeURIComponent(BODY)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-white/5 hover:border-white/10 hover:bg-white/[0.03] transition-colors"
+              className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-gray-200 dark:border-white/5 hover:border-gray-300 dark:hover:border-white/10 hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors"
             >
-              <svg viewBox="0 0 24 24" className="w-5 h-5 text-blue-400" fill="currentColor"><path d="M24 7.387v10.478c0 .23-.08.424-.24.584-.16.16-.354.24-.584.24H.76c-.23 0-.424-.08-.584-.24C.02 18.29 0 18.09 0 17.865V7.387c0 .23.08.424.24.584.16.16.354.24.584.24h22.48c.23 0 .424-.08.584-.24.16-.16.24-.354.24-.584zM1.74 8.77l9.72 6.03V8.77H1.74zm10.52 6.03l9.72-6.03v10.74l-9.72 6.181z"/></svg>
-              <p className="text-xs font-semibold text-zinc-300">Outlook</p>
-              <p className="text-[9px] text-zinc-600 text-center">Web</p>
+              <svg viewBox="0 0 24 24" className="w-5 h-5 text-blue-500" fill="currentColor"><path d="M24 7.387v10.478c0 .23-.08.424-.24.584-.16.16-.354.24-.584.24H.76c-.23 0-.424-.08-.584-.24C.02 18.29 0 18.09 0 17.865V7.387c0 .23.08.424.24.584.16.16.354.24.584.24h22.48c.23 0 .424-.08.584-.24.16-.16.24-.354.24-.584zM1.74 8.77l9.72 6.03V8.77H1.74zm10.52 6.03l9.72-6.03v10.74l-9.72 6.181z"/></svg>
+              <p className="text-xs font-semibold text-gray-700 dark:text-zinc-300">Outlook</p>
+              <p className="text-[9px] text-gray-400 dark:text-zinc-600 text-center">Web</p>
             </a>
             <a
               href={`mailto:${ADMIN_EMAIL}?subject=${encodeURIComponent(SUBJECT)}&body=${encodeURIComponent(BODY)}`}
-              className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-white/5 hover:border-white/10 hover:bg-white/[0.03] transition-colors"
+              className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-gray-200 dark:border-white/5 hover:border-gray-300 dark:hover:border-white/10 hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors"
             >
-              <svg viewBox="0 0 24 24" className="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
-              <p className="text-xs font-semibold text-zinc-300">App email</p>
-              <p className="text-[9px] text-zinc-600 text-center">Mặc định</p>
+              <svg viewBox="0 0 24 24" className="w-5 h-5 text-gray-400 dark:text-zinc-400" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+              <p className="text-xs font-semibold text-gray-700 dark:text-zinc-300">App email</p>
+              <p className="text-[9px] text-gray-400 dark:text-zinc-600 text-center">Mặc định</p>
             </a>
           </div>
 
           <button
             onClick={copyEmail}
-            className="w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-medium py-2.5 rounded-xl transition-colors border border-white/5"
+            className="w-full flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-700 dark:text-zinc-300 text-xs font-medium py-2.5 rounded-xl transition-colors border border-gray-200 dark:border-white/5"
           >
             <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
             Sao chép email
