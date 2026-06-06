@@ -373,6 +373,53 @@
   animation-delay: 0s;
 }
 
+/* ── Logo wordmark: gradient + shimmer on hover ── */
+.logo-wordmark {
+  font-size: 1rem;
+  sm-font-size: 1.125rem;
+  font-weight: 800;
+  line-height: 1.2;
+  background: linear-gradient(
+    105deg,
+    #f97316 0%,
+    #fbbf24 30%,
+    #f97316 50%,
+    #ea580c 70%,
+    #f97316 100%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-color: #f97316;
+  transition: background-position 0.4s ease;
+}
+.group\/logo:hover .logo-wordmark {
+  background-position: right center;
+}
+
+/* ── Shimmer overlay on logo icon (on hover) ── */
+.logo-shimmer-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  background-position: -200% 0;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.group\/logo:hover .logo-shimmer-overlay {
+  opacity: 1;
+  animation: logo-shimmer 1.2s ease forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .logo-3d,
   .logo-3d-shimmer {

@@ -185,12 +185,10 @@ export function CaffiliateLogo({
   /** Ẩn cụm chữ trên màn nhỏ (chỉ hiện icon) — dùng cho header chật. */
   hideTextOnMobile?: boolean;
 }) {
-  // Dùng image PNG đã render từ icon.svg (cùng asset với PWA / favicon /
-  // Home Screen) → branding nhất quán + nhẹ hơn SVG inline phức tạp.
   return (
     <div className={`group/logo ${className ?? ""}`}>
       <div className="flex items-center gap-2.5">
-        <span className="logo-3d relative inline-flex h-10 w-10 items-center justify-center rounded-2xl shrink-0 overflow-hidden shadow-md">
+        <span className="logo-3d relative inline-flex h-10 w-10 items-center justify-center rounded-2xl shrink-0 overflow-hidden shadow-md cursor-pointer">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/seo/icon-192.png"
@@ -199,12 +197,14 @@ export function CaffiliateLogo({
             height={40}
             className="w-full h-full object-cover"
           />
+          {/* Shimmer overlay — appears on hover */}
+          <span className="logo-shimmer-overlay" />
         </span>
         <div className={`flex-col leading-tight min-w-0 ${hideTextOnMobile ? "hidden sm:flex" : "flex"}`}>
-          <span className="text-base sm:text-lg font-extrabold leading-tight bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 bg-clip-text text-transparent group-hover/logo:from-orange-400 group-hover/logo:to-orange-500 transition-colors truncate">
+          <span className="logo-wordmark truncate">
             {title}
           </span>
-          <span className="text-[10px] text-gray-400 dark:text-zinc-500 leading-tight truncate">
+          <span className="text-[10px] text-gray-400 dark:text-zinc-500 leading-tight truncate group-hover/logo:text-orange-400 transition-colors">
             {subtitle}
           </span>
         </div>
@@ -263,7 +263,6 @@ export function BrandLogo({
           className="logo-3d relative inline-flex items-center justify-center rounded-2xl shrink-0 overflow-hidden shadow-md"
           style={{ width: iconSize, height: iconSize }}
         >
-          {/* Dùng <img> thay vì next/image để tránh layout shift + hỗ trợ PWA standalone tốt */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/seo/icon-192.png"
@@ -272,12 +271,13 @@ export function BrandLogo({
             height={iconSize}
             className="w-full h-full object-cover"
           />
+          <span className="logo-shimmer-overlay" />
         </span>
         <div className="flex flex-col leading-tight min-w-0">
-          <span className="text-base sm:text-lg font-extrabold leading-tight bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 bg-clip-text text-transparent group-hover/logo:from-orange-400 group-hover/logo:to-orange-500 transition-colors truncate">
+          <span className="logo-wordmark truncate">
             {title}
           </span>
-          <span className="text-[10px] text-gray-400 dark:text-zinc-500 leading-tight truncate">
+          <span className="text-[10px] text-gray-400 dark:text-zinc-500 leading-tight truncate group-hover/logo:text-orange-400 transition-colors">
             {subtitle}
           </span>
         </div>
