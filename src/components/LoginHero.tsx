@@ -110,158 +110,120 @@ function Stars({ count }: { count: number }) {
 }
 
 /**
- * Illustration animations - scoped with style jsx so Tailwind scans them.
- */
-function IllustrationAnimations() {
-  return (
-    <style jsx>{`
-      @keyframes svgCardFloat {
-        0%, 100% { transform: translateY(0px) rotate(0deg); }
-        50%      { transform: translateY(-12px) rotate(1deg); }
-      }
-      @keyframes svgFloatUp {
-        0%, 100% { transform: translateY(0px); }
-        50%      { transform: translateY(-8px); }
-      }
-      @keyframes svgFloatCoin {
-        0%, 100% { transform: translateY(0px) scale(1); }
-        50%      { transform: translateY(-6px) scale(1.1); }
-      }
-      @keyframes svgSparkle {
-        0%, 100% { opacity: 0.6; transform: scale(1); }
-        50%      { opacity: 1; transform: scale(1.2); }
-      }
-      .svg-card-float  { animation: svgCardFloat 4s ease-in-out infinite; }
-      .svg-float-up    { animation: svgFloatUp 3s ease-in-out infinite; }
-      .svg-float-up-2 { animation: svgFloatUp 3.5s ease-in-out infinite; }
-      .svg-float-up-3 { animation: svgFloatUp 3.2s ease-in-out infinite; }
-      .svg-float-coin  { animation: svgFloatCoin 2.5s ease-in-out infinite; }
-      .svg-float-coin-2{ animation: svgFloatCoin 3s ease-in-out infinite; }
-      .svg-float-coin-3{ animation: svgFloatCoin 2.8s ease-in-out infinite; }
-      .svg-sparkle     { animation: svgSparkle 2s ease-in-out infinite; }
-      .svg-sparkle-2   { animation: svgSparkle 2.5s ease-in-out infinite; }
-      .svg-sparkle-3   { animation: svgSparkle 1.8s ease-in-out infinite; }
-    `}</style>
-  );
-}
-
-/**
  * Redesigned illustration: floating dashboard cards with cashback theme.
+ * Each animated element is a real DOM div (not SVG <g>) so CSS animations
+ * are guaranteed to work in all browsers and production builds.
  */
 function Illustration() {
   return (
-    <div className="relative w-full max-w-md mx-auto">
+    <div className="relative w-full max-w-md mx-auto h-[300px]">
       {/* Glowing background orbs */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-orange-500/20 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute top-1/3 left-1/4 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl animate-pulse" style={{ animationDelay: "1s" }} />
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="w-64 h-64 bg-orange-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl animate-pulse" style={{ animationDelay: "1s" }} />
+      </div>
 
-      {/* Main floating card */}
-      <div className="relative z-10 svg-card-float">
-        <svg viewBox="0 0 400 300" className="w-full drop-shadow-2xl">
-          <defs>
-            <linearGradient id="heroCard" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#fb923c" />
-              <stop offset="50%" stopColor="#f59e0b" />
-              <stop offset="100%" stopColor="#f97316" />
-            </linearGradient>
-            <linearGradient id="greenCard" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#34d399" />
-              <stop offset="100%" stopColor="#10b981" />
-            </linearGradient>
-            <linearGradient id="purpleCard" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#a78bfa" />
-              <stop offset="100%" stopColor="#8b5cf6" />
-            </linearGradient>
-            <linearGradient id="coinGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#fbbf24" />
-              <stop offset="100%" stopColor="#f59e0b" />
-            </linearGradient>
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
+      {/* Main credit card — floats as a whole unit */}
+      <div className="absolute left-1/2 -translate-x-1/2 top-[80px] z-10 svg-card-float drop-shadow-2xl">
+        {/* Card body */}
+        <div className="relative w-[250px] h-[160px] rounded-[20px] bg-gradient-to-br from-orange-400 via-amber-400 to-orange-500 shadow-xl shadow-orange-500/30 overflow-hidden">
+          {/* Card glow */}
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-400 via-amber-400 to-orange-500 opacity-75" />
+          {/* Top row */}
+          <div className="relative flex items-start justify-between p-4">
+            <span className="text-white/90 font-bold tracking-widest text-xs">V-AFFILIATE</span>
+            <div className="w-10 h-7 rounded bg-amber-100/90">
+              <div className="w-7 h-4 rounded-sm bg-amber-800/30 m-[6px]" />
+            </div>
+          </div>
+          {/* Card number */}
+          <div className="relative px-4 mt-2">
+            <span className="text-white font-black text-lg tracking-widest font-mono">•••• •••• 5168</span>
+          </div>
+          {/* Bottom row */}
+          <div className="relative flex items-end justify-between p-4 mt-2">
+            <span className="text-white/80 text-[11px]">CASHBACK VIP · TIER 3</span>
+            <div className="flex items-center gap-1">
+              <span className="bg-white text-orange-500 font-black text-xs px-2 py-0.5 rounded-full">58%</span>
+            </div>
+          </div>
+          {/* Shimmer overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-[shimmer_3s_ease-in-out_infinite]" />
+        </div>
+      </div>
 
-          {/* Shadow layer */}
-          <rect x="90" y="88" width="250" height="160" rx="20" fill="#00000010" transform="translate(0, 8)" />
+      {/* Floating mini card — green cashback */}
+      <div className="absolute left-0 top-0 z-20 svg-float-up" style={{ animationDelay: "0.5s" }}>
+        <div className="w-[90px] h-[55px] rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 shadow-lg shadow-emerald-500/20 flex flex-col items-start justify-center px-2">
+          <span className="text-white/85 font-bold text-[10px]">+50.000đ</span>
+          <span className="text-white font-extrabold text-xs">Hoàn tiền</span>
+        </div>
+      </div>
 
-          {/* Main credit card */}
-          <rect x="85" y="80" width="250" height="160" rx="20" fill="url(#heroCard)" filter="url(#glow)" />
-          <rect x="85" y="80" width="250" height="160" rx="20" fill="url(#heroCard)" />
+      {/* Floating mini card — purple VIP */}
+      <div className="absolute right-0 top-[40px] z-20 svg-float-up-2" style={{ animationDelay: "1s" }}>
+        <div className="w-[95px] h-[55px] rounded-xl bg-gradient-to-br from-purple-400 to-violet-500 shadow-lg shadow-purple-500/20 flex flex-col items-start justify-center px-2">
+          <span className="text-white/85 font-bold text-[10px]">TIER VIP</span>
+          <span className="text-white font-extrabold text-sm">Hoàn 58%</span>
+        </div>
+      </div>
 
-          {/* Card texture */}
-          <rect x="85" y="80" width="250" height="160" rx="20" fill="url(#heroCard)" opacity="0.85" />
+      {/* Floating coin 1 */}
+      <div className="absolute left-0 bottom-[70px] z-20 svg-float-coin">
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 shadow-lg shadow-amber-500/30 flex items-center justify-center">
+          <span className="text-white font-black text-lg leading-none">đ</span>
+        </div>
+      </div>
 
-          {/* Card content */}
-          <text x="110" y="115" fontSize="14" fill="white" opacity="0.9" fontWeight="700" letterSpacing="2">V-AFFILIATE</text>
-          <rect x="110" y="130" width="40" height="30" rx="4" fill="#fef3c7" opacity="0.9" />
-          <rect x="116" y="137" width="28" height="16" rx="2" fill="#92400e" opacity="0.3" />
-          <text x="110" y="200" fontSize="22" fill="white" fontWeight="900" fontFamily="monospace">•••• •••• 5168</text>
-          <text x="110" y="222" fontSize="11" fill="white" opacity="0.8">CASHBACK VIP · TIER 3</text>
+      {/* Floating coin 2 */}
+      <div className="absolute right-0 bottom-[50px] z-20 svg-float-coin-2" style={{ animationDelay: "0.7s" }}>
+        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 shadow-lg shadow-amber-500/30 flex items-center justify-center">
+          <span className="text-white font-black text-sm leading-none">đ</span>
+        </div>
+      </div>
 
-          {/* Cashback badge */}
-          <rect x="260" y="90" width="60" height="28" rx="14" fill="white" opacity="0.9" />
-          <text x="290" y="109" fontSize="12" fill="#f97316" fontWeight="900" textAnchor="middle">58%</text>
+      {/* Floating coin 3 */}
+      <div className="absolute right-[15px] top-[70px] z-20 svg-float-coin-3" style={{ animationDelay: "1.2s" }}>
+        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-300 to-amber-500 shadow-lg shadow-amber-500/30 flex items-center justify-center">
+          <span className="text-white font-black text-xs leading-none">đ</span>
+        </div>
+      </div>
 
-          {/* Floating mini cards */}
-          <g className="svg-float-up" style={{ animationDelay: "0.5s" }}>
-            <rect x="30" y="30" width="90" height="55" rx="12" fill="url(#greenCard)" opacity="0.95" />
-            <text x="45" y="55" fontSize="10" fill="white" fontWeight="700" opacity="0.85">+50.000đ</text>
-            <text x="45" y="72" fontSize="12" fill="white" fontWeight="800">Hoàn tiền</text>
-          </g>
-
-          <g className="svg-float-up-2" style={{ animationDelay: "1s" }}>
-            <rect x="285" y="40" width="95" height="55" rx="12" fill="url(#purpleCard)" opacity="0.95" />
-            <text x="300" y="65" fontSize="10" fill="white" fontWeight="700" opacity="0.85">⭐ TIER VIP</text>
-            <text x="300" y="82" fontSize="14" fill="white" fontWeight="900">Hoàn 58%</text>
-          </g>
-
-          {/* Floating coins */}
-          <g className="svg-float-coin">
-            <circle cx="45" cy="230" r="18" fill="url(#coinGrad)" />
-            <circle cx="45" cy="230" r="18" fill="url(#coinGrad)" opacity="0.8" />
-            <text x="45" y="237" fontSize="20" fill="white" fontWeight="900" textAnchor="middle">đ</text>
-          </g>
-
-          <g className="svg-float-coin-2" style={{ animationDelay: "0.7s" }}>
-            <circle cx="370" cy="250" r="14" fill="url(#coinGrad)" />
-            <text x="370" y="256" fontSize="16" fill="white" fontWeight="900" textAnchor="middle">đ</text>
-          </g>
-
-          <g className="svg-float-coin-3" style={{ animationDelay: "1.2s" }}>
-            <circle cx="355" cy="70" r="12" fill="url(#coinGrad)" />
-            <text x="355" y="76" fontSize="14" fill="white" fontWeight="900" textAnchor="middle">đ</text>
-          </g>
-
-          {/* Sparkles */}
-          <g className="svg-sparkle">
-            <path d="M30 130 L33 120 L36 130 L46 133 L36 136 L33 146 L30 136 L20 133 Z" fill="#fbbf24" opacity="0.8" />
-          </g>
-          <g className="svg-sparkle-2" style={{ animationDelay: "0.5s" }}>
-            <path d="M365 170 L367 163 L369 170 L376 172 L369 174 L367 181 L365 174 L358 172 Z" fill="#fbbf24" opacity="0.8" />
-          </g>
-          <g className="svg-sparkle-3" style={{ animationDelay: "1s" }}>
-            <circle cx="200" cy="280" r="4" fill="#fbbf24" opacity="0.6" />
-          </g>
-
-          {/* Checkmark badge */}
-          <g className="svg-float-up-3" style={{ animationDelay: "0.3s" }}>
-            <circle cx="355" cy="140" r="18" fill="white" />
-            <circle cx="355" cy="140" r="18" fill="white" opacity="0.9" />
-            <path d="M347 140 L352 145 L363 134" stroke="#10b981" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          </g>
+      {/* Sparkle 1 */}
+      <div className="absolute left-0 top-[130px] z-20 svg-sparkle">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+          <path d="M13 1L15.2 9.8L24 12L15.2 14.2L13 23L10.8 14.2L2 12L10.8 9.8L13 1Z" fill="#fbbf24" />
         </svg>
       </div>
 
-      {/* Additional decorative elements */}
-      <div className="absolute -bottom-4 left-1/4 w-8 h-8 bg-amber-400/30 rounded-full blur-sm svg-float-coin-2" />
-      <div className="absolute -top-2 right-1/4 w-6 h-6 bg-orange-400/30 rounded-full blur-sm svg-float-coin-3" />
+      {/* Sparkle 2 */}
+      <div className="absolute right-0 top-[170px] z-20 svg-sparkle-2" style={{ animationDelay: "0.5s" }}>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M9 0L10.5 6.8L17 8.2L10.5 9.6L9 16.5L7.5 9.6L1 8.2L7.5 6.8L9 0Z" fill="#fbbf24" />
+        </svg>
+      </div>
 
-      {/* Load animations */}
-      <IllustrationAnimations />
+      {/* Sparkle 3 */}
+      <div className="absolute left-1/2 -translate-x-1/2 bottom-0 z-20 svg-sparkle-3" style={{ animationDelay: "1s" }}>
+        <div className="w-2 h-2 rounded-full bg-amber-400" />
+      </div>
+
+      {/* Checkmark badge */}
+      <div className="absolute right-[15px] top-[140px] z-20 svg-float-up-3" style={{ animationDelay: "0.3s" }}>
+        <div className="w-9 h-9 rounded-full bg-white shadow-lg flex items-center justify-center">
+          <svg viewBox="0 0 24 24" className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Extra ambient dots */}
+      <div className="absolute left-1/4 -bottom-4 z-10 svg-float-coin-2" style={{ animationDelay: "0.5s" }}>
+        <div className="w-8 h-8 rounded-full bg-amber-400/30 blur-sm" />
+      </div>
+      <div className="absolute right-1/4 -top-2 z-10 svg-float-coin-3" style={{ animationDelay: "1s" }}>
+        <div className="w-6 h-6 rounded-full bg-orange-400/30 blur-sm" />
+      </div>
     </div>
   );
 }

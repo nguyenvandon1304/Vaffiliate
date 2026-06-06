@@ -889,47 +889,37 @@ html { scroll-behavior: smooth; }
   animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
 }
 
-/* ── Illustration floating animations (LoginHero) ── */
-@keyframes illustration-float {
+/* ── Illustration SVG animations ── */
+.svg-card-float { animation: svgCardFloat 4s ease-in-out infinite; }
+.svg-float-up   { animation: svgFloatUp 3s ease-in-out infinite; }
+.svg-float-up-2 { animation: svgFloatUp 3.5s ease-in-out infinite; }
+.svg-float-up-3 { animation: svgFloatUp 3.2s ease-in-out infinite; }
+.svg-float-coin  { animation: svgFloatCoin 2.5s ease-in-out infinite; }
+.svg-float-coin-2{ animation: svgFloatCoin 3s ease-in-out infinite; }
+.svg-float-coin-3{ animation: svgFloatCoin 2.8s ease-in-out infinite; }
+.svg-sparkle     { animation: svgSparkle 2s ease-in-out infinite; }
+.svg-sparkle-2   { animation: svgSparkle 2.5s ease-in-out infinite; }
+.svg-sparkle-3   { animation: svgSparkle 1.8s ease-in-out infinite; }
+
+@keyframes svgCardFloat {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
   50%      { transform: translateY(-12px) rotate(1deg); }
 }
-@keyframes illustration-floatUp {
+@keyframes svgFloatUp {
   0%, 100% { transform: translateY(0px); }
   50%      { transform: translateY(-8px); }
 }
-@keyframes illustration-floatCoin {
+@keyframes svgFloatCoin {
   0%, 100% { transform: translateY(0px) scale(1); }
   50%      { transform: translateY(-6px) scale(1.1); }
 }
-@keyframes illustration-sparkle {
+@keyframes svgSparkle {
   0%, 100% { opacity: 0.6; transform: scale(1); }
   50%      { opacity: 1; transform: scale(1.2); }
 }
-.animate-illustration-float { animation: illustration-float 4s ease-in-out infinite; transform-box: fill-box; transform-origin: center center; }
-.animate-illustration-floatUp { animation: illustration-floatUp 3s ease-in-out infinite; transform-box: fill-box; transform-origin: center center; }
-.animate-illustration-floatCoin { animation: illustration-floatCoin 2.5s ease-in-out infinite; transform-box: fill-box; transform-origin: center center; }
-.animate-illustration-sparkle { animation: illustration-sparkle 2s ease-in-out infinite; transform-box: fill-box; transform-origin: center center; }
-.animate-illustration-floatUp-2 { animation: illustration-floatUp 3.5s ease-in-out infinite; transform-box: fill-box; transform-origin: center center; }
-.animate-illustration-floatUp-3 { animation: illustration-floatUp 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center center; }
-.animate-illustration-floatCoin-2 { animation: illustration-floatCoin 3s ease-in-out infinite; transform-box: fill-box; transform-origin: center center; }
-.animate-illustration-floatCoin-3 { animation: illustration-floatCoin 2.8s ease-in-out infinite; transform-box: fill-box; transform-origin: center center; }
-.animate-illustration-sparkle-2 { animation: illustration-sparkle 2.5s ease-in-out infinite; transform-box: fill-box; transform-origin: center center; }
-.animate-illustration-sparkle-3 { animation: illustration-sparkle 1.8s ease-in-out infinite; transform-box: fill-box; transform-origin: center center; }
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-illustration-float,
-  .animate-illustration-floatUp,
-  .animate-illustration-floatCoin,
-  .animate-illustration-sparkle,
-  .animate-illustration-floatUp-2,
-  .animate-illustration-floatUp-3,
-  .animate-illustration-floatCoin-2,
-  .animate-illustration-floatCoin-3,
-  .animate-illustration-sparkle-2,
-  .animate-illustration-sparkle-3 {
-    animation: none !important;
-  }
+@keyframes shimmer {
+  0%   { transform: translateX(-100%) skewX(-12deg); }
+  100% { transform: translateX(200%) skewX(-12deg); }
 }
 
 /* ── Float animation ── */
