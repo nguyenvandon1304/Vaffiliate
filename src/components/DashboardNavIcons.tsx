@@ -54,7 +54,7 @@ export function DashboardNavIcons() {
     return pathname === "/dashboard" && tabParam === key;
   }
 
-  return (
+    return (
     <nav className="hidden md:flex items-center gap-1">
       {TABS.map((t) => {
         const active = isActive(t.key);
@@ -63,7 +63,7 @@ export function DashboardNavIcons() {
           <button
             key={t.key}
             onClick={() => router.push(t.href)}
-            className={`nav-bubble group relative inline-flex items-center justify-center rounded-xl transition-all duration-200 ${
+            className={`nav-bubble group relative inline-flex flex-col items-center justify-start rounded-xl transition-all duration-200 gap-1 ${
               active
                 ? "bg-orange-500/10 shadow-sm"
                 : "hover:bg-black/5 dark:hover:bg-white/5"
@@ -79,10 +79,14 @@ export function DashboardNavIcons() {
               <Icon active={active} size={32} />
             </div>
 
-            {/* Active indicator dot */}
-            {active && (
-              <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-orange-500" />
-            )}
+            {/* Label */}
+            <span className={`text-[10px] font-bold whitespace-nowrap leading-none pb-0.5 ${
+              active
+                ? "text-orange-600 dark:text-orange-400"
+                : "text-gray-400 dark:text-zinc-600"
+            }`}>
+              {t.title}
+            </span>
           </button>
         );
       })}
