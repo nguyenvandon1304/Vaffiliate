@@ -256,7 +256,7 @@ export function LoginHero() {
   // Fetch public stats (cached 60s server-side)
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/public-stats", { cache: "force-cache" })
+    fetch("/api/public-stats")
       .then((r) => r.json())
       .then((d) => {
         if (cancelled) return;
