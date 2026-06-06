@@ -435,19 +435,21 @@ function DashboardContent() {
                     {tab === "link-history" && <ClockIcon3D active={isActive} size={32} />}
                     {tab === "help" && <HelpIcon3D active={isActive} size={32} />}
                     {tab === "referral" && <ReferralIcon3D active={isActive} size={32} />}
-                    {isActive && (
-                      <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 whitespace-nowrap leading-none">
-                        {{
-                          overview: "Tổng quan",
-                          "create-link": "Tạo link",
-                          orders: "Đơn hàng",
-                          wallet: "Ví tiền",
-                          "link-history": "Lịch sử",
-                          help: "Hướng dẫn",
-                          referral: "Giới thiệu",
-                        }[tab]}
-                      </span>
-                    )}
+                    <span className={`text-[10px] font-bold whitespace-nowrap leading-none ${
+                      isActive
+                        ? "text-orange-600 dark:text-orange-400"
+                        : "text-gray-400 dark:text-zinc-600"
+                    }`}>
+                      {{
+                        overview: "Tổng quan",
+                        "create-link": "Tạo link",
+                        orders: "Đơn hàng",
+                        wallet: "Ví tiền",
+                        "link-history": "Lịch sử",
+                        help: "Hướng dẫn",
+                        referral: "Giới thiệu",
+                      }[tab]}
+                    </span>
                   </button>
                 );
               })}
