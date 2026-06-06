@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Tilt3D } from "@/components/Tilt3D";
 
 interface PublicStats {
   totalUsers: number;
@@ -109,6 +110,42 @@ function Stars({ count }: { count: number }) {
 }
 
 /**
+ * Illustration animations - scoped with style jsx so Tailwind scans them.
+ */
+function IllustrationAnimations() {
+  return (
+    <style jsx>{`
+      @keyframes svgCardFloat {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50%      { transform: translateY(-12px) rotate(1deg); }
+      }
+      @keyframes svgFloatUp {
+        0%, 100% { transform: translateY(0px); }
+        50%      { transform: translateY(-8px); }
+      }
+      @keyframes svgFloatCoin {
+        0%, 100% { transform: translateY(0px) scale(1); }
+        50%      { transform: translateY(-6px) scale(1.1); }
+      }
+      @keyframes svgSparkle {
+        0%, 100% { opacity: 0.6; transform: scale(1); }
+        50%      { opacity: 1; transform: scale(1.2); }
+      }
+      .svg-card-float  { animation: svgCardFloat 4s ease-in-out infinite; }
+      .svg-float-up    { animation: svgFloatUp 3s ease-in-out infinite; }
+      .svg-float-up-2 { animation: svgFloatUp 3.5s ease-in-out infinite; }
+      .svg-float-up-3 { animation: svgFloatUp 3.2s ease-in-out infinite; }
+      .svg-float-coin  { animation: svgFloatCoin 2.5s ease-in-out infinite; }
+      .svg-float-coin-2{ animation: svgFloatCoin 3s ease-in-out infinite; }
+      .svg-float-coin-3{ animation: svgFloatCoin 2.8s ease-in-out infinite; }
+      .svg-sparkle     { animation: svgSparkle 2s ease-in-out infinite; }
+      .svg-sparkle-2   { animation: svgSparkle 2.5s ease-in-out infinite; }
+      .svg-sparkle-3   { animation: svgSparkle 1.8s ease-in-out infinite; }
+    `}</style>
+  );
+}
+
+/**
  * Redesigned illustration: floating dashboard cards with cashback theme.
  */
 function Illustration() {
@@ -119,7 +156,7 @@ function Illustration() {
       <div className="absolute top-1/3 left-1/4 w-32 h-32 bg-amber-400/20 rounded-full blur-2xl animate-pulse" style={{ animationDelay: "1s" }} />
 
       {/* Main floating card */}
-      <div className="relative z-10" style={{ animation: "float 4s ease-in-out infinite" }}>
+      <div className="relative z-10 svg-card-float">
         <svg viewBox="0 0 400 300" className="w-full drop-shadow-2xl">
           <defs>
             <linearGradient id="heroCard" x1="0" y1="0" x2="1" y2="1">
@@ -170,48 +207,48 @@ function Illustration() {
           <text x="290" y="109" fontSize="12" fill="#f97316" fontWeight="900" textAnchor="middle">58%</text>
 
           {/* Floating mini cards */}
-          <g style={{ animation: "floatUp 3s ease-in-out infinite", animationDelay: "0.5s" }}>
+          <g className="svg-float-up" style={{ animationDelay: "0.5s" }}>
             <rect x="30" y="30" width="90" height="55" rx="12" fill="url(#greenCard)" opacity="0.95" />
             <text x="45" y="55" fontSize="10" fill="white" fontWeight="700" opacity="0.85">+50.000đ</text>
             <text x="45" y="72" fontSize="12" fill="white" fontWeight="800">Hoàn tiền</text>
           </g>
 
-          <g style={{ animation: "floatUp 3.5s ease-in-out infinite", animationDelay: "1s" }}>
+          <g className="svg-float-up-2" style={{ animationDelay: "1s" }}>
             <rect x="285" y="40" width="95" height="55" rx="12" fill="url(#purpleCard)" opacity="0.95" />
             <text x="300" y="65" fontSize="10" fill="white" fontWeight="700" opacity="0.85">⭐ TIER VIP</text>
             <text x="300" y="82" fontSize="14" fill="white" fontWeight="900">Hoàn 58%</text>
           </g>
 
           {/* Floating coins */}
-          <g style={{ animation: "floatCoin 2.5s ease-in-out infinite" }}>
+          <g className="svg-float-coin">
             <circle cx="45" cy="230" r="18" fill="url(#coinGrad)" />
             <circle cx="45" cy="230" r="18" fill="url(#coinGrad)" opacity="0.8" />
             <text x="45" y="237" fontSize="20" fill="white" fontWeight="900" textAnchor="middle">đ</text>
           </g>
 
-          <g style={{ animation: "floatCoin 3s ease-in-out infinite", animationDelay: "0.7s" }}>
+          <g className="svg-float-coin-2" style={{ animationDelay: "0.7s" }}>
             <circle cx="370" cy="250" r="14" fill="url(#coinGrad)" />
             <text x="370" y="256" fontSize="16" fill="white" fontWeight="900" textAnchor="middle">đ</text>
           </g>
 
-          <g style={{ animation: "floatCoin 2.8s ease-in-out infinite", animationDelay: "1.2s" }}>
+          <g className="svg-float-coin-3" style={{ animationDelay: "1.2s" }}>
             <circle cx="355" cy="70" r="12" fill="url(#coinGrad)" />
             <text x="355" y="76" fontSize="14" fill="white" fontWeight="900" textAnchor="middle">đ</text>
           </g>
 
           {/* Sparkles */}
-          <g style={{ animation: "sparkle 2s ease-in-out infinite" }}>
+          <g className="svg-sparkle">
             <path d="M30 130 L33 120 L36 130 L46 133 L36 136 L33 146 L30 136 L20 133 Z" fill="#fbbf24" opacity="0.8" />
           </g>
-          <g style={{ animation: "sparkle 2.5s ease-in-out infinite", animationDelay: "0.5s" }}>
+          <g className="svg-sparkle-2" style={{ animationDelay: "0.5s" }}>
             <path d="M365 170 L367 163 L369 170 L376 172 L369 174 L367 181 L365 174 L358 172 Z" fill="#fbbf24" opacity="0.8" />
           </g>
-          <g style={{ animation: "sparkle 1.8s ease-in-out infinite", animationDelay: "1s" }}>
+          <g className="svg-sparkle-3" style={{ animationDelay: "1s" }}>
             <circle cx="200" cy="280" r="4" fill="#fbbf24" opacity="0.6" />
           </g>
 
           {/* Checkmark badge */}
-          <g style={{ animation: "floatUp 3.2s ease-in-out infinite", animationDelay: "0.3s" }}>
+          <g className="svg-float-up-3" style={{ animationDelay: "0.3s" }}>
             <circle cx="355" cy="140" r="18" fill="white" />
             <circle cx="355" cy="140" r="18" fill="white" opacity="0.9" />
             <path d="M347 140 L352 145 L363 134" stroke="#10b981" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
@@ -220,27 +257,11 @@ function Illustration() {
       </div>
 
       {/* Additional decorative elements */}
-      <div className="absolute -bottom-4 left-1/4 w-8 h-8 bg-amber-400/30 rounded-full blur-sm" style={{ animation: "floatCoin 3s ease-in-out infinite", animationDelay: "0.5s" }} />
-      <div className="absolute -top-2 right-1/4 w-6 h-6 bg-orange-400/30 rounded-full blur-sm" style={{ animation: "floatCoin 2.8s ease-in-out infinite", animationDelay: "1s" }} />
+      <div className="absolute -bottom-4 left-1/4 w-8 h-8 bg-amber-400/30 rounded-full blur-sm svg-float-coin-2" />
+      <div className="absolute -top-2 right-1/4 w-6 h-6 bg-orange-400/30 rounded-full blur-sm svg-float-coin-3" />
 
-      <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-12px) rotate(1deg); }
-        }
-        @keyframes floatUp {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-8px); }
-        }
-        @keyframes floatCoin {
-          0%, 100% { transform: translateY(0px) scale(1); }
-          50% { transform: translateY(-6px) scale(1.1); }
-        }
-        @keyframes sparkle {
-          0%, 100% { opacity: 0.6; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.2); }
-        }
-      `}</style>
+      {/* Load animations */}
+      <IllustrationAnimations />
     </div>
   );
 }
@@ -337,7 +358,8 @@ export function LoginHero() {
       {/* Redesigned Social Proof Bar */}
       <div className="grid grid-cols-3 gap-4 w-full">
         {/* Users card */}
-        <div className="group relative rounded-2xl bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-500/10 dark:to-amber-500/5 border border-orange-200/60 dark:border-orange-500/20 p-4 shadow-lg shadow-orange-500/10 hover:shadow-xl hover:shadow-orange-500/15 hover:scale-[1.02] transition-all duration-300 overflow-hidden">
+        <Tilt3D max={3} lift={3}>
+          <div className="group relative rounded-2xl bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-500/10 dark:to-amber-500/5 border border-orange-200/60 dark:border-orange-500/20 p-4 shadow-lg shadow-orange-500/10 hover:shadow-xl hover:shadow-orange-500/15 hover:scale-[1.02] transition-all duration-300 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="relative">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-amber-400 flex items-center justify-center mb-3 shadow-md shadow-orange-500/20">
@@ -354,9 +376,11 @@ export function LoginHero() {
             <p className="text-xs text-gray-500 dark:text-zinc-400 font-medium mt-0.5">user đã tham gia</p>
           </div>
         </div>
+        </Tilt3D>
 
         {/* Cashback card */}
-        <div className="group relative rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-500/10 dark:to-green-500/5 border border-emerald-200/60 dark:border-emerald-500/20 p-4 shadow-lg shadow-emerald-500/10 hover:shadow-xl hover:shadow-emerald-500/15 hover:scale-[1.02] transition-all duration-300 overflow-hidden">
+        <Tilt3D max={3} lift={3}>
+          <div className="group relative rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-500/10 dark:to-green-500/5 border border-emerald-200/60 dark:border-emerald-500/20 p-4 shadow-lg shadow-emerald-500/10 hover:shadow-xl hover:shadow-emerald-500/15 hover:scale-[1.02] transition-all duration-300 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="relative">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center mb-3 shadow-md shadow-emerald-500/20">
@@ -371,9 +395,11 @@ export function LoginHero() {
             <p className="text-xs text-gray-500 dark:text-zinc-400 font-medium mt-0.5">đã hoàn cho user</p>
           </div>
         </div>
+        </Tilt3D>
 
         {/* Orders card */}
-        <div className="group relative rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-500/10 dark:to-indigo-500/5 border border-blue-200/60 dark:border-blue-500/20 p-4 shadow-lg shadow-blue-500/10 hover:shadow-xl hover:shadow-blue-500/15 hover:scale-[1.02] transition-all duration-300 overflow-hidden">
+        <Tilt3D max={3} lift={3}>
+          <div className="group relative rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-500/10 dark:to-indigo-500/5 border border-blue-200/60 dark:border-blue-500/20 p-4 shadow-lg shadow-blue-500/10 hover:shadow-xl hover:shadow-blue-500/15 hover:scale-[1.02] transition-all duration-300 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="relative">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center mb-3 shadow-md shadow-blue-500/20">
@@ -389,10 +415,12 @@ export function LoginHero() {
             <p className="text-xs text-gray-500 dark:text-zinc-400 font-medium mt-0.5">hoàn thành</p>
           </div>
         </div>
+        </Tilt3D>
       </div>
 
       {/* Redesigned Testimonial with gradient border */}
-      <div className="relative w-full">
+      <Tilt3D max={3} lift={4}>
+        <div className="relative w-full">
         {/* Gradient border effect */}
         <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500 rounded-2xl opacity-30 blur-sm" />
 
@@ -456,6 +484,7 @@ export function LoginHero() {
           </div>
         </div>
       </div>
+      </Tilt3D>
     </div>
   );
 }
